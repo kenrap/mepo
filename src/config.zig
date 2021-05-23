@@ -1,0 +1,44 @@
+pub const Tsize = 256;
+pub const Turl = "http://mts0.google.com/vt/hl=en&src=api&x={0}&s=&y={1}&z={2}";
+//pub const Turl = "https://tile.openstreetmap.org/{2}/{0}/{1}.png";
+pub const InitWindowW = 720;
+pub const InitWindowH = 720;
+pub const StartZoom = 14;
+
+pub const DefaultBaseConfig =
+    \\ bind_key j [move_relative 0 10];
+    \\ bind_key k [move_relative 0 -10];
+    \\ bind_key h [move_relative -10 0];
+    \\ bind_key l [move_relative 10 0];
+    \\ bind_key = [zoom_relative 1];
+    \\ bind_key - [zoom_relative -1];
+    \\ bind_key x [center_on_coords 45.5051 122.6750];
+    \\ bind_key n [pin_cycle 1];
+    \\ bind_key o [pin_deactivate];
+    \\ 
+    \\ bind_key g [shellpipe /home/m/mepo/scripts/mepo_nomatim_searchprompt.sh];
+    \\ bind_key z [shellpipe /home/m/mepo/scripts/mepo_zoomlevelset.sh];
+    \\ bind_key b [shellpipe /home/m/mepo/scripts/mepo_bbox_search.sh];
+    \\ bind_key u [shellpipe /home/m/mepo/scripts/mepo_urlsourceset.sh];
+    \\
+    \\ bind_key d [prefset debug_tiles 1];
+    \\ bind_key s [prefset debug_tiles 0];
+    \\
+    \\ bind_key e [prefset debug_global 1];
+    \\ bind_key w [prefset debug_global 0];
+
+    \\ bind_key c [center_on_mouse];
+    \\
+    \\ prefset crosshair_size 15;
+    \\ prefset crosshair_on 1;
+
+    \\ center_on_coords 40.78392 -73.96442;
+
+    \\ prefset debug_global 1;
+    \\ prefset debug_tiles 0;
+    \\ prefset zoom 14;
+    \\ prefset tile_cache_dir /tmp/foo;
+    \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
+
+    \\ pin_add 40.7418 -73.9899 baz;
+    ;
