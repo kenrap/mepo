@@ -15,6 +15,7 @@ pub const DefaultBaseConfig =
     \\ bind_key x [center_on_coords 45.5051 122.6750];
     \\ bind_key n [pin_cycle 1];
     \\ bind_key o [pin_deactivate];
+    \\ bind_key p [pin_purge];
     \\ 
     \\ bind_key g [shellpipe /home/m/mepo/scripts/mepo_nomatim_searchprompt.sh];
     \\ bind_key z [shellpipe /home/m/mepo/scripts/mepo_zoomlevelset.sh];

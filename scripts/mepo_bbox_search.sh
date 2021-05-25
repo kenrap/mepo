@@ -20,6 +20,8 @@ JSON_RESULTS="$(
   )"
 )"
 
+echo 'pin_purge;'
+
 echo "$JSON_RESULTS" |
   jq '.elements | .[] | "\(.lat) \(.lon) \(.tags.name)" ' |
   tr -d \" |

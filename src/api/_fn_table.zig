@@ -13,6 +13,7 @@ pub fn generate_fn_table() anyerror!types.MepoFnTable {
     try ft.put("pin_add", @import("pin_add.zig").f_pin_add);
     try ft.put("pin_cycle", @import("pin_cycle.zig").f_pin_cycle);
     try ft.put("pin_deactivate", @import("pin_deactivate.zig").f_pin_deactivate);
+    try ft.put("pin_purge", @import("pin_purge.zig").f_pin_purge);
     try ft.put("center_on_mouse", @import("center_on_mouse.zig").f_center_on_mouse);
     return ft;
 }
