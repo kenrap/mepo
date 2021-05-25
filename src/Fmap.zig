@@ -203,6 +203,7 @@ fn blit_pin_active_text(fmap: *@This()) !void {
 }
 
 fn blit_demokeyoverlay(fmap: *@This()) !void {
+    if (fmap.demokey == null) return;
     _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(fmap.window), &sdl.SDL_Rect{
       .x = @intCast(i32, fmap.w) - 50,
       .y = 10,
@@ -493,7 +494,7 @@ pub fn init(tile_cache: *TileCache, cfg: []const u8) anyerror!@This() {
         .drag = false,
         .debug_tiles = false,
         .debug_global = false,
-        .demokey = 'u',
+        .demokey = null,
         .crosshair_size = 10,
         .crosshair_on = true,
         .tile_cache = tile_cache,

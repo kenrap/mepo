@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-echo foo | dmenu
-
-BBOX="40.74595644996025,-74.04390335083008,40.811730481593585,-73.90829086303711"
+BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
+echo "$BBOX" | 
+  dmenu -l 10 -p "Bbox POI Search"
 
 JSON_RESULTS="$(
   curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
