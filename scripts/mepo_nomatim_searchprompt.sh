@@ -1,8 +1,20 @@
 #!/usr/bin/env sh
 
+OPTIONS='
+  Amsterdam
+  Paris
+  NYC
+  Boston
+  India
+  Romania
+  Iraq
+'
+
 curl "$(
-  echo "Location:" |
-    dmenu -w $(xdotool getactivewindow) -p "Place" |
+  echo "$OPTIONS" |
+    awk '{$1=$1};1' | 
+    grep . | 
+    dmenu -l 10 -w $(xdotool getactivewindow) -p "Search for Location" |
     xargs -0 echo "https://nominatim.openstreetmap.org/search?format=json&q=" 
 )" |
   jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |

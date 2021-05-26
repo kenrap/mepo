@@ -13,7 +13,7 @@ SCOPE="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    dmenu -l 10 -p "Bbox POI Search" |
+    dmenu -w $(xdotool getactivewindow) -l 10 -p "Bbox POI Search" |
     cut -d ' ' -f2-
 )"
 
