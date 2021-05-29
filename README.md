@@ -12,7 +12,7 @@ Mepo is a fast, simple, and hackable OSM map viewer for desktop linux
 environment's various user interfaces (Wayland & X inclusive). Mepo
 works both offline and online, features a minimalist both touch/mouse
 and keyboard compatible interface, and offers a UNIX-philosophy inspired
-underlying design, exposing a powerful command language called mepolang
+underlying design, exposing a powerful command language called [mepolang](doc/mepolang.md)
 capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
@@ -95,9 +95,8 @@ search scripts, bookmarks, and more.
 - **Milestone 4: Wayland & Mobile Support**
   - Add support for pinch-to-zoom using SDL multitouch gesture API.
   - Currently scripts for location search, bounding-box search, and similar
-    use dmenu (X-based); investigate in an analog tool for Wayland or worst
-    case use XWayland. Ensure either way that Wayland Pinephone environments
-    like Phosh play nice.
+    use dmenu (X-based); use wofi or a similar tool for Wayland. XWayland can be
+    used in intermediate term.
   - Ensure outside of desktop & Sxmo use there is a way we can bind mepolang
     commands to run. Within Sxmo, the context menu is the answer since a
     keybinding can launch a touch-friendly (dmenu) context menu. A context
@@ -118,6 +117,9 @@ search scripts, bookmarks, and more.
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang command and basic usage.
   - Document examples on how to write custom scripts using mepolang.
+  - Modify internals of mepolang to include documentation directly in
+    structs so that mepolang API documentation can be automatically generated
+    as a webpage for end-users.
   - Create Alpine/pmOS package and add to postmarketos-ui-* frontends.
   - Possibly package-split current `scripts/` directory to keep dependencies
     on base even more minimal.
