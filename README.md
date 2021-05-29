@@ -77,6 +77,8 @@ search scripts, bookmarks, and more.
     downloading of tiles.
   - Download command should allow downloading a coordinate with a given radius
     for specified zoom-level; Or a bounding-box for specified zoom-levels.
+  - Add a shell script to download interactively based on nominatim search
+    query result so you can say download an entire city for example.
 - **Milestone 3: Powerful, Robust Pin API**
   - Pin-selection mode
     - Cycle currently active pin (with p/n keys)
@@ -91,7 +93,7 @@ search scripts, bookmarks, and more.
     for example one pin group may be bookmarks, another for a search,
     another for current location.
 - **Milestone 4: Wayland & Mobile Support**
-  - Add support for pinch-to-zoom using SDL multitouch gesture API
+  - Add support for pinch-to-zoom using SDL multitouch gesture API.
   - Currently scripts for location search, bounding-box search, and similar
     use dmenu (X-based); investigate in an analog tool for Wayland or worst
     case use XWayland. Ensure either way that Wayland Pinephone environments
@@ -100,13 +102,13 @@ search scripts, bookmarks, and more.
     commands to run. Within Sxmo, the context menu is the answer since a
     keybinding can launch a touch-friendly (dmenu) context menu. A context
     menu similarly could be implemented in Phosh and other environments
-    using a single gesture detection.
+    using single gesture detection.
 - **Milestone 5: UI Niceties**
   - Use filedescriptor & poll/select or similar mechanism to read
     SDL events; add filedescriptor to continually monitor STDIN instead
     of config being one-shot. So commandline of running UI also can
     function as a mepolang debugging console.
-  - Gracefully handle switching tile sources (e.g. purge cache & reload)
+  - Gracefully handle switching tile sources (e.g. purge cache & reload).
     Should be able to switch between OSM/bikemaps/stamen etc. without
     glitches.
   - Add per-tile-downloading progress-indicators.
