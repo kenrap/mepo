@@ -8,10 +8,13 @@
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop linux
-& mobile linux devices (like the Pinephone, Librem 5 etc.) and both environment's 
-various user interfaces (Wayland & X inclusive). Mepo works both offline and online,
-can be controlled entirely through the keyboard, and offers a UNIX-philosophy
-inspired design, exposing a command language called mepolang.
+& mobile linux devices (like the Pinephone, Librem 5 etc.) and both
+environment's various user interfaces (Wayland & X inclusive). Mepo
+works both offline and online, features a minimalist both touch/mouse
+and keyboard compatible interface, and offers a UNIX-philosophy inspired
+underlying design, exposing a powerful command language called mepolang
+capable of being scripted to provide things like custom bounding-box
+search scripts, bookmarks, and more.
 
 [Videos of User Interface](http://media.lrdu.org/mepo_demos)
 
@@ -21,6 +24,8 @@ inspired design, exposing a command language called mepolang.
     resource-constrained devices. 
   - Mepo renders using SDL which keeps things **fast** and lightweight;
     also as a bonus: portable.
+  - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
+    memory usage and allocations/deallocations
 - **UNIX-philosophy inspired design - scriptability via mepolang**:
   - Mepo's UI is built **to do one thing well**: download & render maps. 
     Extra functionality is enabled via its command language (mepolang).
@@ -30,6 +35,8 @@ inspired design, exposing a command language called mepolang.
   - Existing OSM tools for search like the [Nominatim](https://nominatim.org/) & [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API) APIs are
     integrated through [bundled shell scripts](./scripts); customize to your heart's content
     or write your own for things like bookmarking etc.
+  - Bundled scripts utilize existing tools like [dmenu](https://tools.suckless.org/dmenu/)
+    for user input and list selection rather then implementing application-specific input logic.
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
     through mepolang.
@@ -39,7 +46,7 @@ inspired design, exposing a command language called mepolang.
   - A map application must ofcourse be usable with a mouse / touch, but
     the keyboard as a tool for map navigation has been underlooked in
     other applications.
-  - Mepo provides vi-like (& customizable) keybindings out-of-the-box 
+  - Provides vi-like (& customizable) keybindings out-of-the-box.
 
 ## **High-level overview of currently implemented feature of mepo:**
 - Fast SDL-based rendering of OSM map tiles
@@ -87,12 +94,13 @@ inspired design, exposing a command language called mepolang.
   - Add support for pinch-to-zoom using SDL multitouch gesture API
   - Currently scripts for location search, bounding-box search, and similar
     use dmenu (X-based); investigate in an analog tool for Wayland or worst
-    case use XWayland. Ensure either way that Pinephone environments like
-    Phosh play nice.
+    case use XWayland. Ensure either way that Wayland Pinephone environments
+    like Phosh play nice.
   - Ensure outside of desktop & Sxmo use there is a way we can bind mepolang
-    commands to run. Within Sxmo, the context menu is the answer. A context
-    menu could be implemented in Phosh and other environments using a single
-    gesture detection.
+    commands to run. Within Sxmo, the context menu is the answer since a
+    keybinding can launch a touch-friendly (dmenu) context menu. A context
+    menu similarly could be implemented in Phosh and other environments
+    using a single gesture detection.
 - **Milestone 5: UI Niceties**
   - Use filedescriptor & poll/select or similar mechanism to read
     SDL events; add filedescriptor to continually monitor STDIN instead
@@ -116,11 +124,11 @@ inspired design, exposing a command language called mepolang.
 
 ## **Contributing**
 
-Mepo is surely welcome to contributors who have experience or interest in mobile Linux
-and/or Zig. Since things are still early on in the project, there is no dedicated
-ML yet, however this will come soon. In the meantime please either email
-me directly and I can provide guidance on contributing or preferably drop into our
-IRC channel to discuss.
+Mepo is surely welcome to contributors who have experience or interest
+in mobile Linux, OSM, and/or Zig. Since things are still early on in the
+project, there is no dedicated ML yet, however this will come soon. In
+the meantime please either email me directly and I can provide guidance
+on contributing or preferably drop into our IRC channel to discuss.
 
 IRC Channel:
 #mepo on irc.oftc.net
