@@ -1,5 +1,5 @@
 const std = @import("std");
-const Fmap = @import("./Fmap.zig");
+const Mepo = @import("./Mepo.zig");
 const TileCache = @import("./TileCache.zig");
 const conversion = @import("./conversion.zig");
 const sdl = @import("./sdlshim.zig");
@@ -11,6 +11,6 @@ pub fn main() !void {
 
   var tile_cache = try TileCache.init();
   var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
-  var fmap = try Fmap.init(&tile_cache, cfg);
-  try fmap.sdl_event_loop();
+  var mepo = try Mepo.init(&tile_cache, cfg);
+  try mepo.sdl_event_loop();
 }

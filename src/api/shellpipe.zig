@@ -1,35 +1,35 @@
-const Fmap = @import("../Fmap.zig");
+const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const conversionutil = @import("../util/conversionutil.zig");
 
-pub fn f_shellpipe(fmap: *Fmap, args: [5]types.MepoArg) !void {
+pub fn f_shellpipe(mepo: *Mepo, args: [5]types.MepoArg) !void {
     const cmd = args[0].Text;
-    try shellpipe(fmap, cmd);
+    try shellpipe(mepo, cmd);
 }
 
-pub fn shellpipe(fmap: *Fmap, cmd: []const u8) !void {
+pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
     var env_vars = std.BufMap.init(&arena.allocator);
     var v = try std.process.getEnvMap(&arena.allocator);
 
     // TODO: maybe as stdin?
-    try v.set("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(fmap.y, fmap.zoom)}));
-    try v.set("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(fmap.x, fmap.zoom)}));
+    try v.set("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(mepo.y, mepo.zoom)}));
+    try v.set("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(mepo.x, mepo.zoom)}));
 
     try v.set("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lat(fmap.y - @divTrunc(@intCast(i32, fmap.h), @intCast(i32, 2)), fmap.zoom)
+      conversionutil.px_to_lat(mepo.y - @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
     }));
     try v.set("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lon(fmap.x - @divTrunc(@intCast(i32, fmap.w), @intCast(i32, 2)), fmap.zoom)
+      conversionutil.px_to_lon(mepo.x - @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
     }));
 
     try v.set("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lat(fmap.y + @divTrunc(@intCast(i32, fmap.h), @intCast(i32, 2)), fmap.zoom)
+      conversionutil.px_to_lat(mepo.y + @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
     }));
     try v.set("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lon(fmap.x + @divTrunc(@intCast(i32, fmap.w), @intCast(i32, 2)), fmap.zoom)
+      conversionutil.px_to_lon(mepo.x + @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
     }));
 
     const args = [_][]const u8 { "sh", "-c", cmd };
@@ -39,5 +39,5 @@ pub fn shellpipe(fmap: *Fmap, cmd: []const u8) !void {
       .env_map = &v
     });
 
-    try fmap.mepolang_execute(r.stdout);
+    try mepo.mepolang_execute(r.stdout);
 }
