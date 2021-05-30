@@ -45,32 +45,33 @@ search scripts, bookmarks, and more.
 - **Supports touch AND keyboard-oriented operation**:
   - A map application must ofcourse be usable with a mouse / touch, but
     the keyboard as a tool for map navigation has been underlooked in
-    other applications.
+    in map applications.
   - Provides vi-like (& customizable) keybindings out-of-the-box.
 
 ## **High-level overview of currently implemented feature of mepo:**
 - Fast SDL-based rendering of OSM map tiles
 - Downloading of OSM map tiles from user-specified source (default: OSM Maps)
-- Minimal command-language for 'mepolang' in which all core-functionality built out
+- Minimal command-language for mepolang in which all core-functionality built out
 - Pan via mouse, double tap to zoom, right click or triple left click to zoom out
 - Vi-like keys (though customizable) for panning, zooming, center on mouse, etc.
-- Navigate to different regions via shell-script (nominatim API based)
+- Navigate to regions or addresses via shell-script (nominatim API based)
 - Drop pins / search for POI via shell-script (overpass API based)
 - Cycle through pins using hotkeys (vim-like n/p, though customizable)
 - Switch tile URL source via shell-script (toggle between OSM, Bike maps, Google)
 - Dynamic tile caching to filesystem / offline-maps once downloaded
-- Run API commands (mepolang) via command prompt (dmenu) or via STDIN
+- Run API commands (mepolang) via command prompt (dmenu) or via STDIN (non-continual)
 
 ## **Roadmap to 1.0 release:**
 - **Milestone 1: Overall Stability**
   - Current stability of the application should be improved and crashes should
     be non-existent.
   - Fix downloading bugs: make downloading tiles logic more robust, currently,
-    tiles downloading can occasionally / get stuck.
+    tile downloading can occasionally / get stuck; implement retry logic.
   - Memory allocations / deallocations should be careful tracked and managed.
     Use arena allocator.
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
+  - Tag 0.1 release upon completion
 - **Milestone 2: Offline / Noninteractive Downloading**
   - Add support for downloading tiles through mepolang download command.
   - Allow for both interactive (e.g. while running UI) and noninteractive (CLI)
@@ -94,14 +95,16 @@ search scripts, bookmarks, and more.
     another for current location.
 - **Milestone 4: Wayland & Mobile Support**
   - Add support for pinch-to-zoom using SDL multitouch gesture API.
-  - Currently scripts for location search, bounding-box search, and similar
-    use dmenu (X-based); use wofi or a similar tool for Wayland. XWayland can be
-    used in intermediate term.
+  - Currently scripts for location search, bounding-box search,
+    and similar use dmenu (X-based); integrate wofi or a similar tool
+    for Wayland. XWayland can be used in intermediate term.
   - Ensure outside of desktop & Sxmo use there is a way we can bind mepolang
     commands to run. Within Sxmo, the context menu is the answer since a
     keybinding can launch a touch-friendly (dmenu) context menu. A context
     menu similarly could be implemented in Phosh and other environments
-    using single gesture detection.
+    using simple gesture detection (similar to lisgd).
+  - Perform testing and make fixes as necessary for primary mobile UIs:
+    Phosh, Sxmo, and Plasma Mobile.
 - **Milestone 5: UI Niceties**
   - Use filedescriptor & poll/select or similar mechanism to read
     SDL events; add filedescriptor to continually monitor STDIN instead
@@ -114,6 +117,8 @@ search scripts, bookmarks, and more.
   - Add bottom status bar to show current bandwidth usage / download of tiles.
   - Integrate gpsd into most likely a script to update user current location
     pin.
+  - Finalize mepolang API and add error checking so things don't crash
+    when accessing invalid union tag etc.
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang command and basic usage.
   - Document examples on how to write custom scripts using mepolang.
@@ -125,6 +130,7 @@ search scripts, bookmarks, and more.
     on base even more minimal.
   - Work with maintainers of mobile linux (& Pinephone) UIs to get
     mepo integrated properly.
+  - Tag 1.0 release
 
 ## **Contributing**
 
