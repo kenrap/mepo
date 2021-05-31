@@ -26,9 +26,9 @@ search scripts, bookmarks, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **UNIX-philosophy inspired design - scriptability via mepolang**:
+- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/mepolang.md)**:
   - Mepo's UI is built **to do one thing well**: download & render maps. 
-    Extra functionality is enabled via its command language (mepolang).
+    Extra functionality is enabled via its command language / API (mepolang).
   - Reduces overall application logic complexity, handing over to 
     shell-scripting integral features like map bounding-box & location search,
     bookmarks, dropping pins, rebinding keys, and more.
@@ -47,6 +47,8 @@ search scripts, bookmarks, and more.
     the keyboard as a tool for map navigation has been underlooked in
     in map applications.
   - Provides vi-like (& customizable) keybindings out-of-the-box.
+  - Should be usable in touch-oriented enviroments like the Pinephone and
+    similar where a physical keyboard isn't present.
 
 ## **High-level overview of currently implemented feature of mepo:**
 - Fast SDL-based rendering of OSM map tiles
