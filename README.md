@@ -1,6 +1,6 @@
 # **Mepo**
 
-> **Note:** mepo is currently in an alpha state although quickly making progress.
+> **Note:** Mepo is currently in an alpha state although quickly making progress.
 > An initial first tagged release (0.1), is scheduled to be released in short
 > order (within less then a month or so). See below for the high-level goals,
 > current state of mepo, path to 1.0, and information on contributing!
