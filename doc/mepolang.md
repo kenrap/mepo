@@ -9,7 +9,7 @@
   - E.g. `./my_script | mepo`
   - Or `cat config | mepo`
   - Or `mkfifo foo; cat foo | mepo`
-- Upon the 1.0 release it is planned that there will be two commands included to run mepo: `mepo_raw` and `mepo` wherein `mepo` will just be a script that runs `cat default_config | mepo_raw`.
+- Upon the 1.0 release it is planned that there will be two commands included to run Mepo: `mepo_raw` and `mepo` wherein `mepo` will just be a script that runs `cat default_config | mepo_raw`.
   - The [default config](../config) provides some nice mobile & desktop friendly settings, however things are entirely customizable through mepolang by providing your own config.
 - Many of Mepo's commands play nice together. A good place to look to understand mepolang's utilization is the [default config](../config).
   - For example `bind_key` actually also takes mepolang text to run as an argument.
@@ -29,7 +29,7 @@ commandname2 arg 8.373 anothertextarg;
 - Each statement is made up of multiple tokens.
 - Each mepolang command should be terminated by a semicolon.
 - The first token in a statement is always the command name.
-- Tokens should be seperated by whitespace.
+- Tokens should be separated by whitespace.
 - Each token is either:
   - Text
     - Just plain text, by default assumed to be a single word.
@@ -52,8 +52,8 @@ commandname2 arg 8.373 anothertextarg;
 - **pin_cycle** [index:number]:
   - Focus the next or previous pin based on the index (relative). Repositions the
     viewport's center to lie ontop of the pin.
-- **pin_deactive**:
-  - Deactive pin-selection mode.
+- **pin_deactivate**:
+  - Deactivate pin-selection mode.
 - **pin_purge**:
   - Clear all currently added pins.
 - **prefset** [prefname:text] [value:text_or_number]:
