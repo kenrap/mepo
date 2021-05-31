@@ -52,7 +52,16 @@ config](../config).
 - **pin_purge**:
   - Clear all currently added pins.
 - **prefset** [prefname:text] [value:text_or_number]:
-  - Sets the preference named text to the value given.
+  - Sets the preference named text to the value. Currently supported preferences:
+  - | prefname       | type   | description                                                   |
+    | ---            | ---    | ---                                                           |
+    | debug_global   | number | Shows (1) or hides (0) global debug text.                     |
+    | debug_tiles    | number | Shows (1) or hides (0) per-tile debug text.                   |
+    | zoom           | number | Sets the zoom level of the map.                               |
+    | crosshair_on   | number | Show (1) or hides (0) the center crosshair.                   |
+    | crosshair_size | number | Determines the size pixels of the center crosshair.           |
+    | tile_cache_dir | text   | Determines the directory for downloaded tites to be saved to. |
+    | tile_cache_url | text   | Determines the URL of the tileserver to pull from.            |
 - **shellpipe** [path_to_script:text]:
   - Executes the script given in a subshell; the result given to STDOUT may optionally
     be mepolang command(s).
