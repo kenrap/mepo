@@ -221,32 +221,6 @@ fn blit_demokeyoverlay(mepo: *@This()) !void {
     );
 }
 
-fn draw_circle(renderer: *sdl.SDL_Renderer, radius: usize, center_x: i32, center_y: i32) void {
-   var x : c_int = @intCast(c_int, radius);
-   var y : c_int = 0;
-   var err : c_int = 0;
-   while (x >= y) {
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x + x, center_y + y);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x + y, center_y + x);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x - y, center_y + x);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x - x, center_y + y);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x - x, center_y - y);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x - y, center_y - x);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x + y, center_y - x);
-     _ = sdl.SDL_RenderDrawPoint(renderer, center_x + x, center_y - y);
-     
-     if (err <= 0) {
-       y += 1;
-       err += 2*y + 1;
-    }
- 
-    if (err > 0) { 
-      x -= 1;
-      err -= 2*x + 1;
-    }
-   }
-}
-
 pub fn blit(mepo: *@This()) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
     if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
