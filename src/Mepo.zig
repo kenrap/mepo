@@ -18,13 +18,13 @@ x: i32,
 y: i32,
 w: u32,
 h: u32,
-demokey: ?u8,
 mouse_pending_last_time: ?u32,
 mouse_pending_n_taps: ?u32,
 crosshair_size: u32,
 crosshair_on: bool,
 debug_tiles: bool,
 debug_global: bool,
+download_bar: bool,
 zoom: u8,
 drag: bool,
 pin_active: ?[]const u8,
@@ -202,6 +202,33 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     }
 }
 
+fn blit_download_bar(mepo: *@This()) !void {
+    if (!mepo.download_bar) return;
+
+    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+      .x = 0,
+      .y = @intCast(i32, mepo.h) - 20,
+      .w = @intCast(i32, mepo.w),
+      .h = 200,
+    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 255, 0));
+
+    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+      .x = 0,
+      .y = @intCast(i32, mepo.h) - 20,
+      .w = @intCast(i32, mepo.w),
+      .h = 1,
+    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 0, 0, 0, 0));
+
+    _ = try mepo.blit_multiline_text(
+      5,
+      @intCast(i32, mepo.h) - 20 + 3,
+      mepo.w,
+      mepo.h,
+      "Queued: {d} / Currently downloading: {d} / Cached Tiles: {}",
+      .{ mepo.tile_cache.queue.items.len, mepo.tile_cache.n_current_transfers, mepo.tile_cache.map.count() }
+    );
+}
+
 pub fn blit(mepo: *@This()) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
     if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
@@ -210,10 +237,11 @@ pub fn blit(mepo: *@This()) !void {
     }
 
     try blit_tiles_all(mepo, mepo.x - @divTrunc(@intCast(i32, mepo.w), 2), mepo.y - @divTrunc(@intCast(i32, mepo.h), 2), mepo.w, mepo.h, mepo.zoom);
-    try blit_global_text(mepo);
-    try blit_pins(mepo);
-    try blit_pin_active_text(mepo);
-    try blit_crosshair(mepo);
+    try mepo.blit_global_text();
+    try mepo.blit_pins();
+    try mepo.blit_pin_active_text();
+    try mepo.blit_crosshair();
+    try mepo.blit_download_bar();
 
     if (sdl.SDL_UpdateWindowSurface(mepo.window) > 0) {
         return error.UpdateWindowError;
@@ -339,7 +367,6 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 },
                 .SDL_KEYDOWN => {
                     if (mepo.keybindings_table.get(@intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)))) |run_expression| {
-                        mepo.demokey = sdl.SDL_GetKeyName(e.key.keysym.sym)[0];
                         std.debug.warn("Got table function {}", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
                         try blit(mepo);
@@ -448,7 +475,7 @@ pub fn init(tile_cache: *TileCache, cfg: []const u8) anyerror!@This() {
         .drag = false,
         .debug_tiles = false,
         .debug_global = false,
-        .demokey = null,
+        .download_bar = false,
         .crosshair_size = 10,
         .crosshair_on = true,
         .tile_cache = tile_cache,

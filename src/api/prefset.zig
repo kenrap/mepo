@@ -7,7 +7,9 @@ const center_on_coords = @import("./center_on_coords.zig");
 pub fn f_prefset(mepo: *Mepo, args: [5]types.MepoArg) !void {
     const name = args[0].Text;
 
-    if (std.mem.eql(u8, "debug_global", name)) {
+    if (std.mem.eql(u8, "download_bar", name)) {
+      mepo.download_bar = args[1].Number == 1;
+    } else if (std.mem.eql(u8, "debug_global", name)) {
       mepo.debug_global = args[1].Number == 1;
     } else if (std.mem.eql(u8, "debug_tiles", name)) {
       mepo.debug_tiles = args[1].Number == 1;

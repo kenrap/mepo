@@ -36,6 +36,7 @@ pub const DefaultBaseConfig =
 
     \\ center_on_coords 40.78392 -73.96442;
 
+    \\ prefset download_bar 1;
     \\ prefset debug_global 1;
     \\ prefset debug_tiles 0;
     \\ prefset zoom 14;
