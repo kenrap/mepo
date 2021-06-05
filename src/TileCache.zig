@@ -21,6 +21,7 @@ pub const TransferDatum = struct {
 pub const TileData = struct {
     transfer_datum: ?TransferDatum,
     surface: ?*sdl.SDL_Surface,
+    load_to_surface_memory: bool = true,
 };
 
 source_url: ?[:0]const u8,
@@ -127,12 +128,19 @@ pub fn download_loop(tile_cache: *@This()) !void {
                               try cache_dir.writeFile(try png_path(tile_cache.source_url.?, kv.key.x, kv.key.y, kv.key.z), kv.value.transfer_datum.?.data.items);
                             }
 
-                            var surf = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &kv.value.transfer_datum.?.data.items[0]), @intCast(c_int, kv.value.transfer_datum.?.data.items.len)), 1);
+                            if (kv.value.load_to_surface_memory){
+                              // E.g. load into hashmap memory and refresh
+                              kv.value.surface = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(
+                                @ptrCast(*c_void, &kv.value.transfer_datum.?.data.items[0]), 
+                                @intCast(c_int, kv.value.transfer_datum.?.data.items.len)
+                              ), 1);
+                              try sdlutil.sdl_push_resize_event();
+                            }
+
                             _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, kv.value.transfer_datum.?.client);
                             _ = curl.curl_easy_cleanup(kv.value.transfer_datum.?.client);
-                            kv.value.surface = surf;// = .{ .surface = surf, .transfer_datum = null };
                             tile_cache.n_current_transfers -= 1;
-                            try sdlutil.sdl_push_resize_event();
+
                             break;
                         }
                     }
