@@ -99,10 +99,10 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     }
 
     try mepo.blit_multiline_text(
-      @intCast(i32, tile_x * 256) - x_off,
-      @intCast(i32, tile_y * 256) - y_off,
-      256,
-      256,
+      @intCast(i32, tile_x * config.Tsize) - x_off,
+      @intCast(i32, tile_y * config.Tsize) - y_off,
+      config.Tsize,
+      config.Tsize,
       "tx: {}\nty: {}\ndl: {}/{}",
       .{ tile_x, tile_y, dl_now, dl_total }
     );
@@ -113,17 +113,17 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     var tile_data = try mepo.tile_cache.tile_retrieve(screen.*.format, .{ .x = tile_x, .y = tile_y, .z = zoom });
     if (tile_data.surface) |surf| {
         if (sdl.SDL_BlitSurface(@ptrCast([*c]sdl.SDL_Surface, surf), null, screen, &sdl.SDL_Rect{
-          .x = @intCast(i32, tile_x * 256) - x_off,
-          .y = @intCast(i32, tile_y * 256) - y_off,
-          .w = 256,
-          .h = 256
+          .x = @intCast(i32, tile_x * config.Tsize) - x_off,
+          .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+          .w = config.Tsize,
+          .h = config.Tsize
         }) > 0) {
             return error.BlitError;
         }
     } else {
         // Blit background color tile?
 
-        //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(256, 256, 256, 32, pixel_format.format);
+        //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
         //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
         //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
         //    return error.FillFail;
