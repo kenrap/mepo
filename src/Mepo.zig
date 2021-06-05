@@ -202,25 +202,6 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     }
 }
 
-fn blit_demokeyoverlay(mepo: *@This()) !void {
-    if (mepo.demokey == null) return;
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
-      .x = @intCast(i32, mepo.w) - 50,
-      .y = 10,
-      .w = 30,
-      .h = 30,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 255, 0));
-    
-    _ = try mepo.blit_multiline_text(
-      @intCast(i32, mepo.w) - 50 + 10,
-      15,
-      30,
-      30,
-      "{c}p",
-      .{mepo.demokey}
-    );
-}
-
 pub fn blit(mepo: *@This()) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
     if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
@@ -233,7 +214,6 @@ pub fn blit(mepo: *@This()) !void {
     try blit_pins(mepo);
     try blit_pin_active_text(mepo);
     try blit_crosshair(mepo);
-    try blit_demokeyoverlay(mepo);
 
     if (sdl.SDL_UpdateWindowSurface(mepo.window) > 0) {
         return error.UpdateWindowError;
