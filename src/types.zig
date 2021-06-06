@@ -15,5 +15,7 @@ pub const MepoArg = union(MepoArgTag) {
     Text: [:0]const u8,
     Number: f64
 };
-pub const MepoFn = fn (mepo: *Mepo, args: [5]MepoArg) anyerror!void;
+
+pub const MepoFnNargs = 6;
+pub const MepoFn = fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void;
 pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);

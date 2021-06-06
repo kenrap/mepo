@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 
 
-pub fn f_bind_key(mepo: *Mepo, args: [5]types.MepoArg) !void {
+pub fn f_bind_key(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const key = args[0].Text;
     const expression = args[1].Text;
     try bind_key(mepo, key, expression);

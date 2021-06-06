@@ -4,7 +4,7 @@ const std = @import("std");
 const conversionutil = @import("../util/conversionutil.zig");
 const center_on_coords = @import("./center_on_coords.zig");
 
-pub fn f_pin_cycle(mepo: *Mepo, args: [5]types.MepoArg) !void {
+pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const index = @floatToInt(i32, args[0].Number);
     try pin_cycle(mepo, index);
 }

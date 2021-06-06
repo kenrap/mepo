@@ -4,7 +4,7 @@ const std = @import("std");
 const conversionutil = @import("../util/conversionutil.zig");
 const center_on_coords = @import("./center_on_coords.zig");
 
-pub fn f_prefset(mepo: *Mepo, args: [5]types.MepoArg) !void {
+pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
     if (std.mem.eql(u8, "download_bar", name)) {

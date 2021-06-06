@@ -256,9 +256,9 @@ pub fn blit(mepo: *@This()) !void {
 
 }
 
-pub fn mepolang_argize(tokens: [][]const u8) ![5]types.MepoArg {
+pub fn mepolang_argize(tokens: [][]const u8) ![types.MepoFnNargs]types.MepoArg {
     var args_i: usize = 0;
-    var args: [5]types.MepoArg = undefined;
+    var args: [types.MepoFnNargs]types.MepoArg = undefined;
     var i: usize = 0;
     var start_bracket: ?usize = null;
 
@@ -289,7 +289,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
-            var args: [5]types.MepoArg = try mepolang_argize(statement[1..statement.len]);
+            var args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(statement[1..statement.len]);
             std.debug.warn("Running API function: {} with args {}\n", .{ func, args });
             try func(mepo, args);
         } else {

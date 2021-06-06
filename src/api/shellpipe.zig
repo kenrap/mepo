@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const conversionutil = @import("../util/conversionutil.zig");
 
-pub fn f_shellpipe(mepo: *Mepo, args: [5]types.MepoArg) !void {
+pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const cmd = args[0].Text;
     try shellpipe(mepo, cmd);
 }

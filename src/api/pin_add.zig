@@ -4,7 +4,7 @@ const std = @import("std");
 const conversionutil = @import("../util/conversionutil.zig");
 const center_on_coords = @import("./center_on_coords.zig");
 
-pub fn f_pin_add(mepo: *Mepo, args: [5]types.MepoArg) !void {
+pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const lat = args[0].Number;
     const lon = args[1].Number;
     const name = args[2].Text;
