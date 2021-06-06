@@ -45,6 +45,8 @@ commandname2 arg 8.373 anothertextarg;
   - Navigates to the given latitude and longitude placing point in center of the screen.
 - **center_on_mouse**:
   - Reposition the viewport to be centered on the current position of the mouse.
+- **download_bbox** [a_lat:number] [a_lon:number] [b_lat:number] [b_lon:number] [zoom_min:number] [zoom_max:number]:
+  - Queues for downloading all tiles within the bounding box denoted between a lat/lon and b lat/lon for zoom levels between zoom_min/zoom_max
 - **move_relative** [x:number] [y:number]:
   - Move the viewport by the given x and y relative numbers.
 - **pin_add** [lat:number] [lon:number] [name:text]:

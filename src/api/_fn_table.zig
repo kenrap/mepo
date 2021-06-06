@@ -15,5 +15,6 @@ pub fn generate_fn_table() anyerror!types.MepoFnTable {
     try ft.put("pin_deactivate", @import("pin_deactivate.zig").f_pin_deactivate);
     try ft.put("pin_purge", @import("pin_purge.zig").f_pin_purge);
     try ft.put("center_on_mouse", @import("center_on_mouse.zig").f_center_on_mouse);
+    try ft.put("download_bbox", @import("download_bbox.zig").f_download_bbox);
     return ft;
 }
