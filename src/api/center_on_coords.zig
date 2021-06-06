@@ -10,6 +10,6 @@ pub fn f_center_on_coords(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !
 }
 
 pub fn center_on_coords(mepo: *Mepo, lat: f64, lon: f64) void {
-    mepo.x = conversionutil.lon_to_px(lon, mepo.zoom);
-    mepo.y = conversionutil.lat_to_px(lat, mepo.zoom);
+    mepo.x = conversionutil.lon_to_px_x(lon, mepo.zoom);
+    mepo.y = conversionutil.lat_to_px_y(lat, mepo.zoom);
 }

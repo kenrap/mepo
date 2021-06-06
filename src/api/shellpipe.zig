@@ -15,21 +15,21 @@ pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var v = try std.process.getEnvMap(&arena.allocator);
 
     // TODO: maybe as stdin?
-    try v.set("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(mepo.y, mepo.zoom)}));
-    try v.set("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_to_lat(mepo.x, mepo.zoom)}));
+    try v.set("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_y_to_lat(mepo.y, mepo.zoom)}));
+    try v.set("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_x_to_lon(mepo.x, mepo.zoom)}));
 
     try v.set("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lat(mepo.y - @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
+      conversionutil.px_y_to_lat(mepo.y - @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
     }));
     try v.set("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lon(mepo.x - @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
+      conversionutil.px_x_to_lon(mepo.x - @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
     }));
 
     try v.set("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lat(mepo.y + @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
+      conversionutil.px_y_to_lat(mepo.y + @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
     }));
     try v.set("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_to_lon(mepo.x + @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
+      conversionutil.px_x_to_lon(mepo.x + @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
     }));
 
     const args = [_][]const u8 { "sh", "-c", cmd };

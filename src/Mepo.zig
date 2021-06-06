@@ -134,8 +134,8 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_global_text(mepo: *@This()) !void {
     if (!mepo.debug_global) return;
 
-    const lat = conversionutil.px_to_lat(mepo.y, mepo.zoom);
-    const lon = conversionutil.px_to_lon(mepo.x, mepo.zoom);
+    const lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
+    const lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
     const surf = try mepo.blit_multiline_text(
       5,
       5,
@@ -155,8 +155,8 @@ fn blit_pins(mepo: *@This()) !void {
     } 
 
     for (mepo.pin_table.items()) |item| {
-      var x = -1 * (mepo.x - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px(item.value.lon, mepo.zoom));
-      var y = -1 * (mepo.y - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px(item.value.lat, mepo.zoom));
+      var x = -1 * (mepo.x - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value.lon, mepo.zoom));
+      var y = -1 * (mepo.y - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value.lat, mepo.zoom));
 
       var size : i32 = 10;
       _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
@@ -249,8 +249,8 @@ pub fn blit(mepo: *@This()) !void {
 
 
     // Update title
-    const lat = conversionutil.px_to_lat(mepo.y, mepo.zoom);
-    const lon = conversionutil.px_to_lon(mepo.x, mepo.zoom);
+    const lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
+    const lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
     var title = try std.fmt.allocPrintZ(std.heap.c_allocator, "mepo - {d} lat, {d} lon", .{lat, lon});
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 
@@ -378,8 +378,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                             try blit(mepo);
                         },
                         .SDL_WINDOWEVENT_RESIZED => {
-                            var old_lat = conversionutil.px_to_lat(mepo.y, mepo.zoom);
-                            var old_lon = conversionutil.px_to_lon(mepo.x, mepo.zoom);
+                            var old_lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
+                            var old_lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
                             mepo.w = @intCast(u32, e.window.data1);
                             mepo.h = @intCast(u32, e.window.data2);
                             //mepo.center_on_coords(old_lat, old_lon);
