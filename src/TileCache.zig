@@ -73,6 +73,19 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
     return TileData{ .queued_position = 99 };
 }
 
+pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
+    if (tile_cache.cache_dir) |cache_dir| {
+        // TODO: lookup exists fn in stdb lib
+        var file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), 500000) catch null;
+        if (file_cached_png_opt) |file_cached_png| {
+            std.heap.c_allocator.free(file_cached_png);
+            return;
+        }
+    }
+
+    try tile_cache.queue_map.put(coords, false);
+}
+
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
     var dat = try std.heap.c_allocator.create(TransferDatum);
     dat.client = curl.curl_easy_init().?;
@@ -121,19 +134,19 @@ pub fn download_loop(tile_cache: *@This()) !void {
                     }
 
                     if (coords_opt) |coords| {
-
                         // Save to filesystem
                         if (tile_cache.cache_dir) |cache_dir| {
                           // Save file to tile_cache in fs
                           try cache_dir.writeFile(try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), tile_cache.transfer_map.get(coords_opt.?).?.data.items);
                         }
 
-
                         // Load to surface
                         if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
                           try tile_cache.surface_map.put(coords, sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]), @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)), 1));
-                          try sdlutil.sdl_push_resize_event();
                         }
+
+                        // Refresh UI
+                        try sdlutil.sdl_push_resize_event();
                     } else {
                         std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
                     }

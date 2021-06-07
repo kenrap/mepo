@@ -32,6 +32,11 @@ pub fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64
       var y : i32 = y_min;
       while (y <= y_max) : (y += 1) {
         std.debug.warn("Queue {d} {d} {d}\n", .{x, y, z});
+        try mepo.tile_cache.tile_queue_no_surface_load(.{
+            .x = @intCast(u32, x),
+            .y = @intCast(u32, y),
+            .z = @intCast(u8, z)
+        });
       }
     }
   }

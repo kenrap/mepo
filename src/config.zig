@@ -20,6 +20,7 @@ pub const DefaultBaseConfig =
     \\ bind_key g [shellpipe /home/m/mepo/scripts/mepo_nomatim_searchprompt.sh];
     \\ bind_key z [shellpipe /home/m/mepo/scripts/mepo_zoomlevelset.sh];
     \\ bind_key b [shellpipe /home/m/mepo/scripts/mepo_bbox_search.sh];
+    \\ bind_key q [shellpipe /home/m/mepo/scripts/mepo_bbox_queuedownload.sh];
     \\ bind_key u [shellpipe /home/m/mepo/scripts/mepo_urlsourceset.sh];
     \\ bind_key a [shellpipe /home/m/mepo/scripts/mepo_apilangexec.sh];
     \\
