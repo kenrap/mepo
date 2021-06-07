@@ -50,7 +50,7 @@ fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_dat
 fn png_path(source: []const u8, x: u32, y: u32, z: u32) ![]u8 {
     var source_hash: [32:0]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
-    return try std.fmt.allocPrint(std.heap.c_allocator, "{s}_{d}_{d}_{d}.png", .{ source_hash[0..8], z, x, y });
+    return try std.fmt.allocPrint(std.heap.c_allocator, "{s}_{d}_{d}_{d}.png", .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), z, x, y });
 }
 
 pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, coords: types.TileSpec) !TileData {
@@ -144,6 +144,8 @@ pub fn download_loop(tile_cache: *@This()) !void {
                         if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
                           try tile_cache.surface_map.put(coords, sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]), @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)), 1));
                         }
+
+                        _ = tile_cache.transfer_map.swapRemove(coords_opt.?);
 
                         // Refresh UI
                         try sdlutil.sdl_push_resize_event();
