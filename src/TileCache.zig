@@ -63,15 +63,15 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), 500000) catch null;
     }
 
-    var dat = try std.heap.c_allocator.alloc(TileData, 1);
+    var dat = try std.heap.c_allocator.create(TileData);
     if (file_cached_png_opt) |file_cached_png| {
-       dat[0] = .{
+       dat.* = .{
            .surface = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, file_cached_png), @intCast(c_int, file_cached_png.len)), 1),
            .transfer_datum = null,
        };
-       try tile_cache.map.put(coords, dat[0]);
+       try tile_cache.map.put(coords, dat.*);
     } else {
-       dat[0] = .{
+       dat.* = .{
            .surface = null,
            .transfer_datum = .{
                .client = curl.curl_easy_init().?,
@@ -81,10 +81,10 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
                .progress_dl_total = null,
            },
        };
-       try tile_cache.map.put(coords, dat[0]);
+       try tile_cache.map.put(coords, dat.*);
        try tile_cache.queue.put(coords, void{});
     }
-   return dat[0];
+   return dat.*;
 }
 
 fn add_to_curl_multi(tile_cache: *@This(),coords: types.TileSpec) !void {
