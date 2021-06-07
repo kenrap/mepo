@@ -73,7 +73,7 @@ pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zo
                 try mepo.blit_tile_surface(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
                 try mepo.blit_tile_text(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
             } else {
-                std.debug.warn("Blit wont blit for neg x={} y={}\n", .{ tilex, tiley });
+                std.debug.warn("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
             }
             y += config.Tsize;
             tiley += 1;
@@ -103,7 +103,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
       @intCast(i32, tile_y * config.Tsize) - y_off,
       config.Tsize,
       config.Tsize,
-      "tx: {}\nty: {}\ndl: {}/{}",
+      "tx: {d}\nty: {d}\ndl: {d}/{d}",
       .{ tile_x, tile_y, dl_now, dl_total }
     );
 }
@@ -141,7 +141,7 @@ fn blit_global_text(mepo: *@This()) !void {
       5,
       mepo.w,
       mepo.h,
-      "x: {}\ny: {}\nz: {}\nlat: {d}\nlon: {d}",
+      "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
       .{ mepo.x, mepo.y, mepo.zoom, lat, lon }
     );
 }
@@ -154,9 +154,10 @@ fn blit_pins(mepo: *@This()) !void {
       return error.Utoh;
     } 
 
-    for (mepo.pin_table.items()) |item| {
-      var x = -1 * (mepo.x - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value.lon, mepo.zoom));
-      var y = -1 * (mepo.y - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value.lat, mepo.zoom));
+    var it = mepo.pin_table.iterator();
+    while (it.next()) |item| {
+      var x = -1 * (mepo.x - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
+      var y = -1 * (mepo.y - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
       var size : i32 = 10;
       _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
@@ -164,7 +165,7 @@ fn blit_pins(mepo: *@This()) !void {
         .y = y - @divTrunc(size, 2), 
         .w = size,
         .h = size,
-      }, sdl.SDL_MapRGBA(surf.*.format, if (mepo.pin_active != null and std.mem.eql(u8, item.key, mepo.pin_active.?)) 255 else 0, 0, 0, 255));
+      }, sdl.SDL_MapRGBA(surf.*.format, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, 255));
    }    
 }
 
@@ -186,7 +187,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         @intCast(i32, mepo.h) - (18 * 3),
         mepo.w,
         mepo.h,
-        "Pin: {}\nlat: {}\nlon: {}\n",
+        "Pin: {s}\nlat: {d}\nlon: {d}\n",
         .{ pin.name, pin.lat, pin.lon }
       );
 
@@ -196,7 +197,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         mepo.w,
         mepo.h,
         "{d}p",
-        .{ mepo.pin_table.items().len }
+        .{ mepo.pin_table.iterator().len }
       );
 
     }
@@ -224,7 +225,7 @@ fn blit_download_bar(mepo: *@This()) !void {
       @intCast(i32, mepo.h) - 20 + 3,
       mepo.w,
       mepo.h,
-      "Queued: {d} / Currently downloading: {d} / Cached Tiles: {}",
+      "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
       .{ mepo.tile_cache.queue.items.len, mepo.tile_cache.n_current_transfers, mepo.tile_cache.map.count() }
     );
 }
@@ -274,7 +275,7 @@ pub fn mepolang_argize(tokens: [][]const u8) ![types.MepoFnNargs]types.MepoArg {
             args[i] = .{ .Number = try std.fmt.parseFloat(f64, tok) };
             args_i += 1;
         } else {
-            args[i] = .{ .Text = try std.fmt.allocPrintZ(std.heap.c_allocator, "{}", .{tok}) };
+            args[i] = .{ .Text = try std.fmt.allocPrintZ(std.heap.c_allocator, "{s}", .{tok}) };
             args_i += 1;
         }
         i += 1;
@@ -284,16 +285,16 @@ pub fn mepolang_argize(tokens: [][]const u8) ![types.MepoFnNargs]types.MepoArg {
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     for (try stringsutil.statementize(mepolang_text)) |statement| {
-        std.debug.warn("Executing statment: {}\n", .{statement});
+        std.debug.warn("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
             var args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(statement[1..statement.len]);
-            std.debug.warn("Running API function: {} with args {}\n", .{ func, args });
+            std.debug.warn("Running API function: {s} with args {any}\n", .{ func, args });
             try func(mepo, args);
         } else {
-            std.debug.warn("Requested API function {} but that's not registered in ftable\n", .{statement[0]});
+            std.debug.warn("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
         }
     }
 }
@@ -367,7 +368,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 },
                 .SDL_KEYDOWN => {
                     if (mepo.keybindings_table.get(@intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)))) |run_expression| {
-                        std.debug.warn("Got table function {}", .{run_expression});
+                        std.debug.warn("Got table function {s}", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
                         try blit(mepo);
                     }

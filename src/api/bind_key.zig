@@ -11,7 +11,7 @@ pub fn f_bind_key(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 pub fn bind_key(mepo: *Mepo, key: [:0]const u8, expression: []const u8) !void {
-    std.debug.warn("Binding key: {} to expression {}\n", .{key, expression});
+    std.debug.warn("Binding key: {s} to expression {s}\n", .{key, expression});
 
     const keycode = sdl.SDL_GetKeyFromName(key);
     if (keycode == sdl.SDLK_UNKNOWN) {

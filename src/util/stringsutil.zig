@@ -64,14 +64,14 @@ pub fn statementize(input: []const u8) ![][][]const u8 {
 }
 
 pub fn read_stdin() anyerror![]const u8 {
-    const stream = &std.io.getStdIn().inStream();
+    const stream = &std.io.getStdIn().reader();
     var buffer = try std.heap.c_allocator.alloc(u8, 1024 * 100);
     std.debug.warn("Waiting for STDIN\n", .{});
     if (stream.read(buffer)) {
         std.debug.warn("Read STDIN to buffer ok\n", .{});
     } else |err| {
-        std.debug.warn("Error: {}\n", .{err});
-        @panic("Error reading STDIN: {}\n");
+        std.debug.warn("Error: {any}\n", .{err});
+        @panic("Error reading STDIN: {any}\n");
     }
     return whitespace_trim(buffer);
 }

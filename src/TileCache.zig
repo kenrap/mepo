@@ -40,7 +40,7 @@ fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl
 }
 
 fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_data: *c_void) callconv(.C) c_uint {
-    std.debug.warn("Got some bytes in download for tile {}\n", .{user_data});
+    std.debug.warn("Got some bytes in download for tile {any}\n", .{user_data});
     var tile_data = @intToPtr(*TileData, @ptrToInt(user_data));
     var typed_data = @intToPtr([*]u8, @ptrToInt(data));
     tile_data.transfer_datum.?.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
@@ -50,7 +50,7 @@ fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_dat
 fn png_path(source: []const u8, x: u32, y: u32, z: u32) ![]u8 {
   var source_hash : [32:0]u8 = undefined;
   std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
-  return try std.fmt.allocPrint(std.heap.c_allocator, "{s}_{}_{}_{}.png", .{ source_hash[0..8], z, x, y });
+  return try std.fmt.allocPrint(std.heap.c_allocator, "{s}_{d}_{d}_{d}.png", .{ source_hash[0..8], z, x, y });
 }
 
 
@@ -88,14 +88,14 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
 }
 
 fn add_to_curl_multi(tile_cache: *@This(),coords: types.TileSpec) !void {
-        var ptr: *TileData = &tile_cache.map.getEntry(coords).?.value;
-        std.debug.warn("Going to pass the ptr {*} for coords {}\n", .{ ptr, coords });
+        var ptr: *TileData = tile_cache.map.getEntry(coords).?.value_ptr;
+        std.debug.warn("Going to pass the ptr {*} for coords {any}\n", .{ ptr, coords });
 
-        std.debug.warn("FROM {}\n", .{tile_cache.source_url.?});
+        std.debug.warn("FROM {s}\n", .{tile_cache.source_url.?});
         var url = try std.heap.c_allocator.alloc(u8, 2000);
         url[199] = 0;
         _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
-        std.debug.warn("Got {}\n", .{url});
+        std.debug.warn("Got {s}\n", .{url});
 
         //var url = try std.fmt.allocPrint(std.heap.c_allocator, tile_cache.source_url.?, .{ coords.x, coords.y, coords.z });
         _ = curl.curl_easy_setopt(ptr.transfer_datum.?.client, @intToEnum(curl.CURLoption, curl.CURLOPT_URL), @ptrCast(*c_void, url));
@@ -106,7 +106,7 @@ fn add_to_curl_multi(tile_cache: *@This(),coords: types.TileSpec) !void {
         _ = curl.curl_easy_setopt(ptr.transfer_datum.?.client, @intToEnum(curl.CURLoption, curl.CURLOPT_WRITEFUNCTION), tile_write_curl_callback);
         _ = curl.curl_easy_setopt(ptr.transfer_datum.?.client, @intToEnum(curl.CURLoption, curl.CURLOPT_WRITEDATA), ptr);
         _ = curl.curl_multi_add_handle(tile_cache.curl_multi, ptr.transfer_datum.?.client);
-        std.debug.warn("Add multi handle {}\n", .{coords});
+        std.debug.warn("Add multi handle {any}\n", .{coords});
 }
 
 pub fn download_loop(tile_cache: *@This()) !void {
@@ -118,27 +118,27 @@ pub fn download_loop(tile_cache: *@This()) !void {
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
-                .CURLMSG_DONE => {
+                ._DONE => {
                     var it = tile_cache.map.iterator();
                     while (it.next()) |kv| {
-                        if (kv.value.transfer_datum != null and kv.value.transfer_datum.?.client == msg.*.easy_handle) {
+                        if (kv.value_ptr.transfer_datum != null and kv.value_ptr.transfer_datum.?.client == msg.*.easy_handle) {
 
                             if (tile_cache.cache_dir) |cache_dir| {
                               // Save file to tile_cache in fs
-                              try cache_dir.writeFile(try png_path(tile_cache.source_url.?, kv.key.x, kv.key.y, kv.key.z), kv.value.transfer_datum.?.data.items);
+                              try cache_dir.writeFile(try png_path(tile_cache.source_url.?, kv.key_ptr.x, kv.key_ptr.y, kv.key_ptr.z), kv.value_ptr.transfer_datum.?.data.items);
                             }
 
-                            if (kv.value.load_to_surface_memory){
+                            if (kv.value_ptr.load_to_surface_memory){
                               // E.g. load into hashmap memory and refresh
-                              kv.value.surface = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(
-                                @ptrCast(*c_void, &kv.value.transfer_datum.?.data.items[0]), 
-                                @intCast(c_int, kv.value.transfer_datum.?.data.items.len)
+                              kv.value_ptr.surface = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(
+                                @ptrCast(*c_void, &kv.value_ptr.transfer_datum.?.data.items[0]), 
+                                @intCast(c_int, kv.value_ptr.transfer_datum.?.data.items.len)
                               ), 1);
                               try sdlutil.sdl_push_resize_event();
                             }
 
-                            _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, kv.value.transfer_datum.?.client);
-                            _ = curl.curl_easy_cleanup(kv.value.transfer_datum.?.client);
+                            _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, kv.value_ptr.transfer_datum.?.client);
+                            _ = curl.curl_easy_cleanup(kv.value_ptr.transfer_datum.?.client);
                             tile_cache.n_current_transfers -= 1;
 
                             break;

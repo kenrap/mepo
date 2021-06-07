@@ -31,7 +31,7 @@ pub fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64
     while (x <= x_max) : (x += 1) {
       var y : i32 = y_min;
       while (y <= y_max) : (y += 1) {
-        std.debug.warn("Queue {} {} {}\n", .{x, y, z});
+        std.debug.warn("Queue {d} {d} {d}\n", .{x, y, z});
       }
     }
   }
