@@ -27,7 +27,7 @@ pub const TileData = struct {
 source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
-queue: std.ArrayList(types.TileSpec),
+queue: std.array_hash_map.AutoArrayHashMap(types.TileSpec, void),
 map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData),
 curl_multi: *curl.CURLM,
 
@@ -82,7 +82,7 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
            },
        };
        try tile_cache.map.put(coords, dat[0]);
-       try tile_cache.queue.append(coords);
+       try tile_cache.queue.put(coords, void{});
     }
    return dat[0];
 }
@@ -151,9 +151,9 @@ pub fn download_loop(tile_cache: *@This()) !void {
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
-        while (tile_cache.queue.items.len > 0 and tile_cache.n_current_transfers < 20) {
+        while (tile_cache.queue.count() > 0 and tile_cache.n_current_transfers < 20) {
           var coords = tile_cache.queue.pop();
-          try tile_cache.add_to_curl_multi(coords);
+          try tile_cache.add_to_curl_multi(coords.key);
           tile_cache.n_current_transfers += 1;
         }
 
@@ -185,11 +185,12 @@ pub fn init() anyerror!@This() {
             .source_url = null,
             .cache_dir = null,
             .n_current_transfers = 0,
-            .queue = std.ArrayList(types.TileSpec).init(std.heap.c_allocator),
+            .queue = std.array_hash_map.AutoArrayHashMap(types.TileSpec, void).init(std.heap.c_allocator),
             .map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData).init(std.heap.c_allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
         try x.map.ensureCapacity(2000);
+        try x.queue.ensureCapacity(20000);
         return x;
     } else {
         return error.MultiInitFail;
