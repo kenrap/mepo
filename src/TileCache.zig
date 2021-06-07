@@ -28,7 +28,7 @@ source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
 queue: std.array_hash_map.AutoArrayHashMap(types.TileSpec, void),
-map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData),
+surface_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData),
 curl_multi: *curl.CURLM,
 
 fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl_now: curl.curl_off_t, ul_total: curl.curl_off_t, ul_now: curl.curl_off_t) callconv(.C) c_uint {
@@ -57,7 +57,7 @@ fn png_path(source: []const u8, x: u32, y: u32, z: u32) ![]u8 {
 pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, coords: types.TileSpec) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
-    if (tile_cache.map.get(coords)) |tile| {
+    if (tile_cache.surface_map.get(coords)) |tile| {
         return tile;
     } else if (tile_cache.cache_dir) |cache_dir| {
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), 500000) catch null;
@@ -69,7 +69,7 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
            .surface = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, file_cached_png), @intCast(c_int, file_cached_png.len)), 1),
            .transfer_datum = null,
        };
-       try tile_cache.map.put(coords, dat.*);
+       try tile_cache.surface_map.put(coords, dat.*);
     } else {
        dat.* = .{
            .surface = null,
@@ -81,14 +81,14 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
                .progress_dl_total = null,
            },
        };
-       try tile_cache.map.put(coords, dat.*);
+       try tile_cache.surface_map.put(coords, dat.*);
        try tile_cache.queue.put(coords, void{});
     }
    return dat.*;
 }
 
 fn add_to_curl_multi(tile_cache: *@This(),coords: types.TileSpec) !void {
-        var ptr: *TileData = tile_cache.map.getEntry(coords).?.value_ptr;
+        var ptr: *TileData = tile_cache.surface_map.getEntry(coords).?.value_ptr;
         std.debug.warn("Going to pass the ptr {*} for coords {any}\n", .{ ptr, coords });
 
         std.debug.warn("FROM {s}\n", .{tile_cache.source_url.?});
@@ -119,7 +119,7 @@ pub fn download_loop(tile_cache: *@This()) !void {
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
-                    var it = tile_cache.map.iterator();
+                    var it = tile_cache.surface_map.iterator();
                     while (it.next()) |kv| {
                         if (kv.value_ptr.transfer_datum != null and kv.value_ptr.transfer_datum.?.client == msg.*.easy_handle) {
 
@@ -175,7 +175,7 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
   // Empty Cache
   tile_cache.source_url = url;
-  //tile_cache.map.clearAndFree();
+  //tile_cache.surface_map.clearAndFree();
   try sdlutil.sdl_push_resize_event();
 }
 
@@ -186,10 +186,10 @@ pub fn init() anyerror!@This() {
             .cache_dir = null,
             .n_current_transfers = 0,
             .queue = std.array_hash_map.AutoArrayHashMap(types.TileSpec, void).init(std.heap.c_allocator),
-            .map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData).init(std.heap.c_allocator),
+            .surface_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, TileData).init(std.heap.c_allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
-        try x.map.ensureCapacity(2000);
+        try x.surface_map.ensureCapacity(2000);
         try x.queue.ensureCapacity(20000);
         return x;
     } else {
