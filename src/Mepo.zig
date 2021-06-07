@@ -87,15 +87,19 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     if (!mepo.debug_tiles) return;
     var dl_now: c_long = 0;
     var dl_total: c_long = 0;
+    const screen = sdl.SDL_GetWindowSurface(mepo.window);
 
-    var tile_data = try mepo.tile_cache.tile_retrieve(sdl.SDL_GetWindowSurface(mepo.window).*.format, .{ .x = tile_x, .y = tile_y, .z = zoom });
-    if (tile_data.transfer_datum) |transfer_datum| {
-        if (transfer_datum.progress_dl_now) |dln| {
-            dl_now = dln;
-        }
-        if (transfer_datum.progress_dl_total) |dlt| {
-            dl_total = dlt;
-        }
+    switch (try mepo.tile_cache.tile_retrieve(screen.*.format, .{ .x = tile_x, .y = tile_y, .z = zoom })) {
+      .transfer_datum => |transfer_datum| {
+          if (transfer_datum.progress_dl_now) |dln| {
+              dl_now = dln;
+          }
+          if (transfer_datum.progress_dl_total) |dlt| {
+              dl_total = dlt;
+          }
+      },
+      else => {
+      }
     }
 
     try mepo.blit_multiline_text(
@@ -110,8 +114,9 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
-    var tile_data = try mepo.tile_cache.tile_retrieve(screen.*.format, .{ .x = tile_x, .y = tile_y, .z = zoom });
-    if (tile_data.surface) |surf| {
+
+    switch (try mepo.tile_cache.tile_retrieve(screen.*.format, .{ .x = tile_x, .y = tile_y, .z = zoom })) {
+      .surface => |surf| {
         if (sdl.SDL_BlitSurface(@ptrCast([*c]sdl.SDL_Surface, surf), null, screen, &sdl.SDL_Rect{
           .x = @intCast(i32, tile_x * config.Tsize) - x_off,
           .y = @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -120,15 +125,22 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         }) > 0) {
             return error.BlitError;
         }
-    } else {
-        // Blit background color tile?
-
-        //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
-        //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
-        //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
-        //    return error.FillFail;
-        //}
+      }, 
+      else => {
+        // TODO
+      }
     }
+
+    //if (tile_data.surface) |surf| {
+    //} else {
+    //    // Blit background color tile?
+
+    //    //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
+    //    //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
+    //    //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
+    //    //    return error.FillFail;
+    //    //}
+    //}
 }
 
 fn blit_global_text(mepo: *@This()) !void {
@@ -226,7 +238,7 @@ fn blit_download_bar(mepo: *@This()) !void {
       mepo.w,
       mepo.h,
       "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
-      .{ mepo.tile_cache.queue.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() }
+      .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() }
     );
 }
 
