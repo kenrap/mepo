@@ -16,6 +16,7 @@ pub const TransferDatum = struct {
     data: std.ArrayList(u8),
     progress_dl_now: ?c_long,
     progress_dl_total: ?c_long,
+    load_to_surface: bool
 };
 
 const TileDataTag = enum { transfer_datum, surface, queued_position };
@@ -25,7 +26,7 @@ pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, surface
 source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
-queue_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, void),
+queue_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool),
 transfer_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum),
 surface_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Surface),
 curl_multi: *curl.CURLM,
@@ -68,17 +69,18 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
         }
     }
 
-    try tile_cache.queue_map.put(coords, void{});
+    try tile_cache.queue_map.put(coords, true);
     return TileData{ .queued_position = 99 };
 }
 
-fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec) !void {
+fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
     var dat = try std.heap.c_allocator.create(TransferDatum);
     dat.client = curl.curl_easy_init().?;
     dat.coords = coords;
     dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
     dat.progress_dl_now = null;
     dat.progress_dl_total = null;
+    dat.load_to_surface = load_to_surface;
 
     try tile_cache.transfer_map.put(coords, dat);
     var ptr: *TransferDatum = tile_cache.transfer_map.get(coords).?;
@@ -119,14 +121,19 @@ pub fn download_loop(tile_cache: *@This()) !void {
                     }
 
                     if (coords_opt) |coords| {
-                        //if (tile_cache.cache_dir) |cache_dir| {
-                        //  // Save file to tile_cache in fs
-                        //  try cache_dir.writeFile(try png_path(tile_cache.source_url.?, kv.key_ptr.x, kv.key_ptr.y, kv.key_ptr.z), kv.value_ptr.transfer_datum.?.data.items);
-                        //}
-                        try tile_cache.surface_map.put(coords, sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]), @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)), 1));
 
-                        // Free transfer datum here
-                        try sdlutil.sdl_push_resize_event();
+                        // Save to filesystem
+                        if (tile_cache.cache_dir) |cache_dir| {
+                          // Save file to tile_cache in fs
+                          try cache_dir.writeFile(try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), tile_cache.transfer_map.get(coords_opt.?).?.data.items);
+                        }
+
+
+                        // Load to surface
+                        if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
+                          try tile_cache.surface_map.put(coords, sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]), @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)), 1));
+                          try sdlutil.sdl_push_resize_event();
+                        }
                     } else {
                         std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
                     }
@@ -143,7 +150,7 @@ pub fn download_loop(tile_cache: *@This()) !void {
 
         while (tile_cache.queue_map.count() > 0 and tile_cache.n_current_transfers < 20) {
             var coords = tile_cache.queue_map.pop();
-            try tile_cache.add_to_curl_multi(coords.key);
+            try tile_cache.add_to_curl_multi(coords.key, coords.value);
             tile_cache.n_current_transfers += 1;
         }
 
@@ -177,7 +184,7 @@ pub fn init() anyerror!@This() {
             .n_current_transfers = 0,
             .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(std.heap.c_allocator),
             .surface_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Surface).init(std.heap.c_allocator),
-            .queue_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, void).init(std.heap.c_allocator),
+            .queue_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool).init(std.heap.c_allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
         try x.surface_map.ensureCapacity(2000);
