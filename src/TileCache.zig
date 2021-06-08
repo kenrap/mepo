@@ -74,13 +74,11 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
-    if (tile_cache.cache_dir) |cache_dir| {
-        // TODO: lookup exists fn in stdb lib
-        var file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), 500000) catch null;
-        if (file_cached_png_opt) |file_cached_png| {
-            std.heap.c_allocator.free(file_cached_png);
-            return;
-        }
+    if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
+        cache_dir.access(try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), .{}) catch {
+          break :check_tile_exists;
+        };
+        return;
     }
 
     try tile_cache.queue_map.put(coords, false);
