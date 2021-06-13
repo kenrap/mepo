@@ -28,7 +28,7 @@ download_bar: bool,
 zoom: u8,
 drag: bool,
 pin_active: ?[]const u8,
-pin_table: std.array_hash_map.StringArrayHashMap(types.Pin),
+pin_table: std.hash_map.StringHashMap(types.Pin),
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 keybindings_table: std.array_hash_map.AutoArrayHashMap(sdl.SDL_KeyCode, []const u8),
 
@@ -209,7 +209,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         mepo.w,
         mepo.h,
         "{d}p",
-        .{ mepo.pin_table.iterator().len }
+        .{ mepo.pin_table.count() }
       );
 
     }
@@ -492,7 +492,7 @@ pub fn init(tile_cache: *TileCache, cfg: []const u8) anyerror!@This() {
         .crosshair_size = 10,
         .crosshair_on = true,
         .tile_cache = tile_cache,
-        .pin_table = std.array_hash_map.StringArrayHashMap(types.Pin).init(std.heap.c_allocator),
+        .pin_table = std.hash_map.StringHashMap(types.Pin).init(std.heap.c_allocator),
         .pin_active = null,
         .fn_table = try _fn_table.generate_fn_table(),
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(sdl.SDL_KeyCode, []const u8).init(std.heap.c_allocator),

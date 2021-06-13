@@ -40,7 +40,6 @@ echo "$JSON_RESULTS" |
   tr -d \" |
   grep -vE 'null$' |
   grep -vE '^null' |
-  awk -F' ' '{print $1 " " $2 " " $3}' |
+  awk -F' ' '{print $1 " " $2 " [" $3 "]"}' |
   sed 's/[^[:print:]]//g' |
-  head -n 20 |
   xargs -ID echo 'pin_add D;'
