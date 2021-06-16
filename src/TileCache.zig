@@ -142,7 +142,16 @@ pub fn download_loop(tile_cache: *@This()) !void {
 
                         // Load to surface
                         if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
-                          try tile_cache.surface_map.put(coords, sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]), @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)), 1));
+                          var surf = sdl.IMG_Load_RW(
+                            sdl.SDL_RWFromMem(
+                              @ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]),
+                              @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)
+                            ),
+                            1
+                          );
+                          if (surf != null) {
+                            try tile_cache.surface_map.put(coords, surf);
+                          }
                         }
 
                         _ = tile_cache.transfer_map.swapRemove(coords_opt.?);
