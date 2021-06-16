@@ -30,6 +30,9 @@ pub const DefaultBaseConfig =
     \\ bind_key e [prefset debug_global 1];
     \\ bind_key w [prefset debug_global 0];
 
+    \\ bind_key r [prefset download_bar 1];
+    \\ bind_key t [prefset download_bar 0];
+
     \\ bind_key c [center_on_mouse];
     \\
     \\ prefset crosshair_size 15;
@@ -37,7 +40,7 @@ pub const DefaultBaseConfig =
 
     \\ center_on_coords 40.78392 -73.96442;
 
-    \\ prefset download_bar 1;
+    \\ prefset download_bar 0;
     \\ prefset debug_global 1;
     \\ prefset debug_tiles 0;
     \\ prefset zoom 14;
