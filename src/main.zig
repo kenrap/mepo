@@ -9,11 +9,11 @@ const stringsutil = @import("./util/stringsutil.zig");
 pub fn main() !void {
   var args = try stringsutil.read_args();
 
-  var cfg : []const u8 = cfg: {
+  var cfg : ?[]const u8 = cfg: {
     if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
       break :cfg try stringsutil.read_stdin();
     } else {
-      break :cfg "";
+      break :cfg null;
     }
   };
 

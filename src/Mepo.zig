@@ -442,7 +442,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     }
 }
 
-pub fn init(tile_cache: *TileCache, cfg: []const u8) anyerror!@This() {
+pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
     var window: ?*sdl.SDL_Window = null;
 
@@ -502,7 +502,9 @@ pub fn init(tile_cache: *TileCache, cfg: []const u8) anyerror!@This() {
 
     // Run config (base and then user provided STDIN)
     try instance.mepolang_execute(config.DefaultBaseConfig);
-    try instance.mepolang_execute(cfg);
+    if (cfg_opt) |cfg| {
+      try instance.mepolang_execute(cfg);
+    }
 
     return instance;
 }
