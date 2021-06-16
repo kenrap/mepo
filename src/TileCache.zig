@@ -64,8 +64,10 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
             const surf = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, file_cached_png), @intCast(c_int, file_cached_png.len)), 1);
-            try tile_cache.surface_map.put(coords, surf);
-            return TileData{ .surface = surf };
+            if (surf != null) {
+              try tile_cache.surface_map.put(coords, surf);
+              return TileData{ .surface = surf };
+            }
         }
     }
 
