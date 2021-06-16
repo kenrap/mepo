@@ -76,3 +76,21 @@ pub fn read_stdin() anyerror![]const u8 {
     return whitespace_trim(buffer);
 }
 
+pub fn read_args_str() anyerror![]u8 {
+    var args_it = std.process.args();
+    var alloc = std.heap.c_allocator;
+    var accumulate = try std.heap.c_allocator.alloc(u8, 0);
+    var arg = args_it.next(alloc);
+    var i: usize = 0;
+    while (arg != null) : (arg = args_it.next(alloc)) {
+        i += 1;
+        if (i == 1) continue;
+        var a = try arg.?;
+        accumulate = try std.mem.join(std.heap.c_allocator, " ", &[_][]const u8{ accumulate, a });
+    }
+    return accumulate;
+}
+
+pub fn read_args() anyerror![][]const u8 {
+  return try tokenize(try read_args_str());
+}
