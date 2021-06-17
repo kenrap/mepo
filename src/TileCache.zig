@@ -98,9 +98,8 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
     try tile_cache.transfer_map.put(coords, dat);
     var ptr: *TransferDatum = tile_cache.transfer_map.get(coords).?;
     var url = try std.heap.c_allocator.alloc(u8, 2000);
-    url[199] = 0;
     _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
-    std.debug.warn("Got {s}\n", .{url});
+    defer std.heap.c_allocator.free(url);
 
     //var url = try std.fmt.allocPrint(std.heap.c_allocator, tile_cache.source_url.?, .{ coords.x, coords.y, coords.z });
     _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_URL), @ptrCast(*c_void, url));
