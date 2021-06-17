@@ -10,17 +10,8 @@ const types = @import("./types.zig");
 const config = @import("./config.zig");
 const sdlutil = @import("./util/sdlutil.zig");
 
-pub const TransferDatum = struct {
-    client: *curl.CURL,
-    coords: types.TileSpec,
-    data: std.ArrayList(u8),
-    progress_dl_now: ?c_long,
-    progress_dl_total: ?c_long,
-    load_to_surface: bool
-};
-
+pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
 const TileDataTag = enum { transfer_datum, surface, queued_position };
-
 pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, surface: *sdl.SDL_Surface, queued_position: u32 };
 
 source_url: ?[:0]const u8,
@@ -65,8 +56,8 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
         if (file_cached_png_opt) |file_cached_png| {
             const surf = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, file_cached_png), @intCast(c_int, file_cached_png.len)), 1);
             if (surf != null) {
-              try tile_cache.surface_map.put(coords, surf);
-              return TileData{ .surface = surf };
+                try tile_cache.surface_map.put(coords, surf);
+                return TileData{ .surface = surf };
             }
         }
     }
@@ -78,7 +69,7 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
     if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
         cache_dir.access(try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), .{}) catch {
-          break :check_tile_exists;
+            break :check_tile_exists;
         };
         return;
     }
@@ -113,6 +104,49 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
     std.debug.warn("Add multi handle {any}\n", .{coords});
 }
 
+fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
+    var coords_opt: ?types.TileSpec = coords: {
+        var it = tile_cache.transfer_map.iterator();
+        while (it.next()) |kv| {
+            if (kv.value_ptr.*.client == msg.*.easy_handle) {
+                break :coords kv.value_ptr.*.coords;
+            }
+        }
+        break :coords null;
+    };
+
+    // Cleanup
+    defer {
+        if (coords_opt) |coords| {
+            _ = tile_cache.transfer_map.swapRemove(coords);
+        } else {
+            std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
+        }
+        _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
+        _ = curl.curl_easy_cleanup(msg.*.easy_handle);
+        tile_cache.n_current_transfers -= 1;
+        sdlutil.sdl_push_resize_event();
+    }
+
+    if (coords_opt == null) return;
+
+    // Save to FS
+    if (tile_cache.cache_dir) |cache_dir| {
+        const path = try png_path(tile_cache.source_url.?, coords_opt.?.x, coords_opt.?.y, coords_opt.?.z);
+        const datum = tile_cache.transfer_map.get(coords_opt.?).?.data.items;
+        try cache_dir.writeFile(path, datum);
+    }
+
+    // Load to surface
+    if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
+        const datum = @ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]);
+        const len = @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len);
+        if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(datum, len), 1)) |surf| {
+            try tile_cache.surface_map.put(coords_opt.?, surf);
+        }
+    }
+}
+
 pub fn download_loop(tile_cache: *@This()) !void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
@@ -123,47 +157,7 @@ pub fn download_loop(tile_cache: *@This()) !void {
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
-                    var coords_opt: ?types.TileSpec = null;
-
-                    var it = tile_cache.transfer_map.iterator();
-                    while (it.next()) |kv| {
-                        if (kv.value_ptr.*.client == msg.*.easy_handle) {
-                            coords_opt = kv.value_ptr.*.coords;
-                        }
-                    }
-
-                    if (coords_opt) |coords| {
-                        // Save to filesystem
-                        if (tile_cache.cache_dir) |cache_dir| {
-                          // Save file to tile_cache in fs
-                          try cache_dir.writeFile(try png_path(tile_cache.source_url.?, coords.x, coords.y, coords.z), tile_cache.transfer_map.get(coords_opt.?).?.data.items);
-                        }
-
-                        // Load to surface
-                        if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
-                          var surf = sdl.IMG_Load_RW(
-                            sdl.SDL_RWFromMem(
-                              @ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]),
-                              @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len)
-                            ),
-                            1
-                          );
-                          if (surf != null) {
-                            try tile_cache.surface_map.put(coords, surf);
-                          }
-                        }
-
-                        _ = tile_cache.transfer_map.swapRemove(coords_opt.?);
-
-                        // Refresh UI
-                        try sdlutil.sdl_push_resize_event();
-                    } else {
-                        std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
-                    }
-
-                    _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
-                    _ = curl.curl_easy_cleanup(msg.*.easy_handle);
-                    tile_cache.n_current_transfers -= 1;
+                    try tile_cache.transfer_complete(msg);
                 },
                 else => {},
             }
@@ -196,7 +190,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.source_url = url;
     //tile_cache.surface_map.clearAndFree();
-    try sdlutil.sdl_push_resize_event();
+    sdlutil.sdl_push_resize_event();
 }
 
 pub fn init() anyerror!@This() {

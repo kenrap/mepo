@@ -312,7 +312,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 }
 
 fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
-  _ = sdlutil.sdl_push_resize_event() catch 0 ;
+  _ = sdlutil.sdl_push_resize_event();
   return 0;
 }
 
