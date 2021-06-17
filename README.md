@@ -87,6 +87,9 @@ search scripts, bookmarks, and more.
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
+  - Rework tile-cache queueing logic so that viewed surfaces are placed at 
+    start of queue so thye are downloaded before non-interactive / long-queued
+    coordinates.
 - **Milestone 3: Powerful, Robust Pin API**
   - Improve pin-selection mode:
     - Cycle currently active pin (with p/n keys) repositioning map to pin.
