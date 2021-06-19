@@ -44,7 +44,7 @@ pub const DefaultBaseConfig =
     \\ prefset debug_global 1;
     \\ prefset debug_tiles 0;
     \\ prefset zoom 14;
-    \\ prefset tile_cache_dir /tmp/foo;
+    \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
 
     \\ pin_add 40.7418 -73.9899 baz;
