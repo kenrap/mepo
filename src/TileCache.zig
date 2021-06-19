@@ -5,6 +5,9 @@ const curl = @cImport({
 const cstdio = @cImport({
     @cInclude("stdio.h");
 });
+const wordexp = @cImport({
+    @cInclude("wordexp.h");
+});
 const sdl = @import("./sdlshim.zig");
 const types = @import("./types.zig");
 const config = @import("./config.zig");
@@ -186,8 +189,17 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
-    _ = std.fs.cwd().makeDir(path) catch null;
-    tile_cache.cache_dir = try std.fs.cwd().openDir(path, .{ .iterate = true });
+    var expansion : wordexp.wordexp_t = undefined;
+    defer wordexp.wordfree(&expansion);
+
+    if (wordexp.wordexp(&path[0], &expansion, 0) != 0) {
+        return error.CacheDirExpansionFail;
+    } else {
+        const expanded_path : []u8 = try std.fmt.allocPrint(std.heap.c_allocator, "{s}", .{expansion.we_wordv[0]});
+        defer std.heap.c_allocator.free(expanded_path);
+        try std.fs.cwd().makePath(expanded_path);
+        tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
+    }
 }
 
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
