@@ -466,7 +466,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
         return error.InitTTFFail;
     } else {
-        font_opt = sdl.TTF_OpenFont("assets/terminus.ttf", 14);
+        const font = @embedFile("../assets/terminus.ttf");
+        font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, 14);
         if (font_opt == null) {
             std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
             return error.LoadFontFail;
