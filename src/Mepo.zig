@@ -307,12 +307,14 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
             switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_MULTIGESTURE => {
-                    if (e.mgesture.dDist > 0.02) {
-                        mepo.zoom += 1;
+                    const threshold = 0.005;
+
+                    if (e.mgesture.dDist > threshold) {
+                        zoom_relative(mepo, 1);
                         redraw = true;
                     }
-                    if (e.mgesture.dDist < -0.02) {
-                        mepo.zoom += 1;
+                    if (e.mgesture.dDist < -threshold) {
+                        zoom_relative(mepo, -1);
                         redraw = true;
                     }
                 },
