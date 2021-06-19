@@ -277,9 +277,10 @@ fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
 }
 
 pub fn sdl_event_loop(mepo: *@This()) !void {
+    var redraw: bool = true;
     var e: sdl.SDL_Event = undefined;
-    while (true) {
 
+    while (true) {
         // Dispatch double/triple taps
         if (mepo.mouse_pending_n_taps != null) {
             if (sdl.SDL_GetTicks() > mepo.mouse_pending_last_time.? + @intCast(u32, 200)) {
@@ -288,23 +289,31 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 } else if (mepo.mouse_pending_n_taps.? > 2) {
                     zoom_relative(mepo, -1);
                 }
-                try blit(mepo);
+                redraw = true;
                 mepo.mouse_pending_n_taps = null;
                 mepo.mouse_pending_last_time = null;
             }
         }
 
+        // Redraw
+        const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
+        if (!has_pending_motion_events and redraw) {
+            try blit(mepo);
+        }
+
         // Process SDL events
         if (sdl.SDL_WaitEvent(&e) > 0) {
+            redraw = false;
+
             switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_MULTIGESTURE => {
                     if (e.mgesture.dDist > 0.02) {
                         mepo.zoom += 1;
-                        try blit(mepo);
+                        redraw = true;
                     }
                     if (e.mgesture.dDist < -0.02) {
                         mepo.zoom += 1;
-                        try blit(mepo);
+                        redraw = true;
                     }
                 },
                 .SDL_MOUSEBUTTONDOWN => {
@@ -330,37 +339,32 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     if (mepo.drag) {
                         mepo.x -= e.motion.xrel;
                         mepo.y -= e.motion.yrel;
-                        try blit(mepo);
+                        redraw = true;
                     }
                 },
                 .SDL_MOUSEWHEEL => {
                     zoom_relative(mepo, e.wheel.y);
-                    try blit(mepo);
+                    redraw = true;
                 },
                 .SDL_KEYDOWN => {
                     if (mepo.keybindings_table.get(@intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)))) |run_expression| {
                         std.debug.warn("Got table function {s}", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
-                        try blit(mepo);
+                        redraw = true;
                     }
                 },
                 .SDL_WINDOWEVENT => {
                     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
-                        .SDL_WINDOWEVENT_EXPOSED => {
-                            try blit(mepo);
-                        },
                         .SDL_WINDOWEVENT_RESIZED => {
                             var old_lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
                             var old_lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
                             mepo.w = @intCast(u32, e.window.data1);
                             mepo.h = @intCast(u32, e.window.data2);
                             //mepo.center_on_coords(old_lat, old_lon);
-                            try blit(mepo);
                         },
-                        else => {
-                            std.debug.warn("Unhandled winevet\n", .{});
-                        },
+                        else => {},
                     }
+                    redraw = true;
                 },
                 .SDL_QUIT => {
                     std.debug.warn("WINDOW EVENT\n", .{});
