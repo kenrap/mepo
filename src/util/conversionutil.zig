@@ -22,3 +22,19 @@ pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
 fn zoom_bit(zoom: u32) f32 {
     return @intToFloat(f32, (@intCast(i32, 256) << @intCast(u5, zoom)));
 }
+
+test "lon_to_px_x roundtrips with px_x_to_lon" {
+    const lon : f64 = 22.0;
+    const zoom = 3;
+    const conv_x = lon_to_px_x(lon, zoom);
+    const conv_lon = px_x_to_lon(conv_x, zoom);
+    try std.testing.expectEqual(lon, conv_lon);
+}
+
+test "lat_to_px_y roundtrips with px_y_to_lat" {
+    const lat : f64 = 22.0;
+    const zoom = 3;
+    const conv_x = lat_to_px_y(lat, zoom);
+    const conv_lat = px_y_to_lat(conv_x, zoom);
+    try std.testing.expectEqual(lat, conv_lat);
+}
