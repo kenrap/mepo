@@ -15,8 +15,8 @@ window: *sdl.SDL_Window,
 renderer: *sdl.SDL_Renderer,
 tile_cache: *TileCache,
 font: *sdl.TTF_Font,
-x: i32,
-y: i32,
+lon: f64,
+lat: f64,
 w: u32,
 h: u32,
 mouse_pending_last_time: ?u32,
@@ -136,9 +136,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_global_text(mepo: *@This()) !void {
     if (!mepo.debug_global) return;
 
-    const lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
-    const lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
-    const surf = try mepo.blit_multiline_text(5, 5, mepo.w, mepo.h, "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}", .{ mepo.x, mepo.y, mepo.zoom, lat, lon });
+    const surf = try mepo.blit_multiline_text(5, 5, mepo.w, mepo.h, "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}", .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon });
 }
 
 fn blit_pins(mepo: *@This()) !void {
@@ -151,8 +149,8 @@ fn blit_pins(mepo: *@This()) !void {
 
     var it = mepo.pin_table.iterator();
     while (it.next()) |item| {
-        var x = -1 * (mepo.x - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
-        var y = -1 * (mepo.y - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
+        var x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
+        var y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
         var size: i32 = 10;
         _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
@@ -210,7 +208,7 @@ pub fn blit(mepo: *@This()) !void {
         return error.FillFail;
     }
 
-    try blit_tiles_all(mepo, mepo.x - @divTrunc(@intCast(i32, mepo.w), 2), mepo.y - @divTrunc(@intCast(i32, mepo.h), 2), mepo.w, mepo.h, mepo.zoom);
+    try blit_tiles_all(mepo, mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2), mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2), mepo.w, mepo.h, mepo.zoom);
     try mepo.blit_global_text();
     try mepo.blit_pins();
     try mepo.blit_pin_active_text();
@@ -222,9 +220,7 @@ pub fn blit(mepo: *@This()) !void {
     }
 
     // Update title
-    const lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
-    const lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
-    var title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ lat, lon });
+    var title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
     defer mepo.allocator.free(title);
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
@@ -339,8 +335,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 },
                 .SDL_MOUSEMOTION => {
                     if (mepo.drag) {
-                        mepo.x -= e.motion.xrel;
-                        mepo.y -= e.motion.yrel;
+                        mepo.set_x(mepo.get_x() - e.motion.xrel);
+                        mepo.set_y(mepo.get_y() - e.motion.yrel);
                         redraw = true;
                     }
                 },
@@ -358,8 +354,6 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 .SDL_WINDOWEVENT => {
                     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
                         .SDL_WINDOWEVENT_RESIZED => {
-                            var old_lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
-                            var old_lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
                             mepo.w = @intCast(u32, e.window.data1);
                             mepo.h = @intCast(u32, e.window.data2);
                             //mepo.center_on_coords(old_lat, old_lon);
@@ -407,6 +401,22 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     }
 }
 
+pub fn get_x(mepo: *@This()) i32 {
+  return conversionutil.lon_to_px_x(mepo.lon, mepo.zoom);
+}
+
+pub fn get_y(mepo: *@This()) i32 {
+  return conversionutil.lat_to_px_y(mepo.lat, mepo.zoom);
+}
+
+pub fn set_x(mepo: *@This(), x: i32) void {
+  mepo.lon = conversionutil.px_x_to_lon(mepo.zoom, @intCast(u32, x));
+}
+
+pub fn set_y(mepo: *@This(), y: i32) void {
+  mepo.lat = conversionutil.px_y_to_lat(mepo.zoom, @intCast(u32, y));
+}
+
 pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
     var window: ?*sdl.SDL_Window = null;
@@ -447,8 +457,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .window = window.?,
         .renderer = renderer.?,
         .font = font_opt.?,
-        .x = 0,
-        .y = 0,
+        .lat = 0,
+        .lon = 0,
         .w = config.InitWindowW,
         .h = config.InitWindowH,
         .zoom = config.StartZoom,

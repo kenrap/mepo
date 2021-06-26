@@ -10,9 +10,5 @@ pub fn f_zoom_relative(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !voi
 }
 
 pub fn zoom_relative(mepo: *Mepo, relative: i32) void {
-    var old_lat = conversionutil.px_y_to_lat(mepo.y, mepo.zoom);
-    var old_lon = conversionutil.px_x_to_lon(mepo.x, mepo.zoom);
     mepo.zoom = @intCast(u8, std.math.min(19, std.math.max(0, @intCast(i32, mepo.zoom) + relative)));
-
-    center_on_coords.center_on_coords(mepo, old_lat, old_lon);
 }
