@@ -410,11 +410,11 @@ pub fn get_y(mepo: *@This()) i32 {
 }
 
 pub fn set_x(mepo: *@This(), x: i32) void {
-  mepo.lon = conversionutil.px_x_to_lon(mepo.zoom, @intCast(u32, x));
+  mepo.lon = conversionutil.px_x_to_lon(x, mepo.zoom);
 }
 
 pub fn set_y(mepo: *@This(), y: i32) void {
-  mepo.lat = conversionutil.px_y_to_lat(mepo.zoom, @intCast(u32, y));
+  mepo.lat = conversionutil.px_y_to_lat(y, mepo.zoom);
 }
 
 pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
