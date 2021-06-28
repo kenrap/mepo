@@ -146,16 +146,18 @@ search scripts, bookmarks, and more.
     Mepo integrated properly.
   - Tag 1.0 release
 
+
 ## **Contributing**
 
 Mepo is surely welcome to contributors who have experience or interest
 in mobile Linux, OSM, and/or Zig. Since things are still early on in the
 project, there is no dedicated ML yet, however this will come soon. In
 the meantime please either email me directly and I can provide guidance
-on contributing or preferably drop into our IRC channel to discuss.
+on contributing or preferably drop into our IRC channel to discuss. Also
+see the [development guide](doc/develop.md).
 
-IRC Channel:
+**IRC Channel:**
 #mepo on irc.oftc.net
 
-Contact email:
+**Contact email:**
 m at milesalan.com
