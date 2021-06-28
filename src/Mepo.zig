@@ -461,7 +461,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .lon = 0,
         .w = config.InitWindowW,
         .h = config.InitWindowH,
-        .zoom = config.StartZoom,
+        .zoom = 14,
         .drag = false,
         .debug_tiles = false,
         .debug_global = false,

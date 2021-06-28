@@ -1,4 +1,5 @@
 const std = @import("std");
+const config = @import("../config.zig");
 
 pub fn lon_to_px_x(lon: f64, zoom: u32)  i32 { 
     var tilex : f64 = (lon + 180.0) / 360.0;
@@ -20,7 +21,7 @@ pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
 }
 
 fn zoom_bit(zoom: u32) f32 {
-    return @intToFloat(f32, (@intCast(i32, 256) << @intCast(u5, zoom)));
+    return @intToFloat(f32, (@intCast(i32, config.Tsize) << @intCast(u5, zoom)));
 }
 
 test "lon_to_px_x roundtrips with px_x_to_lon" {
