@@ -1,6 +1,4 @@
 pub const Tsize = 256;
-pub const Turl = "http://mts0.google.com/vt/hl=en&src=api&x={0}&s=&y={1}&z={2}";
-//pub const Turl = "https://tile.openstreetmap.org/{2}/{0}/{1}.png";
 pub const InitWindowW = 720;
 pub const InitWindowH = 720;
 pub const StartZoom = 14;
