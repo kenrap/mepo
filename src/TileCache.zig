@@ -131,7 +131,9 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
         }
         _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
         _ = curl.curl_easy_cleanup(msg.*.easy_handle);
-        tile_cache.n_current_transfers -= 1;
+        if (tile_cache.n_current_transfers > 0) {
+            tile_cache.n_current_transfers -= 1;
+        }
         sdlutil.sdl_push_resize_event();
     }
 
@@ -205,7 +207,8 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.source_url = url;
-    //tile_cache.surface_map.clearAndFree();
+    tile_cache.surface_map.clearAndFree();
+    tile_cache.queue_map.clearAndFree();
     sdlutil.sdl_push_resize_event();
 }
 
