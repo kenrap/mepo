@@ -31,7 +31,7 @@ drag: bool,
 pin_active: ?[]const u8,
 pin_table: std.hash_map.StringHashMap(types.Pin),
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
-keybindings_table: std.array_hash_map.AutoArrayHashMap(sdl.SDL_KeyCode, []const u8),
+keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 
 fn blit_crosshair(mepo: *@This()) !void {
     if (!mepo.crosshair_on) return;
@@ -345,7 +345,10 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     redraw = true;
                 },
                 .SDL_KEYDOWN => {
-                    if (mepo.keybindings_table.get(@intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)))) |run_expression| {
+                    if (mepo.keybindings_table.get(.{
+                      .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
+                      .keymod = null,
+                    })) |run_expression| {
                         std.debug.warn("Got table function {s}", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
                         redraw = true;
@@ -472,7 +475,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .pin_table = std.hash_map.StringHashMap(types.Pin).init(std.heap.c_allocator),
         .pin_active = null,
         .fn_table = try _fn_table.generate_fn_table(),
-        .keybindings_table = std.array_hash_map.AutoArrayHashMap(sdl.SDL_KeyCode, []const u8).init(std.heap.c_allocator),
+        .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(std.heap.c_allocator),
     });
 
     try instance.pin_table.ensureCapacity(100000);

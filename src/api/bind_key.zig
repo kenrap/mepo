@@ -21,7 +21,10 @@ pub fn bind_key(mepo: *Mepo, key: [:0]const u8, expression: []const u8) !void {
     // TODO: Check if overwriting?
 
     try mepo.keybindings_table.put(
-      @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
+      .{
+        .keymod = null,
+        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
+      },
       expression
     );
 }
