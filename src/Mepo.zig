@@ -347,7 +347,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 .SDL_KEYDOWN => {
                     if (mepo.keybindings_table.get(.{
                       .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
-                      .keymod = null,
+                      .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
                     })) |run_expression| {
                         std.debug.warn("Got table function {s}", .{run_expression});
                         try mepo.mepolang_execute(run_expression);

@@ -23,5 +23,5 @@ pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);
 
 pub const KeyInput = struct {
   keycode: sdl.SDL_KeyCode,
-  keymod: ?sdl.SDL_Keymod
+  keymod: sdl.SDL_Keymod
 };

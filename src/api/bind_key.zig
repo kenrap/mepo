@@ -22,7 +22,7 @@ pub fn bind_key(mepo: *Mepo, key: [:0]const u8, expression: []const u8) !void {
 
     try mepo.keybindings_table.put(
       .{
-        .keymod = null,
+        .keymod = @intToEnum(sdl.SDL_Keymod, sdl.KMOD_NONE),
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
       },
       expression
