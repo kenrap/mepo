@@ -64,6 +64,10 @@ search scripts, bookmarks, and more.
 - Switch tile URL source via shell-script (toggle between OSM, Bike maps, Google)
 - Dynamic tile caching to filesystem / offline-maps once downloaded
 - Run API commands (mepolang) via command prompt (dmenu) or via STDIN (non-continual)
+- Basic pinch-to-zoom via SDL multitouch API on Pinephone / mobile
+- Piping of current state (lat/lon & bbox) to scripts in shellpipe command
+- Basic noninteractive tile downloading based on viewport bounding-box
+
 
 ## **Roadmap to 1.0 release:**
 - **Milestone 1: Overall Stability**
@@ -71,68 +75,69 @@ search scripts, bookmarks, and more.
     be non-existent.
   - Fix downloading bugs: make downloading tiles logic more robust, currently,
     tile downloading can occasionally / get stuck; implement retry logic.
+    Error check / handle invalid data received from tileservers.
   - Memory allocations / deallocations should be careful tracked and managed.
-    Use arena allocator.
+    Debug with valgrind.
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
+  - Implement LIFO for downloading queue: viewport tiles should always take
+    priority before long-queued offscreen tiles.
   - Refactor error handling logic and implement log levels for debugging.
   - Tag 0.1 release upon completion
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
-  - Add support for downloading tiles through mepolang download command.
-  - Allow for both interactive (e.g. while running UI) and noninteractive (CLI)
-    downloading of tiles.
-  - Download command should allow downloading a coordinate with a given radius
-    for specified zoom-level; Or a bounding-box for specified zoom-levels.
+  - Rework main application / boot logic to enable fully noninteractive mode
+    (free of SDL-context) to allow for CLI-based downloading of tiles.
+  - Add error handling logic to existing bounding-box based mepolang download
+    command to ensure valid bounding-box provided by user.
+  - Add radius-based download command allowing user to download tiles based on
+    coordinate with a given radius (km distance) for specified zoom-levels.
   - Add a shell script to download interactively based on Nominatim search
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
-  - Rework tile-cache queueing logic so that viewed surfaces are placed at 
-    start of queue so thye are downloaded before non-interactive / long-queued
-    coordinates.
 - **Milestone 3: Powerful, Robust Pin API**
-  - Improve pin-selection mode:
-    - Cycle currently active pin (with p/n keys) repositioning map to pin.
-    - Ensure ability to cycle through pins only in viewport and all pins
-      distinctly as two separate features.
-  - Allow piping current state (lat/lon etc.) to scripts in shellpipe
-    mepolang command, to feedback for viewport / bounding box search.
+  - Correct pin-selection mode cycling to properly respect delta values.
+  - Add ability to cycle through pins based on both: viewport visible pins and all pins.
   - Add support for click pin to activate.
-  - Implement command for removing specific pins.
-  - Allow ability to associate metadata with pins
+  - Implement command for removing specific pins based on handle.
+  - Allow ability to associate metadata with pins.
   - Fix existing pin bugs (e.g. title not showing properly & brittleness).
   - Add pin groups and extend API as such so user can distinguish groups;
     for example one pin group may be bookmarks, another for a search,
     another for current location.
-  - Add script to add a pin based on Nominatim results in addition to
+  - Allow pin groups to be either ordered or unordered, ordered pin groups
+    show in UI with connecting lines (thus enabling lightweight navigation).
+  - Add script to add pins based on Nominatim results in addition to
     existing Overpass pin script.
 - **Milestone 4: Wayland & Mobile Support**
-  - Add support for pinch-to-zoom using SDL multitouch gesture API, test
-    on Pinephone & mobile devices.
+  - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
+    more reliable and test on Pinephone & mobile devices.
   - Currently scripts for location search, bounding-box search,
     and similar use dmenu (X-based); integrate wofi or a similar tool
-    for Wayland. XWayland can be used in intermediate term.
-  - Ensure outside of desktop & Sxmo use there is a way we can bind mepolang
-    commands to run. Within Sxmo, the context menu is the answer since a
-    keybinding can launch a touch-friendly (dmenu) context menu. A context
-    menu similarly could be implemented in Phosh and other environments
-    using simple gesture detection (similar to lisgd).
+    for Wayland. XWayland can be used in intermediate term. Dynamically
+    determine which menuing system to use in scripts.
+  - Add a simple gesture detection binding mepolang API (bind_gesture) command
+    similar to lisgd to facilitate opening a context menu on mobile.
+  - Build out context-menu to be used in mobile-context allowing functionality
+    triggered on desktop via keybindings for search etc. to be simply triggered
+    on mobile.
   - Perform testing and make fixes as necessary for primary mobile UIs:
     Phosh, Sxmo, and Plasma Mobile.
 - **Milestone 5: UI Niceties**
-  - Use filedescriptor & poll/select or similar mechanism to read
-    SDL events; add filedescriptor to continually monitor STDIN instead
-    of config being one-shot. So commandline of running UI also can
-    function as a mepolang debugging console.
+  - Rework main application event loop to handle STDIN filedescriptor in
+    parallel to current SDL events processing. So commandline of application
+    can thus be used noninteractively / scripted. Also helpful for debugging.
   - Gracefully handle switching tile sources (e.g. purge cache & reload).
     Should be able to switch between OSM/bikemaps/stamen etc. without
     glitches.
   - Add per-tile-downloading progress-indicators.
-  - Add bottom status bar to show current bandwidth usage / download of tiles.
-  - Integrate gpsd into most likely a script to update user current location
-    pin.
-  - Finalize mepolang API and add error checking so things don't crash
-    when accessing invalid union tag etc.
+  - Improve bottom status bar display to show bandwidth usage / download of
+    tiles, disk, and memory usage.
+  - Integrate gpsd into a script to update user's current location pin and
+    fallback to geoclue2 as needed.
+  - Finalize mepolang 1.0 API and add error checking so things don't crash
+    when accessing invalid union tag etc (improve robustness of mepolang
+    parser).
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang commands and basic usage.
   - Document examples on how to write custom scripts using mepolang.
