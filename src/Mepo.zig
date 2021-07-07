@@ -349,7 +349,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                       .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
                       .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
                     })) |run_expression| {
-                        std.debug.warn("Got table function {s}", .{run_expression});
+                        std.debug.warn("Got table function {s}\n", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
                         redraw = true;
                     }
