@@ -68,7 +68,13 @@ pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, c
     }
 
     try tile_cache.queue_map.put(coords, true);
-    return TileData{ .queued_position = 99 };
+
+    if (tile_cache.queue_map.getIndex(coords)) |index| {
+        return TileData{ .queued_position = @intCast(u32, index) };
+    } else {
+        return TileData{ .queued_position = 0 };
+    }
+
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
