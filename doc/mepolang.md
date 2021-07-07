@@ -39,7 +39,7 @@ commandname2 arg 8.373 anothertextarg;
 
 ## **Commands:**
 
-- **bind_key** [mepolang:text]:
+- **bind_key [mod:text] [key:text] [mepolang:text]**:
   - Binds pressing a keyboard key to run another mepolang command.
 - **center_on_coords [lat:number] [lon:number]**:
   - Navigates to the given latitude and longitude placing point in center of the screen.
