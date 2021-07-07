@@ -3,34 +3,39 @@ pub const InitWindowW = 720;
 pub const InitWindowH = 720;
 
 pub const DefaultBaseConfig =
-    \\ bind_key j [move_relative 0 10];
-    \\ bind_key k [move_relative 0 -10];
-    \\ bind_key h [move_relative -10 0];
-    \\ bind_key l [move_relative 10 0];
-    \\ bind_key = [zoom_relative 1];
-    \\ bind_key - [zoom_relative -1];
-    \\ bind_key x [center_on_coords 45.5051 122.6750];
-    \\ bind_key n [pin_cycle 1];
-    \\ bind_key o [pin_deactivate];
-    \\ bind_key p [pin_purge];
+    \\ bind_key _ j [move_relative 0 10];
+    \\ bind_key s j [move_relative 0 100];
+    \\ bind_key _ k [move_relative 0 -10];
+    \\ bind_key s k [move_relative 0 -100];
+    \\ bind_key _ h [move_relative -10 0];
+    \\ bind_key s h [move_relative -100 0];
+    \\ bind_key _ l [move_relative 10 0];
+    \\ bind_key s l [move_relative 100 0];
+
+    \\ bind_key _ = [zoom_relative 1];
+    \\ bind_key _ - [zoom_relative -1];
+    \\ bind_key _ x [center_on_coords 45.5051 122.6750];
+    \\ bind_key _ n [pin_cycle 1];
+    \\ bind_key _ o [pin_deactivate];
+    \\ bind_key _ p [pin_purge];
     \\ 
-    \\ bind_key g [shellpipe mepo_nomatim_searchprompt.sh];
-    \\ bind_key z [shellpipe mepo_zoomlevelset.sh];
-    \\ bind_key b [shellpipe mepo_bbox_search.sh];
-    \\ bind_key q [shellpipe mepo_bbox_queuedownload.sh];
-    \\ bind_key u [shellpipe mepo_urlsourceset.sh];
-    \\ bind_key a [shellpipe mepo_apilangexec.sh];
+    \\ bind_key _ g [shellpipe mepo_nomatim_searchprompt.sh];
+    \\ bind_key _ z [shellpipe mepo_zoomlevelset.sh];
+    \\ bind_key _ b [shellpipe mepo_bbox_search.sh];
+    \\ bind_key _ q [shellpipe mepo_bbox_queuedownload.sh];
+    \\ bind_key _ u [shellpipe mepo_urlsourceset.sh];
+    \\ bind_key _ a [shellpipe mepo_apilangexec.sh];
     \\
-    \\ bind_key d [prefset debug_tiles 1];
-    \\ bind_key s [prefset debug_tiles 0];
+    \\ bind_key _ d [prefset debug_tiles 1];
+    \\ bind_key _ s [prefset debug_tiles 0];
     \\
-    \\ bind_key e [prefset debug_global 1];
-    \\ bind_key w [prefset debug_global 0];
+    \\ bind_key _ e [prefset debug_global 1];
+    \\ bind_key _ w [prefset debug_global 0];
 
-    \\ bind_key r [prefset download_bar 1];
-    \\ bind_key t [prefset download_bar 0];
+    \\ bind_key _ r [prefset download_bar 1];
+    \\ bind_key _ t [prefset download_bar 0];
 
-    \\ bind_key c [center_on_mouse];
+    \\ bind_key _ c [center_on_mouse];
     \\
     \\ prefset crosshair_size 15;
     \\ prefset crosshair_on 1;
