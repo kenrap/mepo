@@ -95,6 +95,9 @@ search scripts, bookmarks, and more.
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
+  - Add configuration parameter to set an offline mode; when set to true
+    all tile downloading logic should no-operation for the privacy and
+    bandwidth conscience.
 - **Milestone 3: Powerful, Robust Pin API**
   - Correct pin-selection mode cycling to properly respect delta values.
   - Add ability to cycle through pins based on both: viewport visible pins and all pins.
@@ -107,22 +110,34 @@ search scripts, bookmarks, and more.
     another for current location.
   - Allow pin groups to be either ordered or unordered, ordered pin groups
     show in UI with connecting lines (thus enabling lightweight navigation).
-  - Add script to add pins based on Nominatim results in addition to
-    existing Overpass pin script.
+  - Implement distinction between structural pins and information pins for
+    ordered pin groups wherein structural pins are the nodes in a way and
+    informational pins can be used for navigational cues.
+  - Add script to add pins based on Nominatim bounding box results in
+    addition to the existing Overpass pin script.
 - **Milestone 4: Wayland & Mobile Support**
   - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
     more reliable and test on Pinephone & mobile devices.
   - Currently scripts for location search, bounding-box search,
-    and similar use dmenu (X-based); integrate wofi or a similar tool
-    for Wayland. XWayland can be used in intermediate term. Dynamically
-    determine which menuing system to use in scripts.
+    and similar use dmenu (X-based); integrate wofi, bemenu, or a
+    similar tool for Wayland. XWayland can be used in intermediate
+    term. Dynamically determine which menuing system to use in scripts.
   - Add a simple gesture detection binding mepolang API (bind_gesture) command
     similar to lisgd to facilitate opening a context menu on mobile.
+  - Allow binding lefthand/righthand side of pin overlay via new
+    (bind_button) command and set to pin_cycle by default. Thus enabling
+    touch-based pin-cycling for navigation.
   - Build out context-menu to be used in mobile-context allowing functionality
     triggered on desktop via keybindings for search etc. to be simply triggered
     on mobile.
-  - Perform testing and make fixes as necessary for primary mobile UIs:
-    Phosh, Sxmo, and Plasma Mobile.
+  - Perform testing and make fixes as necessary on most common UIs on
+    postmarketOS. Primarily test and ensure compatibility with Phosh (mobile
+    Wayland), Sxmo (mobile X), Sway (desktop Wayland), and i3 (desktop
+    X) as these 4 enviroments encompass large userbases and represent the
+    4 different combinations of mobile/desktop & X/Wayland that should
+    all have first-class support.
+  - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
+    greatest cross-compatibility between enviroments.
 - **Milestone 5: UI Niceties**
   - Rework main application event loop to handle STDIN filedescriptor in
     parallel to current SDL events processing. So commandline of application
@@ -135,12 +150,21 @@ search scripts, bookmarks, and more.
     tiles, disk, and memory usage.
   - Integrate gpsd into a script to update user's current location pin and
     fallback to geoclue2 as needed.
+  - Add routing script based on GraphHopper, OpenRouteService, or similar
+    to parse GeoJSON LineString API response into an ordered pin group. Thus
+    allowing for point-to-point navigation.
+  - Refine existing Overpass search script (provide beter recommendations
+    illustrating OSM tag-based flexibility).
   - Finalize mepolang 1.0 API and add error checking so things don't crash
     when accessing invalid union tag etc (improve robustness of mepolang
     parser).
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang commands and basic usage.
-  - Document examples on how to write custom scripts using mepolang.
+  - Document existing scripts used for search and add notes about
+    how these scripts could be used offline by running Nominatim,
+    Overpass, etc. locally.
+  - Document examples on how to write custom scripts interfacing with
+    mepolang.
   - Modify internals of mepolang to include documentation directly in
     structs so that mepolang API documentation can be automatically generated
     as a webpage for end-users.
