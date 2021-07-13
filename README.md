@@ -27,14 +27,20 @@ search scripts, bookmarks, and more.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
 - **UNIX-philosophy inspired design - scriptability via [mepolang](doc/mepolang.md)**:
-  - Mepo's UI is built **to do one thing well**: download & render maps. 
+  - Mepo's UI is built **to do one thing well**: download & render maps.
     Extra functionality is enabled via its command language / API (mepolang).
-  - Reduces overall application logic complexity, handing over to 
-    shell-scripting integral features like map bounding-box & location search,
-    bookmarks, dropping pins, rebinding keys, and more.
-  - Existing OSM tools for search like the [Nominatim](https://nominatim.org/) & [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API) APIs are
-    integrated through [bundled shell scripts](./scripts); customize to your heart's content
-    or write your own scripts for things like bookmarking etc.
+  - Reduces overall application logic complexity, handing over to
+    shell-scripting integral features like map bounding-box searches,
+    location search lookup, bookmarking, dropping pins, routing,
+    rebinding keys, and more.
+  - Uses single abstraction (central pin API via mepolang) for indicating
+    and placing user-defined coordinates graphically on the map (e.g. same
+    mechanism used generically between POI searches, bookmarks, routing, etc.)
+  - Existing OSM tools for search & routing like the [Nominatim](https://nominatim.org/),
+    [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API), and
+    [GraphHopper](https://www.graphhopper.com/) APIs are integrated through
+    [bundled shell scripts](./scripts); customize to your heart's content or
+    write your own scripts for custom integrations.
   - Bundled scripts utilize existing tools like [dmenu](https://tools.suckless.org/dmenu/)
     for user input and list selection rather then implementing application-specific input logic.
 - **Offline operation as a first-class feature**:
@@ -87,10 +93,15 @@ search scripts, bookmarks, and more.
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
     (free of SDL-context) to allow for CLI-based downloading of tiles.
+  - Remove SDL delay from TileCache downloading logic / properly wait on file
+    descriptors instead using curl_multi_wait.
   - Add error handling logic to existing bounding-box based mepolang download
     command to ensure valid bounding-box provided by user.
   - Add radius-based download command allowing user to download tiles based on
     coordinate with a given radius (km distance) for specified zoom-levels.
+  - Add distance to lat-lon conversion functions to assist in above (along
+    with unit tests) and to later be used for measuring distance between
+    pins in ordered groups.
   - Add a shell script to download interactively based on Nominatim search
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
@@ -145,6 +156,8 @@ search scripts, bookmarks, and more.
   - Gracefully handle switching tile sources (e.g. purge cache & reload).
     Should be able to switch between OSM/bikemaps/stamen etc. without
     glitches.
+  - Add support for pasting / copying current coordinates from the system
+    clipboard and ensure compatibility in both Wayland & X.
   - Add per-tile-downloading progress-indicators.
   - Improve bottom status bar display to show bandwidth usage / download of
     tiles, disk, and memory usage.
@@ -155,6 +168,7 @@ search scripts, bookmarks, and more.
     allowing for point-to-point navigation.
   - Refine existing Overpass search script (provide beter recommendations
     illustrating OSM tag-based flexibility).
+  - Add example bookmarking script based on pin API.
   - Finalize mepolang 1.0 API and add error checking so things don't crash
     when accessing invalid union tag etc (improve robustness of mepolang
     parser).
@@ -169,8 +183,9 @@ search scripts, bookmarks, and more.
     structs so that mepolang API documentation can be automatically generated
     as a webpage for end-users.
   - Create Alpine/pmOS package and add to postmarketos-ui-* frontends.
-  - Possibly package-split current `scripts/` directory to keep dependencies
-    on base even more minimal.
+  - Package-split current `scripts/` directory to allow seperate packages
+    for mepo and mepo-scripts. The former only will contain the base
+    application (Zig) executable; the latter will contain auxillary scripts.
   - Work with maintainers of mobile linux (& Pinephone) UIs to get
     Mepo integrated properly.
   - Tag 1.0 release
