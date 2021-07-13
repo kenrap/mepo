@@ -273,7 +273,7 @@ fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
 }
 
 pub fn sdl_event_loop(mepo: *@This()) !void {
-    var redraw: bool = true;
+    var pending: enum { None, Redraw, Drag } = .None;
     var e: sdl.SDL_Event = undefined;
 
     while (true) {
@@ -285,7 +285,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 } else if (mepo.mouse_pending_n_taps.? > 2) {
                     zoom_relative(mepo, -1);
                 }
-                redraw = true;
+                pending = .Redraw;
                 mepo.mouse_pending_n_taps = null;
                 mepo.mouse_pending_last_time = null;
             }
@@ -293,13 +293,16 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
         // Redraw
         const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
-        if (!has_pending_motion_events and redraw) {
+        if (
+          (!has_pending_motion_events and pending == .Drag) or
+          pending == .Redraw
+        ) {
             try blit(mepo);
         }
 
         // Process SDL events
         if (sdl.SDL_WaitEvent(&e) > 0) {
-            redraw = false;
+            pending = .None;
 
             switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_MULTIGESTURE => {
@@ -307,11 +310,11 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
                     if (e.mgesture.dDist > threshold) {
                         zoom_relative(mepo, 1);
-                        redraw = true;
+                        pending = .Redraw;
                     }
                     if (e.mgesture.dDist < -threshold) {
                         zoom_relative(mepo, -1);
-                        redraw = true;
+                        pending = .Redraw;
                     }
                 },
                 .SDL_MOUSEBUTTONDOWN => {
@@ -337,12 +340,12 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     if (mepo.drag) {
                         mepo.set_x(mepo.get_x() - e.motion.xrel);
                         mepo.set_y(mepo.get_y() - e.motion.yrel);
-                        redraw = true;
+                        pending = .Drag;
                     }
                 },
                 .SDL_MOUSEWHEEL => {
                     zoom_relative(mepo, e.wheel.y);
-                    redraw = true;
+                    pending = .Redraw;
                 },
                 .SDL_KEYDOWN => {
                     if (mepo.keybindings_table.get(.{
@@ -351,7 +354,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     })) |run_expression| {
                         std.debug.warn("Got table function {s}\n", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
-                        redraw = true;
+                        pending = .Redraw;
                     }
                 },
                 .SDL_WINDOWEVENT => {
@@ -363,7 +366,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                         },
                         else => {},
                     }
-                    redraw = true;
+                    pending = .Redraw;
                 },
                 .SDL_QUIT => {
                     std.debug.warn("WINDOW EVENT\n", .{});
