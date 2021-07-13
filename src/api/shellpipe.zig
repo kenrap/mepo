@@ -10,6 +10,7 @@ pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
 
     var env_vars = std.BufMap.init(&arena.allocator);
     var v = try std.process.getEnvMap(&arena.allocator);
