@@ -3,6 +3,7 @@ const sdl = @import("./sdlshim.zig");
 const conversionutil = @import("./util/conversionutil.zig");
 const types = @import("./types.zig");
 const config = @import("./config.zig");
+const errors = @import("./errors.zig");
 const TileCache = @import("./TileCache.zig");
 const parseutil = @import("util/parseutil.zig");
 const stringsutil = @import("util/stringsutil.zig");
@@ -33,13 +34,13 @@ pin_table: std.hash_map.StringHashMap(types.Pin),
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 
-fn blit_crosshair(mepo: *@This()) !void {
+fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
     var r = sdl.SDL_CreateSoftwareRenderer(sdl.SDL_GetWindowSurface(mepo.window));
 
     if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
-        return error.Utoh;
+        return errors.SDLError.RenderDrawColor;
     } else if (0 != sdl.SDL_RenderDrawLine(
         r,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
@@ -47,7 +48,7 @@ fn blit_crosshair(mepo: *@This()) !void {
         @intCast(c_int, mepo.w / 2 + (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
     )) {
-        return error.Utoh;
+        return errors.SDLError.RenderDrawLine;
     } else if (0 != sdl.SDL_RenderDrawLine(
         r,
         @intCast(c_int, mepo.w / 2),
@@ -55,7 +56,7 @@ fn blit_crosshair(mepo: *@This()) !void {
         @intCast(c_int, mepo.w / 2),
         @intCast(c_int, mepo.h / 2 + (mepo.crosshair_size / 2)),
     )) {
-        return error.Utoh;
+        return errors.SDLError.RenderDrawLine;
     }
 }
 
@@ -113,7 +114,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     switch (try mepo.tile_cache.tile_retrieve(screen.*.format, .{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .surface => |surf| {
             if (sdl.SDL_BlitSurface(@ptrCast([*c]sdl.SDL_Surface, surf), null, screen, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
-                return error.BlitError;
+                return errors.SDLError.BlitSurface;
             }
         },
         else => {
@@ -128,7 +129,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     //    //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
     //    //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
     //    //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
-    //    //    return error.FillFail;
+    //    //    return errors.SDLError.FillFail;
     //    //}
     //}
 }
@@ -139,12 +140,12 @@ fn blit_global_text(mepo: *@This()) !void {
     const surf = try mepo.blit_multiline_text(5, 5, mepo.w, mepo.h, "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}", .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon });
 }
 
-fn blit_pins(mepo: *@This()) !void {
+fn blit_pins(mepo: *@This()) errors.SDLError!void {
     var surf = sdl.SDL_GetWindowSurface(mepo.window);
     var r = sdl.SDL_CreateSoftwareRenderer(surf);
 
     if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
-        return error.Utoh;
+        return errors.SDLError.RenderDrawColor;
     }
 
     var it = mepo.pin_table.iterator();
@@ -205,7 +206,7 @@ pub fn blit(mepo: *@This()) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
     if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
         std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
-        return error.FillFail;
+        return errors.SDLError.FillRect;
     }
 
     try blit_tiles_all(mepo, mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2), mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2), mepo.w, mepo.h, mepo.zoom);
@@ -216,7 +217,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_download_bar();
 
     if (sdl.SDL_UpdateWindowSurface(mepo.window) > 0) {
-        return error.UpdateWindowError;
+        return errors.SDLError.UpdateWindowSurface;
     }
 
     // Update title
@@ -398,7 +399,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
             var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = 1 });
             if (text_surf != null) {
                 if (sdl.SDL_BlitSurface(text_surf.?, null, sdl.SDL_GetWindowSurface(mepo.window), &dest_rect) > 0) {
-                    return error.BlitError;
+                    return errors.SDLError.BlitSurface;
                 }
             }
             start = current + 1;
@@ -429,29 +430,29 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
 
     // Initialize video, create window
     if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) < 0) {
-        return error.VideoInitializationFailed;
+        return errors.SDLError.Init;
     } else {
         window = sdl.SDL_CreateWindow("mepo", sdl.SDL_WINDOWPOS_UNDEFINED, sdl.SDL_WINDOWPOS_UNDEFINED, config.InitWindowW, config.InitWindowH, sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE);
         if (window == null) {
-            return error.WindowCreateFailed;
+            return errors.SDLError.CreateWindow;
         }
     }
 
     var renderer = sdl.SDL_CreateRenderer(window, -1, 0);
     if (renderer == null) {
-        return error.FailedToCreateRenderer;
+        return errors.SDLError.CreateRenderer;
     }
 
     // Initialize TTF, load font
     if (sdl.TTF_Init() == -1) {
         std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
-        return error.InitTTFFail;
+        return errors.SDLError.TTF_Init;
     } else {
         const font = @embedFile("../assets/terminus.ttf");
         font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, 14);
         if (font_opt == null) {
             std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
-            return error.LoadFontFail;
+            return errors.SDLError.OpenFontRW;
         }
     }
 
