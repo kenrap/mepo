@@ -27,7 +27,7 @@ pub fn tokenize(patch_str: []const u8) ![][]const u8 {
         tokens_size += 1;
 
         // Starting delims
-        while (tokens[tokens_size - 1][0] == '{' or tokens[tokens_size - 1][0] == '[') {
+        while (tokens[tokens_size - 1][0] == '[') {
             if (tokens[tokens_size - 1].len == 1) break;
             tokens[tokens_size] = tokens[tokens_size - 1][1..];
             tokens[tokens_size - 1] = tokens[tokens_size - 1][0..1];
@@ -36,9 +36,7 @@ pub fn tokenize(patch_str: []const u8) ![][]const u8 {
 
         // Ending delims
         var origpos = tokens_size - 1;
-        while (tokens[origpos].len > 1 and (tokens[origpos][tokens[origpos].len - 1] == '}' or
-            tokens[origpos][tokens[origpos].len - 1] == ']'))
-        {
+        while (tokens[origpos].len > 1 and tokens[origpos][tokens[origpos].len - 1] == ']') {
             tokens[tokens_size] = tokens[origpos][tokens[origpos].len - 1 .. tokens[origpos].len];
             tokens[origpos] = tokens[origpos][0 .. tokens[origpos].len - 1];
             tokens_size += 1;
@@ -93,4 +91,30 @@ pub fn read_args_str() anyerror![]u8 {
 
 pub fn read_args() anyerror![][]const u8 {
   return try tokenize(try read_args_str());
+}
+
+
+test "tokenize" {
+    // e.g. treats [] brackets as individual tokens irregardless of whitespace
+    // foo bar [baz]  => foo bar [ baz ]
+    // foo bar [ baz] => foo bar [ baz ]
+
+    {
+        // e.g. treats [] brackets as individual tokens irregardless of whitespace
+        var expect = [_][]const u8{"foo", "bar", "[", "baz", "]"};
+        var result = try tokenize("foo bar [baz]");
+        try std.testing.expectEqual(@intCast(usize, 5), result.len);
+        for (result) |_, idx| {
+          try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
+        }
+    }
+
+    {
+        var expect = [_][]const u8{"foo", "bar", "[", "baz", "]"};
+        var result = try tokenize("foo bar [ baz]");
+        try std.testing.expectEqual(@intCast(usize, 5), result.len);
+        for (result) |_, idx| {
+          try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
+        }
+    }
 }
