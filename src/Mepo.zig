@@ -424,6 +424,14 @@ pub fn set_y(mepo: *@This(), y: i32) void {
   mepo.lat = conversionutil.px_y_to_lat(y, mepo.zoom);
 }
 
+pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
+  std.debug.warn("Graceful shutdown via signal: {}\n", .{arg});
+  sdl.SDL_VideoQuit();
+  sdl.SDL_Quit();
+  std.os.exit(0);
+}
+
+
 pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
     var window: ?*sdl.SDL_Window = null;
@@ -488,6 +496,18 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     try instance.mepolang_execute(config.DefaultBaseConfig);
     if (cfg_opt) |cfg| {
         try instance.mepolang_execute(cfg);
+    }
+
+    // Setup TERM/INT signals
+    const sigs : [2]u6 = .{std.os.linux.SIGTERM, std.os.linux.SIGINT};
+    for (sigs) |sig| {
+        if (0 != std.os.linux.sigaction(sig, &.{
+          .handler = .{ .handler = sighandle_terminate },
+          .mask = [_]u32{0} ** 32,
+          .flags = @as(c_uint, 0),
+        }, null)) {
+          return error.FailedToSetupSighandler;
+        }
     }
 
     return instance;
