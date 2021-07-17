@@ -131,6 +131,9 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     // Cleanup
     defer {
         if (coords_opt) |coords| {
+            if (tile_cache.transfer_map.get(coords)) |transfer| {
+              transfer.data.deinit();
+            }
             _ = tile_cache.transfer_map.swapRemove(coords);
         } else {
             std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
