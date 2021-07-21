@@ -176,9 +176,8 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
 
     if (pin_opt) |pin| {
-        _ = try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "Pin: {s}\nlat: {d}\nlon: {d}\n", .{ pin.name, pin.lat, pin.lon });
-
-        _ = try mepo.blit_multiline_text(@intCast(i32, mepo.w) - 20, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "{d}p", .{mepo.pin_table.count()});
+        try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "Pin: {s}\nlat: {d}\nlon: {d}\n", .{ pin.name, pin.lat, pin.lon });
+        try mepo.blit_multiline_text(@intCast(i32, mepo.w) - 20, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "{d}p", .{mepo.pin_table.count()});
     }
 }
 
@@ -199,7 +198,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 1,
     }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 0, 0, 0, 0));
 
-    _ = try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() });
+    try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() });
 }
 
 pub fn blit(mepo: *@This()) !void {
