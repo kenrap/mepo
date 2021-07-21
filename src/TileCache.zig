@@ -47,7 +47,7 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, x: u32, y: u32, z
     return try std.fmt.allocPrint(allocator, "{s}_{d}_{d}_{d}.png", .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), z, x, y });
 }
 
-pub fn tile_retrieve(tile_cache: *@This(), pixel_format: *sdl.SDL_PixelFormat, coords: types.TileSpec) !TileData {
+pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
     if (tile_cache.surface_map.get(coords)) |tile| {
