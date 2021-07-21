@@ -225,7 +225,7 @@ pub fn blit(mepo: *@This()) !void {
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
 
-pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: [][]const u8) ![types.MepoFnNargs]types.MepoArg {
+pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![types.MepoFnNargs]types.MepoArg {
     var args_i: usize = 0;
     var args: [types.MepoFnNargs]types.MepoArg = undefined;
     var i: usize = 0;
