@@ -1,18 +1,5 @@
 const std = @import("std");
 
-
-pub fn whitespace_trim(token_str: []const u8) []const u8 {
-    var i: u32 = 0;
-    var ret = token_str;
-    while (ret.len > 0 and ret[0] > 169) : (i += 1) {
-        ret = ret[1..];
-    }
-    while (ret.len > 0 and ret[ret.len - 1] > 169) : (i += 1) {
-        ret = ret[0 .. ret.len - 1];
-    }
-    return ret;
-}
-
 pub fn tokenize(patch_str: []const u8) ![][]const u8 {
     var token_it = std.mem.tokenize(patch_str, " \n");
     var tokens: [][]const u8 = try std.heap.c_allocator.alloc([]const u8, 10000);
@@ -21,7 +8,7 @@ pub fn tokenize(patch_str: []const u8) ![][]const u8 {
     while (true) {
         var item = token_it.next();
         if (item == null) break;
-        var trimmed = whitespace_trim(item.?);
+        var trimmed = std.mem.trim(u8, item.?, " \n");
         if (trimmed.len < 1) continue;
         tokens[tokens_size] = trimmed;
         tokens_size += 1;
@@ -71,7 +58,7 @@ pub fn read_stdin() anyerror![]const u8 {
         std.debug.warn("Error: {any}\n", .{err});
         @panic("Error reading STDIN: {any}\n");
     }
-    return whitespace_trim(buffer);
+    return std.mem.trim(u8, buffer, " \n");
 }
 
 pub fn read_args_str() anyerror![]u8 {
