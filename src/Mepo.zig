@@ -523,10 +523,19 @@ test "mepolang_argize" {
 
   var specs = [_]spec{ 
     .{
+      // Standard check to make sure text / numbers argized properly
       .input = &[_][]const u8{"arga", "22.2"},
       .expect = &[_]types.MepoArg{
         types.MepoArg{ .Text = "arga" },
         types.MepoArg{ .Number = 22.2 },
+      }
+    },
+    .{
+      // Numbers check (negative, postive)
+      .input = &[_][]const u8{"-22.4", "2747.2716"  },
+      .expect = &[_]types.MepoArg{
+        types.MepoArg{ .Number = -22.4 },
+        types.MepoArg{ .Number = 2747.2716, },
       }
     }
   };
