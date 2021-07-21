@@ -511,3 +511,34 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
 
     return instance;
 }
+
+test "mepolang_argize" {
+  var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+  defer arena.deinit();
+
+  const spec = struct {
+    input: []const []const u8,
+    expect: []const types.MepoArg,
+  };
+
+  var specs = [_]spec{ 
+    .{
+      .input = &[_][]const u8{"arga", "22.2"},
+      .expect = &[_]types.MepoArg{
+        types.MepoArg{ .Text = "arga" },
+        types.MepoArg{ .Number = 22.2 },
+      }
+    }
+  };
+
+  for (specs) |s| {
+      const result = try mepolang_argize(&arena.allocator, s.input[0..]);
+      for (s.expect) |_, i| {
+        try std.testing.expectEqual(@TypeOf(result[i]), @TypeOf(s.expect[i]));
+        switch (result[i]) {
+          .Number => try std.testing.expectEqual(result[i].Number, s.expect[i].Number),
+          .Text => try std.testing.expectEqualSlices(u8, result[i].Text, s.expect[i].Text),
+        }
+      }
+  }
+}
