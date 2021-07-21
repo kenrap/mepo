@@ -14,7 +14,6 @@ pub const DefaultBaseConfig =
 
     \\ bind_key _ = [zoom_relative 1];
     \\ bind_key _ - [zoom_relative -1];
-    \\ bind_key _ x [center_on_coords 45.5051 122.6750];
     \\ bind_key _ n [pin_cycle 1];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ p [pin_purge];
@@ -27,13 +26,13 @@ pub const DefaultBaseConfig =
     \\ bind_key _ a [shellpipe mepo_apilangexec.sh];
     \\
     \\ bind_key _ d [prefset debug_tiles 1];
-    \\ bind_key _ s [prefset debug_tiles 0];
+    \\ bind_key s d [prefset debug_tiles 0];
     \\
     \\ bind_key _ e [prefset debug_global 1];
-    \\ bind_key _ w [prefset debug_global 0];
+    \\ bind_key s e [prefset debug_global 0];
 
     \\ bind_key _ r [prefset download_bar 1];
-    \\ bind_key _ t [prefset download_bar 0];
+    \\ bind_key s r [prefset download_bar 0];
 
     \\ bind_key _ c [center_on_mouse];
     \\
