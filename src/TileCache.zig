@@ -54,12 +54,12 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
         return TileData{ .surface = tile };
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
-    } else if (tile_cache.cache_dir) |cache_dir| {
+    } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
         defer std.heap.c_allocator.free(png);
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
-            const surf = try tile_cache.load_data_to_surface(coords, file_cached_png);
+            const surf = tile_cache.load_data_to_surface(coords, file_cached_png) catch { break :load_from_fs; };
             return TileData{ .surface = surf };
         }
     }
