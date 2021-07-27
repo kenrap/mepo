@@ -59,11 +59,8 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
         defer std.heap.c_allocator.free(png);
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
-            const surf = sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, file_cached_png), @intCast(c_int, file_cached_png.len)), 1);
-            if (surf != null) {
-                try tile_cache.surface_map.put(coords, surf);
-                return TileData{ .surface = surf };
-            }
+            const surf = try tile_cache.load_data_to_surface(coords, file_cached_png);
+            return TileData{ .surface = surf };
         }
     }
 
@@ -74,7 +71,6 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     } else {
         return TileData{ .queued_position = 0 };
     }
-
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
@@ -128,52 +124,53 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
     }
 }
 
+fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec {
+    var it = tile_cache.transfer_map.iterator();
+    while (it.next()) |kv| {
+        if (kv.value_ptr.*.client == msg.*.easy_handle) {
+            return kv.value_ptr.*.coords;
+        }
+    }
+    return null;
+}
+
+fn load_data_to_surface(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Surface {
+    const datum = @ptrCast(*c_void, &data[0]);
+    const len = @intCast(c_int, data.len);
+    if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(datum, len), 1)) |surf| {
+        try tile_cache.surface_map.put(coords, surf);
+        return tile_cache.surface_map.get(coords).?;
+    } else {
+        return error.LoadToSurfaceFail;
+    }
+}
+
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
-    var coords_opt: ?types.TileSpec = coords: {
-        var it = tile_cache.transfer_map.iterator();
-        while (it.next()) |kv| {
-            if (kv.value_ptr.*.client == msg.*.easy_handle) {
-                break :coords kv.value_ptr.*.coords;
-            }
-        }
-        break :coords null;
-    };
+    if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+        const datum = tile_cache.transfer_map.get(coords).?.data.items;
 
-    // Cleanup
-    defer {
-        if (coords_opt) |coords| {
-            if (tile_cache.transfer_map.get(coords)) |transfer| {
-              transfer.data.deinit();
-            }
-            _ = tile_cache.transfer_map.swapRemove(coords);
-        } else {
-            std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
+        if (tile_cache.cache_dir) |cache_dir| {
+            // Save to FS
+            const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords.x, coords.y, coords.z);
+            try cache_dir.writeFile(path, datum);
         }
-        _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
-        _ = curl.curl_easy_cleanup(msg.*.easy_handle);
-        if (tile_cache.n_current_transfers > 0) {
-            tile_cache.n_current_transfers -= 1;
+        if (tile_cache.transfer_map.get(coords).?.load_to_surface) {
+            // Load to surface
+            _ = try tile_cache.load_data_to_surface(coords, datum);
         }
-        sdlutil.sdl_push_resize_event();
+
+        tile_cache.transfer_map.get(coords).?.data.deinit();
+        _ = tile_cache.transfer_map.swapRemove(coords);
+    } else {
+        std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
     }
 
-    if (coords_opt == null) return;
-
-    // Save to FS
-    if (tile_cache.cache_dir) |cache_dir| {
-        const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords_opt.?.x, coords_opt.?.y, coords_opt.?.z);
-        const datum = tile_cache.transfer_map.get(coords_opt.?).?.data.items;
-        try cache_dir.writeFile(path, datum);
+    _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
+    _ = curl.curl_easy_cleanup(msg.*.easy_handle);
+    if (tile_cache.n_current_transfers > 0) {
+        tile_cache.n_current_transfers -= 1;
     }
-
-    // Load to surface
-    if (tile_cache.transfer_map.get(coords_opt.?).?.load_to_surface) {
-        const datum = @ptrCast(*c_void, &tile_cache.transfer_map.get(coords_opt.?).?.data.items[0]);
-        const len = @intCast(c_int, tile_cache.transfer_map.get(coords_opt.?).?.data.items.len);
-        if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(datum, len), 1)) |surf| {
-            try tile_cache.surface_map.put(coords_opt.?, surf);
-        }
-    }
+    sdlutil.sdl_push_resize_event();
 }
 
 pub fn download_loop(tile_cache: *@This()) !void {
@@ -185,9 +182,7 @@ pub fn download_loop(tile_cache: *@This()) !void {
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
-                ._DONE => {
-                    try tile_cache.transfer_complete(msg);
-                },
+                ._DONE => try tile_cache.transfer_complete(msg),
                 else => {},
             }
             _ = curl.curl_multi_perform(tile_cache.curl_multi, &running);
@@ -211,13 +206,13 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
-    var expansion : wordexp.wordexp_t = undefined;
+    var expansion: wordexp.wordexp_t = undefined;
     defer wordexp.wordfree(&expansion);
 
     if (wordexp.wordexp(&path[0], &expansion, 0) != 0) {
         return error.CacheDirExpansionFail;
     } else {
-        const expanded_path : []u8 = try std.fmt.allocPrint(std.heap.c_allocator, "{s}", .{expansion.we_wordv[0]});
+        const expanded_path: []u8 = try std.fmt.allocPrint(std.heap.c_allocator, "{s}", .{expansion.we_wordv[0]});
         defer std.heap.c_allocator.free(expanded_path);
         try std.fs.cwd().makePath(expanded_path);
         tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
