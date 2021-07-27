@@ -41,10 +41,10 @@ fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_dat
     return nmemb * size;
 }
 
-fn png_path(allocator: *std.mem.Allocator, source: []const u8, x: u32, y: u32, z: u32) ![]u8 {
+fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.TileSpec) ![]u8 {
     var source_hash: [32:0]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
-    return try std.fmt.allocPrint(allocator, "{s}_{d}_{d}_{d}.png", .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), z, x, y });
+    return try std.fmt.allocPrint(allocator, "{s}_{d}_{d}_{d}.png", .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y });
 }
 
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
@@ -55,7 +55,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| {
-        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords.x, coords.y, coords.z);
+        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
         defer std.heap.c_allocator.free(png);
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
@@ -66,16 +66,12 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
 
     try tile_cache.queue_map.put(coords, true);
 
-    if (tile_cache.queue_map.getIndex(coords)) |index| {
-        return TileData{ .queued_position = @intCast(u32, index) };
-    } else {
-        return TileData{ .queued_position = 0 };
-    }
+    return TileData{ .queued_position = @intCast(u32, if (tile_cache.queue_map.getIndex(coords)) |index| index else 0) };
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
     if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
-        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords.x, coords.y, coords.z);
+        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
         defer std.heap.c_allocator.free(png);
         cache_dir.access(png, .{}) catch {
             break :check_tile_exists;
@@ -151,7 +147,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
 
         if (tile_cache.cache_dir) |cache_dir| {
             // Save to FS
-            const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords.x, coords.y, coords.z);
+            const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
             try cache_dir.writeFile(path, datum);
         }
         if (tile_cache.transfer_map.get(coords).?.load_to_surface) {
