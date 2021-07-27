@@ -2,6 +2,8 @@ pub const Tsize = 256;
 pub const InitWindowW = 720;
 pub const InitWindowH = 720;
 pub const Useragent = "mepo";
+pub const MaxNTransfers = 20;
+pub const DownloaderPollMs = 50;
 
 pub const DefaultBaseConfig =
     \\ bind_key _ j [move_relative 0 10];

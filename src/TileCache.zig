@@ -185,13 +185,13 @@ pub fn download_loop(tile_cache: *@This()) !void {
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
-        while (tile_cache.queue_map.count() > 0 and tile_cache.n_current_transfers < 20) {
+        while (tile_cache.queue_map.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
             var coords = tile_cache.queue_map.pop();
             try tile_cache.add_to_curl_multi(coords.key, coords.value);
             tile_cache.n_current_transfers += 1;
         }
 
-        sdl.SDL_Delay(50);
+        sdl.SDL_Delay(config.DownloaderPollMs);
     }
 }
 
