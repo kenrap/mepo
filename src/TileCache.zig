@@ -91,30 +91,41 @@ pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) 
 }
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
-    var dat = try std.heap.c_allocator.create(TransferDatum);
-    dat.client = curl.curl_easy_init().?;
-    dat.coords = coords;
-    dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
-    dat.progress_dl_now = null;
-    dat.progress_dl_total = null;
-    dat.load_to_surface = load_to_surface;
+    var transfer_datum: *TransferDatum = datum: {
+        var dat = try std.heap.c_allocator.create(TransferDatum);
+        dat.client = curl.curl_easy_init().?;
+        dat.coords = coords;
+        dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
+        dat.progress_dl_now = null;
+        dat.progress_dl_total = null;
+        dat.load_to_surface = load_to_surface;
+        break :datum dat;
+    };
+    try tile_cache.transfer_map.put(coords, transfer_datum);
 
-    try tile_cache.transfer_map.put(coords, dat);
-    var ptr: *TransferDatum = tile_cache.transfer_map.get(coords).?;
-    var url = try std.heap.c_allocator.alloc(u8, 2000);
-    _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
-    defer std.heap.c_allocator.free(url);
+    var tile_url = url: {
+        var url = try std.heap.c_allocator.alloc(u8, 2000);
+        _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
+        break :url url;
+    };
+    defer std.heap.c_allocator.free(tile_url);
 
-    //var url = try std.fmt.allocPrint(std.heap.c_allocator, tile_cache.source_url.?, .{ coords.x, coords.y, coords.z });
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_URL), @ptrCast(*c_void, url));
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_USERAGENT), "sdlmap/1.0");
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_NOPROGRESS), @intCast(c_long, 0));
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_XFERINFOFUNCTION), tile_xferinfo_curl_callback);
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_XFERINFODATA), ptr);
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_WRITEFUNCTION), tile_write_curl_callback);
-    _ = curl.curl_easy_setopt(ptr.client, @intToEnum(curl.CURLoption, curl.CURLOPT_WRITEDATA), ptr);
-    _ = curl.curl_multi_add_handle(tile_cache.curl_multi, ptr.client);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.Useragent);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, tile_xferinfo_curl_callback);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, tile_write_curl_callback);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
+
+    _ = curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client);
     std.debug.warn("Add multi handle {any}\n", .{coords});
+}
+
+fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
+    if (@intToEnum(curl.CURLcode, curl.CURLE_OK) != curl.curl_easy_setopt(client, @intToEnum(curl.CURLoption, opt), value)) {
+        return error.CurlEasySetOptFail;
+    }
 }
 
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {

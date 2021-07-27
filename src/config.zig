@@ -1,6 +1,7 @@
 pub const Tsize = 256;
 pub const InitWindowW = 720;
 pub const InitWindowH = 720;
+pub const Useragent = "mepo";
 
 pub const DefaultBaseConfig =
     \\ bind_key _ j [move_relative 0 10];
