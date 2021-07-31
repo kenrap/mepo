@@ -34,7 +34,6 @@ fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl
 }
 
 fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_data: *c_void) callconv(.C) c_uint {
-    std.debug.warn("Got some bytes in download for tile {any}\n", .{user_data});
     var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     var typed_data = @intToPtr([*]u8, @ptrToInt(data));
     transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
@@ -104,11 +103,12 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
 
     try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.Useragent);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 1));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, tile_xferinfo_curl_callback);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, tile_write_curl_callback);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
 
     _ = curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client);
     std.debug.warn("Add multi handle {any}\n", .{coords});
