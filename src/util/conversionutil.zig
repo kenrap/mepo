@@ -29,7 +29,7 @@ test "lon_to_px_x roundtrips with px_x_to_lon" {
     const zoom = 3;
     const conv_x = lon_to_px_x(lon, zoom);
     const conv_lon = px_x_to_lon(conv_x, zoom);
-    try std.testing.expectEqual(lon, conv_lon);
+    try std.testing.expectEqual(round_to(lon, 1), round_to(conv_lon, 1));
 }
 
 test "lat_to_px_y roundtrips with px_y_to_lat" {
@@ -37,5 +37,9 @@ test "lat_to_px_y roundtrips with px_y_to_lat" {
     const zoom = 3;
     const conv_x = lat_to_px_y(lat, zoom);
     const conv_lat = px_y_to_lat(conv_x, zoom);
-    try std.testing.expectEqual(lat, conv_lat);
+    try std.testing.expectEqual(round_to(lat, 1), round_to(conv_lat, 1));
+}
+
+fn round_to(input: f64, n_decimals: u32) f64 {
+    return std.math.round(input * @intToFloat(f64, std.math.pow(u32, 10, n_decimals)));
 }
