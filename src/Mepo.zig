@@ -119,17 +119,6 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             // TODO
         },
     }
-
-    //if (tile_data.surface) |surf| {
-    //} else {
-    //    // Blit background color tile?
-
-    //    //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
-    //    //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
-    //    //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
-    //    //    return errors.SDLError.FillFail;
-    //    //}
-    //}
 }
 
 fn blit_global_text(mepo: *@This()) !void {
@@ -152,7 +141,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         var y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
         var size: i32 = 10;
-        _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 255, 255, sdl.SDL_ALPHA_OPAQUE);
+        _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
         _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
@@ -385,23 +374,25 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
-    var dest_rect = sdl.SDL_Rect{
-        .x = x,
-        .y = y,
-        .w = @intCast(c_int, w),
-        .h = @intCast(c_int, h),
-    };
-
+    // TODO: Implement clipping based on passed w/h
     const line_height = 16;
+
+    var dest_rect = sdl.SDL_Rect{ .x = x, .y = y, .w = undefined, .h = undefined };
     var start: usize = 0;
     var current: usize = 0;
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = 1 });
+            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = sdl.SDL_ALPHA_OPAQUE});
             if (text_surf != null) {
-                if (sdl.SDL_BlitSurface(text_surf.?, null, sdl.SDL_GetWindowSurface(mepo.window), &dest_rect) > 0) {
-                    return errors.SDLError.BlitSurface;
+                if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
+                    dest_rect.w = text_surf.?.w;
+                    dest_rect.h = text_surf.?.h;
+                    if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect) > 0) {
+                        return errors.SDLError.BlitSurface;
+                    }
+                } else {
+                    return error.Fail;
                 }
             }
             start = current + 1;
