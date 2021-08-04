@@ -37,12 +37,10 @@ keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
-    var r = sdl.SDL_CreateSoftwareRenderer(sdl.SDL_GetWindowSurface(mepo.window));
-
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
+    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
     } else if (0 != sdl.SDL_RenderDrawLine(
-        r,
+        mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
         @intCast(c_int, mepo.w / 2 + (mepo.crosshair_size / 2)),
@@ -50,7 +48,7 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     )) {
         return errors.SDLError.RenderDrawLine;
     } else if (0 != sdl.SDL_RenderDrawLine(
-        r,
+        mepo.renderer,
         @intCast(c_int, mepo.w / 2),
         @intCast(c_int, mepo.h / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.w / 2),
@@ -112,8 +110,8 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
-        .surface => |surf| {
-            if (sdl.SDL_BlitSurface(@ptrCast([*c]sdl.SDL_Surface, surf), null, screen, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
+        .texture => |text| {
+            if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
                 return errors.SDLError.BlitSurface;
             }
         },
@@ -121,17 +119,6 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             // TODO
         },
     }
-
-    //if (tile_data.surface) |surf| {
-    //} else {
-    //    // Blit background color tile?
-
-    //    //var surf = sdl.SDL_CreateRGBSurfaceWithFormat(config.Tsize, config.Tsize, config.Tsize, 32, pixel_format.format);
-    //    //if (sdl.SDL_FillRect(surf, null, sdl.SDL_MapRGB(pixel_format, 255, 0, 255)) != 0) {
-    //    //    std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
-    //    //    return errors.SDLError.FillFail;
-    //    //}
-    //}
 }
 
 fn blit_global_text(mepo: *@This()) !void {
@@ -144,7 +131,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
     var surf = sdl.SDL_GetWindowSurface(mepo.window);
     var r = sdl.SDL_CreateSoftwareRenderer(surf);
 
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
+    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
     }
 
@@ -154,24 +141,29 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         var y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
         var size: i32 = 10;
-        _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+        _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
+        _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
-        }, sdl.SDL_MapRGBA(surf.*.format, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, 255));
+        });
     }
 }
 
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
-
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 0, 255)) {
+      return error.Todo;
+    }
+    if (0 != sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 0, 0));
+    })) {
+      return error.Todo;
+    }
 
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
 
@@ -184,26 +176,28 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, sdl.SDL_ALPHA_OPAQUE);
+    _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 255, 0));
+    });
 
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
+    _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 1,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 0, 0, 0, 0));
+    });
 
-    try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() });
+    _ = try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() });
 }
 
 pub fn blit(mepo: *@This()) !void {
-    var screen = sdl.SDL_GetWindowSurface(mepo.window);
-    if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, 255);
+    if (sdl.SDL_RenderFillRect(mepo.renderer, null) != 0) {
         std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
         return errors.SDLError.FillRect;
     }
@@ -215,9 +209,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_crosshair();
     try mepo.blit_download_bar();
 
-    if (sdl.SDL_UpdateWindowSurface(mepo.window) > 0) {
-        return errors.SDLError.UpdateWindowSurface;
-    }
+    sdl.SDL_RenderPresent(mepo.renderer);
 
     // Update title
     var title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
@@ -382,23 +374,25 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
-    var dest_rect = sdl.SDL_Rect{
-        .x = x,
-        .y = y,
-        .w = @intCast(c_int, w),
-        .h = @intCast(c_int, h),
-    };
-
+    // TODO: Implement clipping based on passed w/h
     const line_height = 16;
+
+    var dest_rect = sdl.SDL_Rect{ .x = x, .y = y, .w = undefined, .h = undefined };
     var start: usize = 0;
     var current: usize = 0;
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = 1 });
+            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = sdl.SDL_ALPHA_OPAQUE});
             if (text_surf != null) {
-                if (sdl.SDL_BlitSurface(text_surf.?, null, sdl.SDL_GetWindowSurface(mepo.window), &dest_rect) > 0) {
-                    return errors.SDLError.BlitSurface;
+                if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
+                    dest_rect.w = text_surf.?.w;
+                    dest_rect.h = text_surf.?.h;
+                    if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect) > 0) {
+                        return errors.SDLError.BlitSurface;
+                    }
+                } else {
+                    return error.Fail;
                 }
             }
             start = current + 1;
@@ -445,7 +439,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         }
     }
 
-    var renderer = sdl.SDL_CreateRenderer(window, -1, 0);
+    var renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE);
     if (renderer == null) {
         return errors.SDLError.CreateRenderer;
     }
@@ -488,6 +482,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .fn_table = try _fn_table.generate_fn_table(),
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(std.heap.c_allocator),
     });
+
+    tile_cache.set_renderer(instance.renderer);
 
     try instance.pin_table.ensureCapacity(100000);
 
