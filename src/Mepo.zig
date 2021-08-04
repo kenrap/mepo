@@ -113,7 +113,8 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .surface => |surf| {
-            if (sdl.SDL_BlitSurface(@ptrCast([*c]sdl.SDL_Surface, surf), null, screen, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
+            var text = sdl.SDL_CreateTextureFromSurface(mepo.renderer, @ptrCast([*c]sdl.SDL_Surface, surf));
+            if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
                 return errors.SDLError.BlitSurface;
             }
         },
@@ -154,24 +155,29 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         var y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
         var size: i32 = 10;
-        _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+        _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 255, 255, sdl.SDL_ALPHA_OPAQUE);
+        _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
-        }, sdl.SDL_MapRGBA(surf.*.format, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, 255));
+        });
     }
 }
 
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
-
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 0, 255)) {
+      return error.Todo;
+    }
+    if (0 != sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 0, 0));
+    })) {
+      return error.Todo;
+    }
 
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
 
@@ -184,26 +190,28 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, 255);
+    _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 255, 255, 255, 0));
+    });
 
-    _ = sdl.SDL_FillRect(sdl.SDL_GetWindowSurface(mepo.window), &sdl.SDL_Rect{
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, 255);
+    _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 1,
-    }, sdl.SDL_MapRGBA(sdl.SDL_GetWindowSurface(mepo.window).*.format, 0, 0, 0, 0));
+    });
 
     try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() });
 }
 
 pub fn blit(mepo: *@This()) !void {
-    var screen = sdl.SDL_GetWindowSurface(mepo.window);
-    if (sdl.SDL_FillRect(screen, null, sdl.SDL_MapRGB(screen.*.format, 255, 255, 255)) != 0) {
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, 255);
+    if (sdl.SDL_RenderFillRect(mepo.renderer, null) != 0) {
         std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
         return errors.SDLError.FillRect;
     }
@@ -215,9 +223,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_crosshair();
     try mepo.blit_download_bar();
 
-    if (sdl.SDL_UpdateWindowSurface(mepo.window) > 0) {
-        return errors.SDLError.UpdateWindowSurface;
-    }
+    sdl.SDL_RenderPresent(mepo.renderer);
 
     // Update title
     var title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
@@ -445,7 +451,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         }
     }
 
-    var renderer = sdl.SDL_CreateRenderer(window, -1, 0);
+    var renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_ACCELERATED);
     if (renderer == null) {
         return errors.SDLError.CreateRenderer;
     }
