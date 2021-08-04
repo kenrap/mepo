@@ -128,13 +128,6 @@ fn blit_global_text(mepo: *@This()) !void {
 }
 
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
-    var surf = sdl.SDL_GetWindowSurface(mepo.window);
-    var r = sdl.SDL_CreateSoftwareRenderer(surf);
-
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
-        return errors.SDLError.RenderDrawColor;
-    }
-
     var it = mepo.pin_table.iterator();
     while (it.next()) |item| {
         var x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
