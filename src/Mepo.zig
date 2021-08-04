@@ -37,12 +37,10 @@ keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
-    var r = sdl.SDL_CreateSoftwareRenderer(sdl.SDL_GetWindowSurface(mepo.window));
-
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
+    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
     } else if (0 != sdl.SDL_RenderDrawLine(
-        r,
+        mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
         @intCast(c_int, mepo.w / 2 + (mepo.crosshair_size / 2)),
@@ -50,7 +48,7 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     )) {
         return errors.SDLError.RenderDrawLine;
     } else if (0 != sdl.SDL_RenderDrawLine(
-        r,
+        mepo.renderer,
         @intCast(c_int, mepo.w / 2),
         @intCast(c_int, mepo.h / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.w / 2),
