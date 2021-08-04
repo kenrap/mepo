@@ -14,15 +14,16 @@ const config = @import("./config.zig");
 const sdlutil = @import("./util/sdlutil.zig");
 
 pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
-const TileDataTag = enum { transfer_datum, surface, queued_position };
-pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, surface: *sdl.SDL_Surface, queued_position: u32 };
+const TileDataTag = enum { transfer_datum, texture, queued_position };
+pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, texture: *sdl.SDL_Texture, queued_position: u32 };
 
 source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
 queue_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool),
 transfer_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum),
-surface_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Surface),
+texture_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture),
+renderer: ?*sdl.SDL_Renderer,
 curl_multi: *curl.CURLM,
 
 fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl_now: curl.curl_off_t, ul_total: curl.curl_off_t, ul_now: curl.curl_off_t) callconv(.C) c_uint {
@@ -49,8 +50,8 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.Til
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
-    if (tile_cache.surface_map.get(coords)) |tile| {
-        return TileData{ .surface = tile };
+    if (tile_cache.texture_map.get(coords)) |tile| {
+        return TileData{ .texture = tile };
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
@@ -58,8 +59,8 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
         defer std.heap.c_allocator.free(png);
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
-            const surf = tile_cache.load_data_to_surface(coords, file_cached_png) catch { break :load_from_fs; };
-            return TileData{ .surface = surf };
+            const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch { break :load_from_fs; };
+            return TileData{ .texture = text };
         }
     }
 
@@ -130,12 +131,16 @@ fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec 
     return null;
 }
 
-fn load_data_to_surface(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Surface {
+fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Texture {
     const datum = @ptrCast(*c_void, &data[0]);
     const len = @intCast(c_int, data.len);
     if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(datum, len), 1)) |surf| {
-        try tile_cache.surface_map.put(coords, surf);
-        return tile_cache.surface_map.get(coords).?;
+        if (sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surf)) |text| {
+            try tile_cache.texture_map.put(coords, text);
+            return tile_cache.texture_map.get(coords).?;
+        } else {
+            return error.CreateTextureFromSurfaceFail;
+        }
     } else {
         return error.LoadToSurfaceFail;
     }
@@ -152,7 +157,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
         }
         if (tile_cache.transfer_map.get(coords).?.load_to_surface) {
             // Load to surface
-            _ = try tile_cache.load_data_to_surface(coords, datum);
+            _ = try tile_cache.load_data_to_texture(coords, datum);
         }
 
         tile_cache.transfer_map.get(coords).?.data.deinit();
@@ -218,9 +223,13 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.source_url = url;
-    tile_cache.surface_map.clearAndFree();
+    tile_cache.texture_map.clearAndFree();
     tile_cache.queue_map.clearAndFree();
     sdlutil.sdl_push_resize_event();
+}
+
+pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
+    tile_cache.renderer = renderer;
 }
 
 pub fn init() anyerror!@This() {
@@ -228,13 +237,14 @@ pub fn init() anyerror!@This() {
         var x = @as(@This(), .{
             .source_url = null,
             .cache_dir = null,
+            .renderer = null,
             .n_current_transfers = 0,
             .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(std.heap.c_allocator),
-            .surface_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Surface).init(std.heap.c_allocator),
+            .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(std.heap.c_allocator),
             .queue_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool).init(std.heap.c_allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
-        try x.surface_map.ensureCapacity(2000);
+        try x.texture_map.ensureCapacity(2000);
         try x.transfer_map.ensureCapacity(20000);
         try x.queue_map.ensureCapacity(20000);
         return x;

@@ -39,7 +39,7 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
 
     var r = sdl.SDL_CreateSoftwareRenderer(sdl.SDL_GetWindowSurface(mepo.window));
 
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
+    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
     } else if (0 != sdl.SDL_RenderDrawLine(
         r,
@@ -112,8 +112,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
-        .surface => |surf| {
-            var text = sdl.SDL_CreateTextureFromSurface(mepo.renderer, @ptrCast([*c]sdl.SDL_Surface, surf));
+        .texture => |text| {
             if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
                 return errors.SDLError.BlitSurface;
             }
@@ -145,7 +144,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
     var surf = sdl.SDL_GetWindowSurface(mepo.window);
     var r = sdl.SDL_CreateSoftwareRenderer(surf);
 
-    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, 255)) {
+    if (0 != sdl.SDL_SetRenderDrawColor(r, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
     }
 
@@ -190,7 +189,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, 255);
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, sdl.SDL_ALPHA_OPAQUE);
     _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
@@ -198,7 +197,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 200,
     });
 
-    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, 255);
+    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
     _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
@@ -206,7 +205,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 1,
     });
 
-    try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.surface_map.count() });
+    _ = try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() });
 }
 
 pub fn blit(mepo: *@This()) !void {
@@ -494,6 +493,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .fn_table = try _fn_table.generate_fn_table(),
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(std.heap.c_allocator),
     });
+
+    tile_cache.set_renderer(instance.renderer);
 
     try instance.pin_table.ensureCapacity(100000);
 
