@@ -42,5 +42,11 @@ pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
       .env_map = &v
     });
 
-    try mepo.mepolang_execute(r.stdout);
+    var exitcode = r.term.Exited;
+
+    if (exitcode == 0) {
+        try mepo.mepolang_execute(r.stdout);
+    } else {
+        std.debug.warn("shellpipe error: exited with code {d}\n{s}", .{exitcode, r.stderr});
+    }
 }
