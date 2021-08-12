@@ -43,4 +43,5 @@ echo "$JSON_RESULTS" |
   grep -vE '^null' |
   awk -F' ' '{print $1 " " $2 " [" $3 " " $4 " " $5 " " $6 " " $7 " " $8 "]"}' |
   sed 's/[^[:print:]]//g' |
+  sed "s/'/\\\'/g" |
   xargs -ID echo 'pin_add D;'
