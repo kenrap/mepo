@@ -15,7 +15,9 @@ pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var env_vars = std.BufMap.init(&arena.allocator);
     var v = try std.process.getEnvMap(&arena.allocator);
 
-    // TODO: maybe as stdin?
+    try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.w}));
+    try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.h}));
+
     try v.put("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
     try v.put("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
 
