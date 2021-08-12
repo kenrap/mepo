@@ -532,16 +532,27 @@ test "mepolang_argize" {
         types.MepoArg{ .Number = -22.4 },
         types.MepoArg{ .Number = 2747.2716, },
       }
+    },
+    .{
+      // Ensure argizer never parses past 1st set of string, e.g. nested []
+      // should just tokenize as single arg proc
+      .input = &[_][]const u8{"foo", "bar", "[", "baz", "bill", "]", "dill", "jill"  },
+      .expect = &[_]types.MepoArg{
+        types.MepoArg{ .Text = "foo" },
+        types.MepoArg{ .Text = "bar" },
+        types.MepoArg{ .Text = "baz bill" },
+        types.MepoArg{ .Text = "dill" }
+       }
     }
   };
 
   for (specs) |s| {
       const result = try mepolang_argize(&arena.allocator, s.input[0..]);
       for (s.expect) |_, i| {
-        try std.testing.expectEqual(@TypeOf(result[i]), @TypeOf(s.expect[i]));
+        try std.testing.expectEqual(@TypeOf(s.expect[i]), @TypeOf(result[i]));
         switch (result[i]) {
-          .Number => try std.testing.expectEqual(result[i].Number, s.expect[i].Number),
-          .Text => try std.testing.expectEqualSlices(u8, result[i].Text, s.expect[i].Text),
+          .Number => try std.testing.expectEqual(s.expect[i].Number,result[i].Number),
+          .Text => try std.testing.expectEqualSlices(u8, s.expect[i].Text, result[i].Text),
         }
       }
   }
