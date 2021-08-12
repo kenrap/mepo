@@ -214,25 +214,31 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
     var args_i: usize = 0;
     var args: [types.MepoFnNargs]types.MepoArg = undefined;
     var i: usize = 0;
-    var start_bracket: ?usize = null;
+    var bracket_start_i: usize = undefined;
+    var bracket_nest_n : usize = 0;
 
     for (tokens) |tok| {
-        if (tok[0] == '[' and tok.len == 1) {
-            start_bracket = i;
-        } else if (tok[0] == ']' and tok.len == 1) {
-            args[args_i] = .{ .Text = try std.mem.joinZ(allocator, " ", tokens[start_bracket.? + 1 .. i]) };
+        if (tok[0] == '[' and tok.len == 1) bracket_nest_n += 1;
+        if (tok[0] == ']' and tok.len == 1) bracket_nest_n -= 1;
+
+        if (bracket_nest_n == 1 and tok[0] == '[' and tok.len == 1) {
+            bracket_start_i = i;
+        } else if (bracket_nest_n == 0 and tok[0] == ']' and tok.len == 1) {
+            args[args_i] = .{ .Text = try std.mem.joinZ(allocator, " ", tokens[bracket_start_i + 1  .. i ]) };
             args_i += 1;
-        } else if (start_bracket != null) {
+        } else if (bracket_nest_n >= 1) {
             // nop
         } else if ((tok[0] == '-' and tok.len > 1) or (tok[0] >= '0' and tok[0] <= '9')) {
-            args[i] = .{ .Number = try std.fmt.parseFloat(f64, tok) };
+            args[args_i] = .{ .Number = try std.fmt.parseFloat(f64, tok) };
             args_i += 1;
         } else {
-            args[i] = .{ .Text = try std.fmt.allocPrintZ(allocator, "{s}", .{tok}) };
+            args[args_i] = .{ .Text = try std.fmt.allocPrintZ(allocator, "{s}", .{tok}) };
             args_i += 1;
         }
         i += 1;
+
     }
+
     return args;
 }
 
