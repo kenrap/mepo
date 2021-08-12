@@ -27,6 +27,10 @@ pub const DefaultBaseConfig =
     \\ bind_key _ q [shellpipe mepo_bbox_queuedownload.sh];
     \\ bind_key _ u [shellpipe mepo_urlsourceset.sh];
     \\ bind_key _ a [shellpipe mepo_apilangexec.sh];
+    \\ bind_key c f [shellpipe [mepo_panscreen.sh h 1]];
+    \\ bind_key c b [shellpipe [mepo_panscreen.sh h -1]];
+    \\ bind_key cs f [shellpipe [mepo_panscreen.sh w 1]];
+    \\ bind_key cs b [shellpipe [mepo_panscreen.sh w -1]];
     \\
     \\ bind_key _ d [prefset debug_tiles 1];
     \\ bind_key s d [prefset debug_tiles 0];
