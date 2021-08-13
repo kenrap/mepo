@@ -12,41 +12,27 @@ pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    var env_vars = std.BufMap.init(&arena.allocator);
-    var v = try std.process.getEnvMap(&arena.allocator);
+    const env_vars = env_vars: {
+        var v = try std.process.getEnvMap(&arena.allocator);
+        try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.w}));
+        try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.h}));
+        try v.put("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
+        try v.put("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
+        try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)}));
+        try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)}));
+        try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)}));
+        try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{conversionutil.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)}));
+        break :env_vars v;
+    };
 
-    try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.w}));
-    try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.h}));
-
-    try v.put("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
-    try v.put("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
-
-    try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
-    }));
-    try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
-    }));
-
-    try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.h), @intCast(i32, 2)), mepo.zoom)
-    }));
-    try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{
-      conversionutil.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.w), @intCast(i32, 2)), mepo.zoom)
-    }));
-
-    const args = [_][]const u8 { "sh", "-c", cmd };
-    var r = try std.ChildProcess.exec(.{
-      .allocator = &arena.allocator, 
-      .argv = args[0..],
-      .env_map = &v
-    });
-
-    var exitcode = r.term.Exited;
+    const args = [_][]const u8{ "sh", "-c", cmd };
+    const process_result = try std.ChildProcess.exec(.{ .allocator = &arena.allocator, .argv = args[0..], .env_map = &env_vars });
+    const exitcode = process_result.term.Exited;
 
     if (exitcode == 0) {
-        try mepo.mepolang_execute(r.stdout);
+        try mepo.mepolang_execute(process_result.stdout);
     } else {
-        std.debug.warn("shellpipe error: exited with code {d}\n{s}", .{exitcode, r.stderr});
+        std.debug.warn("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
     }
 }
+
