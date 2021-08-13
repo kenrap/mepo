@@ -18,7 +18,7 @@ SOURCES='
 echo "$SOURCES" | 
   awk '{$1=$1};1' | 
   grep . | 
-  dmenu -p "Tile Source" -l 10 -w $(xdotool getactivewindow) |
+  $MEPO_MENU "Tile Source" |
   cut -d: -f2- |
   tr -d ' ' |
   xargs -IURL echo 'prefset tile_cache_url URL;'

@@ -17,7 +17,7 @@ CMD="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    dmenu -p "Command" -w $(xdotool getactivewindow) -l 10
+    $MEPO_MENU "Command"
 )"
 
 echo "$CMD;"
