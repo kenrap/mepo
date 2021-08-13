@@ -41,7 +41,7 @@ echo "$JSON_RESULTS" |
   tr -d \" |
   grep -vE 'null$' |
   grep -vE '^null' |
-  awk -F' ' '{print $1 " " $2 " [" $3 " " $4 " " $5 " " $6 " " $7 " " $8 "]"}' |
+  awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
   sed 's/[^[:print:]]//g' |
   sed "s/'/\\\'/g" |
   xargs -ID echo 'pin_add D;'
