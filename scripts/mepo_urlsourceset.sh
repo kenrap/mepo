@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+[ -z "$MEPO_MENU" ] && MEPO_MENU="dmenu -l 10 -w $(xdotool getactivewindow) -p"
 
 # Note X, Y, Z provided as %1$d, %2$d, %3$d respectively
 SOURCES='
