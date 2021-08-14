@@ -338,7 +338,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     zoom_relative(mepo, e.wheel.y);
                     pending = .Redraw;
                 },
-                .SDL_KEYDOWN => {
+                .SDL_KEYUP => {
                     if (mepo.keybindings_table.get(.{
                       .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
                       .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
