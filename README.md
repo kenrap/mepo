@@ -89,6 +89,8 @@ search scripts, bookmarks, and more.
   - Implement LIFO for downloading queue: viewport tiles should always take
     priority before long-queued offscreen tiles.
   - Refactor error handling logic and implement log levels for debugging.
+  - Implement text debug message overlay to provide user feedback right
+    in UI when operations like shellpipe fail.
   - Tag 0.1 release upon completion
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
@@ -109,6 +111,8 @@ search scripts, bookmarks, and more.
   - Add configuration parameter to set an offline mode; when set to true
     all tile downloading logic should no-operation for the privacy and
     bandwidth conscience.
+  - Rework UI logic to adjust downloading bar to not overlap with pin details
+    overlay.
 - **Milestone 3: Powerful, Robust Pin API**
   - Correct pin-selection mode cycling to properly respect delta values.
   - Add ability to cycle through pins based on both: viewport visible pins and all pins.
@@ -172,6 +176,11 @@ search scripts, bookmarks, and more.
   - Finalize mepolang 1.0 API and add error checking so things don't crash
     when accessing invalid union tag etc (improve robustness of mepolang
     parser).
+  - Implement save state / restore state mepolang API command that dumps
+    current state to file (as mepolang) / and can restore via loading file.
+  - Make shellpipe non-blocking (e.g. don't freeze UI while waiting for
+    result) or otherwise implement timeout so that runwaway scripts don't
+    freeze application.
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang commands and basic usage.
   - Document existing scripts used for search and add notes about
