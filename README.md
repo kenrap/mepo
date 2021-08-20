@@ -130,6 +130,10 @@ search scripts, bookmarks, and more.
     informational pins can be used for navigational cues.
   - Add script to add pins based on Nominatim bounding box results in
     addition to the existing Overpass pin script.
+  - Implement bind_click mepolang API command to run arbitrary mepolang
+    on clicking specific button (left, right click) 1-n times. Will enable
+    more sophisticated scripts (e.g. such as click to define points in
+    custom route / ordered pin group) in future.
 - **Milestone 4: Wayland & Mobile Support**
   - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
     more reliable and test on Pinephone & mobile devices.
