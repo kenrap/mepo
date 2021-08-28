@@ -17,6 +17,7 @@ SCOPE="$(
     $MEPO_MENU "Bbox POI Search" |
     cut -d ' ' -f2-
 )"
+[ -z "$SCOPE" ] && exit 0
 
 JSON_RESULTS="$(
   curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
