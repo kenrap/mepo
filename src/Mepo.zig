@@ -325,6 +325,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                         _ = sdl.SDL_AddTimer(201, mouse_timeout, null);
                     } else if (e.button.button == sdl.SDL_BUTTON_RIGHT) {
                         zoom_relative(mepo, -1);
+                        pending = .Redraw;
                     }
                 },
                 .SDL_MOUSEMOTION => {
