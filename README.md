@@ -89,8 +89,12 @@ search scripts, bookmarks, and more.
   - Implement LIFO for downloading queue: viewport tiles should always take
     priority before long-queued offscreen tiles.
   - Refactor error handling logic and implement log levels for debugging.
-  - Implement text debug message overlay to provide user feedback right
-    in UI when operations like shellpipe fail.
+  - Implement togglable text debug message overlay to provide user feedback
+    right in UI when operations like shellpipe fail.
+  - Add toggalable help text overlay show current results of bind_key
+    (keybindings table) mapping in UI.
+  - See about getting Alpine package merged into testing repository,
+    depending on status of LLVM12 package / Zig 0.8.
   - Tag 0.1 release upon completion
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
@@ -134,6 +138,9 @@ search scripts, bookmarks, and more.
     on clicking specific button (left, right click) 1-n times. Will enable
     more sophisticated scripts (e.g. such as click to define points in
     custom route / ordered pin group) in future.
+  - Add script to convert XML Relation & Way from OSM API into ordered
+    pin group(s) for testing purposes. Also should help for transit-specific
+    and other overlays etc.
 - **Milestone 4: Wayland & Mobile Support**
   - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
     more reliable and test on Pinephone & mobile devices.
