@@ -11,13 +11,14 @@ OPTIONS='
   Iraq
 '
 
-curl "$(
+QUERY="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    $MEPO_MENU "Search for Location" |
-    xargs -0 echo "https://nominatim.openstreetmap.org/search?format=json&q=" 
-)" |
+    $MEPO_MENU "Search for Location"
+)"
+
+curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
   jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
   $MEPO_MENU "Pick result" |
   grep -oE '(\-|\d|\.)+' |
