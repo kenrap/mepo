@@ -93,6 +93,8 @@ search scripts, bookmarks, and more.
     right in UI when operations like shellpipe fail.
   - Add toggalable help text overlay show current results of bind_key
     (keybindings table) mapping in UI.
+  - Fix bug where negative latitude values fail to round-trip between
+    lat to y / y to lat conversion functions.
   - See about getting Alpine package merged into testing repository,
     depending on status of LLVM12 package / Zig 0.8.
   - Tag 0.1 release upon completion
@@ -112,6 +114,8 @@ search scripts, bookmarks, and more.
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
+  - Parameterize max number of concurrent downloads as a setting accesible
+    via prefset.
   - Add configuration parameter to set an offline mode; when set to true
     all tile downloading logic should no-operation for the privacy and
     bandwidth conscience.
@@ -202,6 +206,8 @@ search scripts, bookmarks, and more.
   - Modify internals of mepolang to include documentation directly in
     structs so that mepolang API documentation can be automatically generated
     as a webpage for end-users.
+  - Modify internals of prefset / preferences table to automatically generate
+    documentation directly from code / structs.
   - Create Alpine/pmOS package and add to postmarketos-ui-* frontends.
   - Package-split current `scripts/` directory to allow seperate packages
     for mepo and mepo-scripts. The former only will contain the base
