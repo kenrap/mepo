@@ -82,8 +82,9 @@ search scripts, bookmarks, and more.
   - Fix downloading bugs: make downloading tiles logic more robust, currently,
     tile downloading can occasionally / get stuck; implement retry logic.
     Error check / handle invalid data received from tileservers.
-  - Memory allocations / deallocations should be careful tracked and managed.
-    Debug with valgrind.
+  - Resolve all existing memory leaks and rework consistency of allocator
+    passing (e.g. remove ad-hoc allocators, ensure arena-allocation based on
+    top-level allocator).
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
   - Implement LIFO for downloading queue: viewport tiles should always take
@@ -91,16 +92,16 @@ search scripts, bookmarks, and more.
   - Refactor error handling logic and implement log levels for debugging.
   - Implement togglable text debug message overlay to provide user feedback
     right in UI when operations like shellpipe fail.
-  - Add toggalable help text overlay show current results of bind_key
+  - Add toggalable help text overlay to show current results of bind_key
     (keybindings table) mapping in UI.
   - Fix bug where negative latitude values fail to round-trip between
-    lat to y / y to lat conversion functions.
+    lat-to-y / y-to-lat conversion functions.
   - See about getting Alpine package merged into testing repository,
     depending on status of LLVM12 package / Zig 0.8.
   - Tag 0.1 release upon completion
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
-    (free of SDL-context) to allow for CLI-based downloading of tiles.
+    (free of SDL/Video context) to allow for CLI-based downloading of tiles.
   - Remove SDL delay from TileCache downloading logic / properly wait on file
     descriptors instead using curl_multi_wait.
   - Add error handling logic to existing bounding-box based mepolang download
@@ -114,7 +115,7 @@ search scripts, bookmarks, and more.
     query result so you can say download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
-  - Parameterize max number of concurrent downloads as a setting accesible
+  - Parameterize max number of concurrent downloads as a setting accessible
     via prefset.
   - Add configuration parameter to set an offline mode; when set to true
     all tile downloading logic should no-operation for the privacy and
@@ -123,17 +124,18 @@ search scripts, bookmarks, and more.
     overlay.
 - **Milestone 3: Powerful, Robust Pin API**
   - Correct pin-selection mode cycling to properly respect delta values.
-  - Add ability to cycle through pins based on both: viewport visible pins and all pins.
+  - Add ability to cycle through pins based on both: viewport visible pins
+    and all pins.
   - Add support for click pin to activate.
   - Implement command for removing specific pins based on handle.
   - Allow ability to associate metadata with pins.
   - Fix existing pin bugs (e.g. title not showing properly & brittleness).
-  - Add pin groups and extend API as such so user can distinguish groups;
-    for example one pin group may be bookmarks, another for a search,
+  - Add pin groups and extend API as such so user can visually distinguish
+    groups; for example one pin group may be bookmarks, another for a search,
     another for current location.
   - Allow pin groups to be either ordered or unordered, ordered pin groups
     show in UI with connecting lines (thus enabling lightweight navigation).
-  - Implement distinction between structural pins and information pins for
+  - Implement distinction between structural pins and informational pins for
     ordered pin groups wherein structural pins are the nodes in a way and
     informational pins can be used for navigational cues.
   - Add script to add pins based on Nominatim bounding box results in
@@ -148,24 +150,28 @@ search scripts, bookmarks, and more.
 - **Milestone 4: Wayland & Mobile Support**
   - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
     more reliable and test on Pinephone & mobile devices.
+  - Rework pinch-to-zoom to not be hardcoded but to instead use new mepolang
+    command (bind_gesture).
+  - Add support for rotate gesture via SDL multitouch gesture API and expose
+    as part of bind_gesture command.
   - Currently scripts for location search, bounding-box search,
-    and similar use dmenu (X-based); integrate wofi, bemenu, or a
-    similar tool for Wayland. XWayland can be used in intermediate
-    term. Dynamically determine which menuing system to use in scripts.
-  - Add a simple gesture detection binding mepolang API (bind_gesture) command
-    similar to lisgd to facilitate opening a context menu on mobile.
+    and similar use dmenu (X-based); integrate wofi, bemenu, or a similar
+    tool for Wayland. Dynamically determine which menuing system to use
+    in scripts.
   - Allow binding lefthand/righthand side of pin overlay via new
     (bind_button) command and set to pin_cycle by default. Thus enabling
     touch-based pin-cycling for navigation.
   - Build out context-menu to be used in mobile-context allowing functionality
     triggered on desktop via keybindings for search etc. to be simply triggered
     on mobile.
+  - Add to default mepolang configuration trigger to open context-menu either
+    via bind_gesture or bind_click.
   - Perform testing and make fixes as necessary on most common UIs on
-    postmarketOS. Primarily test and ensure compatibility with Phosh (mobile
-    Wayland), Sxmo (mobile X), Sway (desktop Wayland), and i3 (desktop
-    X) as these 4 enviroments encompass large userbases and represent the
-    4 different combinations of mobile/desktop & X/Wayland that should
-    all have first-class support.
+    postmarketOS. Primarily test and ensure compatibility with Phosh
+    (mobile Wayland), Swmo (mobile Wayland), Sxmo (mobile X), Sway
+    (desktop Wayland), and i3 (desktop X) as these 5 enviroments encompass
+    large userbases and represent the 4 different combinations of
+    mobile/desktop & X/Wayland that should all have first-class support.
   - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
     greatest cross-compatibility between enviroments.
 - **Milestone 5: UI Niceties**
