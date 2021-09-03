@@ -77,28 +77,27 @@ search scripts, bookmarks, and more.
 
 ## **Roadmap to 1.0 release:**
 - **Milestone 1: Overall Stability**
-  - Current stability of the application should be improved and crashes should
-    be non-existent.
-  - Fix downloading bugs: make downloading tiles logic more robust, currently,
-    tile downloading can occasionally / get stuck; implement retry logic.
-    Error check / handle invalid data received from tileservers.
-  - Resolve all existing memory leaks and rework consistency of allocator
-    passing (e.g. remove ad-hoc allocators, ensure arena-allocation based on
-    top-level allocator).
+  - Improve current stability of the application and resolve intermittent
+    crashes related to tile downloading.
+  - Implement tile downloading retry logic & handle case where user is
+    offline gracefully. Also error check invalid PNG tiledata receieved
+    from tileservers & loaded from filesystem.
+  - Resolve existing memory leaks and rework consistency of allocator
+    passing (e.g. remove ad-hoc allocators, ensure all allocations based on
+    useing top-level allocator via arena allocation).
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
   - Implement LIFO for downloading queue: viewport tiles should always take
     priority before long-queued offscreen tiles.
-  - Refactor error handling logic and implement log levels for debugging.
+  - Refactor error handling logic and implement debug mode preference or
+    similar to control verbosity of debugging STDERR messages.
   - Implement togglable text debug message overlay to provide user feedback
     right in UI when operations like shellpipe fail.
-  - Add toggalable help text overlay to show current results of bind_key
+  - Add togglable help text overlay to show current results of bind_key
     (keybindings table) mapping in UI.
   - Fix bug where negative latitude values fail to round-trip between
     lat-to-y / y-to-lat conversion functions.
-  - See about getting Alpine package merged into testing repository,
-    depending on status of LLVM12 package / Zig 0.8.
-  - Tag 0.1 release upon completion
+  - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
     (free of SDL/Video context) to allow for CLI-based downloading of tiles.
@@ -214,13 +213,13 @@ search scripts, bookmarks, and more.
     as a webpage for end-users.
   - Modify internals of prefset / preferences table to automatically generate
     documentation directly from code / structs.
-  - Create Alpine/pmOS package and add to postmarketos-ui-* frontends.
+  - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
   - Package-split current `scripts/` directory to allow seperate packages
     for mepo and mepo-scripts. The former only will contain the base
     application (Zig) executable; the latter will contain auxillary scripts.
   - Work with maintainers of mobile linux (& Pinephone) UIs to get
     Mepo integrated properly.
-  - Tag 1.0 release
+  - Tag 1.0 release.
 
 
 ## **Contributing**
