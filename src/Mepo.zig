@@ -108,16 +108,28 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
+    const dest = &sdl.SDL_Rect{
+      .x = @intCast(i32, tile_x * config.Tsize) - x_off,
+      .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+      .w = config.Tsize,
+      .h = config.Tsize
+    };
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
-            if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize }) > 0) {
+            if (sdl.SDL_RenderCopy(mepo.renderer, text, null, dest) > 0) {
                 return errors.SDLError.BlitSurface;
             }
         },
-        else => {
-            // TODO
+        .queued_position => |queued_position| {
+            _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 235, 235, 235, sdl.SDL_ALPHA_OPAQUE);
+            _ = sdl.SDL_RenderFillRect(mepo.renderer, dest);
+            try mepo.blit_multiline_text(dest.x, dest.y, @intCast(u32, dest.w), @intCast(u32, dest.h), "{d}", .{queued_position});
         },
+        .transfer_datum => {
+            _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 100, 0, sdl.SDL_ALPHA_OPAQUE);
+            _ = sdl.SDL_RenderFillRect(mepo.renderer, dest);
+        }
     }
 }
 
