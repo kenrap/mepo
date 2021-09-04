@@ -80,11 +80,11 @@ search scripts, bookmarks, and more.
   - Improve current stability of the application and resolve intermittent
     crashes related to tile downloading.
   - Implement tile downloading retry logic & handle case where user is
-    offline gracefully. Also error check invalid PNG tiledata receieved
+    offline gracefully. Also error check invalid PNG tiledata received
     from tileservers & loaded from filesystem.
   - Resolve existing memory leaks and rework consistency of allocator
     passing (e.g. remove ad-hoc allocators, ensure all allocations based on
-    useing top-level allocator via arena allocation).
+    using top-level allocator via arena allocation).
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
   - Implement LIFO for downloading queue: viewport tiles should always take
@@ -110,8 +110,9 @@ search scripts, bookmarks, and more.
   - Add distance to lat-lon conversion functions to assist in above (along
     with unit tests) and to later be used for measuring distance between
     pins in ordered groups.
-  - Add a shell script to download interactively based on Nominatim search
-    query result so you can say download an entire city for example.
+  - Add a shell script to allow downloading either interactively or
+    non-interactively based on Nominatim search query result so you can say
+    download an entire city for example.
   - Create mepolang command to selectively clear download cache so
     tiles can be updated if outdated.
   - Parameterize max number of concurrent downloads as a setting accessible
@@ -168,11 +169,11 @@ search scripts, bookmarks, and more.
   - Perform testing and make fixes as necessary on most common UIs on
     postmarketOS. Primarily test and ensure compatibility with Phosh
     (mobile Wayland), Swmo (mobile Wayland), Sxmo (mobile X), Sway
-    (desktop Wayland), and i3 (desktop X) as these 5 enviroments encompass
+    (desktop Wayland), and i3 (desktop X) as these 5 environments encompass
     large userbases and represent the 4 different combinations of
     mobile/desktop & X/Wayland that should all have first-class support.
   - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
-    greatest cross-compatibility between enviroments.
+    greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties**
   - Rework main application event loop to handle STDIN filedescriptor in
     parallel to current SDL events processing. So commandline of application
@@ -182,7 +183,7 @@ search scripts, bookmarks, and more.
     glitches.
   - Add support for pasting / copying current coordinates from the system
     clipboard and ensure compatibility in both Wayland & X.
-  - Add per-tile-downloading progress-indicators.
+  - Add visual per-tile-downloading progress-indicators.
   - Improve bottom status bar display to show bandwidth usage / download of
     tiles, disk, and memory usage.
   - Integrate gpsd into a script to update user's current location pin and
@@ -190,7 +191,7 @@ search scripts, bookmarks, and more.
   - Add routing script based on GraphHopper, OpenRouteService, or similar
     to parse GeoJSON LineString API response into an ordered pin group. Thus
     allowing for point-to-point navigation.
-  - Refine existing Overpass search script (provide beter recommendations
+  - Refine existing Overpass search script (provide better recommendations
     illustrating OSM tag-based flexibility).
   - Add example bookmarking script based on pin API.
   - Finalize mepolang 1.0 API and add error checking so things don't crash
@@ -203,9 +204,11 @@ search scripts, bookmarks, and more.
     freeze application.
 - **Milestone 6: Documentation & Packaging**
   - Add manpage documenting mepolang commands and basic usage.
-  - Document existing scripts used for search and add notes about
-    how these scripts could be used offline by running Nominatim,
-    Overpass, etc. locally.
+  - Add markdown-based documentation to explain mepolang commands, usage
+    in parity with manpage.
+  - Document existing scripts used for search, routing, etc. and add notes
+    about how these scripts could be used offline by running Nominatim,
+    Overpass, GraphHopper, etc. locally.
   - Document examples on how to write custom scripts interfacing with
     mepolang.
   - Modify internals of mepolang to include documentation directly in
@@ -214,9 +217,9 @@ search scripts, bookmarks, and more.
   - Modify internals of prefset / preferences table to automatically generate
     documentation directly from code / structs.
   - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
-  - Package-split current `scripts/` directory to allow seperate packages
+  - Package-split current `scripts/` directory to allow separate packages
     for mepo and mepo-scripts. The former only will contain the base
-    application (Zig) executable; the latter will contain auxillary scripts.
+    application (Zig) executable; the latter will contain auxiliary scripts.
   - Work with maintainers of mobile linux (& Pinephone) UIs to get
     Mepo integrated properly.
   - Tag 1.0 release.
