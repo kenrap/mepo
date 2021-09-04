@@ -15,7 +15,8 @@ QUERY="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    $MEPO_MENU "Search for Location"
+    $MEPO_MENU "Search for Location" |
+    sed 's/ /%20/g'
 )"
 
 curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
