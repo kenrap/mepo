@@ -21,7 +21,8 @@ pub const DefaultBaseConfig =
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ p [pin_purge];
     \\ 
-    \\ bind_key _ g [shellpipe mepo_nomatim_searchprompt.sh];
+    \\ bind_key _ g [shellpipe [mepo_nomatim_searchprompt.sh center]];
+    \\ bind_key s g [shellpipe [mepo_nomatim_searchprompt.sh pindrop]];
     \\ bind_key _ z [shellpipe mepo_zoomlevelset.sh];
     \\ bind_key _ b [shellpipe mepo_bbox_search.sh];
     \\ bind_key _ q [shellpipe mepo_bbox_queuedownload.sh];
