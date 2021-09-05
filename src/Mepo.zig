@@ -108,12 +108,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
-    const dest = &sdl.SDL_Rect{
-      .x = @intCast(i32, tile_x * config.Tsize) - x_off,
-      .y = @intCast(i32, tile_y * config.Tsize) - y_off,
-      .w = config.Tsize,
-      .h = config.Tsize
-    };
+    const dest = &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize };
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
@@ -129,7 +124,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .transfer_datum => {
             _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 100, 0, sdl.SDL_ALPHA_OPAQUE);
             _ = sdl.SDL_RenderFillRect(mepo.renderer, dest);
-        }
+        },
     }
 }
 
@@ -159,7 +154,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
     if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 0, 255)) {
-      return error.Todo;
+        return error.Todo;
     }
     if (0 != sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
@@ -167,7 +162,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         .w = @intCast(i32, mepo.w),
         .h = 200,
     })) {
-      return error.Todo;
+        return error.Todo;
     }
 
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
@@ -227,7 +222,7 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
     var args: [types.MepoFnNargs]types.MepoArg = undefined;
     var i: usize = 0;
     var bracket_start_i: usize = undefined;
-    var bracket_nest_n : usize = 0;
+    var bracket_nest_n: usize = 0;
 
     for (tokens) |tok| {
         if (tok[0] == '[' and tok.len == 1) bracket_nest_n += 1;
@@ -236,7 +231,7 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
         if (bracket_nest_n == 1 and tok[0] == '[' and tok.len == 1) {
             bracket_start_i = i;
         } else if (bracket_nest_n == 0 and tok[0] == ']' and tok.len == 1) {
-            args[args_i] = .{ .Text = try std.mem.joinZ(allocator, " ", tokens[bracket_start_i + 1  .. i ]) };
+            args[args_i] = .{ .Text = try std.mem.joinZ(allocator, " ", tokens[bracket_start_i + 1 .. i]) };
             args_i += 1;
         } else if (bracket_nest_n >= 1) {
             // nop
@@ -248,7 +243,6 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
             args_i += 1;
         }
         i += 1;
-
     }
 
     return args;
@@ -296,10 +290,9 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
         // Redraw
         const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
-        if (
-          (!has_pending_motion_events and pending == .Drag) or
-          pending == .Redraw
-        ) {
+        if ((!has_pending_motion_events and pending == .Drag) or
+            pending == .Redraw)
+        {
             try blit(mepo);
         }
 
@@ -353,8 +346,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 },
                 .SDL_KEYUP => {
                     if (mepo.keybindings_table.get(.{
-                      .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
-                      .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
+                        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
+                        .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
                     })) |run_expression| {
                         std.debug.warn("Got table function {s}\n", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
@@ -395,7 +388,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = sdl.SDL_ALPHA_OPAQUE});
+            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = sdl.SDL_ALPHA_OPAQUE });
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
                     dest_rect.w = text_surf.?.w;
@@ -414,28 +407,27 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
 }
 
 pub fn get_x(mepo: *@This()) i32 {
-  return conversionutil.lon_to_px_x(mepo.lon, mepo.zoom);
+    return conversionutil.lon_to_px_x(mepo.lon, mepo.zoom);
 }
 
 pub fn get_y(mepo: *@This()) i32 {
-  return conversionutil.lat_to_px_y(mepo.lat, mepo.zoom);
+    return conversionutil.lat_to_px_y(mepo.lat, mepo.zoom);
 }
 
 pub fn set_x(mepo: *@This(), x: i32) void {
-  mepo.lon = conversionutil.px_x_to_lon(x, mepo.zoom);
+    mepo.lon = conversionutil.px_x_to_lon(x, mepo.zoom);
 }
 
 pub fn set_y(mepo: *@This(), y: i32) void {
-  mepo.lat = conversionutil.px_y_to_lat(y, mepo.zoom);
+    mepo.lat = conversionutil.px_y_to_lat(y, mepo.zoom);
 }
 
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
-  std.debug.warn("Graceful shutdown via signal: {}\n", .{arg});
-  sdl.SDL_VideoQuit();
-  sdl.SDL_Quit();
-  std.os.exit(0);
+    std.debug.warn("Graceful shutdown via signal: {}\n", .{arg});
+    sdl.SDL_VideoQuit();
+    sdl.SDL_Quit();
+    std.os.exit(0);
 }
-
 
 pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
@@ -506,14 +498,14 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     }
 
     // Setup TERM/INT signals
-    const sigs : [2]u6 = .{std.os.linux.SIGTERM, std.os.linux.SIGINT};
+    const sigs: [2]u6 = .{ std.os.linux.SIGTERM, std.os.linux.SIGINT };
     for (sigs) |sig| {
         if (0 != std.os.linux.sigaction(sig, &.{
-          .handler = .{ .handler = sighandle_terminate },
-          .mask = [_]u32{0} ** 32,
-          .flags = @as(c_uint, 0),
+            .handler = .{ .handler = sighandle_terminate },
+            .mask = [_]u32{0} ** 32,
+            .flags = @as(c_uint, 0),
         }, null)) {
-          return error.FailedToSetupSighandler;
+            return error.FailedToSetupSighandler;
         }
     }
 
@@ -521,52 +513,49 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
 }
 
 test "mepolang_argize" {
-  var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-  defer arena.deinit();
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
 
-  const spec = struct {
-    input: []const []const u8,
-    expect: []const types.MepoArg,
-  };
+    const spec = struct {
+        input: []const []const u8,
+        expect: []const types.MepoArg,
+    };
 
-  var specs = [_]spec{ 
-    .{
-      // Standard check to make sure text / numbers argized properly
-      .input = &[_][]const u8{"arga", "22.2"},
-      .expect = &[_]types.MepoArg{
-        types.MepoArg{ .Text = "arga" },
-        types.MepoArg{ .Number = 22.2 },
-      }
-    },
-    .{
-      // Numbers check (negative, postive)
-      .input = &[_][]const u8{"-22.4", "2747.2716"  },
-      .expect = &[_]types.MepoArg{
-        types.MepoArg{ .Number = -22.4 },
-        types.MepoArg{ .Number = 2747.2716, },
-      }
-    },
-    .{
-      // Ensure argizer never parses past 1st set of string, e.g. nested []
-      // should just tokenize as single arg proc
-      .input = &[_][]const u8{"foo", "bar", "[", "baz", "bill", "]", "dill", "jill"  },
-      .expect = &[_]types.MepoArg{
-        types.MepoArg{ .Text = "foo" },
-        types.MepoArg{ .Text = "bar" },
-        types.MepoArg{ .Text = "baz bill" },
-        types.MepoArg{ .Text = "dill" }
-       }
-    }
-  };
+    var specs = [_]spec{
+        .{
+            // Standard check to make sure text / numbers argized properly
+            .input = &[_][]const u8{ "arga", "22.2" },
+            .expect = &[_]types.MepoArg{
+                types.MepoArg{ .Text = "arga" },
+                types.MepoArg{ .Number = 22.2 },
+            },
+        },
+        .{
+            // Numbers check (negative, postive)
+            .input = &[_][]const u8{ "-22.4", "2747.2716" },
+            .expect = &[_]types.MepoArg{
+                types.MepoArg{ .Number = -22.4 },
+                types.MepoArg{
+                    .Number = 2747.2716,
+                },
+            },
+        },
+        .{
+            // Ensure argizer never parses past 1st set of string, e.g. nested []
+            // should just tokenize as single arg proc
+            .input = &[_][]const u8{ "foo", "bar", "[", "baz", "bill", "]", "dill", "jill" },
+            .expect = &[_]types.MepoArg{ types.MepoArg{ .Text = "foo" }, types.MepoArg{ .Text = "bar" }, types.MepoArg{ .Text = "baz bill" }, types.MepoArg{ .Text = "dill" } },
+        },
+    };
 
-  for (specs) |s| {
-      const result = try mepolang_argize(&arena.allocator, s.input[0..]);
-      for (s.expect) |_, i| {
-        try std.testing.expectEqual(@TypeOf(s.expect[i]), @TypeOf(result[i]));
-        switch (result[i]) {
-          .Number => try std.testing.expectEqual(s.expect[i].Number,result[i].Number),
-          .Text => try std.testing.expectEqualSlices(u8, s.expect[i].Text, result[i].Text),
+    for (specs) |s| {
+        const result = try mepolang_argize(&arena.allocator, s.input[0..]);
+        for (s.expect) |_, i| {
+            try std.testing.expectEqual(@TypeOf(s.expect[i]), @TypeOf(result[i]));
+            switch (result[i]) {
+                .Number => try std.testing.expectEqual(s.expect[i].Number, result[i].Number),
+                .Text => try std.testing.expectEqualSlices(u8, s.expect[i].Text, result[i].Text),
+            }
         }
-      }
-  }
+    }
 }

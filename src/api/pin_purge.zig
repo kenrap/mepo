@@ -9,6 +9,6 @@ pub fn f_pin_purge(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 pub fn pin_purge(mepo: *Mepo) !void {
-  mepo.pin_active = null;
-  mepo.pin_table.clearAndFree();
+    mepo.pin_active = null;
+    mepo.pin_table.clearAndFree();
 }

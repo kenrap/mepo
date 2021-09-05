@@ -1,4 +1,4 @@
-pub const SDLError = error {
+pub const SDLError = error{
     BlitSurface,
     RenderDrawLine,
     SetRenderDrawColor,

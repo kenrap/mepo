@@ -59,7 +59,9 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
         defer std.heap.c_allocator.free(png);
         file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
-            const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch { break :load_from_fs; };
+            const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
+                break :load_from_fs;
+            };
             return TileData{ .texture = text };
         }
     }

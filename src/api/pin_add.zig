@@ -12,9 +12,5 @@ pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 pub fn pin_add(mepo: *Mepo, lat: f64, lon: f64, name: []const u8) !void {
-  try mepo.pin_table.put(name, .{
-    .lat = lat,
-    .lon = lon,
-    .name = name
-  });
+    try mepo.pin_table.put(name, .{ .lat = lat, .lon = lon, .name = name });
 }

@@ -9,5 +9,5 @@ pub fn f_pin_deactivate(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !vo
 }
 
 pub fn pin_deactivate(mepo: *Mepo) !void {
-  mepo.pin_active = null;
+    mepo.pin_active = null;
 }

@@ -15,7 +15,6 @@ pub const DefaultBaseConfig =
     \\ bind_key s h [move_relative -100 0];
     \\ bind_key _ l [move_relative 10 0];
     \\ bind_key s l [move_relative 100 0];
-
     \\ bind_key _ = [zoom_relative 1];
     \\ bind_key _ - [zoom_relative -1];
     \\ bind_key _ n [pin_cycle 1];
@@ -39,23 +38,18 @@ pub const DefaultBaseConfig =
     \\
     \\ bind_key _ e [prefset debug_global 1];
     \\ bind_key s e [prefset debug_global 0];
-
     \\ bind_key _ r [prefset download_bar 1];
     \\ bind_key s r [prefset download_bar 0];
-
     \\ bind_key _ c [center_on_mouse];
     \\
     \\ prefset crosshair_size 15;
     \\ prefset crosshair_on 1;
-
     \\ center_on_coords 40.78392 -73.96442;
-
     \\ prefset download_bar 0;
     \\ prefset debug_global 1;
     \\ prefset debug_tiles 0;
     \\ prefset zoom 14;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
-
     \\ pin_add 40.7418 -73.9899 baz;
-    ;
+;

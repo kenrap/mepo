@@ -35,4 +35,3 @@ pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
         std.debug.warn("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
     }
 }
-
