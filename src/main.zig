@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const Mepo = @import("./Mepo.zig");
 const TileCache = @import("./TileCache.zig");
 const conversion = @import("./conversion.zig");
@@ -7,8 +8,13 @@ const parseutil = @import("./util/parseutil.zig");
 const stringsutil = @import("./util/stringsutil.zig");
 
 pub fn main() !void {
-    var args = try stringsutil.read_args();
+    comptime {
+        if (std.SemanticVersion.order(builtin.zig_version, try std.SemanticVersion.parse("0.8.0")) != .eq) {
+            @panic("Must be built against Zig 0.8.0");
+        }
+    }
 
+    var args = try stringsutil.read_args();
     var cfg: ?[]const u8 = cfg: {
         if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
             break :cfg try stringsutil.read_stdin();
@@ -16,7 +22,6 @@ pub fn main() !void {
             break :cfg null;
         }
     };
-
     var tile_cache = try TileCache.init();
     var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
     var mepo = try Mepo.init(&tile_cache, cfg);
