@@ -28,3 +28,11 @@ sudo apk add curl-dev sdl2-dev sdl2_image-dev sdl2_ttf-dev
 ```
 
 After adding zig to your path, run `zig build run`
+
+# Code Style
+
+Run all files through zig fmt:
+
+```sh
+ag -g zig | xargs zig fmt
+```
