@@ -4,6 +4,7 @@ pub const InitWindowH = 720;
 pub const Useragent = "mepo";
 pub const MaxNTransfers = 5;
 pub const DownloaderPollMs = 50;
+pub const FontSize = 14;
 
 pub const DefaultBaseConfig =
     \\ bind_key _ j [move_relative 0 10];

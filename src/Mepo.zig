@@ -387,7 +387,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     defer mepo.allocator.free(msg);
 
     // TODO: Implement clipping based on passed w/h
-    const line_height = 16;
+    const line_height = @floatToInt(u32, config.FontSize * 1.25);
 
     var dest_rect = sdl.SDL_Rect{ .x = x, .y = y, .w = undefined, .h = undefined };
     var start: usize = 0;
@@ -462,7 +462,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         return errors.SDLError.TTF_Init;
     } else {
         const font = @embedFile("../assets/terminus.ttf");
-        font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, 14);
+        font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, config.FontSize);
         if (font_opt == null) {
             std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
             return errors.SDLError.OpenFontRW;
