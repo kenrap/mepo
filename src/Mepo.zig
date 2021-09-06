@@ -375,6 +375,15 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
+pub fn u24_to_sdl_color(val: u24) sdl.SDL_Color {
+    return .{
+       .r = @intCast(u8, val >> 16),
+       .g = @intCast(u8, val >> 8 & 0xff),
+       .b = @intCast(u8, val & 0xff),
+       .a = sdl.SDL_ALPHA_OPAQUE,
+    };
+}
+
 pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, comptime fmt_string: []const u8, args: anytype) !void {
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
@@ -388,7 +397,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), .{ .r = 0, .g = 0, .b = 0, .a = sdl.SDL_ALPHA_OPAQUE });
+            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), u24_to_sdl_color(0x00000));
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
                     dest_rect.w = text_surf.?.w;
