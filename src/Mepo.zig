@@ -37,9 +37,8 @@ keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
-    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE)) {
-        return errors.SDLError.RenderDrawColor;
-    } else if (0 != sdl.SDL_RenderDrawLine(
+    try mepo.renderer_set_draw_color(0x000000);
+    if (0 != sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
@@ -63,6 +62,7 @@ pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zo
     const begy = vpy - config.Tsize;
     const endx = vpx + @intCast(i32, vpw) + config.Tsize;
     const endy = vpy + @intCast(i32, vph) + config.Tsize;
+
     var tilex: i32 = @intCast(i32, @divFloor(begx, config.Tsize));
     var tiley: i32 = @intCast(i32, @divFloor(begy, config.Tsize));
 
@@ -103,12 +103,24 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
         else => {},
     }
 
-    try mepo.blit_multiline_text(@intCast(i32, tile_x * config.Tsize) - x_off, @intCast(i32, tile_y * config.Tsize) - y_off, config.Tsize, config.Tsize, "tx: {d}\nty: {d}\ndl: {d}/{d}", .{ tile_x, tile_y, dl_now, dl_total });
+    try mepo.blit_multiline_text(
+        @intCast(i32, tile_x * config.Tsize) - x_off,
+        @intCast(i32, tile_y * config.Tsize) - y_off,
+        config.Tsize,
+        config.Tsize,
+        "tx: {d}\nty: {d}\ndl: {d}/{d}",
+        .{ tile_x, tile_y, dl_now, dl_total },
+    );
 }
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
     var screen = sdl.SDL_GetWindowSurface(mepo.window);
-    const dest = &sdl.SDL_Rect{ .x = @intCast(i32, tile_x * config.Tsize) - x_off, .y = @intCast(i32, tile_y * config.Tsize) - y_off, .w = config.Tsize, .h = config.Tsize };
+    const dest = &sdl.SDL_Rect{
+        .x = @intCast(i32, tile_x * config.Tsize) - x_off,
+        .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+        .w = config.Tsize,
+        .h = config.Tsize,
+    };
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
@@ -117,12 +129,19 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             }
         },
         .queued_position => |queued_position| {
-            _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 235, 235, 235, sdl.SDL_ALPHA_OPAQUE);
+            try mepo.renderer_set_draw_color(0xebebeb);
             _ = sdl.SDL_RenderFillRect(mepo.renderer, dest);
-            try mepo.blit_multiline_text(dest.x, dest.y, @intCast(u32, dest.w), @intCast(u32, dest.h), "{d}", .{queued_position});
+            try mepo.blit_multiline_text(
+                dest.x,
+                dest.y,
+                @intCast(u32, dest.w),
+                @intCast(u32, dest.h),
+                "{d}",
+                .{queued_position},
+            );
         },
         .transfer_datum => {
-            _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 100, 0, sdl.SDL_ALPHA_OPAQUE);
+            try mepo.renderer_set_draw_color(0x006400);
             _ = sdl.SDL_RenderFillRect(mepo.renderer, dest);
         },
     }
@@ -131,7 +150,14 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_global_text(mepo: *@This()) !void {
     if (!mepo.debug_global) return;
 
-    const surf = try mepo.blit_multiline_text(5, 5, mepo.w, mepo.h, "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}", .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon });
+    try mepo.blit_multiline_text(
+        5,
+        5,
+        mepo.w,
+        mepo.h,
+        "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
+        .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
+    );
 }
 
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
@@ -141,7 +167,10 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         var y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
 
         var size: i32 = 10;
-        _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?)) 255 else 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
+        try mepo.renderer_set_draw_color(if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?))
+            0xff0000
+        else
+            0x000000);
         _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
@@ -153,9 +182,8 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
-    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 0, 255)) {
-        return error.Todo;
-    }
+
+    try mepo.renderer_set_draw_color(0xffff00);
     if (0 != sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
@@ -168,15 +196,29 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
 
     if (pin_opt) |pin| {
-        try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "Pin: {s}\nlat: {d}\nlon: {d}\n", .{ pin.name, pin.lat, pin.lon });
-        try mepo.blit_multiline_text(@intCast(i32, mepo.w) - 20, @intCast(i32, mepo.h) - (18 * 3), mepo.w, mepo.h, "{d}p", .{mepo.pin_table.count()});
+        try mepo.blit_multiline_text(
+            5,
+            @intCast(i32, mepo.h) - (18 * 3),
+            mepo.w,
+            mepo.h,
+            "Pin: {s}\nlat: {d}\nlon: {d}\n",
+            .{ pin.name, pin.lat, pin.lon },
+        );
+        try mepo.blit_multiline_text(
+            @intCast(i32, mepo.w) - 20,
+            @intCast(i32, mepo.h) - (18 * 3),
+            mepo.w,
+            mepo.h,
+            "{d}p",
+            .{mepo.pin_table.count()},
+        );
     }
 }
 
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, sdl.SDL_ALPHA_OPAQUE);
+    try mepo.renderer_set_draw_color(0xffffff);
     _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
@@ -184,7 +226,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 200,
     });
 
-    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, sdl.SDL_ALPHA_OPAQUE);
+    try mepo.renderer_set_draw_color(0x000000);
     _ = sdl.SDL_RenderFillRect(mepo.renderer, &sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
@@ -192,17 +234,31 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 1,
     });
 
-    _ = try mepo.blit_multiline_text(5, @intCast(i32, mepo.h) - 20 + 3, mepo.w, mepo.h, "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}", .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() });
+    try mepo.blit_multiline_text(
+        5,
+        @intCast(i32, mepo.h) - 20 + 3,
+        mepo.w,
+        mepo.h,
+        "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
+        .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
+    );
 }
 
 pub fn blit(mepo: *@This()) !void {
-    _ = sdl.SDL_SetRenderDrawColor(mepo.renderer, 255, 255, 255, 255);
+    try mepo.renderer_set_draw_color(0xffffff);
     if (sdl.SDL_RenderFillRect(mepo.renderer, null) != 0) {
         std.debug.warn("Fill fail {s}", .{sdl.SDL_GetError()});
         return errors.SDLError.FillRect;
     }
 
-    try blit_tiles_all(mepo, mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2), mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2), mepo.w, mepo.h, mepo.zoom);
+    try blit_tiles_all(
+        mepo,
+        mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2),
+        mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2),
+        mepo.w,
+        mepo.h,
+        mepo.zoom,
+    );
     try mepo.blit_global_text();
     try mepo.blit_pins();
     try mepo.blit_pin_active_text();
@@ -375,12 +431,19 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
+pub fn renderer_set_draw_color(mepo: *@This(), val: u24) !void {
+    const color = u24_to_sdl_color(val);
+    if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, color.r, color.g, color.b, sdl.SDL_ALPHA_OPAQUE)) {
+        return errors.SDLError.RenderDrawColor;
+    }
+}
+
 pub fn u24_to_sdl_color(val: u24) sdl.SDL_Color {
     return .{
-       .r = @intCast(u8, val >> 16),
-       .g = @intCast(u8, val >> 8 & 0xff),
-       .b = @intCast(u8, val & 0xff),
-       .a = sdl.SDL_ALPHA_OPAQUE,
+        .r = @intCast(u8, val >> 16),
+        .g = @intCast(u8, val >> 8 & 0xff),
+        .b = @intCast(u8, val & 0xff),
+        .a = sdl.SDL_ALPHA_OPAQUE,
     };
 }
 
@@ -446,7 +509,14 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) < 0) {
         return errors.SDLError.Init;
     } else {
-        window = sdl.SDL_CreateWindow("mepo", sdl.SDL_WINDOWPOS_UNDEFINED, sdl.SDL_WINDOWPOS_UNDEFINED, config.InitWindowW, config.InitWindowH, sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE);
+        window = sdl.SDL_CreateWindow(
+            "mepo",
+            sdl.SDL_WINDOWPOS_UNDEFINED,
+            sdl.SDL_WINDOWPOS_UNDEFINED,
+            config.InitWindowW,
+            config.InitWindowH,
+            sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
+        );
         if (window == null) {
             return errors.SDLError.CreateWindow;
         }
