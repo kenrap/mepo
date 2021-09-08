@@ -190,7 +190,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         .w = @intCast(i32, mepo.w),
         .h = 200,
     })) {
-        return error.Todo;
+        return errors.SDLError.RenderFillRect;
     }
 
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
@@ -431,7 +431,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn renderer_set_draw_color(mepo: *@This(), val: u24) !void {
+pub fn renderer_set_draw_color(mepo: *@This(), val: u24) errors.SDLError!void {
     const color = u24_to_sdl_color(val);
     if (0 != sdl.SDL_SetRenderDrawColor(mepo.renderer, color.r, color.g, color.b, sdl.SDL_ALPHA_OPAQUE)) {
         return errors.SDLError.RenderDrawColor;
