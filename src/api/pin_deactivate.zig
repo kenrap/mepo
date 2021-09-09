@@ -8,6 +8,6 @@ pub fn f_pin_deactivate(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !vo
     try pin_deactivate(mepo);
 }
 
-pub fn pin_deactivate(mepo: *Mepo) !void {
+fn pin_deactivate(mepo: *Mepo) !void {
     mepo.pin_active = null;
 }

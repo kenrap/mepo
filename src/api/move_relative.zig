@@ -8,7 +8,7 @@ pub fn f_move_relative(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !voi
     move_relative(mepo, rel_x, rel_y);
 }
 
-pub fn move_relative(mepo: *Mepo, relative_x: i32, relative_y: i32) void {
+fn move_relative(mepo: *Mepo, relative_x: i32, relative_y: i32) void {
     mepo.set_x(mepo.get_x() + relative_x);
     mepo.set_y(mepo.get_y() + relative_y);
 }

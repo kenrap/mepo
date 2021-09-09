@@ -15,7 +15,7 @@ pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !voi
     try download_bbox(mepo, a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
 }
 
-pub fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
+fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
     const lat_min = if (a_lat < b_lat) a_lat else b_lat;
     const lat_max = if (a_lat > b_lat) a_lat else b_lat;
     const lon_min = if (a_lon < b_lon) a_lon else b_lon;

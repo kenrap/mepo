@@ -10,7 +10,7 @@ pub fn f_bind_key(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     try bind_key(mepo, modifier, key, expression);
 }
 
-pub fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expression: []const u8) !void {
+fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expression: []const u8) !void {
     std.debug.warn("Binding key: mod={s} code={s} to expression {s}\n", .{ mod_str, key_str, expression });
 
     // Keymod

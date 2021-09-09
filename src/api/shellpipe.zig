@@ -8,7 +8,7 @@ pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     try shellpipe(mepo, cmd);
 }
 
-pub fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
+fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
