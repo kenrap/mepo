@@ -1,6 +1,7 @@
 pub const SDLError = error{
     BlitSurface,
     CreateRenderer,
+    CreateTextureFromSurface,
     CreateWindow,
     FillRect,
     Init,

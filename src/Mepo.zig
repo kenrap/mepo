@@ -439,7 +439,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
                         return errors.SDLError.BlitSurface;
                     }
                 } else {
-                    return error.Fail;
+                    return errors.SDLError.CreateTextureFromSurface;
                 }
             }
             start = current + 1;
