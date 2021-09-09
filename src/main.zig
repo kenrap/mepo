@@ -14,10 +14,11 @@ pub fn main() !void {
         }
     }
 
-    var args = try stringsutil.read_args();
+    var allocator = std.heap.c_allocator;
+    var args = try stringsutil.read_args(allocator);
     var cfg: ?[]const u8 = cfg: {
         if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
-            break :cfg try stringsutil.read_stdin();
+            break :cfg try stringsutil.read_stdin(allocator);
         } else {
             break :cfg null;
         }

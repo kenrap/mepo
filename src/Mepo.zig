@@ -291,7 +291,7 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
 }
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
-    for (try stringsutil.statementize(mepolang_text)) |statement| {
+    for (try stringsutil.statementize(mepo.allocator, mepolang_text)) |statement| {
         std.debug.warn("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 

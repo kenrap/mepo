@@ -1,8 +1,8 @@
 const std = @import("std");
 
-pub fn tokenize(patch_str: []const u8) ![][]const u8 {
+pub fn tokenize(allocator: *std.mem.Allocator, patch_str: []const u8) ![][]const u8 {
     var token_it = std.mem.tokenize(patch_str, " \n");
-    var tokens: [][]const u8 = try std.heap.c_allocator.alloc([]const u8, 10000);
+    var tokens: [][]const u8 = try allocator.alloc([]const u8, 10000);
     var tokens_size: u32 = 0;
 
     while (true) {
@@ -33,14 +33,14 @@ pub fn tokenize(patch_str: []const u8) ![][]const u8 {
     return tokens[0..tokens_size];
 }
 
-pub fn statementize(input: []const u8) ![][][]const u8 {
+pub fn statementize(allocator: *std.mem.Allocator, input: []const u8) ![][][]const u8 {
     var statement_it = std.mem.tokenize(input, ";");
-    var statements = std.ArrayList([][]const u8).init(std.heap.c_allocator);
+    var statements = std.ArrayList([][]const u8).init(allocator);
 
     while (true) {
         var item = statement_it.next();
         if (item == null) break;
-        var toks = try tokenize(item.?);
+        var toks = try tokenize(allocator, item.?);
         if (toks.len < 1) continue;
         try statements.append(toks);
     }
@@ -48,9 +48,9 @@ pub fn statementize(input: []const u8) ![][][]const u8 {
     return statements.items;
 }
 
-pub fn read_stdin() anyerror![]const u8 {
+pub fn read_stdin(allocator: *std.mem.Allocator) anyerror![]const u8 {
     const stream = &std.io.getStdIn().reader();
-    var buffer = try std.heap.c_allocator.alloc(u8, 1024 * 100);
+    var buffer = try allocator.alloc(u8, 1024 * 100);
     std.debug.warn("Waiting for STDIN\n", .{});
     if (stream.read(buffer)) {
         std.debug.warn("Read STDIN to buffer ok\n", .{});
@@ -61,23 +61,22 @@ pub fn read_stdin() anyerror![]const u8 {
     return std.mem.trim(u8, buffer, " \n");
 }
 
-pub fn read_args_str() anyerror![]u8 {
+pub fn read_args_str(allocator: *std.mem.Allocator) anyerror![]u8 {
     var args_it = std.process.args();
-    var alloc = std.heap.c_allocator;
-    var accumulate = try std.heap.c_allocator.alloc(u8, 0);
-    var arg = args_it.next(alloc);
+    var accumulate = try allocator.alloc(u8, 0);
+    var arg = args_it.next(allocator);
     var i: usize = 0;
-    while (arg != null) : (arg = args_it.next(alloc)) {
+    while (arg != null) : (arg = args_it.next(allocator)) {
         i += 1;
         if (i == 1) continue;
         var a = try arg.?;
-        accumulate = try std.mem.join(std.heap.c_allocator, " ", &[_][]const u8{ accumulate, a });
+        accumulate = try std.mem.join(allocator, " ", &[_][]const u8{ accumulate, a });
     }
     return accumulate;
 }
 
-pub fn read_args() anyerror![][]const u8 {
-    return try tokenize(try read_args_str());
+pub fn read_args(allocator: *std.mem.Allocator) anyerror![][]const u8 {
+    return try tokenize(allocator, try read_args_str(allocator));
 }
 
 test "tokenize" {
