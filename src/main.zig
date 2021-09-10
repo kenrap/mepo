@@ -9,7 +9,7 @@ const stringsutil = @import("./util/stringsutil.zig");
 
 pub fn main() !void {
     comptime {
-        if (std.SemanticVersion.order(builtin.zig_version, try std.SemanticVersion.parse("0.8.0")) != .eq) {
+        if (std.SemanticVersion.order(builtin.zig_version, try std.SemanticVersion.parse("0.8.1")) != .eq) {
             @panic("Must be built against Zig 0.8.0");
         }
     }
