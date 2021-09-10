@@ -16,8 +16,8 @@ There is a work in progress package for Alpine Linux:
 https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/22055/diffs
 
 However, this is not the recommended method to install Zig because Zig 
-0.8 is not available in the Alpine repos.
-You can download the binary release of Zig 0.8 from the official website:
+0.8.1 is not available in the Alpine repos.
+You can download the binary release of Zig 0.8.1 from the official website:
 
 https://ziglang.org/download/
 
