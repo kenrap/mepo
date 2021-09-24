@@ -52,12 +52,7 @@ pub fn read_stdin(allocator: *std.mem.Allocator) anyerror![]const u8 {
     const stream = &std.io.getStdIn().reader();
     var buffer = try allocator.alloc(u8, 1024 * 100);
     std.debug.warn("Waiting for STDIN\n", .{});
-    if (stream.read(buffer)) {
-        std.debug.warn("Read STDIN to buffer ok\n", .{});
-    } else |err| {
-        std.debug.warn("Error: {any}\n", .{err});
-        @panic("Error reading STDIN: {any}\n");
-    }
+    _ = try stream.read(buffer);
     return std.mem.trim(u8, buffer, " \n");
 }
 
