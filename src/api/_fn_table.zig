@@ -17,6 +17,7 @@ pub fn generate_fn_table() anyerror!types.MepoFnTable {
         .{ .name = "pin_purge", .func = @import("pin_purge.zig").f_pin_purge },
         .{ .name = "center_on_mouse", .func = @import("center_on_mouse.zig").f_center_on_mouse },
         .{ .name = "download_bbox", .func = @import("download_bbox.zig").f_download_bbox },
+        .{ .name = "fileload", .func = @import("fileload.zig").f_fileload },
     };
 
     try ft.ensureCapacity(fn_bindings.len);
