@@ -299,7 +299,9 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         if (mepo.fn_table.get(statement[0])) |func| {
             var args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(mepo.allocator, statement[1..statement.len]);
             std.debug.warn("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
-            try func(mepo, args);
+            func(mepo, args) catch |mepolang_err| {
+                std.debug.warn("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
+            };
         } else {
             std.debug.warn("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
         }
