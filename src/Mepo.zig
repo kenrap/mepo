@@ -231,7 +231,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         mepo.w,
         mepo.h,
         "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
-        .{ mepo.tile_cache.queue_map.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
+        .{ mepo.tile_cache.queue_lifo.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
     );
 }
 

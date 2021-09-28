@@ -10,6 +10,7 @@ const types = @import("./types.zig");
 const config = @import("./config.zig");
 const sdlutil = @import("./util/sdlutil.zig");
 const fileutil = @import("./util/fileutil.zig");
+const datastructure = @import("./datastructure/datastructure.zig");
 
 pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
 const TileDataTag = enum { transfer_datum, texture, queued_position };
@@ -18,7 +19,7 @@ pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, texture
 source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
-queue_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool),
+queue_lifo: datastructure.Lifo(types.TileSpec, bool),
 transfer_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum),
 texture_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture),
 renderer: ?*sdl.SDL_Renderer,
@@ -64,9 +65,9 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
         }
     }
 
-    try tile_cache.queue_map.put(coords, true);
+    try tile_cache.queue_lifo.put(coords, true);
 
-    return TileData{ .queued_position = @intCast(u32, if (tile_cache.queue_map.getIndex(coords)) |index| index else 0) };
+    return TileData{ .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0) };
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
@@ -79,7 +80,7 @@ pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) 
         return;
     }
 
-    try tile_cache.queue_map.put(coords, false);
+    try tile_cache.queue_lifo.put(coords, false);
 }
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
@@ -190,8 +191,8 @@ pub fn download_loop(tile_cache: *@This()) !void {
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
-        while (tile_cache.queue_map.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
-            var coords = tile_cache.queue_map.pop();
+        while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
+            var coords = tile_cache.queue_lifo.pop();
             try tile_cache.add_to_curl_multi(coords.key, coords.value);
             tile_cache.n_current_transfers += 1;
         }
@@ -217,7 +218,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.source_url = url;
     tile_cache.texture_map.clearAndFree();
-    tile_cache.queue_map.clearAndFree();
+    tile_cache.queue_lifo.clearAndFree();
     sdlutil.sdl_push_resize_event();
 }
 
@@ -234,12 +235,12 @@ pub fn init() anyerror!@This() {
             .n_current_transfers = 0,
             .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(std.heap.c_allocator),
             .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(std.heap.c_allocator),
-            .queue_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, bool).init(std.heap.c_allocator),
+            .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(std.heap.c_allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
         try x.texture_map.ensureCapacity(2000);
         try x.transfer_map.ensureCapacity(20000);
-        try x.queue_map.ensureCapacity(20000);
+        try x.queue_lifo.ensureCapacity(20000);
         return x;
     } else {
         return error.MultiInitFail;
