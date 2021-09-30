@@ -1,9 +1,9 @@
-# **Mepo**
+# [**Mepo**](https://sr.ht/mil/Mepo/)
 
 > **Note:** Mepo is currently in an alpha state although quickly making progress.
 > An initial first tagged release (0.1), is scheduled to be released in short
-> order (within less then a month or so). See below for the high-level goals,
-> current state of Mepo, the path to 1.0, and information on contributing!
+> order. See below for the high-level goals, current state of Mepo, the path
+> to 1.0, and information on contributing!
 
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
@@ -228,14 +228,9 @@ search scripts, bookmarks, and more.
 ## **Contributing**
 
 Mepo is surely welcome to contributors who have experience or interest
-in mobile Linux, OSM, and/or Zig. Since things are still early on in the
-project, there is no dedicated ML yet, however this will come soon. In
-the meantime please either email me directly and I can provide guidance
-on contributing or preferably drop into our IRC channel to discuss. Also
-see the [development guide](doc/develop.md).
+in mobile Linux, OSM, and/or Zig.
 
-**IRC Channel:**
-#mepo on irc.oftc.net
-
-**Contact email:**
-m at milesalan.com
+- **Development Guide**: [here](doc/develop.md).
+- **Mailing List**: [mepo-devel](https://lists.sr.ht/~mil/mepo-devel)
+- **Tickets**: [mepo-tickets](https://todo.sr.ht/~mil/mepo-tickets)
+- **IRC**: #mepo on irc.oftc.net (mla is my nick)
