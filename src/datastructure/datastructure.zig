@@ -27,6 +27,9 @@ pub fn Lifo(comptime key_type: type, comptime metadata_type: type) type {
         pub fn put(self: *@This(), k: key_type, v: metadata_type) !void {
             const lock = self.mutex.acquire();
             defer lock.release();
+            // E.g. ensures when putting items, we always reorder / bump
+            // the most recently added item to the tail, thus makes lifo
+            if (self.array_hash_map.contains(k)) { _ = self.array_hash_map.orderedRemove(k); }
             try self.array_hash_map.put(k, v);
         }
 
