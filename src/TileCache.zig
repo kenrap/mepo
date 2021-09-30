@@ -16,6 +16,7 @@ pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, d
 const TileDataTag = enum { transfer_datum, texture, queued_position };
 pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, texture: *sdl.SDL_Texture, queued_position: u32 };
 
+allocator: *std.mem.Allocator,
 source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
 n_current_transfers: u32,
@@ -54,10 +55,11 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
-        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
-        defer std.heap.c_allocator.free(png);
-        file_cached_png_opt = cache_dir.readFileAlloc(std.heap.c_allocator, png, 500000) catch null;
+        const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
+        defer tile_cache.allocator.free(png);
+        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
         if (file_cached_png_opt) |file_cached_png| {
+            defer tile_cache.allocator.free(file_cached_png);
             const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
                 break :load_from_fs;
             };
@@ -72,7 +74,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
     if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
-        const png = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
+        const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer std.heap.c_allocator.free(png);
         cache_dir.access(png, .{}) catch {
             break :check_tile_exists;
@@ -86,6 +88,7 @@ pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
     var transfer_datum: *TransferDatum = datum: {
         var dat = try std.heap.c_allocator.create(TransferDatum);
+
         dat.client = curl.curl_easy_init().?;
         dat.coords = coords;
         dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
@@ -97,7 +100,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
     try tile_cache.transfer_map.put(coords, transfer_datum);
 
     var tile_url = url: {
-        var url = try std.heap.c_allocator.alloc(u8, 2000);
+        var url = try std.heap.c_allocator.alloc(u8, tile_cache.source_url.?.len + (3 * 10));
         _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
         break :url url;
     };
@@ -226,16 +229,17 @@ pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
     tile_cache.renderer = renderer;
 }
 
-pub fn init() anyerror!@This() {
+pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |curl_multi| {
         var x = @as(@This(), .{
+            .allocator = allocator,
             .source_url = null,
             .cache_dir = null,
             .renderer = null,
             .n_current_transfers = 0,
-            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(std.heap.c_allocator),
-            .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(std.heap.c_allocator),
-            .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(std.heap.c_allocator),
+            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(allocator),
+            .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(allocator),
+            .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
         try x.texture_map.ensureCapacity(2000);
