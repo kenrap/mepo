@@ -10,6 +10,7 @@ pub fn f_fileload(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn fileload(mepo: *Mepo, filepath: []const u8) !void {
     const expanded_path = try fileutil.wordexp_filepath(mepo.allocator, filepath);
+    defer mepo.allocator.free(expanded_path);
     const mepolang_file = try std.fs.openFileAbsolute(expanded_path, .{ .read = true });
     defer mepolang_file.close();
     const code = try mepolang_file.readToEndAlloc(mepo.allocator, 99999);
