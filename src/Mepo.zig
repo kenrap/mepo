@@ -408,7 +408,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     pending = .Redraw;
                 },
                 .SDL_QUIT => {
-                    std.debug.warn("WINDOW EVENT\n", .{});
+                    std.debug.warn("Quit\n", .{});
                     return;
                 },
                 else => {},
