@@ -430,9 +430,11 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            var text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), sdlutil.u24_to_sdl_color(0x00000));
+            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), sdlutil.u24_to_sdl_color(0x00000));
+            defer sdl.SDL_FreeSurface(text_surf);
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
+                    defer sdl.SDL_DestroyTexture(text);
                     dest_rect.w = text_surf.?.w;
                     dest_rect.h = text_surf.?.h;
                     if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect) > 0) {
