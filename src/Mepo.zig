@@ -252,7 +252,7 @@ pub fn blit(mepo: *@This()) !void {
     sdl.SDL_RenderPresent(mepo.renderer);
 
     // Update title
-    var title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
+    const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
     defer mepo.allocator.free(title);
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
@@ -295,7 +295,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
-            var args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(mepo.allocator, statement[1..statement.len]);
+            const args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(mepo.allocator, statement[1..statement.len]);
             std.debug.warn("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
                 std.debug.warn("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });

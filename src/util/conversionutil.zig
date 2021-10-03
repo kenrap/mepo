@@ -2,12 +2,12 @@ const std = @import("std");
 const config = @import("../config.zig");
 
 pub fn lon_to_px_x(lon: f64, zoom: u32) i32 {
-    var tilex: f64 = (lon + 180.0) / 360.0;
+    const tilex: f64 = (lon + 180.0) / 360.0;
     return @floatToInt(i32, tilex * zoom_bit(zoom));
 }
 
 pub fn lat_to_px_y(lat: f64, zoom: u32) i32 {
-    var tiley = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
+    const tiley = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
     return @floatToInt(i32, tiley * zoom_bit(zoom));
 }
 
@@ -16,7 +16,7 @@ pub fn px_x_to_lon(px: i32, zoom: u32) f64 {
 }
 
 pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
-    var n = std.math.pi - 2.0 * std.math.pi * @intToFloat(f64, px) / zoom_bit(zoom);
+    const n = std.math.pi - 2.0 * std.math.pi * @intToFloat(f64, px) / zoom_bit(zoom);
     return 180.0 / std.math.pi * std.math.atan(0.5 * (std.math.exp(n) - std.math.exp(-n)));
 }
 

@@ -1,8 +1,12 @@
 const std = @import("std");
 
-pub fn tokenize(allocator: *std.mem.Allocator, patch_str: []const u8) ![][]const u8 {
-    var token_it = std.mem.tokenize(patch_str, " \n");
-    var tokens: [][]const u8 = try allocator.alloc([]const u8, 10000);
+/// Tokenizes based on whitespace / NLs, and [] brackets, ensuring that
+/// [foo] is always tokenized as 3 tokens (e.g. [,foo,])
+///
+/// Caller responsible for freeing returned ptr memory
+pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 {
+    var token_it = std.mem.tokenize(input, " \n");
+    const tokens: [][]const u8 = try allocator.alloc([]const u8, 10000);
     var tokens_size: u32 = 0;
 
     while (true) {
@@ -33,6 +37,10 @@ pub fn tokenize(allocator: *std.mem.Allocator, patch_str: []const u8) ![][]const
     return tokens[0..tokens_size];
 }
 
+/// Converts / groups input into a 2d array, top level being "statments"
+/// based on semicolon deliniation and second level being "tokens".
+///
+/// Caller responsible for freeing returned ptr memory
 pub fn statementize(allocator: *std.mem.Allocator, input: []const u8) ![][][]const u8 {
     var statement_it = std.mem.tokenize(input, ";");
     var statements = std.ArrayList([][]const u8).init(allocator);
@@ -48,15 +56,18 @@ pub fn statementize(allocator: *std.mem.Allocator, input: []const u8) ![][][]con
     return statements.items;
 }
 
+/// Reads standard input into a buffer
+///
+/// Caller responsible for freeing returned ptr memory
 pub fn read_stdin(allocator: *std.mem.Allocator) anyerror![]const u8 {
     const stream = &std.io.getStdIn().reader();
-    var buffer = try allocator.alloc(u8, 1024 * 100);
+    const buffer = try allocator.alloc(u8, 1024 * 100);
     std.debug.warn("Waiting for STDIN\n", .{});
     _ = try stream.read(buffer);
     return std.mem.trim(u8, buffer, " \n");
 }
 
-pub fn read_args_str(allocator: *std.mem.Allocator) anyerror![]u8 {
+pub fn read_args_str(allocator: *std.mem.Allocator) anyerror![]const u8 {
     var args_it = std.process.args();
     var accumulate = try allocator.alloc(u8, 0);
     var arg = args_it.next(allocator);
