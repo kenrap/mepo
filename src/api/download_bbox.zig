@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const conversionutil = @import("../util/conversionutil.zig");
+const utilconversion = @import("../util/utilconversion.zig");
 const config = @import("../config.zig");
 
 pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
@@ -23,10 +23,10 @@ fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zo
 
     var z: u32 = @intCast(u32, zoom_min);
     while (z <= zoom_max) : (z += 1) {
-        const x_min = @divFloor(conversionutil.lon_to_px_x(lon_min, z), config.Tsize);
-        const x_max = @divFloor(conversionutil.lon_to_px_x(lon_max, z), config.Tsize);
-        const y_min = @divFloor(conversionutil.lat_to_px_y(lat_max, z), config.Tsize);
-        const y_max = @divFloor(conversionutil.lat_to_px_y(lat_min, z), config.Tsize);
+        const x_min = @divFloor(utilconversion.lon_to_px_x(lon_min, z), config.Tsize);
+        const x_max = @divFloor(utilconversion.lon_to_px_x(lon_max, z), config.Tsize);
+        const y_min = @divFloor(utilconversion.lat_to_px_y(lat_max, z), config.Tsize);
+        const y_max = @divFloor(utilconversion.lat_to_px_y(lat_min, z), config.Tsize);
         var x: i32 = x_min;
         while (x <= x_max) : (x += 1) {
             var y: i32 = y_min;

@@ -8,8 +8,8 @@ const cstdio = @cImport({
 const sdl = @import("./sdlshim.zig");
 const types = @import("./types.zig");
 const config = @import("./config.zig");
-const sdlutil = @import("./util/sdlutil.zig");
-const fileutil = @import("./util/fileutil.zig");
+const utilsdl = @import("./util/utilsdl.zig");
+const utilfile = @import("./util/utilfile.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
 pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
@@ -175,7 +175,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     if (tile_cache.n_current_transfers > 0) {
         tile_cache.n_current_transfers -= 1;
     }
-    sdlutil.sdl_push_resize_event();
+    utilsdl.sdl_push_resize_event();
 }
 
 pub fn download_loop(tile_cache: *@This()) !void {
@@ -211,7 +211,7 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
-    const expanded_path = try fileutil.wordexp_filepath(std.heap.c_allocator, path);
+    const expanded_path = try utilfile.wordexp_filepath(std.heap.c_allocator, path);
     defer std.heap.c_allocator.free(expanded_path);
     try std.fs.cwd().makePath(expanded_path);
     tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
@@ -232,7 +232,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     tile_cache.source_url = try std.fmt.allocPrintZ(tile_cache.allocator, "{s}", .{url});
 
     // Resize
-    sdlutil.sdl_push_resize_event();
+    utilsdl.sdl_push_resize_event();
 }
 
 pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {

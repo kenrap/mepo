@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const fileutil = @import("../util/fileutil.zig");
+const utilfile = @import("../util/utilfile.zig");
 
 pub fn f_fileload(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const filepath = args[0].Text;
@@ -9,7 +9,7 @@ pub fn f_fileload(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn fileload(mepo: *Mepo, filepath: []const u8) !void {
-    const expanded_path = try fileutil.wordexp_filepath(mepo.allocator, filepath);
+    const expanded_path = try utilfile.wordexp_filepath(mepo.allocator, filepath);
     defer mepo.allocator.free(expanded_path);
     const mepolang_file = try std.fs.openFileAbsolute(expanded_path, .{ .read = true });
     defer mepolang_file.close();

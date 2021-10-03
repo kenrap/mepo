@@ -1,14 +1,13 @@
 const std = @import("std");
 const sdl = @import("./sdlshim.zig");
-const conversionutil = @import("./util/conversionutil.zig");
 const types = @import("./types.zig");
 const config = @import("./config.zig");
 const errors = @import("./errors.zig");
 const TileCache = @import("./TileCache.zig");
-const parseutil = @import("util/parseutil.zig");
-const mepolangargizeutil = @import("util/mepolangargizeutil.zig");
-const stringsutil = @import("util/stringsutil.zig");
-const sdlutil = @import("util/sdlutil.zig");
+const utilconversion = @import("./util/utilconversion.zig");
+const utilmepolang = @import("util/utilmepolang.zig");
+const utilstrings = @import("util/utilstrings.zig");
+const utilsdl = @import("util/utilsdl.zig");
 const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 
@@ -38,7 +37,7 @@ keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
-    try sdlutil.sdl_renderer_set_draw_color(mepo.renderer, 0x000000);
+    try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, 0x000000);
     if (0 != sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
@@ -128,7 +127,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             }
         },
         .queued_position => |queued_position| {
-            try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, dest);
+            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, dest);
             try mepo.blit_multiline_text(
                 dest.x,
                 dest.y,
@@ -139,7 +138,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             );
         },
         .transfer_datum => {
-            try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0x006400, dest);
+            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x006400, dest);
         },
     }
 }
@@ -160,15 +159,15 @@ fn blit_global_text(mepo: *@This()) !void {
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
     var it = mepo.pin_table.iterator();
     while (it.next()) |item| {
-        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2) - conversionutil.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
-        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - conversionutil.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
+        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2) - utilconversion.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
+        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - utilconversion.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
         const size: i32 = 10;
         const color: u24 = if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?))
             0xff0000
         else
             0x000000;
 
-        try sdlutil.sdl_renderer_fill_rect(mepo.renderer, color, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -180,7 +179,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
 
-    try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
         .w = @intCast(i32, mepo.w),
@@ -212,13 +211,13 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 200,
     });
-    try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0x00000, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x00000, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
@@ -235,7 +234,7 @@ fn blit_download_bar(mepo: *@This()) !void {
 }
 
 pub fn blit(mepo: *@This()) !void {
-    try sdlutil.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, null);
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, null);
     try blit_tiles_all(
         mepo,
         mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2),
@@ -263,13 +262,13 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    for (try stringsutil.statementize(&arena.allocator, mepolang_text)) |statement| {
+    for (try utilstrings.statementize(&arena.allocator, mepolang_text)) |statement| {
         std.debug.warn("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
-            const args: [types.MepoFnNargs]types.MepoArg = try mepolangargizeutil.mepolang_argize(&arena.allocator, statement[1..statement.len]);
+            const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.mepolang_argize(&arena.allocator, statement[1..statement.len]);
             std.debug.warn("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
                 std.debug.warn("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
@@ -281,7 +280,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 }
 
 fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
-    _ = sdlutil.sdl_push_resize_event();
+    _ = utilsdl.sdl_push_resize_event();
     return 0;
 }
 
@@ -404,7 +403,7 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), sdlutil.u24_to_sdl_color(0x00000));
+            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(0x00000));
             defer sdl.SDL_FreeSurface(text_surf);
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
@@ -425,19 +424,19 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
 }
 
 pub fn get_x(mepo: *@This()) i32 {
-    return conversionutil.lon_to_px_x(mepo.lon, mepo.zoom);
+    return utilconversion.lon_to_px_x(mepo.lon, mepo.zoom);
 }
 
 pub fn get_y(mepo: *@This()) i32 {
-    return conversionutil.lat_to_px_y(mepo.lat, mepo.zoom);
+    return utilconversion.lat_to_px_y(mepo.lat, mepo.zoom);
 }
 
 pub fn set_x(mepo: *@This(), x: i32) void {
-    mepo.lon = conversionutil.px_x_to_lon(x, mepo.zoom);
+    mepo.lon = utilconversion.px_x_to_lon(x, mepo.zoom);
 }
 
 pub fn set_y(mepo: *@This(), y: i32) void {
-    mepo.lat = conversionutil.px_y_to_lat(y, mepo.zoom);
+    mepo.lat = utilconversion.px_y_to_lat(y, mepo.zoom);
 }
 
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {

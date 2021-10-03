@@ -4,8 +4,7 @@ const Mepo = @import("./Mepo.zig");
 const TileCache = @import("./TileCache.zig");
 const conversion = @import("./conversion.zig");
 const sdl = @import("./sdlshim.zig");
-const parseutil = @import("./util/parseutil.zig");
-const stringsutil = @import("./util/stringsutil.zig");
+const utilstrings = @import("./util/utilstrings.zig");
 
 pub fn main() !void {
     comptime {
@@ -15,10 +14,10 @@ pub fn main() !void {
     }
 
     const allocator = std.heap.c_allocator;
-    var args = try stringsutil.read_args(allocator);
+    var args = try utilstrings.read_args(allocator);
     var cfg: ?[]const u8 = cfg: {
         if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
-            break :cfg try stringsutil.read_stdin(allocator);
+            break :cfg try utilstrings.read_stdin(allocator);
         } else {
             break :cfg null;
         }
