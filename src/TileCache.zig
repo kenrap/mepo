@@ -217,11 +217,21 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
     tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
 }
 
+/// Sets the cache URL, making copy of str
+///
+/// Caller passed ptr url may be safely freed
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
-    tile_cache.source_url = url;
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
+
+    // Set new URL
+    if (tile_cache.source_url) |present_source_url| {
+        tile_cache.allocator.free(present_source_url);
+    }
+    tile_cache.source_url = try std.fmt.allocPrintZ(tile_cache.allocator, "{s}", .{url});
+
+    // Resize
     sdlutil.sdl_push_resize_event();
 }
 
