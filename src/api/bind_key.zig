@@ -34,8 +34,9 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         return error.UnableToLookupKeyName;
     }
 
+    const expression_mepo_allocated = try std.fmt.allocPrint(mepo.allocator, "{s}", .{expression});
     try mepo.keybindings_table.put(.{
         .keymod = @intToEnum(sdl.SDL_Keymod, keymod),
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
-    }, expression);
+    }, expression_mepo_allocated);
 }
