@@ -224,6 +224,13 @@ search scripts, bookmarks, and more.
     Mepo integrated properly.
   - Tag 1.0 release.
 
+## **Funding**
+[NLnet](https://nlnet.nl) has kindly awarded a grant to support Mepo's
+development efforts as part of the NGI0 Discovery Fund under grant
+agreement No 825322.  This funding will enable the financial support
+for implementing of the roadmap to reach 1.0 as seen above. We are
+very thankful to NLnet for accepting our application and making this
+development possible!
 
 ## **Contributing**
 
