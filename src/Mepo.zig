@@ -289,13 +289,16 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
 }
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
-    for (try stringsutil.statementize(mepo.allocator, mepolang_text)) |statement| {
+    var arena = std.heap.ArenaAllocator.init(mepo.allocator);
+    defer arena.deinit();
+
+    for (try stringsutil.statementize(&arena.allocator, mepolang_text)) |statement| {
         std.debug.warn("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
-            const args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(mepo.allocator, statement[1..statement.len]);
+            const args: [types.MepoFnNargs]types.MepoArg = try mepolang_argize(&arena.allocator, statement[1..statement.len]);
             std.debug.warn("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
                 std.debug.warn("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
