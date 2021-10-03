@@ -89,7 +89,6 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     if (!mepo.debug_tiles) return;
     var dl_now: c_long = 0;
     var dl_total: c_long = 0;
-    const screen = sdl.SDL_GetWindowSurface(mepo.window);
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .transfer_datum => |transfer_datum| {
@@ -114,7 +113,6 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 }
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
-    var screen = sdl.SDL_GetWindowSurface(mepo.window);
     const dest = sdl.SDL_Rect{
         .x = @intCast(i32, tile_x * config.Tsize) - x_off,
         .y = @intCast(i32, tile_y * config.Tsize) - y_off,
