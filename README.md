@@ -87,8 +87,8 @@ search scripts, bookmarks, and more.
     using top-level allocator via arena allocation).
   - Rework blitting logic to be more intelligent about not drawing offscreen
     entities & pins.
-  - Implement LIFO for downloading queue: viewport tiles should always take
-    priority before long-queued offscreen tiles.
+  - ~~Implement LIFO for downloading queue: viewport tiles should always take
+    priority before long-queued offscreen tiles.~~
   - Refactor error handling logic and implement debug mode preference or
     similar to control verbosity of debugging STDERR messages.
   - Implement togglable text debug message overlay to provide user feedback
