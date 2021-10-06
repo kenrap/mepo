@@ -168,6 +168,9 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         else
             0x000000;
 
+        if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
+            continue;
+
         try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
