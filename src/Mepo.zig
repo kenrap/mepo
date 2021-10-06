@@ -340,6 +340,11 @@ fn event_quit(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     @panic("Quit");
 }
 
+fn event_unhandled(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    utildbg.log("Unhandled SDL Event: {}\n", .{e.type});
+    return .None;
+}
+
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
@@ -393,23 +398,19 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             try blit(mepo);
         }
 
-        const mapping = comptime mapping: {
-            var evt_fns = [_]?fn (*@This(), sdl.SDL_Event) types.Pending{null} ** std.math.maxInt(u16);
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_KEYDOWN)] = event_keydown;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEBUTTONDOWN)] = event_mousebuttondown;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)] = event_mousemotion;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEBUTTONUP)] = event_mousebuttonup;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEWHEEL)] = event_mousewheel;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MULTIGESTURE)] = event_multigesture;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_QUIT)] = event_quit;
-            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_WINDOWEVENT)] = event_windowevent;
-            break :mapping evt_fns;
-        };
-
         // Process SDL events
         if (sdl.SDL_WaitEvent(&e) > 0) {
-            pending = .None;
-            if (mapping[e.type]) |exec_fn| pending = exec_fn(mepo, e);
+            pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
+                .SDL_KEYDOWN => event_keydown,
+                .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
+                .SDL_MOUSEMOTION => event_mousemotion,
+                .SDL_MOUSEBUTTONUP => event_mousebuttonup,
+                .SDL_MOUSEWHEEL => event_mousewheel,
+                .SDL_MULTIGESTURE => event_multigesture,
+                .SDL_QUIT => event_quit,
+                .SDL_WINDOWEVENT => event_windowevent,
+                else => event_unhandled,
+            }(mepo, e);
         }
     }
 }
