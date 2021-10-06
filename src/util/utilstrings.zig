@@ -62,7 +62,6 @@ pub fn statementize(allocator: *std.mem.Allocator, input: []const u8) ![][][]con
 pub fn read_stdin(allocator: *std.mem.Allocator) anyerror![]const u8 {
     const stream = &std.io.getStdIn().reader();
     const buffer = try allocator.alloc(u8, 1024 * 100);
-    std.debug.warn("Waiting for STDIN\n", .{});
     _ = try stream.read(buffer);
     return std.mem.trim(u8, buffer, " \n");
 }

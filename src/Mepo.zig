@@ -7,6 +7,7 @@ const TileCache = @import("./TileCache.zig");
 const utilconversion = @import("./util/utilconversion.zig");
 const utilmepolang = @import("util/utilmepolang.zig");
 const utilstrings = @import("util/utilstrings.zig");
+const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
 const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
@@ -75,7 +76,7 @@ pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zo
                 try mepo.blit_tile_surface(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
                 try mepo.blit_tile_text(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
             } else {
-                std.debug.warn("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
+                utildbg.log("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
             }
             y += config.Tsize;
             tiley += 1;
@@ -263,18 +264,18 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     defer arena.deinit();
 
     for (try utilstrings.statementize(&arena.allocator, mepolang_text)) |statement| {
-        std.debug.warn("Executing statment: {s}\n", .{statement});
+        utildbg.log("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (mepo.fn_table.get(statement[0])) |func| {
             const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.mepolang_argize(&arena.allocator, statement[1..statement.len]);
-            std.debug.warn("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
+            utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
-                std.debug.warn("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
+                utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
             };
         } else {
-            std.debug.warn("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
+            utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
         }
     }
 }
@@ -364,7 +365,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
                         .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
                     })) |run_expression| {
-                        std.debug.warn("Got table function {s}\n", .{run_expression});
+                        utildbg.log("Got table function {s}\n", .{run_expression});
                         try mepo.mepolang_execute(run_expression);
                         pending = .Redraw;
                     }
@@ -381,7 +382,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     pending = .Redraw;
                 },
                 .SDL_QUIT => {
-                    std.debug.warn("Quit\n", .{});
+                    utildbg.log("Quit\n", .{});
                     return;
                 },
                 else => {},
@@ -440,7 +441,7 @@ pub fn set_y(mepo: *@This(), y: i32) void {
 }
 
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
-    std.debug.warn("Graceful shutdown via signal: {}\n", .{arg});
+    utildbg.log("Graceful shutdown via signal: {}\n", .{arg});
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
     std.os.exit(0);
@@ -474,13 +475,13 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
 
     // Initialize TTF, load font
     if (sdl.TTF_Init() == -1) {
-        std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
+        utildbg.log("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
         return errors.SDLError.TTF_Init;
     } else {
         const font = @embedFile("../assets/terminus.ttf");
         font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, config.FontSize);
         if (font_opt == null) {
-            std.debug.warn("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
+            utildbg.log("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
             return errors.SDLError.OpenFontRW;
         }
     }

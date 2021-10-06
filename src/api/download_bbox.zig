@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
+const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
 pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
@@ -31,7 +32,7 @@ fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zo
         while (x <= x_max) : (x += 1) {
             var y: i32 = y_min;
             while (y <= y_max) : (y += 1) {
-                std.debug.warn("Queue {d} {d} {d}\n", .{ x, y, z });
+                utildbg.log("Queue {d} {d} {d}\n", .{ x, y, z });
                 try mepo.tile_cache.tile_queue_no_surface_load(.{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) });
             }
         }

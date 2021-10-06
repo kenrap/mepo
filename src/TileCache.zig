@@ -10,6 +10,7 @@ const types = @import("./types.zig");
 const config = @import("./config.zig");
 const utilsdl = @import("./util/utilsdl.zig");
 const utilfile = @import("./util/utilfile.zig");
+const utildbg = @import("./util/utildbg.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
 pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
@@ -27,7 +28,7 @@ renderer: ?*sdl.SDL_Renderer,
 curl_multi: *curl.CURLM,
 
 fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl_now: curl.curl_off_t, ul_total: curl.curl_off_t, ul_now: curl.curl_off_t) callconv(.C) c_uint {
-    //std.debug.warn("Progress: {} {}\n", .{ dl_now, dl_total });
+    //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
     var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     tile_data.progress_dl_now = dl_now;
     tile_data.progress_dl_total = dl_total;
@@ -116,7 +117,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
     try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
 
     _ = curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client);
-    std.debug.warn("Add multi handle {any}\n", .{coords});
+    utildbg.log("Add multi handle {any}\n", .{coords});
 }
 
 fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
@@ -167,7 +168,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
         tile_cache.transfer_map.get(coords).?.data.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
     } else {
-        std.debug.warn("Failed to find coordinates associated with downloaded data?\n", .{});
+        utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});
     }
 
     _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
@@ -254,7 +255,7 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
         });
         try x.texture_map.ensureCapacity(2000);
         try x.transfer_map.ensureCapacity(20000);
-        try x.queue_lifo.ensureCapacity(20000);
+        try x.queue_lifo.ensureCapacity(10);
         return x;
     } else {
         return error.MultiInitFail;

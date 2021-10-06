@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
+const utildbg = @import("../util/utildbg.zig");
 
 pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const cmd = args[0].Text;
@@ -32,6 +33,6 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
     } else {
-        std.debug.warn("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
+        utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
     }
 }

@@ -5,6 +5,7 @@ const TileCache = @import("./TileCache.zig");
 const conversion = @import("./conversion.zig");
 const sdl = @import("./sdlshim.zig");
 const utilstrings = @import("./util/utilstrings.zig");
+const utildbg = @import("./util/utildbg.zig");
 
 pub fn main() !void {
     comptime {
@@ -17,6 +18,7 @@ pub fn main() !void {
     var args = try utilstrings.read_args(allocator);
     var cfg: ?[]const u8 = cfg: {
         if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
+            utildbg.log("Reading from STDIN", .{});
             break :cfg try utilstrings.read_stdin(allocator);
         } else {
             break :cfg null;

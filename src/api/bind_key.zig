@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
+const utildbg = @import("../util/utildbg.zig");
 
 pub fn f_bind_key(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const modifier = args[0].Text;
@@ -11,7 +12,7 @@ pub fn f_bind_key(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expression: []const u8) !void {
-    std.debug.warn("Binding key: mod={s} code={s} to expression {s}\n", .{ mod_str, key_str, expression });
+    utildbg.log("Binding key: mod={s} code={s} to expression {s}\n", .{ mod_str, key_str, expression });
 
     // Keymod
     const keymod = m: {
