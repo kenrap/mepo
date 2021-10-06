@@ -261,7 +261,7 @@ pub fn blit(mepo: *@This()) !void {
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
 
-fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold = 0.005;
     if (e.mgesture.dDist > threshold) {
         zoom_relative(mepo, 1);
@@ -274,14 +274,14 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
     return .None;
 }
 
-fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = true;
     }
     return .None;
 }
 
-fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = false;
         mepo.mouse_pending_last_time = sdl.SDL_GetTicks();
@@ -298,7 +298,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
     return .None;
 }
 
-fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.drag) {
         mepo.set_x(mepo.get_x() - e.motion.xrel);
         mepo.set_y(mepo.get_y() - e.motion.yrel);
@@ -307,24 +307,24 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
     return .None;
 }
 
-fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     zoom_relative(mepo, e.wheel.y);
     return .Redraw;
 }
 
-fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.keybindings_table.get(.{
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
         .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
     })) |run_expression| {
         utildbg.log("Got table function {s}\n", .{run_expression});
-        try mepo.mepolang_execute(run_expression);
+        mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
     }
     return .None;
 }
 
-fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
         .SDL_WINDOWEVENT_RESIZED => {
             mepo.w = @intCast(u32, e.window.data1);
@@ -336,9 +336,8 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
     return .Redraw;
 }
 
-fn event_quit(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
-    utildbg.log("Quit\n", .{});
-    return error.Quit;
+fn event_quit(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    @panic("Quit");
 }
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
@@ -394,61 +393,23 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             try blit(mepo);
         }
 
+        const mapping = comptime mapping: {
+            var evt_fns = [_]?fn (*@This(), sdl.SDL_Event) types.Pending{null} ** std.math.maxInt(u16);
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_KEYDOWN)] = event_keydown;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEBUTTONDOWN)] = event_mousebuttondown;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)] = event_mousemotion;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEBUTTONUP)] = event_mousebuttonup;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MOUSEWHEEL)] = event_mousewheel;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_MULTIGESTURE)] = event_multigesture;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_QUIT)] = event_quit;
+            evt_fns[@enumToInt(sdl.SDL_EventType.SDL_WINDOWEVENT)] = event_windowevent;
+            break :mapping evt_fns;
+        };
+
         // Process SDL events
         if (sdl.SDL_WaitEvent(&e) > 0) {
             pending = .None;
-
-            switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
-                .SDL_MULTIGESTURE => {
-                    const result = try mepo.event_multigesture(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_MOUSEBUTTONDOWN => {
-                    const result = try mepo.event_mousebuttondown(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_MOUSEBUTTONUP => {
-                    const result = try mepo.event_mousebuttonup(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_MOUSEMOTION => {
-                    const result = try mepo.event_mousemotion(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_MOUSEWHEEL => {
-                    const result = try mepo.event_mousewheel(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_KEYDOWN => {
-                    const result = try mepo.event_keydown(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_WINDOWEVENT => {
-                    const result = try mepo.event_windowevent(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                .SDL_QUIT => {
-                    const result = try mepo.event_quit(e);
-                    if (result != .None) {
-                        pending = result;
-                    }
-                },
-                else => {},
-            }
+            if (mapping[e.type]) |exec_fn| pending = exec_fn(mepo, e);
         }
     }
 }
