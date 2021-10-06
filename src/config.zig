@@ -55,4 +55,4 @@ pub const DefaultBaseConfig =
     \\ pin_add 40.7418 -73.9899 baz;
     \\
     \\ fileload ~/.mepo/bookmarks;
-    ;
+;

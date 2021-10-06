@@ -5,13 +5,13 @@ pub fn Lifo(comptime key_type: type, comptime metadata_type: type) type {
         mutex: std.Thread.Mutex,
         array_hash_map: std.array_hash_map.AutoArrayHashMap(comptime key_type, comptime metadata_type),
 
-        pub fn count(self: *@This()) usize  {
+        pub fn count(self: *@This()) usize {
             const lock = self.mutex.acquire();
             defer lock.release();
             return self.array_hash_map.count();
         }
 
-        pub fn pop(self: *@This()) struct { key: key_type, value: metadata_type} {
+        pub fn pop(self: *@This()) struct { key: key_type, value: metadata_type } {
             const lock = self.mutex.acquire();
             defer lock.release();
             const popped = self.array_hash_map.pop();
@@ -29,7 +29,9 @@ pub fn Lifo(comptime key_type: type, comptime metadata_type: type) type {
             defer lock.release();
             // E.g. ensures when putting items, we always reorder / bump
             // the most recently added item to the tail, thus makes lifo
-            if (self.array_hash_map.contains(k)) { _ = self.array_hash_map.orderedRemove(k); }
+            if (self.array_hash_map.contains(k)) {
+                _ = self.array_hash_map.orderedRemove(k);
+            }
             try self.array_hash_map.put(k, v);
         }
 

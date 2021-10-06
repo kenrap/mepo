@@ -261,6 +261,85 @@ pub fn blit(mepo: *@This()) !void {
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
 
+fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    const threshold = 0.005;
+    if (e.mgesture.dDist > threshold) {
+        zoom_relative(mepo, 1);
+        return .Redraw;
+    }
+    if (e.mgesture.dDist < -threshold) {
+        zoom_relative(mepo, -1);
+        return .Redraw;
+    }
+    return .None;
+}
+
+fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
+        mepo.drag = true;
+    }
+    return .None;
+}
+
+fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
+        mepo.drag = false;
+        mepo.mouse_pending_last_time = sdl.SDL_GetTicks();
+        if (mepo.mouse_pending_n_taps == null) {
+            mepo.mouse_pending_n_taps = 1;
+        } else {
+            mepo.mouse_pending_n_taps.? += 1;
+        }
+        _ = sdl.SDL_AddTimer(201, mouse_timeout, null);
+    } else if (e.button.button == sdl.SDL_BUTTON_RIGHT) {
+        zoom_relative(mepo, -1);
+        return .Redraw;
+    }
+    return .None;
+}
+
+fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    if (mepo.drag) {
+        mepo.set_x(mepo.get_x() - e.motion.xrel);
+        mepo.set_y(mepo.get_y() - e.motion.yrel);
+        return .Drag;
+    }
+    return .None;
+}
+
+fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    zoom_relative(mepo, e.wheel.y);
+    return .Redraw;
+}
+
+fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    if (mepo.keybindings_table.get(.{
+        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
+        .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
+    })) |run_expression| {
+        utildbg.log("Got table function {s}\n", .{run_expression});
+        try mepo.mepolang_execute(run_expression);
+        return .Redraw;
+    }
+    return .None;
+}
+
+fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
+        .SDL_WINDOWEVENT_RESIZED => {
+            mepo.w = @intCast(u32, e.window.data1);
+            mepo.h = @intCast(u32, e.window.data2);
+            //mepo.center_on_coords(old_lat, old_lon);
+        },
+        else => {},
+    }
+    return .Redraw;
+}
+
+fn event_quit(mepo: *@This(), e: sdl.SDL_Event) !types.Pending {
+    utildbg.log("Quit\n", .{});
+    return error.Quit;
+}
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
@@ -289,7 +368,7 @@ fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
 }
 
 pub fn sdl_event_loop(mepo: *@This()) !void {
-    var pending: enum { None, Redraw, Drag } = .None;
+    var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
     while (true) {
@@ -321,72 +400,52 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
             switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_MULTIGESTURE => {
-                    const threshold = 0.005;
-
-                    if (e.mgesture.dDist > threshold) {
-                        zoom_relative(mepo, 1);
-                        pending = .Redraw;
-                    }
-                    if (e.mgesture.dDist < -threshold) {
-                        zoom_relative(mepo, -1);
-                        pending = .Redraw;
+                    const result = try mepo.event_multigesture(e);
+                    if (result != .None) {
+                        pending = result;
                     }
                 },
                 .SDL_MOUSEBUTTONDOWN => {
-                    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-                        mepo.drag = true;
+                    const result = try mepo.event_mousebuttondown(e);
+                    if (result != .None) {
+                        pending = result;
                     }
                 },
                 .SDL_MOUSEBUTTONUP => {
-                    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-                        mepo.drag = false;
-                        mepo.mouse_pending_last_time = sdl.SDL_GetTicks();
-                        if (mepo.mouse_pending_n_taps == null) {
-                            mepo.mouse_pending_n_taps = 1;
-                        } else {
-                            mepo.mouse_pending_n_taps.? += 1;
-                        }
-                        _ = sdl.SDL_AddTimer(201, mouse_timeout, null);
-                    } else if (e.button.button == sdl.SDL_BUTTON_RIGHT) {
-                        zoom_relative(mepo, -1);
-                        pending = .Redraw;
+                    const result = try mepo.event_mousebuttonup(e);
+                    if (result != .None) {
+                        pending = result;
                     }
                 },
                 .SDL_MOUSEMOTION => {
-                    if (mepo.drag) {
-                        mepo.set_x(mepo.get_x() - e.motion.xrel);
-                        mepo.set_y(mepo.get_y() - e.motion.yrel);
-                        pending = .Drag;
+                    const result = try mepo.event_mousemotion(e);
+                    if (result != .None) {
+                        pending = result;
                     }
                 },
                 .SDL_MOUSEWHEEL => {
-                    zoom_relative(mepo, e.wheel.y);
-                    pending = .Redraw;
+                    const result = try mepo.event_mousewheel(e);
+                    if (result != .None) {
+                        pending = result;
+                    }
                 },
                 .SDL_KEYDOWN => {
-                    if (mepo.keybindings_table.get(.{
-                        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
-                        .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
-                    })) |run_expression| {
-                        utildbg.log("Got table function {s}\n", .{run_expression});
-                        try mepo.mepolang_execute(run_expression);
-                        pending = .Redraw;
+                    const result = try mepo.event_keydown(e);
+                    if (result != .None) {
+                        pending = result;
                     }
                 },
                 .SDL_WINDOWEVENT => {
-                    switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
-                        .SDL_WINDOWEVENT_RESIZED => {
-                            mepo.w = @intCast(u32, e.window.data1);
-                            mepo.h = @intCast(u32, e.window.data2);
-                            //mepo.center_on_coords(old_lat, old_lon);
-                        },
-                        else => {},
+                    const result = try mepo.event_windowevent(e);
+                    if (result != .None) {
+                        pending = result;
                     }
-                    pending = .Redraw;
                 },
                 .SDL_QUIT => {
-                    utildbg.log("Quit\n", .{});
-                    return;
+                    const result = try mepo.event_quit(e);
+                    if (result != .None) {
+                        pending = result;
+                    }
                 },
                 else => {},
             }
