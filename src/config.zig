@@ -1,12 +1,13 @@
-pub const Tsize = 256;
-pub const InitWindowW = 720;
-pub const InitWindowH = 950;
-pub const InitWindowX = 0;
-pub const InitWindowY = 0;
-pub const Useragent = "mepo";
-pub const MaxNTransfers = 20;
+pub const DownloadTimeoutSeconds = 5;
+pub const DownloadUseragent = "mepo";
 pub const DownloaderPollMs = 50;
 pub const FontSize = 14;
+pub const InitWindowH = 950;
+pub const InitWindowW = 720;
+pub const InitWindowX = 0;
+pub const InitWindowY = 0;
+pub const MaxNTransfers = 20;
+pub const Tsize = 256;
 
 pub const DefaultBaseConfig =
     \\ bind_key _ j [move_relative 0 10];

@@ -144,14 +144,15 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
     };
     defer tile_cache.allocator.free(tile_url);
 
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.Useragent);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 1));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, tile_xferinfo_curl_callback);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, tile_write_curl_callback);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_TIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.DownloadUseragent);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, tile_write_curl_callback);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, tile_xferinfo_curl_callback);
 
     _ = curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client);
     utildbg.log("Add multi handle {any}\n", .{coords});
@@ -190,33 +191,55 @@ fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8
 }
 
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
-    if (tile_cache.curl_msg_to_coords(msg)) |coords| {
-        const transfer_datum = tile_cache.transfer_map.get(coords).?;
-        const datum_array = transfer_datum.data.items;
+    defer {
+        // Essentially either way, if CURLE_OK passes through or if there's
+        // some error we clear the item from the transfer queue and push a
+        // SDL resize (refresh event). By effect, if tile is loaded in texture
+        // map rendering thread fetches and updates it; if CURLE_OK wasn't
+        // there - the item will get repushed back into queue
+        if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+            const transfer_datum = tile_cache.transfer_map.get(coords).?;
+            const datum_array = transfer_datum.data.items;
 
-        if (tile_cache.cache_dir) |cache_dir| {
-            // Save to FS
-            const path = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
-            try cache_dir.writeFile(path, datum_array);
+            tile_cache.transfer_map.get(coords).?.data.deinit();
+            _ = tile_cache.transfer_map.swapRemove(coords);
+            tile_cache.allocator.destroy(transfer_datum);
         }
-        if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
-            // Load to surface
-            _ = try tile_cache.load_data_to_texture(coords, datum_array);
+        _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
+        _ = curl.curl_easy_cleanup(msg.*.easy_handle);
+        if (tile_cache.n_current_transfers > 0) {
+            tile_cache.n_current_transfers -= 1;
         }
 
-        tile_cache.transfer_map.get(coords).?.data.deinit();
-        _ = tile_cache.transfer_map.swapRemove(coords);
-        tile_cache.allocator.destroy(transfer_datum);
-    } else {
-        utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});
+        utilsdl.sdl_push_resize_event();
     }
 
-    _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
-    _ = curl.curl_easy_cleanup(msg.*.easy_handle);
-    if (tile_cache.n_current_transfers > 0) {
-        tile_cache.n_current_transfers -= 1;
+    switch (msg.data.result) {
+        .CURLE_OPERATION_TIMEDOUT => {
+            utildbg.log("Curl timed out for msg: {}\n", .{msg});
+        },
+        .CURLE_OK => {
+            if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+                const transfer_datum = tile_cache.transfer_map.get(coords).?;
+                const datum_array = transfer_datum.data.items;
+
+                if (tile_cache.cache_dir) |cache_dir| {
+                    // Save to FS
+                    const path = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
+                    try cache_dir.writeFile(path, datum_array);
+                }
+                if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
+                    // Load to surface
+                    _ = try tile_cache.load_data_to_texture(coords, datum_array);
+                }
+            } else {
+                utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});
+            }
+        },
+        else => {
+            utildbg.log("Unhandled curl error code response {}\n", .{msg.data.result});
+        },
     }
-    utilsdl.sdl_push_resize_event();
 }
 
 pub fn download_loop(tile_cache: *@This()) !void {
