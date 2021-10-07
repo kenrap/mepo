@@ -13,9 +13,24 @@ const utilfile = @import("./util/utilfile.zig");
 const utildbg = @import("./util/utildbg.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
-pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_texture: bool };
-const TileDataTag = enum { transfer_datum, texture, queued_position };
-pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, texture: *sdl.SDL_Texture, queued_position: u32 };
+pub const TransferDatum = struct {
+    client: *curl.CURL,
+    coords: types.TileSpec,
+    data: std.ArrayList(u8),
+    progress_dl_now: ?c_long,
+    progress_dl_total: ?c_long,
+    load_to_texture: bool,
+};
+const TileDataTag = enum {
+    transfer_datum,
+    texture,
+    queued_position,
+};
+pub const TileData = union(TileDataTag) {
+    transfer_datum: TransferDatum,
+    texture: *sdl.SDL_Texture,
+    queued_position: u32,
+};
 
 allocator: *std.mem.Allocator,
 source_url: ?[:0]const u8,
@@ -27,7 +42,13 @@ texture_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Textur
 renderer: ?*sdl.SDL_Renderer,
 curl_multi: *curl.CURLM,
 
-fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl_now: curl.curl_off_t, ul_total: curl.curl_off_t, ul_now: curl.curl_off_t) callconv(.C) c_uint {
+fn tile_xferinfo_curl_callback(
+    user_data: *c_void,
+    dl_total: curl.curl_off_t,
+    dl_now: curl.curl_off_t,
+    ul_total: curl.curl_off_t,
+    ul_now: curl.curl_off_t,
+) callconv(.C) c_uint {
     //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
     var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     tile_data.progress_dl_now = dl_now;
@@ -35,7 +56,12 @@ fn tile_xferinfo_curl_callback(user_data: *c_void, dl_total: curl.curl_off_t, dl
     return curl.CURL_PROGRESSFUNC_CONTINUE;
 }
 
-fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_data: *c_void) callconv(.C) c_uint {
+fn tile_write_curl_callback(
+    data: *c_void,
+    size: c_uint,
+    nmemb: c_uint,
+    user_data: *c_void,
+) callconv(.C) c_uint {
     var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     var typed_data = @intToPtr([*]u8, @ptrToInt(data));
     transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
@@ -45,7 +71,11 @@ fn tile_write_curl_callback(data: *c_void, size: c_uint, nmemb: c_uint, user_dat
 fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.TileSpec) ![]u8 {
     var source_hash: [32:0]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
-    return try std.fmt.allocPrint(allocator, "{s}_{d}_{d}_{d}.png", .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y });
+    return try std.fmt.allocPrint(
+        allocator,
+        "{s}_{d}_{d}_{d}.png",
+        .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y },
+    );
 }
 
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
@@ -70,7 +100,9 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
 
     try tile_cache.queue_lifo.put(coords, true);
 
-    return TileData{ .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0) };
+    return TileData{
+        .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0),
+    };
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
@@ -101,7 +133,13 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
 
     var tile_url = url: {
         var url = try std.heap.c_allocator.alloc(u8, tile_cache.source_url.?.len + (3 * 10));
-        _ = cstdio.sprintf(&url[0], tile_cache.source_url.?, @intCast(c_int, coords.x), @intCast(c_int, coords.y), @intCast(c_int, coords.z));
+        _ = cstdio.sprintf(
+            &url[0],
+            tile_cache.source_url.?,
+            @intCast(c_int, coords.x),
+            @intCast(c_int, coords.y),
+            @intCast(c_int, coords.z),
+        );
         break :url url;
     };
     defer std.heap.c_allocator.free(tile_url);
