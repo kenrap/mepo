@@ -1,6 +1,8 @@
 pub const Tsize = 256;
 pub const InitWindowW = 720;
-pub const InitWindowH = 720;
+pub const InitWindowH = 950;
+pub const InitWindowX = 0;
+pub const InitWindowY = 0;
 pub const Useragent = "mepo";
 pub const MaxNTransfers = 20;
 pub const DownloaderPollMs = 50;

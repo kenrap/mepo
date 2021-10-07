@@ -481,8 +481,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     } else {
         window = sdl.SDL_CreateWindow(
             "mepo",
-            sdl.SDL_WINDOWPOS_UNDEFINED,
-            sdl.SDL_WINDOWPOS_UNDEFINED,
+            config.InitWindowX,
+            config.InitWindowY,
             config.InitWindowW,
             config.InitWindowH,
             sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
@@ -496,6 +496,8 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     if (renderer == null) {
         return errors.SDLError.CreateRenderer;
     }
+
+    sdl.SDL_SetWindowPosition(window, config.InitWindowX, config.InitWindowY);
 
     // Initialize TTF, load font
     if (sdl.TTF_Init() == -1) {
