@@ -13,7 +13,7 @@ const utilfile = @import("./util/utilfile.zig");
 const utildbg = @import("./util/utildbg.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
-pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_surface: bool };
+pub const TransferDatum = struct { client: *curl.CURL, coords: types.TileSpec, data: std.ArrayList(u8), progress_dl_now: ?c_long, progress_dl_total: ?c_long, load_to_texture: bool };
 const TileDataTag = enum { transfer_datum, texture, queued_position };
 pub const TileData = union(TileDataTag) { transfer_datum: TransferDatum, texture: *sdl.SDL_Texture, queued_position: u32 };
 
@@ -86,7 +86,7 @@ pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) 
     try tile_cache.queue_lifo.put(coords, false);
 }
 
-fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surface: bool) !void {
+fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_texture: bool) !void {
     var transfer_datum: *TransferDatum = datum: {
         var dat = try std.heap.c_allocator.create(TransferDatum);
 
@@ -95,7 +95,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_surfa
         dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
         dat.progress_dl_now = null;
         dat.progress_dl_total = null;
-        dat.load_to_surface = load_to_surface;
+        dat.load_to_texture = load_to_texture;
         break :datum dat;
     };
     try tile_cache.transfer_map.put(coords, transfer_datum);
@@ -160,7 +160,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
             const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
             try cache_dir.writeFile(path, datum);
         }
-        if (tile_cache.transfer_map.get(coords).?.load_to_surface) {
+        if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
             // Load to surface
             _ = try tile_cache.load_data_to_texture(coords, datum);
         }
