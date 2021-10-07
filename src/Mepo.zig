@@ -471,7 +471,7 @@ pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
     std.os.exit(0);
 }
 
-pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
+pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
     var window: ?*sdl.SDL_Window = null;
 
@@ -514,7 +514,7 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
 
     // Create struct
     var instance = @as(@This(), .{
-        .allocator = std.heap.c_allocator,
+        .allocator = allocator,
         .mouse_pending_last_time = null,
         .mouse_pending_n_taps = null,
         .window = window.?,
@@ -532,10 +532,10 @@ pub fn init(tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
         .crosshair_size = 10,
         .crosshair_on = true,
         .tile_cache = tile_cache,
-        .pin_table = std.hash_map.StringHashMap(types.Pin).init(std.heap.c_allocator),
+        .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
         .pin_active = null,
-        .fn_table = try _fn_table.generate_fn_table(),
-        .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(std.heap.c_allocator),
+        .fn_table = try _fn_table.generate_fn_table(allocator),
+        .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
     });
 
     tile_cache.set_renderer(instance.renderer);

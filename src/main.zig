@@ -26,6 +26,6 @@ pub fn main() !void {
     };
     var tile_cache = try TileCache.init(allocator);
     var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
-    var mepo = try Mepo.init(&tile_cache, cfg);
+    var mepo = try Mepo.init(allocator, &tile_cache, cfg);
     try mepo.sdl_event_loop();
 }

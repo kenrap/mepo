@@ -132,7 +132,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
     try tile_cache.transfer_map.put(coords, transfer_datum);
 
     var tile_url = url: {
-        var url = try std.heap.c_allocator.alloc(u8, tile_cache.source_url.?.len + (3 * 10));
+        var url = try tile_cache.allocator.alloc(u8, tile_cache.source_url.?.len + (3 * 10));
         _ = cstdio.sprintf(
             &url[0],
             tile_cache.source_url.?,
@@ -142,7 +142,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
         );
         break :url url;
     };
-    defer std.heap.c_allocator.free(tile_url);
+    defer tile_cache.allocator.free(tile_url);
 
     try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.Useragent);
@@ -196,7 +196,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
 
         if (tile_cache.cache_dir) |cache_dir| {
             // Save to FS
-            const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
+            const path = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
             try cache_dir.writeFile(path, datum_array);
         }
         if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
@@ -252,8 +252,8 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
-    const expanded_path = try utilfile.wordexp_filepath(std.heap.c_allocator, path);
-    defer std.heap.c_allocator.free(expanded_path);
+    const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, path);
+    defer tile_cache.allocator.free(expanded_path);
     try std.fs.cwd().makePath(expanded_path);
     tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
 }

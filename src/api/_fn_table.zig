@@ -1,9 +1,7 @@
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub fn generate_fn_table() anyerror!types.MepoFnTable {
-    var ft = types.MepoFnTable.init(std.heap.c_allocator);
-
+pub fn generate_fn_table(allocator: *std.mem.Allocator) anyerror!types.MepoFnTable {
     const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
         .{ .name = "bind_key", .func = @import("bind_key.zig").f_bind_key },
         .{ .name = "center_on_coords", .func = @import("center_on_coords.zig").f_center_on_coords },
@@ -21,10 +19,10 @@ pub fn generate_fn_table() anyerror!types.MepoFnTable {
         .{ .name = "zoom_relative", .func = @import("zoom_relative.zig").f_zoom_relative },
     };
 
+    var ft = types.MepoFnTable.init(allocator);
     try ft.ensureCapacity(fn_bindings.len);
     for (fn_bindings) |f| {
         try ft.put(f.name, f.func);
     }
-
     return ft;
 }
