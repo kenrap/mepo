@@ -152,20 +152,22 @@ fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8
 
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     if (tile_cache.curl_msg_to_coords(msg)) |coords| {
-        const datum = tile_cache.transfer_map.get(coords).?.data.items;
+        const transfer_datum = tile_cache.transfer_map.get(coords).?;
+        const datum_array = transfer_datum.data.items;
 
         if (tile_cache.cache_dir) |cache_dir| {
             // Save to FS
             const path = try png_path(std.heap.c_allocator, tile_cache.source_url.?, coords);
-            try cache_dir.writeFile(path, datum);
+            try cache_dir.writeFile(path, datum_array);
         }
         if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
             // Load to surface
-            _ = try tile_cache.load_data_to_texture(coords, datum);
+            _ = try tile_cache.load_data_to_texture(coords, datum_array);
         }
 
         tile_cache.transfer_map.get(coords).?.data.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
+        tile_cache.allocator.destroy(transfer_datum);
     } else {
         utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});
     }
