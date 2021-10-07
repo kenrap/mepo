@@ -76,7 +76,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
     if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
-        defer std.heap.c_allocator.free(png);
+        defer tile_cache.allocator.free(png);
         cache_dir.access(png, .{}) catch {
             break :check_tile_exists;
         };
@@ -88,11 +88,10 @@ pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) 
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_texture: bool) !void {
     var transfer_datum: *TransferDatum = datum: {
-        var dat = try std.heap.c_allocator.create(TransferDatum);
-
+        var dat = try tile_cache.allocator.create(TransferDatum);
         dat.client = curl.curl_easy_init().?;
         dat.coords = coords;
-        dat.data = std.ArrayList(u8).init(std.heap.c_allocator);
+        dat.data = std.ArrayList(u8).init(tile_cache.allocator);
         dat.progress_dl_now = null;
         dat.progress_dl_total = null;
         dat.load_to_texture = load_to_texture;
