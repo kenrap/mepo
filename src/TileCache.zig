@@ -177,6 +177,7 @@ fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8
     if (data.len == 0) {
         return error.LoadToSurfaceFailEmptyData;
     } else if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)), 1)) |surf| {
+        defer sdl.SDL_FreeSurface(surf);
         if (sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surf)) |text| {
             try tile_cache.texture_map.put(coords, text);
             return tile_cache.texture_map.get(coords).?;
