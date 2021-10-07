@@ -137,9 +137,9 @@ fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec 
 }
 
 fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Texture {
-    const datum = @ptrCast(*c_void, &data[0]);
-    const len = @intCast(c_int, data.len);
-    if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(datum, len), 1)) |surf| {
+    if (data.len == 0) {
+        return error.LoadToSurfaceFailEmptyData;
+    } else if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)), 1)) |surf| {
         if (sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surf)) |text| {
             try tile_cache.texture_map.put(coords, text);
             return tile_cache.texture_map.get(coords).?;
@@ -147,7 +147,7 @@ fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8
             return error.CreateTextureFromSurfaceFail;
         }
     } else {
-        return error.LoadToSurfaceFail;
+        return error.LoadToSurfaceFailInvalidPNGData;
     }
 }
 
