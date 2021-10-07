@@ -20,6 +20,8 @@ pub const DefaultBaseConfig =
     \\ bind_key _ n [pin_cycle 1];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ p [pin_purge];
+    \\
+    \\ bind_key c c [quit];
     \\ 
     \\ bind_key _ g [shellpipe [mepo_nomatim_searchprompt.sh center]];
     \\ bind_key s g [shellpipe [mepo_nomatim_searchprompt.sh pindrop]];
