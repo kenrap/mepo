@@ -1,6 +1,4 @@
 #!/usr/bin/env sh
-[ -z "$MEPO_MENU" ] && MEPO_MENU="dmenu -l 10 -w $(xdotool getactivewindow) -p"
-
 BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
 
 OPTIONS='
@@ -14,7 +12,7 @@ SCOPE="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    $MEPO_MENU "Bbox POI Search" |
+    mepo_helper_menu.sh "Bbox POI Search" |
     cut -d ' ' -f2-
 )"
 [ -z "$SCOPE" ] && exit 0

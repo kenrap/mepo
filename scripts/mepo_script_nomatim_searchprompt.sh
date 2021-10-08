@@ -1,6 +1,4 @@
 #!/usr/bin/env sh
-[ -z "$MEPO_MENU" ] && MEPO_MENU="dmenu -l 10 -w $(xdotool getactivewindow) -p"
-
 OPTIONS='
   Amsterdam
   Paris
@@ -15,7 +13,7 @@ QUERY="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    $MEPO_MENU "Search for Location" |
+    mepo_helper_menu.sh "Search for Location" |
     sed 's/ /%20/g'
 )"
 
@@ -25,7 +23,7 @@ nominatimsearch() {
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
       jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
-      $MEPO_MENU "Pick result"
+      mepo_helper_menu.sh "Pick result"
   )"
 
   COORDS="$(

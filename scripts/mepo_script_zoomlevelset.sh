@@ -3,5 +3,5 @@
 
 echo prefset zoom "$(
   seq 1 16 |
-  $MEPO_MENU "Zoom"
+  mepo_helper_menu.sh "Zoom"
 );"

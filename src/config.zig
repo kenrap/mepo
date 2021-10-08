@@ -26,17 +26,17 @@ pub const DefaultBaseConfig =
     \\
     \\ bind_key c c [quit];
     \\ 
-    \\ bind_key _ g [shellpipe [mepo_nomatim_searchprompt.sh center]];
-    \\ bind_key s g [shellpipe [mepo_nomatim_searchprompt.sh pindrop]];
-    \\ bind_key _ z [shellpipe mepo_zoomlevelset.sh];
-    \\ bind_key _ b [shellpipe mepo_bbox_search.sh];
-    \\ bind_key _ q [shellpipe mepo_bbox_queuedownload.sh];
-    \\ bind_key _ u [shellpipe mepo_urlsourceset.sh];
-    \\ bind_key _ a [shellpipe mepo_apilangexec.sh];
-    \\ bind_key c f [shellpipe [mepo_panscreen.sh h 1]];
-    \\ bind_key c b [shellpipe [mepo_panscreen.sh h -1]];
-    \\ bind_key cs f [shellpipe [mepo_panscreen.sh w 1]];
-    \\ bind_key cs b [shellpipe [mepo_panscreen.sh w -1]];
+    \\ bind_key _ g [shellpipe [mepo_script_nomatim_searchprompt.sh center]];
+    \\ bind_key s g [shellpipe [mepo_script_nomatim_searchprompt.sh pindrop]];
+    \\ bind_key _ z [shellpipe mepo_script_zoomlevelset.sh];
+    \\ bind_key _ b [shellpipe mepo_script_bbox_search.sh];
+    \\ bind_key _ q [shellpipe mepo_script_bbox_queuedownload.sh];
+    \\ bind_key _ u [shellpipe mepo_script_urlsourceset.sh];
+    \\ bind_key _ a [shellpipe mepo_script_apilangexec.sh];
+    \\ bind_key c f [shellpipe [mepo_script_panscreen.sh h 1]];
+    \\ bind_key c b [shellpipe [mepo_script_panscreen.sh h -1]];
+    \\ bind_key cs f [shellpipe [mepo_script_panscreen.sh w 1]];
+    \\ bind_key cs b [shellpipe [mepo_script_panscreen.sh w -1]];
     \\
     \\ bind_key _ d [prefset debug_tiles 1];
     \\ bind_key s d [prefset debug_tiles 0];
