@@ -275,14 +275,18 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
+    if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
+        return .None;
+    } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = true;
     }
     return .None;
 }
 
 fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (e.button.button == sdl.SDL_BUTTON_LEFT) {
+    if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
+        return .None;
+    } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = false;
         mepo.mouse_pending_last_time = sdl.SDL_GetTicks();
         if (mepo.mouse_pending_n_taps == null) {
@@ -299,12 +303,16 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (mepo.drag) {
+    if (mepo.drag and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
         mepo.set_x(mepo.get_x() - e.motion.xrel);
         mepo.set_y(mepo.get_y() - e.motion.yrel);
         return .Drag;
     }
     return .None;
+}
+
+fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
+    return x > 0 and y > 0 and x < mepo.w and y < mepo.h;
 }
 
 fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
