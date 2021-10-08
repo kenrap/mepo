@@ -337,7 +337,8 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_quit(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    @panic("Quit");
+    graceful_terminate();
+    return .None;
 }
 
 fn event_unhandled(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
@@ -464,11 +465,16 @@ pub fn set_y(mepo: *@This(), y: i32) void {
     mepo.lat = utilconversion.px_y_to_lat(y, mepo.zoom);
 }
 
-pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
-    utildbg.log("Graceful shutdown via signal: {}\n", .{arg});
+pub fn graceful_terminate() void {
+    utildbg.log("Graceful shutdown\n", .{});
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
     std.os.exit(0);
+}
+
+pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
+    utildbg.log("Graceful shutdown via signal: {}", .{arg});
+    graceful_terminate();
 }
 
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
