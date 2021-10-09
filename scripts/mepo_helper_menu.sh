@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 PROMPT="$1"
 
-MENU="dmenu -w $(xdotool getactivewindow)"
-
-[ -n "$WAYLAND_DISPLAY" ] && MENU="bemenu --scrollbar autohide -s -n -c"
-
 if [ -z "$MEPO_MENU" ]; then
-  eval "$MENU -l 10 -p $PROMPT"
+  if [ -n "$WAYLAND_DISPLAY" ]; then
+    bemenu --scrollbar autohide -s -n -c -l 10 -p "$PROMPT"
+  else
+    dmenu -l 10 -w $(xdotool getactivewindow) -p "$PROMPT"
+  fi
 else
   "$MEPO_MENU" "$PROMPT"
 fi
