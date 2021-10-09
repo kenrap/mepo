@@ -4,6 +4,7 @@ const types = @import("./types.zig");
 const config = @import("./config.zig");
 const errors = @import("./errors.zig");
 const TileCache = @import("./TileCache.zig");
+
 const utilconversion = @import("./util/utilconversion.zig");
 const utilmepolang = @import("util/utilmepolang.zig");
 const utilstrings = @import("util/utilstrings.zig");
@@ -15,14 +16,13 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 allocator: *std.mem.Allocator,
 window: *sdl.SDL_Window,
 renderer: *sdl.SDL_Renderer,
+redraw_requested_at_ms_ticks: ?u32,
 tile_cache: *TileCache,
 font: *sdl.TTF_Font,
 lon: f64,
 lat: f64,
 w: u32,
 h: u32,
-mouse_pending_last_time: ?u32,
-mouse_pending_n_taps: ?u32,
 crosshair_size: u32,
 crosshair_on: bool,
 debug_tiles: bool,
@@ -288,13 +288,17 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         return .None;
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = false;
-        mepo.mouse_pending_last_time = sdl.SDL_GetTicks();
-        if (mepo.mouse_pending_n_taps == null) {
-            mepo.mouse_pending_n_taps = 1;
-        } else {
-            mepo.mouse_pending_n_taps.? += 1;
+        if (e.button.clicks == 1) {
+            return .Redraw;
+        } else if (e.button.clicks == 2) {
+            zoom_relative(mepo, 1);
+            mepo.redraw_requested_at_ms_ticks = sdl.SDL_GetTicks();
+        } else if (e.button.clicks > 2) {
+            // E.g. (-2) since actually button.clicks 2 will have processed
+            // with (1)... is there a way to make these evts exclusive?
+            zoom_relative(mepo, -2);
+            return .Redraw;
         }
-        _ = sdl.SDL_AddTimer(201, mouse_timeout, null);
     } else if (e.button.button == sdl.SDL_BUTTON_RIGHT) {
         zoom_relative(mepo, -1);
         return .Redraw;
@@ -375,40 +379,24 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     }
 }
 
-fn mouse_timeout(interval: u32, v: ?*c_void) callconv(.C) u32 {
-    _ = utilsdl.sdl_push_resize_event();
-    return 0;
-}
-
 pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
     while (true) {
-        // Dispatch double/triple taps
-        if (mepo.mouse_pending_n_taps != null) {
-            if (sdl.SDL_GetTicks() > mepo.mouse_pending_last_time.? + @intCast(u32, 200)) {
-                if (mepo.mouse_pending_n_taps.? == 2) {
-                    zoom_relative(mepo, 1);
-                } else if (mepo.mouse_pending_n_taps.? > 2) {
-                    zoom_relative(mepo, -1);
-                }
-                pending = .Redraw;
-                mepo.mouse_pending_n_taps = null;
-                mepo.mouse_pending_last_time = null;
-            }
-        }
-
         // Redraw
         const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
-        if ((!has_pending_motion_events and pending == .Drag) or
+        const has_pending_redraw_ms = (mepo.redraw_requested_at_ms_ticks != null and sdl.SDL_GetTicks() > mepo.redraw_requested_at_ms_ticks.? + @intCast(u32, config.ClickTimeoutMs));
+        if (has_pending_redraw_ms or
+            (!has_pending_motion_events and pending == .Drag) or
             pending == .Redraw)
         {
             try blit(mepo);
+            mepo.redraw_requested_at_ms_ticks = null;
         }
 
         // Process SDL events
-        if (sdl.SDL_WaitEvent(&e) > 0) {
+        if (sdl.SDL_WaitEventTimeout(&e, config.ClickTimeoutMs) > 0) {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_KEYDOWN => event_keydown,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
@@ -529,11 +517,11 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
-        .mouse_pending_last_time = null,
-        .mouse_pending_n_taps = null,
         .window = window.?,
         .renderer = renderer.?,
         .font = font_opt.?,
+
+        .redraw_requested_at_ms_ticks = null,
         .lat = 0,
         .lon = 0,
         .w = config.InitWindowW,

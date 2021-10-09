@@ -8,6 +8,7 @@ pub const InitWindowX = 0;
 pub const InitWindowY = 0;
 pub const MaxNTransfers = 20;
 pub const Tsize = 256;
+pub const ClickTimeoutMs = 200;
 
 pub const DefaultBaseConfig =
     \\ bind_key _ j [move_relative 0 10];
