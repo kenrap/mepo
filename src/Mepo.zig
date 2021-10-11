@@ -160,7 +160,7 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
             .Right,
-            5,
+            @intCast(i32, mepo.w - 5),
             5,
             "DEBUG: {s}",
             .{mepo.debug_message.?},
@@ -432,7 +432,7 @@ pub fn blit_multiline_text(
     defer mepo.allocator.free(msg);
 
     const line_height = @floatToInt(u32, config.FontSize * 1.25);
-    var dest_rect = sdl.SDL_Rect{ .x = x, .y = y, .w = undefined, .h = undefined };
+    var y_off: i32 = 0;
     var start: usize = 0;
     var current: usize = 0;
     while (current < msg.len) : (current += 1) {
@@ -443,8 +443,12 @@ pub fn blit_multiline_text(
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
                     defer sdl.SDL_DestroyTexture(text);
-                    dest_rect.w = text_surf.?.w;
-                    dest_rect.h = text_surf.?.h;
+                    const dest_rect = sdl.SDL_Rect{
+                        .x = x + if (alignment == .Right) -text_surf.?.w else 0,
+                        .y = y + y_off,
+                        .w = text_surf.?.w,
+                        .h = text_surf.?.h,
+                    };
                     if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect) > 0) {
                         return errors.SDLError.BlitSurface;
                     }
@@ -453,7 +457,7 @@ pub fn blit_multiline_text(
                 }
             }
             start = current + 1;
-            dest_rect.y += line_height;
+            y_off += line_height;
         }
     }
 }
