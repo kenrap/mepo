@@ -108,6 +108,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     }
 
     try mepo.blit_multiline_text(
+        0x000000,
         .Left,
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -133,6 +134,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .queued_position => |queued_position| {
             try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, dest);
             try mepo.blit_multiline_text(
+                0x000000,
                 .Left,
                 dest.x,
                 dest.y,
@@ -149,6 +151,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
         try mepo.blit_multiline_text(
+            0x000000,
             .Left,
             5,
             5,
@@ -159,6 +162,7 @@ fn blit_debug(mepo: *@This()) !void {
 
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
+            0xff0000,
             .Right,
             @intCast(i32, mepo.w - 5),
             5,
@@ -205,6 +209,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     if (pin_opt) |pin| {
         try mepo.blit_multiline_text(
+            0x000000,
             .Left,
             5,
             @intCast(i32, mepo.h) - (18 * 3),
@@ -212,6 +217,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
+            0x000000,
             .Right,
             @intCast(i32, mepo.w - 5),
             @intCast(i32, mepo.h) - (18 * 3),
@@ -230,13 +236,14 @@ fn blit_download_bar(mepo: *@This()) !void {
         .w = @intCast(i32, mepo.w),
         .h = 200,
     });
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x00000, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x000000, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 1,
     });
     try mepo.blit_multiline_text(
+        0x000000,
         .Left,
         5,
         @intCast(i32, mepo.h) - 20 + 3,
@@ -422,10 +429,11 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
 pub fn blit_multiline_text(
     mepo: *@This(),
+    color: u24, 
     alignment: text_alignment,
     x: i32,
     y: i32,
-    comptime fmt_string: []const u8,
+    comptime fmt_string: [:0]const u8,
     args: anytype,
 ) !void {
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
@@ -438,7 +446,7 @@ pub fn blit_multiline_text(
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(0x00000));
+            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color));
             defer sdl.SDL_FreeSurface(text_surf);
             if (text_surf != null) {
                 if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
