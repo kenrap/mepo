@@ -13,6 +13,8 @@ const utilsdl = @import("util/utilsdl.zig");
 const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 
+const text_alignment = enum { Left, Right };
+
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
@@ -106,6 +108,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     }
 
     try mepo.blit_multiline_text(
+        .Left,
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
         "tx: {d}\nty: {d}\ndl: {d}/{d}",
@@ -130,6 +133,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .queued_position => |queued_position| {
             try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, dest);
             try mepo.blit_multiline_text(
+                .Left,
                 dest.x,
                 dest.y,
                 "{d}",
@@ -145,6 +149,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
         try mepo.blit_multiline_text(
+            .Left,
             5,
             5,
             "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
@@ -154,6 +159,7 @@ fn blit_debug(mepo: *@This()) !void {
 
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
+            .Right,
             5,
             5,
             "DEBUG: {s}",
@@ -199,12 +205,14 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     if (pin_opt) |pin| {
         try mepo.blit_multiline_text(
+            .Left,
             5,
             @intCast(i32, mepo.h) - (18 * 3),
             "Pin: {s}\nlat: {d}\nlon: {d}\n",
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
+            .Left,
             @intCast(i32, mepo.w) - 20,
             @intCast(i32, mepo.h) - (18 * 3),
             "{d}p",
@@ -229,6 +237,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .h = 1,
     });
     try mepo.blit_multiline_text(
+        .Left,
         5,
         @intCast(i32, mepo.h) - 20 + 3,
         "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
@@ -411,7 +420,14 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, comptime fmt_string: []const u8, args: anytype) !void {
+pub fn blit_multiline_text(
+    mepo: *@This(),
+    alignment: text_alignment,
+    x: i32,
+    y: i32,
+    comptime fmt_string: []const u8,
+    args: anytype,
+) !void {
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
