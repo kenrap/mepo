@@ -8,8 +8,8 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     if (std.mem.eql(u8, "download_bar", name)) {
         mepo.download_bar = args[1].Number == 1;
-    } else if (std.mem.eql(u8, "debug_global", name)) {
-        mepo.debug_global = args[1].Number == 1;
+    } else if (std.mem.eql(u8, "debug_vars", name)) {
+        mepo.debug_vars = args[1].Number == 1;
     } else if (std.mem.eql(u8, "debug_tiles", name)) {
         mepo.debug_tiles = args[1].Number == 1;
     } else if (std.mem.eql(u8, "zoom", name)) {

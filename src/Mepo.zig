@@ -16,7 +16,7 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
-debug_global: bool = false,
+debug_vars: bool = false,
 debug_tiles: bool = false,
 download_bar: bool = false,
 drag: bool = false,
@@ -144,8 +144,8 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     }
 }
 
-fn blit_global_text(mepo: *@This()) !void {
-    if (!mepo.debug_global) return;
+fn blit_debug_vars(mepo: *@This()) !void {
+    if (!mepo.debug_vars) return;
 
     try mepo.blit_multiline_text(
         5,
@@ -247,7 +247,7 @@ pub fn blit(mepo: *@This()) !void {
         mepo.h,
         mepo.zoom,
     );
-    try mepo.blit_global_text();
+    try mepo.blit_debug_vars();
     try mepo.blit_pins();
     try mepo.blit_pin_active_text();
     try mepo.blit_crosshair();

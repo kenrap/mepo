@@ -64,7 +64,7 @@ commandname2 arg 8.373 anothertextarg;
   - Sets the preference named text to the value. Currently supported preferences:
   - | prefname       | type   | description                                                   |
     | ---            | ---    | ---                                                           |
-    | debug_global   | number | Shows (1) or hides (0) global debug text.                     |
+    | debug_vars     | number | Shows (1) or hides (0) global debug text.                     |
     | debug_tiles    | number | Shows (1) or hides (0) per-tile debug text.                   |
     | zoom           | number | Sets the zoom level of the map.                               |
     | crosshair_on   | number | Show (1) or hides (0) the center crosshair.                   |
