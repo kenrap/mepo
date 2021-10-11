@@ -16,8 +16,10 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
-debug_vars: bool = false,
+debug_message: ?[]const u8 = null,
+debug_message_enabled: bool = false,
 debug_tiles: bool = false,
+debug_vars: bool = false,
 download_bar: bool = false,
 drag: bool = false,
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
@@ -144,17 +146,28 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     }
 }
 
-fn blit_debug_vars(mepo: *@This()) !void {
-    if (!mepo.debug_vars) return;
+fn blit_debug(mepo: *@This()) !void {
+    if (mepo.debug_vars) {
+        try mepo.blit_multiline_text(
+            5,
+            5,
+            mepo.w,
+            mepo.h,
+            "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
+            .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
+        );
+    }
 
-    try mepo.blit_multiline_text(
-        5,
-        5,
-        mepo.w,
-        mepo.h,
-        "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
-        .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
-    );
+    if (mepo.debug_message_enabled and mepo.debug_message != null) {
+        try mepo.blit_multiline_text(
+            5,
+            5,
+            mepo.w,
+            mepo.h,
+            "DEBUG: {s}",
+            .{mepo.debug_message.?},
+        );
+    }
 }
 
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
@@ -247,7 +260,7 @@ pub fn blit(mepo: *@This()) !void {
         mepo.h,
         mepo.zoom,
     );
-    try mepo.blit_debug_vars();
+    try mepo.blit_debug();
     try mepo.blit_pins();
     try mepo.blit_pin_active_text();
     try mepo.blit_crosshair();
@@ -443,6 +456,14 @@ pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, compt
             dest_rect.y += line_height;
         }
     }
+}
+
+pub fn update_debug_message(mepo: *@This(), new_msg: []const u8) !void {
+    if (mepo.debug_message) |dbg_msg| {
+        mepo.allocator.free(dbg_msg);
+    }
+    mepo.debug_message = try std.fmt.allocPrintZ(mepo.allocator, "{s}", .{new_msg});
+    utilsdl.sdl_push_resize_event();
 }
 
 pub fn get_x(mepo: *@This()) i32 {
