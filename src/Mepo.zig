@@ -108,8 +108,6 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     try mepo.blit_multiline_text(
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
-        config.Tsize,
-        config.Tsize,
         "tx: {d}\nty: {d}\ndl: {d}/{d}",
         .{ tile_x, tile_y, dl_now, dl_total },
     );
@@ -134,8 +132,6 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try mepo.blit_multiline_text(
                 dest.x,
                 dest.y,
-                @intCast(u32, dest.w),
-                @intCast(u32, dest.h),
                 "{d}",
                 .{queued_position},
             );
@@ -151,8 +147,6 @@ fn blit_debug(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             5,
             5,
-            mepo.w,
-            mepo.h,
             "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
             .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
         );
@@ -162,8 +156,6 @@ fn blit_debug(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             5,
             5,
-            mepo.w,
-            mepo.h,
             "DEBUG: {s}",
             .{mepo.debug_message.?},
         );
@@ -209,16 +201,12 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             5,
             @intCast(i32, mepo.h) - (18 * 3),
-            mepo.w,
-            mepo.h,
             "Pin: {s}\nlat: {d}\nlon: {d}\n",
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
             @intCast(i32, mepo.w) - 20,
             @intCast(i32, mepo.h) - (18 * 3),
-            mepo.w,
-            mepo.h,
             "{d}p",
             .{mepo.pin_table.count()},
         );
@@ -243,8 +231,6 @@ fn blit_download_bar(mepo: *@This()) !void {
     try mepo.blit_multiline_text(
         5,
         @intCast(i32, mepo.h) - 20 + 3,
-        mepo.w,
-        mepo.h,
         "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
         .{ mepo.tile_cache.queue_lifo.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
     );
@@ -425,13 +411,11 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, w: u32, h: u32, comptime fmt_string: []const u8, args: anytype) !void {
+pub fn blit_multiline_text(mepo: *@This(), x: i32, y: i32, comptime fmt_string: []const u8, args: anytype) !void {
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
-    // TODO: Implement clipping based on passed w/h
     const line_height = @floatToInt(u32, config.FontSize * 1.25);
-
     var dest_rect = sdl.SDL_Rect{ .x = x, .y = y, .w = undefined, .h = undefined };
     var start: usize = 0;
     var current: usize = 0;
