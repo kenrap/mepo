@@ -212,8 +212,8 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
-            .Left,
-            @intCast(i32, mepo.w) - 20,
+            .Right,
+            @intCast(i32, mepo.w - 5),
             @intCast(i32, mepo.h) - (18 * 3),
             "{d}p",
             .{mepo.pin_table.count()},
