@@ -1,5 +1,5 @@
 comptime {
-    _ = @import("util/mepolangargizeutil.zig");
-    _ = @import("util/conversionutil.zig");
-    _ = @import("util/stringsutil.zig");
+    _ = @import("util/utilmepolang.zig");
+    _ = @import("util/utilconversion.zig");
+    _ = @import("util/utilstrings.zig");
 }
