@@ -1,5 +1,8 @@
 const std = @import("std");
 const config = @import("../config.zig");
+const cmath = @cImport({
+    @cInclude("math.h");
+});
 
 pub fn lon_to_px_x(lon: f64, zoom: u32) i32 {
     const tilex: f64 = (lon + 180.0) / 360.0;
@@ -7,7 +10,12 @@ pub fn lon_to_px_x(lon: f64, zoom: u32) i32 {
 }
 
 pub fn lat_to_px_y(lat: f64, zoom: u32) i32 {
-    const tiley = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
+    // Currently there's a bug in zig std.math.asinh where negative
+    // values are not respected. TODO: switch back / remove cmath reference
+    // once when zig MR is merged in 0.8.2 or 0.9
+    //
+    // https://github.com/ziglang/zig/pull/9940
+    const tiley = (1.0 - cmath.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
     return @floatToInt(i32, tiley * zoom_bit(zoom));
 }
 
