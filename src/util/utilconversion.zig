@@ -35,8 +35,8 @@ test "lon_to_px_x roundtrips with px_x_to_lon" {
 test "lat_to_px_y roundtrips with px_y_to_lat" {
     const lat: f64 = 22.0;
     const zoom = 3;
-    const conv_x = lat_to_px_y(lat, zoom);
-    const conv_lat = px_y_to_lat(conv_x, zoom);
+    const conv_y = lat_to_px_y(lat, zoom);
+    const conv_lat = px_y_to_lat(conv_y, zoom);
     try std.testing.expectEqual(round_to(lat, 1), round_to(conv_lat, 1));
 }
 
