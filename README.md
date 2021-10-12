@@ -79,24 +79,26 @@ search scripts, bookmarks, and more.
 - **Milestone 1: Overall Stability**
   - Improve current stability of the application and resolve intermittent
     crashes related to tile downloading.
-  - Implement tile downloading retry logic & handle case where user is
-    offline gracefully. Also error check invalid PNG tiledata received
-    from tileservers & loaded from filesystem.
-  - Resolve existing memory leaks and rework consistency of allocator
-    passing (e.g. remove ad-hoc allocators, ensure all allocations based on
-    using top-level allocator via arena allocation).
-  - Rework blitting logic to be more intelligent about not drawing offscreen
-    entities & pins.
+  - ~~Implement tile downloading retry logic & handle case where user is
+    offline gracefully.~~
+  - Error check invalid PNG tiledata received from tileservers & ~~loaded 
+    from filesystem.~~
+  - Resolve existing memory leaks in the application
+  - ~~Rework consistency of allocator passing (e.g. remove ad-hoc allocators, 
+    ensure all allocations based on using top-level allocator via arena
+    allocation).~~
+  - ~~Rework blitting logic to be more intelligent about not drawing offscreen
+    entities & pins.~~
   - ~~Implement LIFO for downloading queue: viewport tiles should always take
     priority before long-queued offscreen tiles.~~
   - Refactor error handling logic and implement debug mode preference or
     similar to control verbosity of debugging STDERR messages.
-  - Implement togglable text debug message overlay to provide user feedback
-    right in UI when operations like shellpipe fail.
+  - ~~Implement togglable text debug message overlay to provide user feedback
+    right in UI when operations like shellpipe fail.~~
   - Add togglable help text overlay to show current results of bind_key
     (keybindings table) mapping in UI.
-  - Fix bug where negative latitude values fail to round-trip between
-    lat-to-y / y-to-lat conversion functions.
+  - ~~Fix bug where negative latitude values fail to round-trip between
+    lat-to-y / y-to-lat conversion functions.~~
   - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
