@@ -23,7 +23,7 @@ pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8
             args[args_i] = .{ .Number = try std.fmt.parseFloat(f64, tok) };
             args_i += 1;
         } else {
-            args[args_i] = .{ .Text = try std.fmt.allocPrintZ(allocator, "{s}", .{tok}) };
+            args[args_i] = .{ .Text = try allocator.dupeZ(u8, tok) };
             args_i += 1;
         }
         i += 1;

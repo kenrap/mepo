@@ -293,7 +293,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     if (tile_cache.source_url) |present_source_url| {
         tile_cache.allocator.free(present_source_url);
     }
-    tile_cache.source_url = try std.fmt.allocPrintZ(tile_cache.allocator, "{s}", .{url});
+    tile_cache.source_url = try tile_cache.allocator.dupeZ(u8, url);
 
     // Resize
     utilsdl.sdl_push_resize_event();

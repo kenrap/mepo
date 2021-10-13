@@ -474,7 +474,7 @@ pub fn update_debug_message(mepo: *@This(), new_msg: []const u8) !void {
     if (mepo.debug_message) |dbg_msg| {
         mepo.allocator.free(dbg_msg);
     }
-    mepo.debug_message = try std.fmt.allocPrintZ(mepo.allocator, "{s}", .{new_msg});
+    mepo.debug_message = try mepo.allocator.dupe(u8, new_msg);
     utilsdl.sdl_push_resize_event();
 }
 
