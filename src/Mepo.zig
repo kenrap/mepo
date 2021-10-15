@@ -451,8 +451,10 @@ pub fn blit_multiline_text(
     var start: usize = 0;
     var current: usize = 0;
     while (current < msg.len) : (current += 1) {
+
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
+            if (msg[start] == 0) break;
             const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color, 255)));
             defer sdl.SDL_FreeSurface(text_surf);
 
