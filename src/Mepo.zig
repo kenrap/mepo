@@ -453,19 +453,21 @@ pub fn blit_multiline_text(
     while (current < msg.len) : (current += 1) {
         if (msg[current] == '\n' or current == msg.len - 1) {
             msg[current] = 0;
-            const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color, 255));
+            const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color, 255)));
             defer sdl.SDL_FreeSurface(text_surf);
-            if (text_surf != null) {
-                const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
-                defer sdl.SDL_DestroyTexture(text);
-                const dest_rect = sdl.SDL_Rect{
-                    .x = x + if (alignment == .Right) -text_surf.?.w else 0,
-                    .y = y + y_off,
-                    .w = text_surf.?.w,
-                    .h = text_surf.?.h,
-                };
-                try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
-            }
+
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+            defer sdl.SDL_DestroyTexture(text);
+
+            const dest_rect = sdl.SDL_Rect{
+                .x = x + if (alignment == .Right) -text_surf.w else 0,
+                .y = y + y_off,
+                .w = text_surf.w,
+                .h = text_surf.h,
+            };
+
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
+
             start = current + 1;
             y_off += line_height;
         }
