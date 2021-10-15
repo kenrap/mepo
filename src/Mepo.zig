@@ -43,23 +43,20 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, 0x000000, 255);
-    if (0 != sdl.SDL_RenderDrawLine(
+    try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
         @intCast(c_int, mepo.w / 2 + (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.h / 2),
-    )) {
-        return errors.SDLError.RenderDrawLine;
-    } else if (0 != sdl.SDL_RenderDrawLine(
+    ));
+    try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.w / 2),
         @intCast(c_int, mepo.h / 2 - (mepo.crosshair_size / 2)),
         @intCast(c_int, mepo.w / 2),
         @intCast(c_int, mepo.h / 2 + (mepo.crosshair_size / 2)),
-    )) {
-        return errors.SDLError.RenderDrawLine;
-    }
+    ));
 }
 
 pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zoom: u8) !void {
@@ -127,9 +124,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
-            if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest) > 0) {
-                return errors.SDLError.BlitSurface;
-            }
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest));
         },
         .queued_position => |queued_position| {
             try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, 255, dest);
@@ -186,7 +181,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
             continue;
 
-        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, 255, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, 255 / 2, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -429,7 +424,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
 pub fn blit_multiline_text(
     mepo: *@This(),
-    color: u24, 
+    color: u24,
     alignment: text_alignment,
     x: i32,
     y: i32,
@@ -442,15 +437,11 @@ pub fn blit_multiline_text(
     // Create target texture
     var target_texture = target: {
         var info: sdl.SDL_RendererInfo = undefined;
-        if (0 != sdl.SDL_GetRendererInfo(mepo.renderer, &info)) {
-            return errors.SDLError.GetRendererInfo;
-        }
+        try utilsdl.errorcheck(sdl.SDL_GetRendererInfo(mepo.renderer, &info));
         var target = sdl.SDL_CreateTexture(mepo.renderer, info.texture_formats[0], sdl.SDL_TEXTUREACCESS_TARGET, @intCast(c_int, mepo.w), @intCast(c_int, mepo.h));
-        if (0 != sdl.SDL_SetTextureBlendMode(target, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_BLEND))) {
-            return errors.SDLError.SetTextureBlendMode;
-        } else if (0 != sdl.SDL_SetRenderTarget(mepo.renderer, target)) {
-            return errors.SDLError.SetRenderTarget;
-        }
+        defer sdl.SDL_DestroyTexture(target);
+        try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(target, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_BLEND)));
+        try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, target));
         break :target target.?;
     };
 
@@ -465,20 +456,15 @@ pub fn blit_multiline_text(
             const text_surf: ?*sdl.SDL_Surface = sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color, 255));
             defer sdl.SDL_FreeSurface(text_surf);
             if (text_surf != null) {
-                if (sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf)) |text| {
-                    defer sdl.SDL_DestroyTexture(text);
-                    const dest_rect = sdl.SDL_Rect{
-                        .x = x + if (alignment == .Right) -text_surf.?.w else 0,
-                        .y = y + y_off,
-                        .w = text_surf.?.w,
-                        .h = text_surf.?.h,
-                    };
-                    if (sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect) > 0) {
-                        return errors.SDLError.BlitSurface;
-                    }
-                } else {
-                    return errors.SDLError.CreateTextureFromSurface;
-                }
+                const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+                defer sdl.SDL_DestroyTexture(text);
+                const dest_rect = sdl.SDL_Rect{
+                    .x = x + if (alignment == .Right) -text_surf.?.w else 0,
+                    .y = y + y_off,
+                    .w = text_surf.?.w,
+                    .h = text_surf.?.h,
+                };
+                try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
             }
             start = current + 1;
             y_off += line_height;
@@ -487,14 +473,10 @@ pub fn blit_multiline_text(
 
     // Copy over target texture to main (screen) texture
     {
-        if (0 != sdl.SDL_SetRenderTarget(mepo.renderer, null)) {
-            return errors.SDLError.SetRenderTarget;
-        }
+        try (utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null)));
         const dest_rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = @intCast(c_int, mepo.w), .h = @intCast(c_int, mepo.h) };
-        _ = sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_ADD));
-        if (sdl.SDL_RenderCopy(mepo.renderer, target_texture, null, &dest_rect) > 0) {
-            return errors.SDLError.BlitSurface;
-        }
+        try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_ADD)));
+        //try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, target_texture, null, &dest_rect));
     }
 }
 
@@ -536,55 +518,37 @@ pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
 
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     var font_opt: ?*sdl.TTF_Font = null;
-    var window: ?*sdl.SDL_Window = null;
 
     // Initialize video, create window
-    if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) < 0) {
-        return errors.SDLError.Init;
-    } else {
-        window = sdl.SDL_CreateWindow(
-            "mepo",
-            config.InitWindowX,
-            config.InitWindowY,
-            config.InitWindowW,
-            config.InitWindowH,
-            sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
-        );
-        if (window == null) {
-            return errors.SDLError.CreateWindow;
-        }
-    }
+    try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
+    const window = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
+        "mepo",
+        config.InitWindowX,
+        config.InitWindowY,
+        config.InitWindowW,
+        config.InitWindowH,
+        sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
+    ));
 
-    var renderer = sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE);
-    if (renderer == null) {
-        return errors.SDLError.CreateRenderer;
-    }
+    const renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE));
 
     sdl.SDL_SetWindowPosition(window, config.InitWindowX, config.InitWindowY);
 
     // Initialize TTF, load font
-    if (sdl.TTF_Init() == -1) {
-        utildbg.log("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
-        return errors.SDLError.TTF_Init;
-    } else {
-        const font = @embedFile("../assets/terminus.ttf");
-        font_opt = sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font[0]), font.len), 1, config.FontSize);
-        if (font_opt == null) {
-            utildbg.log("Failed to load lazy font! SDL_ttf Error: {s}\n", .{sdl.TTF_GetError()});
-            return errors.SDLError.OpenFontRW;
-        }
-    }
+    try utilsdl.errorcheck(sdl.TTF_Init());
+    const font_dat = @embedFile("../assets/terminus.ttf");
+    const font = try utilsdl.errorcheck_ptr(sdl.TTF_Font, sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len), 1, config.FontSize));
 
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
         .fn_table = try _fn_table.generate_fn_table(allocator),
-        .font = font_opt.?,
+        .font = font,
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
-        .renderer = renderer.?,
+        .renderer = renderer,
         .tile_cache = tile_cache,
-        .window = window.?,
+        .window = window,
     });
 
     tile_cache.set_renderer(instance.renderer);
