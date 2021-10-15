@@ -13,7 +13,7 @@ pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, val: u24, opacit
     const blend_mode = if (color.a != sdl.SDL_ALPHA_OPAQUE) sdl.SDL_BLENDMODE_ADD else sdl.SDL_BLENDMODE_NONE;
 
     if (0 != sdl.SDL_SetRenderDrawBlendMode(renderer, @intToEnum(sdl.SDL_BlendMode, blend_mode))) {
-        return errors.SDLError.RenderDrawColor; //TODO
+        return errors.SDLError.SetRenderDrawBlendMode;
     } else if (0 != sdl.SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, opacity)) {
         return errors.SDLError.RenderDrawColor;
     }
