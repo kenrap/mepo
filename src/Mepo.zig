@@ -13,7 +13,7 @@ const utilsdl = @import("util/utilsdl.zig");
 const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 
-const BoxAlignment = struct{
+const BoxAlignment = struct {
     w: ?usize = null,
     h: ?usize = null,
     align_x: enum { Left, Center, Right } = .Left,
@@ -132,10 +132,11 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest));
         },
         .queued_position => |queued_position| {
-            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, 255, dest);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, 0xffffff, 255, dest, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, 0xebebeb, 255, dest, .Draw);
             try mepo.blit_multiline_text(
                 0x000000,
-                .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center},
+                .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
                 "{d}",
@@ -143,7 +144,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             );
         },
         .transfer_datum => {
-            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x006400, 255, dest);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, 0x006400, 255, dest, .Fill);
         },
     }
 }
@@ -163,7 +164,7 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
             0xff0000,
-            .{.align_x = .Right},
+            .{ .align_x = .Right },
             @intCast(i32, mepo.w - 5),
             5,
             "DEBUG: {s}",
@@ -186,12 +187,12 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
             continue;
 
-        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, 255 / 2, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_rect(mepo.renderer, color, 255 / 2, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
-        });
+        }, .Fill);
     }
 }
 
@@ -200,19 +201,19 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     const pin_overlay_height = 70;
 
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, 120, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_rect(mepo.renderer, 0xffff00, 120, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - pin_overlay_height,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    });
+    }, .Fill);
 
     const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
 
     if (pin_opt) |pin| {
         try mepo.blit_multiline_text(
             0x000000,
-            .{.align_y = .Center, .h = pin_overlay_height},
+            .{ .align_y = .Center, .h = pin_overlay_height },
             5,
             @intCast(i32, mepo.h) - pin_overlay_height,
             "Pin: {s}\nlat: {d}\nlon: {d}\n",
@@ -220,7 +221,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         );
         try mepo.blit_multiline_text(
             0x000000,
-            .{.align_y = .Center, .align_x = .Right, .w = mepo.w, .h =  pin_overlay_height},
+            .{ .align_y = .Center, .align_x = .Right, .w = mepo.w, .h = pin_overlay_height },
             0,
             @intCast(i32, mepo.h) - pin_overlay_height,
             "{d}p",
@@ -232,18 +233,18 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, 0, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_rect(mepo.renderer, 0xffffff, 0, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 200,
-    });
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x000000, 0, sdl.SDL_Rect{
+    }, .Fill);
+    try utilsdl.sdl_renderer_rect(mepo.renderer, 0x000000, 0, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 1,
-    });
+    }, .Fill);
     try mepo.blit_multiline_text(
         0x000000,
         .{},
@@ -255,7 +256,7 @@ fn blit_download_bar(mepo: *@This()) !void {
 }
 
 pub fn blit(mepo: *@This()) !void {
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, 255, null);
+    try utilsdl.sdl_renderer_rect(mepo.renderer, 0xffffff, 255, null, .Fill);
     try blit_tiles_all(
         mepo,
         mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2),
@@ -470,21 +471,21 @@ pub fn blit_multiline_text(
 
     // Render out textures
     {
-        const x_off : c_int = x_off: {
+        const x_off: c_int = x_off: {
             const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.w);
             const offset = switch (alignment.align_x) {
-              .Left => 0,
-              .Right => bbox_total_w - textures_width,
-              .Center => @divTrunc(bbox_total_w - textures_width, 2)
+                .Left => 0,
+                .Right => bbox_total_w - textures_width,
+                .Center => @divTrunc(bbox_total_w - textures_width, 2),
             };
             break :x_off x + offset;
         };
         var y_off: c_int = y_off: {
             const bbox_total_h = @intCast(c_int, if (alignment.h) |h| h else mepo.h);
             const offset = switch (alignment.align_y) {
-              .Top => 0,
-              .Bottom => bbox_total_h - textures_height,
-              .Center => @divTrunc(bbox_total_h - textures_height, 2)
+                .Top => 0,
+                .Bottom => bbox_total_h - textures_height,
+                .Center => @divTrunc(bbox_total_h - textures_height, 2),
             };
             break :y_off y + offset;
         };

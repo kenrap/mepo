@@ -2,6 +2,8 @@ const sdl = @import("../sdlshim.zig");
 const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
 
+const RectOpt = enum { Draw, Fill };
+
 pub fn sdl_push_resize_event() void {
     var sdlevent: sdl.SDL_Event = undefined;
     sdlevent.type = sdl.SDL_WINDOWEVENT;
@@ -16,7 +18,7 @@ pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, val: u24, opacit
     try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, opacity));
 }
 
-pub fn sdl_renderer_fill_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, rect: ?sdl.SDL_Rect) errors.SDLError!void {
+pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, rect: ?sdl.SDL_Rect, rect_opt: RectOpt) errors.SDLError!void {
     const rect_ptr: ?*const sdl.SDL_Rect = rect_ptr: {
         if (rect != null) {
             break :rect_ptr &rect.?;
@@ -24,9 +26,24 @@ pub fn sdl_renderer_fill_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: 
             break :rect_ptr null;
         }
     };
-
     try sdl_renderer_set_draw_color(renderer, color, opacity);
-    try errorcheck(sdl.SDL_RenderFillRect(renderer, rect_ptr));
+    if (rect_opt == .Draw) {
+        try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
+    } else {
+        try errorcheck(sdl.SDL_RenderFillRect(renderer, rect_ptr));
+    }
+}
+
+pub fn sdl_renderer_draw_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, rect: ?sdl.SDL_Rect) errors.SDLError!void {
+    const rect_ptr: ?*const sdl.SDL_Rect = rect_ptr: {
+        if (rect != null) {
+            break :rect_ptr &rect.?;
+        } else {
+            break :rect_ptr null;
+        }
+    };
+    try sdl_renderer_set_draw_color(renderer, color, opacity);
+    try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
 }
 
 pub fn u24_to_sdl_color(val: u24, opacity: u8) sdl.SDL_Color {
