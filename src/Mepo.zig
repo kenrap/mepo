@@ -434,53 +434,46 @@ pub fn blit_multiline_text(
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
-    // Create target texture
-    var target_texture = target: {
-        var info: sdl.SDL_RendererInfo = undefined;
-        try utilsdl.errorcheck(sdl.SDL_GetRendererInfo(mepo.renderer, &info));
-        var target = sdl.SDL_CreateTexture(mepo.renderer, info.texture_formats[0], sdl.SDL_TEXTUREACCESS_TARGET, @intCast(c_int, mepo.w), @intCast(c_int, mepo.h));
-        defer sdl.SDL_DestroyTexture(target);
-        try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(target, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_BLEND)));
-        try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, target));
-        break :target target.?;
+    var textures_width: c_int = 0;
+    var textures_height: c_int = 0;
+
+    // Accumulate lines rendered into slice of textures
+    var textures: []*sdl.SDL_Texture = textures: {
+        var textures_array: [50]*sdl.SDL_Texture = undefined;
+        var textures_array_size: usize = 0;
+
+        var index_start: usize = 0;
+        var index_current: usize = 0;
+        while (index_current < msg.len) : (index_current += 1) {
+            if (msg[index_current] == '\n' or index_current == msg.len - 1) {
+                msg[index_current] = 0;
+                if (msg[index_start] == 0) break;
+                const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[index_start]), utilsdl.u24_to_sdl_color(color, 255)));
+                defer sdl.SDL_FreeSurface(text_surf);
+                const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+                textures_height += text_surf.h;
+                textures_width = std.math.max(textures_width, text_surf.w);
+                textures_array[textures_array_size] = text;
+                textures_array_size += 1;
+                index_start = index_current + 1;
+            }
+        }
+        break :textures textures_array[0..textures_array_size];
     };
 
-    // Render copy text into texture
-    const line_height = @floatToInt(u32, config.FontSize * 1.25);
-    var y_off: i32 = 0;
-    var start: usize = 0;
-    var current: usize = 0;
-    while (current < msg.len) : (current += 1) {
-
-        if (msg[current] == '\n' or current == msg.len - 1) {
-            msg[current] = 0;
-            if (msg[start] == 0) break;
-            const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[start]), utilsdl.u24_to_sdl_color(color, 255)));
-            defer sdl.SDL_FreeSurface(text_surf);
-
-            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
-            defer sdl.SDL_DestroyTexture(text);
-
-            const dest_rect = sdl.SDL_Rect{
-                .x = x + if (alignment == .Right) -text_surf.w else 0,
-                .y = y + y_off,
-                .w = text_surf.w,
-                .h = text_surf.h,
-            };
-
-            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
-
-            start = current + 1;
-            y_off += line_height;
-        }
-    }
-
-    // Copy over target texture to main (screen) texture
-    {
-        try (utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null)));
-        const dest_rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = @intCast(c_int, mepo.w), .h = @intCast(c_int, mepo.h) };
-        try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_ADD)));
-        //try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, target_texture, null, &dest_rect));
+    // Render out textures
+    var y_off: c_int = 0;
+    for (textures) |texture| {
+        defer sdl.SDL_DestroyTexture(texture);
+        var dest_rect = sdl.SDL_Rect{
+            .x = x + if (alignment == .Right) -textures_width else 0,
+            .y = y + y_off,
+            .w = undefined,
+            .h = undefined,
+        };
+        try utilsdl.errorcheck(sdl.SDL_QueryTexture(texture, null, null, &dest_rect.w, &dest_rect.h));
+        y_off += dest_rect.h;
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, texture, null, &dest_rect));
     }
 }
 
