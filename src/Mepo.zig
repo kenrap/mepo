@@ -42,7 +42,7 @@ zoom: u8 = 14,
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     if (!mepo.crosshair_on) return;
 
-    try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, 0x000000);
+    try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, 0x000000, 255);
     if (0 != sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
@@ -132,7 +132,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             }
         },
         .queued_position => |queued_position| {
-            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, dest);
+            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, 255, dest);
             try mepo.blit_multiline_text(
                 0x000000,
                 .Left,
@@ -143,7 +143,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             );
         },
         .transfer_datum => {
-            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x006400, dest);
+            try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x006400, 255, dest);
         },
     }
 }
@@ -186,7 +186,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
             continue;
 
-        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_fill_rect(mepo.renderer, color, 255, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -198,7 +198,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
 
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, 120, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
         .w = @intCast(i32, mepo.w),
@@ -230,13 +230,13 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, 0, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
         .h = 200,
     });
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x000000, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0x000000, 0, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.h) - 20,
         .w = @intCast(i32, mepo.w),
@@ -253,7 +253,7 @@ fn blit_download_bar(mepo: *@This()) !void {
 }
 
 pub fn blit(mepo: *@This()) !void {
-    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, null);
+    try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffffff, 255, null);
     try blit_tiles_all(
         mepo,
         mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2),
