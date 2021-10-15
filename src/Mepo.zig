@@ -135,9 +135,9 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xebebeb, 255, dest);
             try mepo.blit_multiline_text(
                 0x000000,
-                .{},
-                dest.x,
-                dest.y,
+                .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center},
+                @intCast(i32, tile_x * config.Tsize) - x_off,
+                @intCast(i32, tile_y * config.Tsize) - y_off,
                 "{d}",
                 .{queued_position},
             );
@@ -198,9 +198,11 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
 
+    const pin_overlay_height = 70;
+
     try utilsdl.sdl_renderer_fill_rect(mepo.renderer, 0xffff00, 120, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.h) - (18 * 3) - 6,
+        .y = @intCast(i32, mepo.h) - pin_overlay_height,
         .w = @intCast(i32, mepo.w),
         .h = 200,
     });
@@ -210,17 +212,17 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     if (pin_opt) |pin| {
         try mepo.blit_multiline_text(
             0x000000,
-            .{},
+            .{.align_y = .Center, .h = pin_overlay_height},
             5,
-            @intCast(i32, mepo.h) - (18 * 3),
+            @intCast(i32, mepo.h) - pin_overlay_height,
             "Pin: {s}\nlat: {d}\nlon: {d}\n",
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
             0x000000,
-            .{},
-            @intCast(i32, mepo.w - 5),
-            @intCast(i32, mepo.h) - (18 * 3),
+            .{.align_y = .Center, .align_x = .Right, .w = mepo.w, .h =  pin_overlay_height},
+            0,
+            @intCast(i32, mepo.h) - pin_overlay_height,
             "{d}p",
             .{mepo.pin_table.count()},
         );
