@@ -17,3 +17,10 @@ pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);
 pub const KeyInput = struct { keycode: sdl.SDL_KeyCode, keymod: sdl.SDL_Keymod };
 
 pub const Pending = enum { None, Redraw, Drag };
+
+pub const BoxAlignment = struct {
+    w: ?usize = null,
+    h: ?usize = null,
+    align_x: enum { Left, Center, Right } = .Left,
+    align_y: enum { Top, Center, Bottom } = .Top,
+};

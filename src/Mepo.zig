@@ -13,13 +13,6 @@ const utilsdl = @import("util/utilsdl.zig");
 const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 
-const BoxAlignment = struct {
-    w: ?usize = null,
-    h: ?usize = null,
-    align_x: enum { Left, Center, Right } = .Left,
-    align_y: enum { Top, Center, Bottom } = .Top,
-};
-
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
@@ -433,7 +426,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 pub fn blit_multiline_text(
     mepo: *@This(),
     color: u24,
-    alignment: BoxAlignment,
+    alignment: types.BoxAlignment,
     x: i32,
     y: i32,
     comptime fmt_string: [:0]const u8,
