@@ -467,20 +467,37 @@ pub fn blit_multiline_text(
     };
 
     // Render out textures
-    const x_off : c_int = x + if (alignment.align_x == .Right) -textures_width else 0;
-    var y_off: c_int = 0;
-
-    for (textures) |texture| {
-        defer sdl.SDL_DestroyTexture(texture);
-        var dest_rect = sdl.SDL_Rect{
-            .x = x_off,
-            .y = y + y_off,
-            .w = undefined,
-            .h = undefined,
+    {
+        const x_off : c_int = x_off: {
+            const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.w);
+            const offset = switch (alignment.align_x) {
+              .Left => 0,
+              .Right => bbox_total_w - textures_width,
+              .Center => @divTrunc(bbox_total_w - textures_width, 2)
+            };
+            break :x_off x + offset;
         };
-        try utilsdl.errorcheck(sdl.SDL_QueryTexture(texture, null, null, &dest_rect.w, &dest_rect.h));
-        y_off += dest_rect.h;
-        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, texture, null, &dest_rect));
+        var y_off: c_int = y_off: {
+            const bbox_total_h = @intCast(c_int, if (alignment.h) |h| h else mepo.h);
+            const offset = switch (alignment.align_y) {
+              .Top => 0,
+              .Bottom => bbox_total_h - textures_height,
+              .Center => @divTrunc(bbox_total_h - textures_height, 2)
+            };
+            break :y_off y + offset;
+        };
+        for (textures) |texture| {
+            defer sdl.SDL_DestroyTexture(texture);
+            var dest_rect = sdl.SDL_Rect{
+                .x = x_off,
+                .y = y_off,
+                .w = undefined,
+                .h = undefined,
+            };
+            try utilsdl.errorcheck(sdl.SDL_QueryTexture(texture, null, null, &dest_rect.w, &dest_rect.h));
+            y_off += dest_rect.h;
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, texture, null, &dest_rect));
+        }
     }
 }
 
