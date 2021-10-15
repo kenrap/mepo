@@ -439,6 +439,22 @@ pub fn blit_multiline_text(
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
+    // Create target texture
+    var target_texture = target: {
+        var info: sdl.SDL_RendererInfo = undefined;
+        if (0 != sdl.SDL_GetRendererInfo(mepo.renderer, &info)) {
+            return errors.SDLError.GetRendererInfo;
+        }
+        var target = sdl.SDL_CreateTexture(mepo.renderer, info.texture_formats[0], sdl.SDL_TEXTUREACCESS_TARGET, @intCast(c_int, mepo.w), @intCast(c_int, mepo.h));
+        if (0 != sdl.SDL_SetTextureBlendMode(target, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_BLEND))) {
+            return errors.SDLError.SetTextureBlendMode;
+        } else if (0 != sdl.SDL_SetRenderTarget(mepo.renderer, target)) {
+            return errors.SDLError.SetRenderTarget;
+        }
+        break :target target.?;
+    };
+
+    // Render copy text into texture
     const line_height = @floatToInt(u32, config.FontSize * 1.25);
     var y_off: i32 = 0;
     var start: usize = 0;
@@ -466,6 +482,18 @@ pub fn blit_multiline_text(
             }
             start = current + 1;
             y_off += line_height;
+        }
+    }
+
+    // Copy over target texture to main (screen) texture
+    {
+        if (0 != sdl.SDL_SetRenderTarget(mepo.renderer, null)) {
+            return errors.SDLError.SetRenderTarget;
+        }
+        const dest_rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = @intCast(c_int, mepo.w), .h = @intCast(c_int, mepo.h) };
+        _ = sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, @intToEnum(sdl.SDL_BlendMode, sdl.SDL_BLENDMODE_ADD));
+        if (sdl.SDL_RenderCopy(mepo.renderer, target_texture, null, &dest_rect) > 0) {
+            return errors.SDLError.BlitSurface;
         }
     }
 }
