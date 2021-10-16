@@ -445,8 +445,10 @@ pub fn blit_multiline_text(
 
         var index_start: usize = 0;
         var index_current: usize = 0;
-        while (index_current < msg.len) : (index_current += 1) {
-            if (msg[index_current] == '\n' or index_current == msg.len - 1) {
+        while (index_current < msg.len) : (index_current += 1) loop: {
+            if (textures_array_size + 1 > textures_array.len - 1) {
+                break :loop;
+            } else if (msg[index_current] == '\n' or index_current == msg.len - 1) {
                 msg[index_current] = 0;
                 if (msg[index_start] == 0) break;
                 const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[index_start]), utilsdl.u24_to_sdl_color(color, 255)));
