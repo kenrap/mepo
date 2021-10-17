@@ -6,7 +6,9 @@ const conversionutil = @import("../util/conversionutil.zig");
 pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
-    if (std.mem.eql(u8, "download_bar", name)) {
+    if (std.mem.eql(u8, "help", name)) {
+        mepo.help = args[1].Number == 1;
+    } else if (std.mem.eql(u8, "download_bar", name)) {
         mepo.download_bar = args[1].Number == 1;
     } else if (std.mem.eql(u8, "debug_vars", name)) {
         mepo.debug_vars = args[1].Number == 1;

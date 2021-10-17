@@ -25,6 +25,7 @@ drag: bool = false,
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 font: *sdl.TTF_Font,
 h: u32 = config.InitWindowH,
+help: bool = false,
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 lat: f64 = 0,
 lon: f64 = 0,
@@ -248,6 +249,37 @@ fn blit_download_bar(mepo: *@This()) !void {
     );
 }
 
+fn blit_help(mepo: *@This()) !void {
+    if (!mepo.help) return;
+
+    var msg = msg: {
+        var acc = std.ArrayList([]const u8).init(mepo.allocator);
+        defer acc.deinit();
+        defer for (acc.items) |item| mepo.allocator.free(item);
+
+        var it = mepo.keybindings_table.iterator();
+        while (it.next()) |kv| {
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{}/{} = {s}", .{ kv.key_ptr.keycode, kv.key_ptr.keymod, kv.value_ptr.* }));
+        }
+
+        break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
+    };
+    defer mepo.allocator.free(msg);
+
+    try mepo.blit_multiline_text(
+        0x000000,
+        .{ .align_x = .Center, .align_y = .Center },
+        0,
+        0,
+        \\mepo - Development version
+        \\ 
+        \\Keybindings:
+        \\{s}
+    ,
+        .{msg},
+    );
+}
+
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.sdl_renderer_rect(mepo.renderer, 0xffffff, 255, null, .Fill);
     try blit_tiles_all(
@@ -263,6 +295,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_pin_active_text();
     try mepo.blit_crosshair();
     try mepo.blit_download_bar();
+    try mepo.blit_help();
 
     sdl.SDL_RenderPresent(mepo.renderer);
 

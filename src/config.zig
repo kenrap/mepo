@@ -39,6 +39,9 @@ pub const DefaultBaseConfig =
     \\ bind_key cs f [shellpipe [mepo_script_panscreen.sh w 1]];
     \\ bind_key cs b [shellpipe [mepo_script_panscreen.sh w -1]];
     \\
+    \\ bind_key _ / [prefset help 1];
+    \\ bind_key s / [prefset help 0];
+    \\
     \\ bind_key _ d [prefset debug_tiles 1];
     \\ bind_key s d [prefset debug_tiles 0];
     \\
