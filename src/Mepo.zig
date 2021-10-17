@@ -259,7 +259,7 @@ fn blit_help(mepo: *@This()) !void {
 
         var it = mepo.keybindings_table.iterator();
         while (it.next()) |kv| {
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{}/{} = {s}", .{ kv.key_ptr.keycode, kv.key_ptr.keymod, kv.value_ptr.* }));
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s}/S={} = {s}", .{ sdl.SDL_GetKeyName(@enumToInt(kv.key_ptr.keycode)), kv.key_ptr.keymod, kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
