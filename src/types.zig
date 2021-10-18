@@ -18,6 +18,20 @@ pub const KeyInput = struct { keycode: sdl.SDL_KeyCode, keymod: sdl.SDL_Keymod }
 
 pub const Pending = enum { None, Redraw, Drag };
 
+pub const Color = struct {
+    value: u24 = 0x000000,
+    opacity: u8 = 255,
+
+    pub fn sdl(self: @This()) sdl.SDL_Color {
+        return .{
+            .r = @intCast(u8, self.value >> 16),
+            .g = @intCast(u8, self.value >> 8 & 0xff),
+            .b = @intCast(u8, self.value & 0xff),
+            .a = self.opacity,
+        };
+    }
+};
+
 pub const BoxAlignment = struct {
     w: ?usize = null,
     h: ?usize = null,

@@ -1,4 +1,5 @@
 const sdl = @import("../sdlshim.zig");
+const types = @import("../types.zig");
 const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
 
@@ -11,14 +12,14 @@ pub fn sdl_push_resize_event() void {
     _ = sdl.SDL_PushEvent(&sdlevent);
 }
 
-pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, val: u24, opacity: u8) errors.SDLError!void {
-    const color = u24_to_sdl_color(val, opacity);
-    const blend_mode = if (color.a != sdl.SDL_ALPHA_OPAQUE) sdl.SDL_BLENDMODE_ADD else sdl.SDL_BLENDMODE_NONE;
+pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, color: types.Color) errors.SDLError!void {
+    var sdl_color = color.sdl();
+    const blend_mode = if (sdl_color.a != sdl.SDL_ALPHA_OPAQUE) sdl.SDL_BLENDMODE_ADD else sdl.SDL_BLENDMODE_NONE;
     try errorcheck(sdl.SDL_SetRenderDrawBlendMode(renderer, @intToEnum(sdl.SDL_BlendMode, blend_mode)));
-    try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, opacity));
+    try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, color.opacity));
 }
 
-pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, rect: ?sdl.SDL_Rect, rect_opt: RectOpt) errors.SDLError!void {
+pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: types.Color, rect: ?sdl.SDL_Rect, rect_opt: RectOpt) errors.SDLError!void {
     const rect_ptr: ?*const sdl.SDL_Rect = rect_ptr: {
         if (rect != null) {
             break :rect_ptr &rect.?;
@@ -26,7 +27,7 @@ pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, r
             break :rect_ptr null;
         }
     };
-    try sdl_renderer_set_draw_color(renderer, color, opacity);
+    try sdl_renderer_set_draw_color(renderer, color);
     if (rect_opt == .Draw) {
         try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
     } else {
@@ -34,7 +35,7 @@ pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, r
     }
 }
 
-pub fn sdl_renderer_draw_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: u8, rect: ?sdl.SDL_Rect) errors.SDLError!void {
+pub fn sdl_renderer_draw_rect(renderer: *sdl.SDL_Renderer, color: types.Color, rect: ?sdl.SDL_Rect) errors.SDLError!void {
     const rect_ptr: ?*const sdl.SDL_Rect = rect_ptr: {
         if (rect != null) {
             break :rect_ptr &rect.?;
@@ -44,15 +45,6 @@ pub fn sdl_renderer_draw_rect(renderer: *sdl.SDL_Renderer, color: u24, opacity: 
     };
     try sdl_renderer_set_draw_color(renderer, color, opacity);
     try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
-}
-
-pub fn u24_to_sdl_color(val: u24, opacity: u8) sdl.SDL_Color {
-    return .{
-        .r = @intCast(u8, val >> 16),
-        .g = @intCast(u8, val >> 8 & 0xff),
-        .b = @intCast(u8, val & 0xff),
-        .a = opacity,
-    };
 }
 
 pub fn errorcheck(return_value: c_int) errors.SDLError!void {
