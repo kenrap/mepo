@@ -187,10 +187,12 @@ fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec 
 fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Texture {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
-    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]),  @intCast(c_int, data.len)));
+    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)));
     const surface = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
     defer sdl.SDL_FreeSurface(surface);
     const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
+    // TODO: should there be some limit on size of texture map cache?
+    //       currently memory will just accumulate there ad-infinitum
     //defer sdl.SDL_DestroyTexture(texture);
     try tile_cache.texture_map.put(coords, texture);
     return tile_cache.texture_map.get(coords).?;
@@ -223,56 +225,60 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
             utildbg.log("Unhandled curl error code response {}\n", .{msg.data.result});
         },
     }
-
-    utildbg.log("Complete cleanup!\n", .{});
-    // Cleanup
-    {
-        // Essentially either way, if CURLE_OK passes through or if there's
-        // some error we clear the item from the transfer queue and push a
-        // SDL resize (refresh event). By effect, if tile is loaded in texture
-        // map rendering thread fetches and updates it; if CURLE_OK wasn't
-        // there - the item will get repushed back into queue
-        if (tile_cache.curl_msg_to_coords(msg)) |coords| {
-            const transfer_datum = tile_cache.transfer_map.get(coords).?;
-            const datum_array = transfer_datum.data.items;
-
-            tile_cache.transfer_map.get(coords).?.data.deinit();
-            _ = tile_cache.transfer_map.swapRemove(coords);
-            tile_cache.allocator.destroy(transfer_datum);
-        }
-        try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle));
-        curl.curl_easy_cleanup(msg.*.easy_handle);
-        if (tile_cache.n_current_transfers > 0) {
-            tile_cache.n_current_transfers -= 1;
-        }
-
-        utilsdl.sdl_push_resize_event();
-    }
 }
 
-// TODO: This function shouldn't return errors; remove all try
-// if a tile fails to load for whatever reason should pop back into queue.
-// Currently it'll wholesale fail and the SDL download loop will terminate
-// outright based on caller ignoring error
-pub fn download_loop(tile_cache: *@This()) !void {
+// Essentially either way, if CURLE_OK passes through or if there's
+// some error we clear the item from the transfer queue and push a
+// SDL resize (refresh event). By effect, if tile is loaded in texture
+// map rendering thread fetches and updates it; if CURLE_OK wasn't
+// there - the item will get repushed back into queue
+fn transfer_cleanup(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
+    if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+        const transfer_datum = tile_cache.transfer_map.get(coords).?;
+        const datum_array = transfer_datum.data.items;
+        tile_cache.transfer_map.get(coords).?.data.deinit();
+        _ = tile_cache.transfer_map.swapRemove(coords);
+        tile_cache.allocator.destroy(transfer_datum);
+    }
+
+    try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle));
+
+    curl.curl_easy_cleanup(msg.*.easy_handle);
+
+    if (tile_cache.n_current_transfers > 0) {
+        tile_cache.n_current_transfers -= 1;
+    }
+    utilsdl.sdl_push_resize_event();
+}
+
+pub fn download_loop(tile_cache: *@This()) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
     while (true) {
-        try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
+        curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
-                ._DONE => try tile_cache.transfer_complete(msg),
-                else => { },
+                ._DONE => {
+                    tile_cache.transfer_complete(msg) catch |err| {
+                        utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
+                    };
+                    tile_cache.transfer_cleanup(msg) catch |err| {
+                        utildbg.log("Failed to successfully cleanup transfer: {}!\n", .{err});
+                    };
+                },
+                else => {
+                    // Will timeout and trigger ._DONE in anycase
+                },
             }
-            try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
+            curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
             var coords = tile_cache.queue_lifo.pop();
-            try tile_cache.add_to_curl_multi(coords.key, coords.value);
+            tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
             tile_cache.n_current_transfers += 1;
         }
 
@@ -282,7 +288,7 @@ pub fn download_loop(tile_cache: *@This()) !void {
 
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
-    var err = tile_cache.download_loop();
+    tile_cache.download_loop();
     return 0;
 }
 
