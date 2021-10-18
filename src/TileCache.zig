@@ -175,19 +175,15 @@ fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec 
 }
 
 fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Texture {
-    if (data.len == 0) {
-        return error.LoadToSurfaceFailEmptyData;
-    } else if (sdl.IMG_Load_RW(sdl.SDL_RWFromMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)), 1)) |surf| {
-        defer sdl.SDL_FreeSurface(surf);
-        if (sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surf)) |text| {
-            try tile_cache.texture_map.put(coords, text);
-            return tile_cache.texture_map.get(coords).?;
-        } else {
-            return error.CreateTextureFromSurfaceFail;
-        }
-    } else {
-        return error.LoadToSurfaceFailInvalidPNGData;
-    }
+    if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
+
+    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]),  @intCast(c_int, data.len)));
+    const surface = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
+    defer sdl.SDL_FreeSurface(surface);
+    const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
+    //defer sdl.SDL_DestroyTexture(texture);
+    try tile_cache.texture_map.put(coords, texture);
+    return tile_cache.texture_map.get(coords).?;
 }
 
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
