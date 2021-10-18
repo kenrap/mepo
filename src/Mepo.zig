@@ -105,6 +105,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 
     try mepo.blit_multiline_text(
         0x000000,
+        null,
         .{},
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -130,6 +131,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, dest, .Draw);
             try mepo.blit_multiline_text(
                 0x000000,
+                null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -147,6 +149,7 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
         try mepo.blit_multiline_text(
             0x000000,
+            null,
             .{},
             5,
             5,
@@ -158,6 +161,7 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
             0xff0000,
+            null,
             .{ .align_x = .Right },
             @intCast(i32, mepo.w - 5),
             5,
@@ -181,7 +185,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
             continue;
 
-        try utilsdl.sdl_renderer_rect(mepo.renderer, .{.value = color_value}, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -207,6 +211,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     if (pin_opt) |pin| {
         try mepo.blit_multiline_text(
             0x000000,
+            null,
             .{ .align_y = .Center, .h = pin_overlay_height },
             5,
             @intCast(i32, mepo.h) - pin_overlay_height,
@@ -215,6 +220,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         );
         try mepo.blit_multiline_text(
             0x000000,
+            null,
             .{ .align_y = .Center, .align_x = .Right, .w = mepo.w, .h = pin_overlay_height },
             0,
             @intCast(i32, mepo.h) - pin_overlay_height,
@@ -241,6 +247,7 @@ fn blit_download_bar(mepo: *@This()) !void {
     }, .Fill);
     try mepo.blit_multiline_text(
         0x000000,
+        null,
         .{},
         5,
         @intCast(i32, mepo.h) - 20 + 3,
@@ -268,6 +275,7 @@ fn blit_help(mepo: *@This()) !void {
 
     try mepo.blit_multiline_text(
         0x000000,
+        types.Color{ .value = 0xe8e8e8, .opacity = 120 },
         .{ .align_x = .Center, .align_y = .Center },
         0,
         0,
@@ -459,6 +467,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 pub fn blit_multiline_text(
     mepo: *@This(),
     color: u24,
+    background_opt: ?types.Color,
     alignment: types.BoxAlignment,
     x: i32,
     y: i32,
@@ -484,7 +493,7 @@ pub fn blit_multiline_text(
             } else if (msg[index_current] == '\n' or index_current == msg.len - 1) {
                 msg[index_current] = 0;
                 if (msg[index_start] == 0) break;
-                const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[index_start]), (types.Color{ .value = color}).sdl() ));
+                const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[index_start]), (types.Color{ .value = color }).sdl()));
                 defer sdl.SDL_FreeSurface(text_surf);
                 const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
                 textures_height += text_surf.h;
@@ -497,8 +506,9 @@ pub fn blit_multiline_text(
         break :textures textures_array[0..textures_array_size];
     };
 
-    // Render out textures
+    // Rendering
     {
+        // Calculate X/Y offsets
         const x_off: c_int = x_off: {
             const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.w);
             const offset = switch (alignment.align_x) {
@@ -517,6 +527,12 @@ pub fn blit_multiline_text(
             };
             break :y_off y + offset;
         };
+
+        // Render background
+        if (background_opt) |background|
+            try utilsdl.sdl_renderer_rect(mepo.renderer, background, sdl.SDL_Rect{ .x = x_off, .y = y_off, .w = textures_width, .h = textures_height }, .Fill);
+
+        // Reder text
         for (textures) |texture| {
             defer sdl.SDL_DestroyTexture(texture);
             var dest_rect = sdl.SDL_Rect{
