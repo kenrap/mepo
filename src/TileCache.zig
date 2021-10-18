@@ -62,6 +62,7 @@ fn tile_write_curl_callback(
     nmemb: c_uint,
     user_data: *c_void,
 ) callconv(.C) c_uint {
+    //utildbg.log("Write!!: \n", .{});
     var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     var typed_data = @intToPtr([*]u8, @ptrToInt(data));
     transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
@@ -145,6 +146,8 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
     defer tile_cache.allocator.free(tile_url);
 
     try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 1));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOSIGNAL, @intCast(c_long, 1));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_CONNECTTIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_TIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.DownloadUseragent);
@@ -154,8 +157,15 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, tile_xferinfo_curl_callback);
 
-    _ = curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client);
+    try curl_errorcheck(curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client));
     utildbg.log("Add multi handle {any}\n", .{coords});
+}
+
+fn curl_errorcheck(response: curl.CURLMcode) !void {
+    if (response == @intToEnum(curl.CURLMcode, curl.CURLM_OK)) {
+        return;
+    }
+    return error.CurlMultiFail;
 }
 
 fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
@@ -187,29 +197,6 @@ fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8
 }
 
 fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
-    defer {
-        // Essentially either way, if CURLE_OK passes through or if there's
-        // some error we clear the item from the transfer queue and push a
-        // SDL resize (refresh event). By effect, if tile is loaded in texture
-        // map rendering thread fetches and updates it; if CURLE_OK wasn't
-        // there - the item will get repushed back into queue
-        if (tile_cache.curl_msg_to_coords(msg)) |coords| {
-            const transfer_datum = tile_cache.transfer_map.get(coords).?;
-            const datum_array = transfer_datum.data.items;
-
-            tile_cache.transfer_map.get(coords).?.data.deinit();
-            _ = tile_cache.transfer_map.swapRemove(coords);
-            tile_cache.allocator.destroy(transfer_datum);
-        }
-        _ = curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle);
-        _ = curl.curl_easy_cleanup(msg.*.easy_handle);
-        if (tile_cache.n_current_transfers > 0) {
-            tile_cache.n_current_transfers -= 1;
-        }
-
-        utilsdl.sdl_push_resize_event();
-    }
-
     switch (msg.data.result) {
         .CURLE_OPERATION_TIMEDOUT => {
             utildbg.log("Curl timed out for msg: {}\n", .{msg});
@@ -236,21 +223,50 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
             utildbg.log("Unhandled curl error code response {}\n", .{msg.data.result});
         },
     }
+
+    utildbg.log("Complete cleanup!\n", .{});
+    // Cleanup
+    {
+        // Essentially either way, if CURLE_OK passes through or if there's
+        // some error we clear the item from the transfer queue and push a
+        // SDL resize (refresh event). By effect, if tile is loaded in texture
+        // map rendering thread fetches and updates it; if CURLE_OK wasn't
+        // there - the item will get repushed back into queue
+        if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+            const transfer_datum = tile_cache.transfer_map.get(coords).?;
+            const datum_array = transfer_datum.data.items;
+
+            tile_cache.transfer_map.get(coords).?.data.deinit();
+            _ = tile_cache.transfer_map.swapRemove(coords);
+            tile_cache.allocator.destroy(transfer_datum);
+        }
+        try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle));
+        curl.curl_easy_cleanup(msg.*.easy_handle);
+        if (tile_cache.n_current_transfers > 0) {
+            tile_cache.n_current_transfers -= 1;
+        }
+
+        utilsdl.sdl_push_resize_event();
+    }
 }
 
+// TODO: This function shouldn't return errors; remove all try
+// if a tile fails to load for whatever reason should pop back into queue.
+// Currently it'll wholesale fail and the SDL download loop will terminate
+// outright based on caller ignoring error
 pub fn download_loop(tile_cache: *@This()) !void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
     while (true) {
-        _ = curl.curl_multi_perform(tile_cache.curl_multi, &running);
+        try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => try tile_cache.transfer_complete(msg),
-                else => {},
+                else => { },
             }
-            _ = curl.curl_multi_perform(tile_cache.curl_multi, &running);
+            try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
@@ -312,9 +328,6 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
-        try x.texture_map.ensureCapacity(2000);
-        try x.transfer_map.ensureCapacity(20000);
-        try x.queue_lifo.ensureCapacity(10);
         return x;
     } else {
         return error.MultiInitFail;
