@@ -33,6 +33,8 @@ nominatimsearch() {
     tr "\n" " "
   )"
 
+  [ -z "$COORDS" ] && exit 0
+
   echo "center_on_coords $COORDS;"
   [ "$PINORCENTER" = "pindrop" ] && echo "pin_add $COORDS [$RESULT];"
   exit 0
