@@ -28,7 +28,7 @@ nominatimsearch() {
 
   COORDS="$(
     echo "$RESULT" |
-    grep -oE '(\-|\d|\.)+' |
+    busybox grep -oE '(\-|\d|\.)+' |
     tail -n2 |
     tr "\n" " "
   )"
