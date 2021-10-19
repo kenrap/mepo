@@ -24,6 +24,24 @@ pub fn Lifo(comptime key_type: type, comptime metadata_type: type) type {
             return self.array_hash_map.getIndex(key);
         }
 
+        pub fn get(self: *@This(), key: key_type) ?metadata_type {
+            const lock = self.mutex.acquire();
+            defer lock.release();
+            return self.array_hash_map.get(key);
+        }
+
+        pub fn swapRemove(self: *@This(), key: key_type) bool {
+            const lock = self.mutex.acquire();
+            defer lock.release();
+            return self.array_hash_map.swapRemove(key);
+        }
+
+        pub fn iterator(self: *@This()) std.array_hash_map.AutoArrayHashMap(comptime key_type, comptime metadata_type).Iterator {
+            const lock = self.mutex.acquire();
+            defer lock.release();
+            return self.array_hash_map.iterator();
+        }
+
         pub fn put(self: *@This(), k: key_type, v: metadata_type) !void {
             const lock = self.mutex.acquire();
             defer lock.release();
