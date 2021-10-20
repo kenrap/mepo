@@ -33,7 +33,10 @@ nominatimsearch() {
     tr "\n" " "
   )"
 
-  [ -z "$COORDS" ] && exit 0
+  [ -z "$COORDS" ] && {
+      echo "Failed to determine COORDS from: $RESULT" >&2
+      exit 1
+  }
 
   echo "center_on_coords $COORDS;"
   [ "$PINORCENTER" = "pindrop" ] && echo "pin_add $COORDS [$RESULT];"
