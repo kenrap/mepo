@@ -33,53 +33,20 @@ pub const TileData = union(TileDataTag) {
 };
 
 allocator: *std.mem.Allocator,
-source_url: ?[:0]const u8,
 cache_dir: ?std.fs.Dir,
+curl_multi: *curl.CURLM,
+mutex: std.Thread.Mutex,
 n_current_transfers: u32,
 queue_lifo: datastructure.Lifo(types.TileSpec, bool),
-transfer_map: datastructure.Lifo(types.TileSpec, *TransferDatum),
-texture_map: datastructure.Lifo(types.TileSpec, *sdl.SDL_Texture),
 renderer: ?*sdl.SDL_Renderer,
-curl_multi: *curl.CURLM,
-
-fn tile_xferinfo_curl_callback(
-    user_data: *c_void,
-    dl_total: curl.curl_off_t,
-    dl_now: curl.curl_off_t,
-    ul_total: curl.curl_off_t,
-    ul_now: curl.curl_off_t,
-) callconv(.C) c_uint {
-    //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
-    var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
-    tile_data.progress_dl_now = dl_now;
-    tile_data.progress_dl_total = dl_total;
-    return curl.CURL_PROGRESSFUNC_CONTINUE;
-}
-
-fn tile_write_curl_callback(
-    data: *c_void,
-    size: c_uint,
-    nmemb: c_uint,
-    user_data: *c_void,
-) callconv(.C) c_uint {
-    //utildbg.log("Write!!: \n", .{});
-    var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
-    var typed_data = @intToPtr([*]u8, @ptrToInt(data));
-    transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
-    return nmemb * size;
-}
-
-fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.TileSpec) ![]u8 {
-    var source_hash: [32:0]u8 = undefined;
-    std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
-    return try std.fmt.allocPrint(
-        allocator,
-        "{s}_{d}_{d}_{d}.png",
-        .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y },
-    );
-}
+source_url: ?[:0]const u8,
+texture_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture),
+transfer_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum),
 
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
+    const lock = tile_cache.mutex.acquire();
+    defer lock.release();
+
     var file_cached_png_opt: ?[]u8 = null;
 
     if (tile_cache.texture_map.get(coords)) |tile| {
@@ -107,6 +74,9 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
 }
 
 pub fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
+    const lock = tile_cache.mutex.acquire();
+    defer lock.release();
+
     if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
@@ -251,11 +221,50 @@ fn transfer_cleanup(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     utilsdl.sdl_push_resize_event();
 }
 
-pub fn download_loop(tile_cache: *@This()) void {
+fn tile_xferinfo_curl_callback(
+    user_data: *c_void,
+    dl_total: curl.curl_off_t,
+    dl_now: curl.curl_off_t,
+    ul_total: curl.curl_off_t,
+    ul_now: curl.curl_off_t,
+) callconv(.C) c_uint {
+    //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
+    var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
+    tile_data.progress_dl_now = dl_now;
+    tile_data.progress_dl_total = dl_total;
+    return curl.CURL_PROGRESSFUNC_CONTINUE;
+}
+
+fn tile_write_curl_callback(
+    data: *c_void,
+    size: c_uint,
+    nmemb: c_uint,
+    user_data: *c_void,
+) callconv(.C) c_uint {
+    //utildbg.log("Write!!: \n", .{});
+    var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
+    var typed_data = @intToPtr([*]u8, @ptrToInt(data));
+    transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
+    return nmemb * size;
+}
+
+fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.TileSpec) ![]u8 {
+    var source_hash: [32:0]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
+    return try std.fmt.allocPrint(
+        allocator,
+        "{s}_{d}_{d}_{d}.png",
+        .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y },
+    );
+}
+
+fn download_loop(tile_cache: *@This()) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
     while (true) {
+        const lock = tile_cache.mutex.acquire();
+
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
@@ -282,6 +291,7 @@ pub fn download_loop(tile_cache: *@This()) void {
             tile_cache.n_current_transfers += 1;
         }
 
+        lock.release();
         sdl.SDL_Delay(config.DownloaderPollMs);
     }
 }
@@ -324,13 +334,14 @@ pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
 pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |curl_multi| {
         var x = @as(@This(), .{
+            .mutex = std.Thread.Mutex{},
             .allocator = allocator,
             .source_url = null,
             .cache_dir = null,
             .renderer = null,
             .n_current_transfers = 0,
-            .transfer_map = datastructure.Lifo(types.TileSpec, *TransferDatum).init(allocator),
-            .texture_map = datastructure.Lifo(types.TileSpec, *sdl.SDL_Texture).init(allocator),
+            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(allocator),
+            .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(allocator),
             .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
