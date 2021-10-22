@@ -23,7 +23,7 @@ debug_vars: bool = false,
 download_bar: bool = false,
 drag: bool = false,
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
-font: *sdl.TTF_Font,
+fonts: [50]*sdl.TTF_Font,
 h: u32 = config.InitWindowH,
 help: bool = false,
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -109,6 +109,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
         .{},
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
+        null,
         "tx: {d}\nty: {d}\ndl: {d}/{d}",
         .{ tile_x, tile_y, dl_now, dl_total },
     );
@@ -135,6 +136,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
+                20,
                 "{d}",
                 .{queued_position},
             );
@@ -153,6 +155,7 @@ fn blit_debug(mepo: *@This()) !void {
             .{},
             5,
             5,
+            null,
             "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
             .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
         );
@@ -165,6 +168,7 @@ fn blit_debug(mepo: *@This()) !void {
             .{ .align_x = .Right },
             @intCast(i32, mepo.w - 5),
             5,
+            null,
             "DEBUG: {s}",
             .{mepo.debug_message.?},
         );
@@ -215,6 +219,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             .{ .align_y = .Center, .h = pin_overlay_height },
             5,
             @intCast(i32, mepo.h) - pin_overlay_height,
+            null,
             "Pin: {s}\nlat: {d}\nlon: {d}\n",
             .{ pin.name, pin.lat, pin.lon },
         );
@@ -224,6 +229,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             .{ .align_y = .Center, .align_x = .Right, .w = mepo.w, .h = pin_overlay_height },
             0,
             @intCast(i32, mepo.h) - pin_overlay_height,
+            null,
             "{d}p",
             .{mepo.pin_table.count()},
         );
@@ -251,6 +257,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .{},
         5,
         @intCast(i32, mepo.h) - 20 + 3,
+        null,
         "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
         .{ mepo.tile_cache.queue_lifo.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
     );
@@ -279,6 +286,7 @@ fn blit_help(mepo: *@This()) !void {
         .{ .align_x = .Center, .align_y = .Center },
         0,
         0,
+        null,
         \\mepo - Development version
         \\ 
         \\Keybindings:
@@ -471,11 +479,20 @@ pub fn blit_multiline_text(
     alignment: types.BoxAlignment,
     x: i32,
     y: i32,
+    font_size_opt: ?u32,
     comptime fmt_string: [:0]const u8,
     args: anytype,
 ) !void {
     var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
+
+    const font_size = font_size: {
+        if (font_size_opt) |font_size| {
+            if (font_size > mepo.fonts.len) return error.FontTooBig else break :font_size font_size;
+        } else {
+            break :font_size config.FontSize;
+        }
+    };
 
     var textures_width: c_int = 0;
     var textures_height: c_int = 0;
@@ -493,7 +510,10 @@ pub fn blit_multiline_text(
             } else if (msg[index_current] == '\n' or index_current == msg.len - 1) {
                 msg[index_current] = 0;
                 if (msg[index_start] == 0) break;
-                const text_surf = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.TTF_RenderText_Solid(mepo.font, @ptrCast([*c]const u8, &msg[index_start]), (types.Color{ .value = color }).sdl()));
+                const text_surf = try utilsdl.errorcheck_ptr(
+                    sdl.SDL_Surface,
+                    sdl.TTF_RenderText_Solid(mepo.fonts[font_size], @ptrCast([*c]const u8, &msg[index_start]), (types.Color{ .value = color }).sdl()),
+                );
                 defer sdl.SDL_FreeSurface(text_surf);
                 const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
                 textures_height += text_surf.h;
@@ -602,16 +622,29 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
 
     sdl.SDL_SetWindowPosition(window, config.InitWindowX, config.InitWindowY);
 
-    // Initialize TTF, load font
+    // Initialize TTF, load fonts
     try utilsdl.errorcheck(sdl.TTF_Init());
-    const font_dat = @embedFile("../assets/terminus.ttf");
-    const font = try utilsdl.errorcheck_ptr(sdl.TTF_Font, sdl.TTF_OpenFontRW(sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len), 1, config.FontSize));
 
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
         .fn_table = try _fn_table.generate_fn_table(allocator),
-        .font = font,
+        .fonts = fonts: {
+            const font_dat = @embedFile("../assets/terminus.ttf");
+            var fonts: [50]*sdl.TTF_Font = undefined;
+            var font_size: usize = 0;
+            while (font_size < fonts.len) : (font_size += 1) {
+                fonts[font_size] = try utilsdl.errorcheck_ptr(
+                    sdl.TTF_Font,
+                    sdl.TTF_OpenFontRW(
+                        sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len),
+                        1,
+                        @intCast(c_int, font_size),
+                    ),
+                );
+            }
+            break :fonts fonts;
+        },
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
         .renderer = renderer,
