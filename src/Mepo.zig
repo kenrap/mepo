@@ -220,7 +220,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             5,
             @intCast(i32, mepo.h) - pin_overlay_height,
             null,
-            "Pin: {s}\nlat: {d}\nlon: {d}\n",
+            "Pin: {s}\nlat: {d}\nlon: {d}",
             .{ pin.name, pin.lat, pin.lon },
         );
         try mepo.blit_multiline_text(
@@ -230,7 +230,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             0,
             @intCast(i32, mepo.h) - pin_overlay_height,
             null,
-            "{d}p",
+            "{d}",
             .{mepo.pin_table.count()},
         );
     }
@@ -502,27 +502,26 @@ pub fn blit_multiline_text(
         var textures_array: [50]*sdl.SDL_Texture = undefined;
         var textures_array_size: usize = 0;
 
-        var index_start: usize = 0;
-        var index_current: usize = 0;
-        while (index_current < msg.len) : (index_current += 1) loop: {
-            if (textures_array_size + 1 > textures_array.len - 1) {
-                break :loop;
-            } else if (msg[index_current] == '\n' or index_current == msg.len - 1) {
-                msg[index_current] = 0;
-                if (msg[index_start] == 0) break;
-                const text_surf = try utilsdl.errorcheck_ptr(
-                    sdl.SDL_Surface,
-                    sdl.TTF_RenderText_Solid(mepo.fonts[font_size], @ptrCast([*c]const u8, &msg[index_start]), (types.Color{ .value = color }).sdl()),
-                );
-                defer sdl.SDL_FreeSurface(text_surf);
-                const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
-                textures_height += text_surf.h;
-                textures_width = std.math.max(textures_width, text_surf.w);
-                textures_array[textures_array_size] = text;
-                textures_array_size += 1;
-                index_start = index_current + 1;
-            }
+        var lines_it = std.mem.tokenize(msg, "\n");
+        while (lines_it.next()) |line| {
+            if (textures_array_size + 1 > textures_array.len - 1) break;
+
+            const line_sentinel_terminated = try std.mem.dupeZ(mepo.allocator, u8, line);
+            defer mepo.allocator.free(line_sentinel_terminated);
+
+            const text_surf = try utilsdl.errorcheck_ptr(
+                sdl.SDL_Surface,
+                sdl.TTF_RenderText_Solid(mepo.fonts[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).sdl()),
+            );
+            defer sdl.SDL_FreeSurface(text_surf);
+
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+            textures_height += text_surf.h;
+            textures_width = std.math.max(textures_width, text_surf.w);
+            textures_array[textures_array_size] = text;
+            textures_array_size += 1;
         }
+
         break :textures textures_array[0..textures_array_size];
     };
 
