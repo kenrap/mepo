@@ -16,7 +16,7 @@ const datastructure = @import("./datastructure/datastructure.zig");
 pub const TransferDatum = struct {
     client: *curl.CURL,
     coords: types.TileSpec,
-    data: std.ArrayList(u8),
+    data_arraylist: std.ArrayList(u8),
     progress_dl_now: ?c_long,
     progress_dl_total: ?c_long,
     load_to_texture: bool,
@@ -94,7 +94,7 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
         var dat = try tile_cache.allocator.create(TransferDatum);
         dat.client = curl.curl_easy_init().?;
         dat.coords = coords;
-        dat.data = std.ArrayList(u8).init(tile_cache.allocator);
+        dat.data_arraylist = std.ArrayList(u8).init(tile_cache.allocator);
         dat.progress_dl_now = null;
         dat.progress_dl_total = null;
         dat.load_to_texture = load_to_texture;
@@ -104,13 +104,13 @@ fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_textu
 
     var tile_url = url: {
         var url = try tile_cache.allocator.alloc(u8, tile_cache.source_url.?.len + (3 * 10));
-        _ = cstdio.sprintf(
+        if (cstdio.sprintf(
             &url[0],
             tile_cache.source_url.?,
             @intCast(c_int, coords.x),
             @intCast(c_int, coords.y),
             @intCast(c_int, coords.z),
-        );
+        ) < 0) return error.TileURLSprintfFail;
         break :url url;
     };
     defer tile_cache.allocator.free(tile_url);
@@ -176,7 +176,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
         .CURLE_OK => {
             if (tile_cache.curl_msg_to_coords(msg)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
-                const datum_array = transfer_datum.data.items;
+                const datum_array = transfer_datum.data_arraylist.items;
 
                 if (tile_cache.cache_dir) |cache_dir| {
                     // Save to FS
@@ -205,8 +205,8 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
 fn transfer_cleanup(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     if (tile_cache.curl_msg_to_coords(msg)) |coords| {
         const transfer_datum = tile_cache.transfer_map.get(coords).?;
-        const datum_array = transfer_datum.data.items;
-        tile_cache.transfer_map.get(coords).?.data.deinit();
+        const datum_array = transfer_datum.data_arraylist.items;
+        tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
     }
@@ -244,7 +244,7 @@ fn tile_write_curl_callback(
     //utildbg.log("Write!!: \n", .{});
     var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     var typed_data = @intToPtr([*]u8, @ptrToInt(data));
-    transfer_datum.data.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
+    transfer_datum.data_arraylist.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
     return nmemb * size;
 }
 
@@ -333,7 +333,7 @@ pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
 
 pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |curl_multi| {
-        var x = @as(@This(), .{
+        return @as(@This(), .{
             .mutex = std.Thread.Mutex{},
             .allocator = allocator,
             .source_url = null,
@@ -345,7 +345,6 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
-        return x;
     } else {
         return error.MultiInitFail;
     }
