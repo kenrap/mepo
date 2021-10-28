@@ -9,6 +9,6 @@ pub fn f_center_on_mouse(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !v
     var y: c_int = undefined;
     _ = sdl.SDL_GetMouseState(&x, &y);
 
-    mepo.set_x(x + (@intCast(i32, mepo.get_x()) - @intCast(i32, (mepo.w / 2))));
-    mepo.set_y(y + (@intCast(i32, mepo.get_y()) - @intCast(i32, (mepo.h / 2))));
+    mepo.set_x(x + (@intCast(i32, mepo.get_x()) - @intCast(i32, (mepo.win_w / 2))));
+    mepo.set_y(y + (@intCast(i32, mepo.get_y()) - @intCast(i32, (mepo.win_h / 2))));
 }

@@ -24,7 +24,6 @@ download_bar: bool = false,
 drag: bool = false,
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 fonts: [50]*sdl.TTF_Font,
-h: u32 = config.InitWindowH,
 help: bool = false,
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 lat: f64 = 0,
@@ -34,7 +33,8 @@ pin_table: std.hash_map.StringHashMap(types.Pin),
 redraw_requested_at_ms_ticks: ?u32 = null,
 renderer: *sdl.SDL_Renderer,
 tile_cache: *TileCache,
-w: u32 = config.InitWindowW,
+win_h: u32 = config.InitWindowH,
+win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window,
 zoom: u8 = 14,
 
@@ -44,17 +44,17 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
-        @intCast(c_int, mepo.w / 2 - (mepo.crosshair_size / 2)),
-        @intCast(c_int, mepo.h / 2),
-        @intCast(c_int, mepo.w / 2 + (mepo.crosshair_size / 2)),
-        @intCast(c_int, mepo.h / 2),
+        @intCast(c_int, mepo.win_w / 2 - (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_h / 2),
+        @intCast(c_int, mepo.win_w / 2 + (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_h / 2),
     ));
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
-        @intCast(c_int, mepo.w / 2),
-        @intCast(c_int, mepo.h / 2 - (mepo.crosshair_size / 2)),
-        @intCast(c_int, mepo.w / 2),
-        @intCast(c_int, mepo.h / 2 + (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_w / 2),
+        @intCast(c_int, mepo.win_h / 2 - (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_w / 2),
+        @intCast(c_int, mepo.win_h / 2 + (mepo.crosshair_size / 2)),
     ));
 }
 
@@ -166,7 +166,7 @@ fn blit_debug(mepo: *@This()) !void {
             0xff0000,
             null,
             .{ .align_x = .Right },
-            @intCast(i32, mepo.w - 5),
+            @intCast(i32, mepo.win_w - 5),
             5,
             null,
             "DEBUG: {s}",
@@ -178,15 +178,15 @@ fn blit_debug(mepo: *@This()) !void {
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
     var it = mepo.pin_table.iterator();
     while (it.next()) |item| {
-        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2) - utilconversion.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
-        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2) - utilconversion.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
+        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
+        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
         const size: i32 = 10;
         const color_value: u24 = if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?))
             0xff0000
         else
             0x000000;
 
-        if (x < 0 or x > mepo.w or y < 0 or y > mepo.h)
+        if (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h)
             continue;
 
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
@@ -205,8 +205,8 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffff00, .opacity = 120 }, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.h) - pin_overlay_height,
-        .w = @intCast(i32, mepo.w),
+        .y = @intCast(i32, mepo.win_h) - pin_overlay_height,
+        .w = @intCast(i32, mepo.win_w),
         .h = 200,
     }, .Fill);
 
@@ -216,7 +216,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             null,
             .{ .align_y = .Center, .h = pin_overlay_height },
             5,
-            @intCast(i32, mepo.h) - pin_overlay_height,
+            @intCast(i32, mepo.win_h) - pin_overlay_height,
             null,
             "Pin: {s}\nlat: {d}\nlon: {d}",
             .{ pin.name, pin.lat, pin.lon },
@@ -224,9 +224,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             0x000000,
             null,
-            .{ .align_y = .Center, .align_x = .Right, .w = mepo.w, .h = pin_overlay_height },
+            .{ .align_y = .Center, .align_x = .Right, .w = mepo.win_w, .h = pin_overlay_height },
             0,
-            @intCast(i32, mepo.h) - pin_overlay_height,
+            @intCast(i32, mepo.win_h) - pin_overlay_height,
             null,
             "{d}",
             .{mepo.pin_table.count()},
@@ -239,14 +239,14 @@ fn blit_download_bar(mepo: *@This()) !void {
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.h) - 20,
-        .w = @intCast(i32, mepo.w),
+        .y = @intCast(i32, mepo.win_h) - 20,
+        .w = @intCast(i32, mepo.win_w),
         .h = 200,
     }, .Fill);
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x000000 }, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.h) - 20,
-        .w = @intCast(i32, mepo.w),
+        .y = @intCast(i32, mepo.win_h) - 20,
+        .w = @intCast(i32, mepo.win_w),
         .h = 1,
     }, .Fill);
     try mepo.blit_multiline_text(
@@ -254,7 +254,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         null,
         .{},
         5,
-        @intCast(i32, mepo.h) - 20 + 3,
+        @intCast(i32, mepo.win_h) - 20 + 3,
         null,
         "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
         .{ mepo.tile_cache.queue_lifo.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
@@ -298,10 +298,10 @@ pub fn blit(mepo: *@This()) !void {
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
     try blit_tiles_all(
         mepo,
-        mepo.get_x() - @divTrunc(@intCast(i32, mepo.w), 2),
-        mepo.get_y() - @divTrunc(@intCast(i32, mepo.h), 2),
-        mepo.w,
-        mepo.h,
+        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2),
+        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2),
+        mepo.win_w,
+        mepo.win_h,
         mepo.zoom,
     );
     try mepo.blit_debug();
@@ -374,7 +374,7 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
-    return x > 0 and y > 0 and x < mepo.w and y < mepo.h;
+    return x > 0 and y > 0 and x < mepo.win_w and y < mepo.win_h;
 }
 
 fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
@@ -397,8 +397,8 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
         .SDL_WINDOWEVENT_RESIZED => {
-            mepo.w = @intCast(u32, e.window.data1);
-            mepo.h = @intCast(u32, e.window.data2);
+            mepo.win_w = @intCast(u32, e.window.data1);
+            mepo.win_h = @intCast(u32, e.window.data2);
             //mepo.center_on_coords(old_lat, old_lon);
         },
         else => {},
@@ -527,7 +527,7 @@ pub fn blit_multiline_text(
     {
         // Calculate X/Y offsets
         const x_off: c_int = x_off: {
-            const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.w);
+            const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.win_w);
             const offset = switch (alignment.align_x) {
                 .Left => 0,
                 .Right => bbox_total_w - textures_width,
@@ -536,7 +536,7 @@ pub fn blit_multiline_text(
             break :x_off x + offset;
         };
         var y_off: c_int = y_off: {
-            const bbox_total_h = @intCast(c_int, if (alignment.h) |h| h else mepo.h);
+            const bbox_total_h = @intCast(c_int, if (alignment.h) |h| h else mepo.win_h);
             const offset = switch (alignment.align_y) {
                 .Top => 0,
                 .Bottom => bbox_total_h - textures_height,
@@ -650,8 +650,6 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     });
 
     tile_cache.set_renderer(instance.renderer);
-
-    try instance.pin_table.ensureCapacity(100000);
 
     // Run config (base and then user provided STDIN)
     try instance.mepolang_execute(config.DefaultBaseConfig);
