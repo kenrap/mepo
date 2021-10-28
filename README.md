@@ -98,9 +98,9 @@ search scripts, bookmarks, and more.
       (keybindings table) mapping in UI.
     - Fix bug where negative latitude values fail to round-trip between
       lat-to-y / y-to-lat conversion functions.
-  - **Todo:**
     - Implement debug mode preference or similar to control verbosity of
       debugging STDERR messages.
+  - **Todo:**
     - Resolve existing memory leaks in the application (mostly complete, need
       to do quality pass).
     - Handle case where user is offline gracefully (implement max retries?)

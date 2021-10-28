@@ -51,16 +51,17 @@ pub const DefaultBaseConfig =
     \\ bind_key s r [prefset download_bar 0];
     \\ bind_key _ c [center_on_mouse];
     \\
-    \\ prefset crosshair_size 15;
-    \\ prefset crosshair_on 1;
     \\ center_on_coords 40.78392 -73.96442;
-    \\ prefset download_bar 0;
-    \\ prefset debug_vars 1;
+    \\ prefset crosshair_on 1;
+    \\ prefset crosshair_size 15;
     \\ prefset debug_message_enabled 1;
+    \\ prefset debug_stderr 0;
     \\ prefset debug_tiles 0;
-    \\ prefset zoom 14;
+    \\ prefset debug_vars 1;
+    \\ prefset download_bar 0;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
+    \\ prefset zoom 14;
     \\
     \\ pin_add 40.7418 -73.9899 baz;
     \\
