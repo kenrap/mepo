@@ -296,8 +296,7 @@ fn blit_help(mepo: *@This()) !void {
 
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
-    try blit_tiles_all(
-        mepo,
+    try mepo.blit_tiles_all(
         mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2),
         mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2),
         mepo.win_w,
@@ -602,31 +601,29 @@ pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
 }
 
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
-    var font_opt: ?*sdl.TTF_Font = null;
-
     // Initialize video, create window
-    try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
-    const window = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
-        "mepo",
-        config.InitWindowX,
-        config.InitWindowY,
-        config.InitWindowW,
-        config.InitWindowH,
-        sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
-    ));
-
-    const renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE));
-
-    sdl.SDL_SetWindowPosition(window, config.InitWindowX, config.InitWindowY);
-
-    // Initialize TTF, load fonts
-    try utilsdl.errorcheck(sdl.TTF_Init());
+    const window = window: {
+        try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
+        const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
+            "mepo",
+            config.InitWindowX,
+            config.InitWindowY,
+            config.InitWindowW,
+            config.InitWindowH,
+            sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
+        ));
+        sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
+        break :window w;
+   };
 
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
         .fn_table = try _fn_table.generate_fn_table(allocator),
         .fonts = fonts: {
+            // Initialize TTF, load fonts
+            try utilsdl.errorcheck(sdl.TTF_Init());
+
             const font_dat = @embedFile("../assets/terminus.ttf");
             var fonts: [50]*sdl.TTF_Font = undefined;
             var font_size: usize = 0;
@@ -644,28 +641,32 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         },
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
-        .renderer = renderer,
+        .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
         .tile_cache = tile_cache,
         .window = window,
     });
 
+
+    // Set renderer for tile cache
     tile_cache.set_renderer(instance.renderer);
 
     // Run config (base and then user provided STDIN)
-    try instance.mepolang_execute(config.DefaultBaseConfig);
-    if (cfg_opt) |cfg| {
-        try instance.mepolang_execute(cfg);
+    {
+        try instance.mepolang_execute(config.DefaultBaseConfig);
+        if (cfg_opt) |cfg| try instance.mepolang_execute(cfg);
     }
 
     // Setup TERM/INT signals
-    const sigs: [2]u6 = .{ std.os.linux.SIGTERM, std.os.linux.SIGINT };
-    for (sigs) |sig| {
-        if (0 != std.os.linux.sigaction(sig, &.{
-            .handler = .{ .handler = sighandle_terminate },
-            .mask = [_]u32{0} ** 32,
-            .flags = @as(c_uint, 0),
-        }, null)) {
-            return error.FailedToSetupSighandler;
+    {
+        const sigs: [2]u6 = .{ std.os.linux.SIGTERM, std.os.linux.SIGINT };
+        for (sigs) |sig| {
+            if (0 != std.os.linux.sigaction(sig, &.{
+                .handler = .{ .handler = sighandle_terminate },
+                .mask = [_]u32{0} ** 32,
+                .flags = @as(c_uint, 0),
+            }, null)) {
+                return error.FailedToSetupSighandler;
+            }
         }
     }
 
