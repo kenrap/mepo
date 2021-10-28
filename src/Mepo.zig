@@ -210,9 +210,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         .h = 200,
     }, .Fill);
 
-    const pin_opt = mepo.pin_table.get(mepo.pin_active.?);
-
-    if (pin_opt) |pin| {
+    if (mepo.pin_table.get(mepo.pin_active.?)) |pin| {
         try mepo.blit_multiline_text(
             0x000000,
             null,
