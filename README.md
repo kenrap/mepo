@@ -80,7 +80,8 @@ search scripts, bookmarks, and more.
   - **Done:**
     - Improve current stability of the application and resolve intermittent
       crashes related to tile downloading.
-    - Implement tile downloading retry logic.
+    - Implement tile downloading retry logic and handle case where user is
+      offline gracefully
     - Error check invalid PNG tiledata received from tileservers & loaded 
       from filesystem.
     - Rework consistency of allocator passing (e.g. remove ad-hoc allocators, 
@@ -103,8 +104,6 @@ search scripts, bookmarks, and more.
   - **Todo:**
     - Resolve existing memory leaks in the application (mostly complete, need
       to do quality pass).
-    - Handle case where user is offline gracefully (implement max retries?)
-      and blit error message text to tile rather then infinetly retrying
     - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
   - Rework main application / boot logic to enable fully noninteractive mode
