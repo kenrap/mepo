@@ -2,7 +2,6 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
-const conversionutil = @import("../util/conversionutil.zig");
 
 pub fn f_center_on_mouse(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     var x: c_int = undefined;

@@ -1,7 +1,6 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const conversionutil = @import("../util/conversionutil.zig");
 
 pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const index = @floatToInt(i32, args[0].Number);

@@ -2,7 +2,6 @@ const std = @import("std");
 const builtin = @import("builtin");
 const Mepo = @import("./Mepo.zig");
 const TileCache = @import("./TileCache.zig");
-const conversion = @import("./conversion.zig");
 const sdl = @import("./sdlshim.zig");
 const utilstrings = @import("./util/utilstrings.zig");
 const utildbg = @import("./util/utildbg.zig");
