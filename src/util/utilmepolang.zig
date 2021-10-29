@@ -1,6 +1,11 @@
 const std = @import("std");
 const types = @import("../types.zig");
 
+/// Converts a list of tokens into a list of args decoded to proper
+/// union types.
+///
+/// Caller is responsible for freeing returned memory for heap allocated
+/// text args
 pub fn mepolang_argize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![types.MepoFnNargs]types.MepoArg {
     var args_i: usize = 0;
     var args: [types.MepoFnNargs]types.MepoArg = undefined;
