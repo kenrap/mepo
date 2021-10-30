@@ -76,7 +76,7 @@ search scripts, bookmarks, and more.
 
 
 ## **Roadmap to 1.0 release:**
-- **Milestone 1: Overall Stability**
+- **Milestone 1: Overall Stability** (Complete: 10/31/2021)
   - **Done:**
     - Improve current stability of the application and resolve intermittent
       crashes related to tile downloading.
@@ -101,86 +101,87 @@ search scripts, bookmarks, and more.
       lat-to-y / y-to-lat conversion functions.
     - Implement debug mode preference or similar to control verbosity of
       debugging STDERR messages.
-  - **Todo:**
-    - Resolve existing memory leaks in the application (mostly complete, need
-      to do quality pass).
+    - Resolve existing memory leaks in the application.
     - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading**
-  - Rework main application / boot logic to enable fully noninteractive mode
-    (free of SDL/Video context) to allow for CLI-based downloading of tiles.
-  - Remove SDL delay from TileCache downloading logic / properly wait on file
-    descriptors instead using curl_multi_wait.
-  - Add error handling logic to existing bounding-box based mepolang download
-    command to ensure valid bounding-box provided by user.
-  - Add radius-based download command allowing user to download tiles based on
-    coordinate with a given radius (km distance) for specified zoom-levels.
-  - Add distance to lat-lon conversion functions to assist in above (along
-    with unit tests) and to later be used for measuring distance between
-    pins in ordered groups.
-  - Add a shell script to allow downloading either interactively or
-    non-interactively based on Nominatim search query result so you can say
-    download an entire city for example.
-  - Create mepolang command to selectively clear download cache so
-    tiles can be updated if outdated.
-  - Parameterize max number of concurrent downloads as a setting accessible
-    via prefset.
-  - Add configuration parameter to set an offline mode; when set to true
-    all tile downloading logic should no-operation for the privacy and
-    bandwidth conscience.
-  - Rework UI logic to adjust downloading bar to not overlap with pin details
-    overlay.
+  - **Todo:**
+    - Rework main application / boot logic to enable fully noninteractive mode
+      (free of SDL/Video context) to allow for CLI-based downloading of tiles.
+    - Remove SDL delay from TileCache downloading logic / properly wait on file
+      descriptors instead using curl_multi_wait.
+    - Add error handling logic to existing bounding-box based mepolang download
+      command to ensure valid bounding-box provided by user.
+    - Add radius-based download command allowing user to download tiles based on
+      coordinate with a given radius (km distance) for specified zoom-levels.
+    - Add distance to lat-lon conversion functions to assist in above (along
+      with unit tests) and to later be used for measuring distance between
+      pins in ordered groups.
+    - Add a shell script to allow downloading either interactively or
+      non-interactively based on Nominatim search query result so you can say
+      download an entire city for example.
+    - Create mepolang command to selectively clear download cache so
+      tiles can be updated if outdated.
+    - Parameterize max number of concurrent downloads as a setting accessible
+      via prefset.
+    - Add configuration parameter to set an offline mode; when set to true
+      all tile downloading logic should no-operation for the privacy and
+      bandwidth conscience.
+    - Rework UI logic to adjust downloading bar to not overlap with pin details
+      overlay.
 - **Milestone 3: Powerful, Robust Pin API**
-  - Correct pin-selection mode cycling to properly respect delta values.
-  - Add ability to cycle through pins based on both: viewport visible pins
-    and all pins.
-  - Add support for click pin to activate.
-  - Implement command for removing specific pins based on handle.
-  - Allow ability to associate metadata with pins.
-  - Fix existing pin bugs (e.g. title not showing properly & brittleness).
-  - Add pin groups and extend API as such so user can visually distinguish
-    groups; for example one pin group may be bookmarks, another for a search,
-    another for current location.
-  - Allow pin groups to be either ordered or unordered, ordered pin groups
-    show in UI with connecting lines (thus enabling lightweight navigation).
-  - Implement distinction between structural pins and informational pins for
-    ordered pin groups wherein structural pins are the nodes in a way and
-    informational pins can be used for navigational cues.
-  - Add script to add pins based on Nominatim bounding box results in
-    addition to the existing Overpass pin script.
-  - Implement bind_click mepolang API command to run arbitrary mepolang
-    on clicking specific button (left, right click) 1-n times. Will enable
-    more sophisticated scripts (e.g. such as click to define points in
-    custom route / ordered pin group) in future.
-  - Add script to convert XML Relation & Way from OSM API into ordered
-    pin group(s) for testing purposes. Also should help for transit-specific
-    and other overlays etc.
+  - **Todo:**
+    - Correct pin-selection mode cycling to properly respect delta values.
+    - Add ability to cycle through pins based on both: viewport visible pins
+      and all pins.
+    - Add support for click pin to activate.
+    - Implement command for removing specific pins based on handle.
+    - Allow ability to associate metadata with pins.
+    - Fix existing pin bugs (e.g. title not showing properly & brittleness).
+    - Add pin groups and extend API as such so user can visually distinguish
+      groups; for example one pin group may be bookmarks, another for a search,
+      another for current location.
+    - Allow pin groups to be either ordered or unordered, ordered pin groups
+      show in UI with connecting lines (thus enabling lightweight navigation).
+    - Implement distinction between structural pins and informational pins for
+      ordered pin groups wherein structural pins are the nodes in a way and
+      informational pins can be used for navigational cues.
+    - Add script to add pins based on Nominatim bounding box results in
+      addition to the existing Overpass pin script.
+    - Implement bind_click mepolang API command to run arbitrary mepolang
+      on clicking specific button (left, right click) 1-n times. Will enable
+      more sophisticated scripts (e.g. such as click to define points in
+      custom route / ordered pin group) in future.
+    - Add script to convert XML Relation & Way from OSM API into ordered
+      pin group(s) for testing purposes. Also should help for transit-specific
+      and other overlays etc.
 - **Milestone 4: Wayland & Mobile Support**
-  - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
-    more reliable and test on Pinephone & mobile devices.
-  - Rework pinch-to-zoom to not be hardcoded but to instead use new mepolang
-    command (bind_gesture).
-  - Add support for rotate gesture via SDL multitouch gesture API and expose
-    as part of bind_gesture command.
-  - Currently scripts for location search, bounding-box search,
-    and similar use dmenu (X-based); integrate wofi, bemenu, or a similar
-    tool for Wayland. Dynamically determine which menuing system to use
-    in scripts.
-  - Allow binding lefthand/righthand side of pin overlay via new
-    (bind_button) command and set to pin_cycle by default. Thus enabling
-    touch-based pin-cycling for navigation.
-  - Build out context-menu to be used in mobile-context allowing functionality
-    triggered on desktop via keybindings for search etc. to be simply triggered
-    on mobile.
-  - Add to default mepolang configuration trigger to open context-menu either
-    via bind_gesture or bind_click.
-  - Perform testing and make fixes as necessary on most common UIs on
-    postmarketOS. Primarily test and ensure compatibility with Phosh
-    (mobile Wayland), Swmo (mobile Wayland), Sxmo (mobile X), Sway
-    (desktop Wayland), and i3 (desktop X) as these 5 environments encompass
-    large userbases and represent the 4 different combinations of
-    mobile/desktop & X/Wayland that should all have first-class support.
-  - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
-    greatest cross-compatibility between environments.
+  - **Todo:**
+    - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
+      more reliable and test on Pinephone & mobile devices.
+    - Rework pinch-to-zoom to not be hardcoded but to instead use new mepolang
+      command (bind_gesture).
+    - Add support for rotate gesture via SDL multitouch gesture API and expose
+      as part of bind_gesture command.
+    - Currently scripts for location search, bounding-box search,
+      and similar use dmenu (X-based); integrate wofi, bemenu, or a similar
+      tool for Wayland. Dynamically determine which menuing system to use
+      in scripts.
+    - Allow binding lefthand/righthand side of pin overlay via new
+      (bind_button) command and set to pin_cycle by default. Thus enabling
+      touch-based pin-cycling for navigation.
+    - Build out context-menu to be used in mobile-context allowing functionality
+      triggered on desktop via keybindings for search etc. to be simply triggered
+      on mobile.
+    - Add to default mepolang configuration trigger to open context-menu either
+      via bind_gesture or bind_click.
+    - Perform testing and make fixes as necessary on most common UIs on
+      postmarketOS. Primarily test and ensure compatibility with Phosh
+      (mobile Wayland), Swmo (mobile Wayland), Sxmo (mobile X), Sway
+      (desktop Wayland), and i3 (desktop X) as these 5 environments encompass
+      large userbases and represent the 4 different combinations of
+      mobile/desktop & X/Wayland that should all have first-class support.
+    - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
+      greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties**
   - Rework main application event loop to handle STDIN filedescriptor in
     parallel to current SDL events processing. So commandline of application
@@ -210,26 +211,27 @@ search scripts, bookmarks, and more.
     result) or otherwise implement timeout so that runwaway scripts don't
     freeze application.
 - **Milestone 6: Documentation & Packaging**
-  - Add manpage documenting mepolang commands and basic usage.
-  - Add markdown-based documentation to explain mepolang commands, usage
-    in parity with manpage.
-  - Document existing scripts used for search, routing, etc. and add notes
-    about how these scripts could be used offline by running Nominatim,
-    Overpass, GraphHopper, etc. locally.
-  - Document examples on how to write custom scripts interfacing with
-    mepolang.
-  - Modify internals of mepolang to include documentation directly in
-    structs so that mepolang API documentation can be automatically generated
-    as a webpage for end-users.
-  - Modify internals of prefset / preferences table to automatically generate
-    documentation directly from code / structs.
-  - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
-  - Package-split current `scripts/` directory to allow separate packages
-    for mepo and mepo-scripts. The former only will contain the base
-    application (Zig) executable; the latter will contain auxiliary scripts.
-  - Work with maintainers of mobile linux (& Pinephone) UIs to get
-    Mepo integrated properly.
-  - Tag 1.0 release.
+  - **Todo:**
+    - Add manpage documenting mepolang commands and basic usage.
+    - Add markdown-based documentation to explain mepolang commands, usage
+      in parity with manpage.
+    - Document existing scripts used for search, routing, etc. and add notes
+      about how these scripts could be used offline by running Nominatim,
+      Overpass, GraphHopper, etc. locally.
+    - Document examples on how to write custom scripts interfacing with
+      mepolang.
+    - Modify internals of mepolang to include documentation directly in
+      structs so that mepolang API documentation can be automatically generated
+      as a webpage for end-users.
+    - Modify internals of prefset / preferences table to automatically generate
+      documentation directly from code / structs.
+    - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
+    - Package-split current `scripts/` directory to allow separate packages
+      for mepo and mepo-scripts. The former only will contain the base
+      application (Zig) executable; the latter will contain auxiliary scripts.
+    - Work with maintainers of mobile linux (& Pinephone) UIs to get
+      Mepo integrated properly.
+    - Tag 1.0 release.
 
 ## **Funding**
 [NLnet](https://nlnet.nl) has kindly awarded a grant to support Mepo's
