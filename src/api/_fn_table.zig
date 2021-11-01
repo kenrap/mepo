@@ -14,6 +14,7 @@ pub fn generate_fn_table(allocator: *std.mem.Allocator) anyerror!types.MepoFnTab
         .{ .name = "pin_deactivate", .func = @import("pin_deactivate.zig").f_pin_deactivate },
         .{ .name = "pin_purge", .func = @import("pin_purge.zig").f_pin_purge },
         .{ .name = "prefset", .func = @import("prefset.zig").f_prefset },
+        .{ .name = "preftoggle", .func = @import("preftoggle.zig").f_preftoggle },
         .{ .name = "quit", .func = @import("quit.zig").f_quit },
         .{ .name = "shellpipe", .func = @import("shellpipe.zig").f_shellpipe },
         .{ .name = "zoom_relative", .func = @import("zoom_relative.zig").f_zoom_relative },
