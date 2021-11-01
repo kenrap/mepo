@@ -269,8 +269,22 @@ fn blit_help(mepo: *@This()) !void {
         defer for (acc.items) |item| mepo.allocator.free(item);
 
         var it = mepo.keybindings_table.iterator();
+
         while (it.next()) |kv| {
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s}/S={} = {s}", .{ sdl.SDL_GetKeyName(@enumToInt(kv.key_ptr.keycode)), kv.key_ptr.keymod, kv.value_ptr.* }));
+            const keymod = k: {
+                if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LCTRL) {
+                    break :k " C";
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LSHIFT) {
+                    break :k " S";
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LSHIFT | sdl.KMOD_LCTRL) {
+                    break :k "CS";
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LALT) {
+                    break :k " A";
+                }
+                break :k "  ";
+            };
+
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {s} = {s}", .{ keymod, sdl.SDL_GetKeyName(@enumToInt(kv.key_ptr.keycode)), kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
@@ -613,7 +627,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         ));
         sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
         break :window w;
-   };
+    };
 
     // Create struct
     var instance = @as(@This(), .{
@@ -644,7 +658,6 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         .tile_cache = tile_cache,
         .window = window,
     });
-
 
     // Set renderer for tile cache
     tile_cache.set_renderer(instance.renderer);
