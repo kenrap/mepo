@@ -292,7 +292,9 @@ fn download_loop(tile_cache: *@This()) void {
         }
 
         lock.release();
-        sdl.SDL_Delay(config.DownloaderPollMs);
+        curl_errorcheck(curl.curl_multi_wait(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
+            utildbg.log("Curl multi wait fail: {}\n", .{e});
+        };
     }
 }
 
