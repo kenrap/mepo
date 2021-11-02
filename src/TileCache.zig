@@ -263,19 +263,20 @@ fn download_loop(tile_cache: *@This()) void {
     var n_msgs: c_int = undefined;
 
     while (true) {
-        const lock = tile_cache.mutex.acquire();
-
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
+                    if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+                    const lock = tile_cache.mutex.acquire();
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
                     tile_cache.transfer_cleanup(msg) catch |err| {
                         utildbg.log("Failed to successfully cleanup transfer: {}!\n", .{err});
                     };
+                    lock.release();
                 },
                 else => {
                     // Will timeout and trigger ._DONE in anycase
@@ -286,12 +287,14 @@ fn download_loop(tile_cache: *@This()) void {
         }
 
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
+            if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+            const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
             tile_cache.n_current_transfers += 1;
+            lock.release();
         }
 
-        lock.release();
         curl_errorcheck(curl.curl_multi_wait(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
             utildbg.log("Curl multi wait fail: {}\n", .{e});
         };
