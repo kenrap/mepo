@@ -22,6 +22,12 @@ fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zo
     const lon_min = if (a_lon < b_lon) a_lon else b_lon;
     const lon_max = if (a_lon > b_lon) a_lon else b_lon;
 
+    if (zoom_min < zoom_max or
+        zoom_max < 0 or
+        zoom_max > 19 or
+        zoom_min < 0 or
+        zoom_max > 19) return error.InvalidZoomRange;
+
     var z: u32 = @intCast(u32, zoom_min);
     while (z <= zoom_max) : (z += 1) {
         const x_min = @divFloor(utilconversion.lon_to_px_x(lon_min, z), config.Tsize);

@@ -201,7 +201,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
 
     const overlay_height = 70;
-    const y_off : i32 = if (mepo.download_bar) 20 else 0;
+    const y_off: i32 = if (mepo.download_bar) 20 else 0;
     const y_pos = @intCast(i32, mepo.win_h) - overlay_height - y_off;
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffff00, .opacity = 120 }, sdl.SDL_Rect{

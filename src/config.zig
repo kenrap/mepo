@@ -43,7 +43,6 @@ pub const DefaultBaseConfig =
     \\ bind_key _ d [preftoggle debug_tiles];
     \\ bind_key _ e [preftoggle debug_vars];
     \\ bind_key _ r [preftoggle download_bar];
-
     \\ bind_key _ c [center_on_mouse];
     \\
     \\ center_on_coords 40.78392 -73.96442;
