@@ -1,11 +1,15 @@
 #!/usr/bin/env sh
+
+BOUND_LOWER=1
+BOUND_UPPER=19
+
 ZOOM_MIN="$(
-  seq 1 16 |
+  seq $BOUND_LOWER $BOUND_UPPER |
   mepo_helper_menu.sh "Download Zoom Min:"
 )"
 
 ZOOM_MAX="$(
-  seq 1 16 |
+  seq $BOUND_LOWER $BOUND_UPPER |
   mepo_helper_menu.sh "Download Zoom Max:"
 )"
 
