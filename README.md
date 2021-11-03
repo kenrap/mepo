@@ -1,9 +1,9 @@
 # [**Mepo**](https://sr.ht/mil/Mepo/)
 
 > **Note:** Mepo is currently in an alpha state although quickly making progress.
-> An initial first tagged release (0.1), is scheduled to be released in short
-> order. See below for the high-level goals, current state of Mepo, the path
-> to 1.0, and information on contributing!
+> An initial first tagged release (0.1) is available and [packaged for Alpine](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/27096).
+> See below for the high-level goals, current state of Mepo, the path to 1.0,
+> and information on contributing!
 
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
@@ -183,33 +183,34 @@ search scripts, bookmarks, and more.
     - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties**
-  - Rework main application event loop to handle STDIN filedescriptor in
-    parallel to current SDL events processing. So commandline of application
-    can thus be used noninteractively / scripted. Also helpful for debugging.
-  - Gracefully handle switching tile sources (e.g. purge cache & reload).
-    Should be able to switch between OSM/bikemaps/stamen etc. without
-    glitches.
-  - Add support for pasting / copying current coordinates from the system
-    clipboard and ensure compatibility in both Wayland & X.
-  - Add visual per-tile-downloading progress-indicators.
-  - Improve bottom status bar display to show bandwidth usage / download of
-    tiles, disk, and memory usage.
-  - Integrate gpsd into a script to update user's current location pin and
-    fallback to geoclue2 as needed.
-  - Add routing script based on GraphHopper, OpenRouteService, or similar
-    to parse GeoJSON LineString API response into an ordered pin group. Thus
-    allowing for point-to-point navigation.
-  - Refine existing Overpass search script (provide better recommendations
-    illustrating OSM tag-based flexibility).
-  - Add example bookmarking script based on pin API.
-  - Finalize mepolang 1.0 API and add error checking so things don't crash
-    when accessing invalid union tag etc (improve robustness of mepolang
-    parser).
-  - Implement save state / restore state mepolang API command that dumps
-    current state to file (as mepolang) / and can restore via loading file.
-  - Make shellpipe non-blocking (e.g. don't freeze UI while waiting for
-    result) or otherwise implement timeout so that runwaway scripts don't
-    freeze application.
+  - **Todo:**
+    - Rework main application event loop to handle STDIN filedescriptor in
+      parallel to current SDL events processing. So commandline of application
+      can thus be used noninteractively / scripted. Also helpful for debugging.
+    - Gracefully handle switching tile sources (e.g. purge cache & reload).
+      Should be able to switch between OSM/bikemaps/stamen etc. without
+      glitches.
+    - Add support for pasting / copying current coordinates from the system
+      clipboard and ensure compatibility in both Wayland & X.
+    - Add visual per-tile-downloading progress-indicators.
+    - Improve bottom status bar display to show bandwidth usage / download of
+      tiles, disk, and memory usage.
+    - Integrate gpsd into a script to update user's current location pin and
+      fallback to geoclue2 as needed.
+    - Add routing script based on GraphHopper, OpenRouteService, or similar
+      to parse GeoJSON LineString API response into an ordered pin group. Thus
+      allowing for point-to-point navigation.
+    - Refine existing Overpass search script (provide better recommendations
+      illustrating OSM tag-based flexibility).
+    - Add example bookmarking script based on pin API.
+    - Finalize mepolang 1.0 API and add error checking so things don't crash
+      when accessing invalid union tag etc (improve robustness of mepolang
+      parser).
+    - Implement save state / restore state mepolang API command that dumps
+      current state to file (as mepolang) / and can restore via loading file.
+    - Make shellpipe non-blocking (e.g. don't freeze UI while waiting for
+      result) or otherwise implement timeout so that runwaway scripts don't
+      freeze application.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting mepolang commands and basic usage.
