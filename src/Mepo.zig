@@ -155,7 +155,7 @@ fn blit_debug(mepo: *@This()) !void {
             5,
             5,
             null,
-            "x: {d}\ny: {d}\nz: {d}\nlat: {d}\nlon: {d}",
+            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}",
             .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
         );
     }
@@ -328,7 +328,7 @@ pub fn blit(mepo: *@This()) !void {
     sdl.SDL_RenderPresent(mepo.renderer);
 
     // Update title
-    const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d} lat, {d} lon", .{ mepo.lat, mepo.lon });
+    const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ mepo.lat, mepo.lon });
     defer mepo.allocator.free(title);
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
