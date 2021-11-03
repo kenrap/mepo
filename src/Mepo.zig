@@ -200,11 +200,13 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 fn blit_pin_active_text(mepo: *@This()) !void {
     if (mepo.pin_active == null) return;
 
-    const pin_overlay_height = 70;
+    const overlay_height = 70;
+    const y_off : i32 = if (mepo.download_bar) 20 else 0;
+    const y_pos = @intCast(i32, mepo.win_h) - overlay_height - y_off;
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffff00, .opacity = 120 }, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.win_h) - pin_overlay_height,
+        .y = y_pos,
         .w = @intCast(i32, mepo.win_w),
         .h = 200,
     }, .Fill);
@@ -213,9 +215,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             0x000000,
             null,
-            .{ .align_y = .Center, .h = pin_overlay_height },
+            .{ .align_y = .Center, .h = overlay_height },
             5,
-            @intCast(i32, mepo.win_h) - pin_overlay_height,
+            y_pos,
             null,
             "Pin: {s}\nlat: {d}\nlon: {d}",
             .{ pin.name, pin.lat, pin.lon },
@@ -223,9 +225,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             0x000000,
             null,
-            .{ .align_y = .Center, .align_x = .Right, .w = mepo.win_w, .h = pin_overlay_height },
+            .{ .align_y = .Center, .align_x = .Right, .w = mepo.win_w, .h = overlay_height },
             0,
-            @intCast(i32, mepo.win_h) - pin_overlay_height,
+            y_pos,
             null,
             "{d}",
             .{mepo.pin_table.count()},
