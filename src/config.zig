@@ -49,7 +49,7 @@ pub const DefaultBaseConfig =
     \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;
     \\ prefset debug_message_enabled 1;
-    \\ prefset debug_stderr 0;
+    \\ prefset debug_stderr 1;
     \\ prefset debug_tiles 0;
     \\ prefset debug_vars 1;
     \\ prefset download_bar 0;
