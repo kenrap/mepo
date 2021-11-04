@@ -21,6 +21,7 @@ debug_tiles: bool = false,
 debug_vars: bool = false,
 download_bar: bool = false,
 drag: bool = false,
+drag_scale: i32 = 1,
 fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 fonts: [50]*sdl.TTF_Font,
 help: bool = false,
@@ -382,8 +383,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.drag and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
-        mepo.set_x(mepo.get_x() - e.motion.xrel);
-        mepo.set_y(mepo.get_y() - e.motion.yrel);
+        mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.drag_scale));
+        mepo.set_y(mepo.get_y() - (e.motion.yrel * mepo.drag_scale));
         return .Drag;
     } else {
         mepo.drag = false;
