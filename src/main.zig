@@ -14,17 +14,29 @@ pub fn main() !void {
     }
 
     const allocator = std.heap.c_allocator;
-    var args = try utilstrings.read_args(allocator);
-    var cfg: ?[]const u8 = cfg: {
-        if (args.len > 0 and std.mem.eql(u8, args[0], "-i")) {
+    var mode: enum { Graphical, Download } = .Graphical;
+    var cfg: ?[]const u8 = null;
+    
+    for (try utilstrings.read_args(allocator)) |arg| {
+        if (std.mem.eql(u8, arg, "-i")) {
+            // -i: Read from STDIN
             utildbg.log("Reading from STDIN", .{});
-            break :cfg try utilstrings.read_stdin(allocator);
-        } else {
-            break :cfg null;
+            cfg = try utilstrings.read_stdin(allocator);
+        } else if (std.mem.eql(u8, arg, "-d")) {
+            // -d: Downloader mode (non-video), runs cfg
+            mode = .Download;
         }
-    };
+    }
+
     var tile_cache = try TileCache.init(allocator);
     var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
     var mepo = try Mepo.init(allocator, &tile_cache, cfg);
-    try mepo.sdl_event_loop();
+
+    utildbg.log("Boot Mepo in mode: {}", .{mode});
+    switch (mode) {
+        .Graphical => { 
+            try mepo.sdl_event_loop(); 
+        },
+        .Download => { },
+    }
 }
