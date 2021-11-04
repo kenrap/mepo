@@ -9,8 +9,8 @@ const utilmepolang = @import("util/utilmepolang.zig");
 const utilstrings = @import("util/utilstrings.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
-const _fn_table = @import("./api/_fn_table.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
+const FnTable = @import("./api/_FnTable.zig");
 
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
@@ -22,7 +22,6 @@ debug_vars: bool = false,
 download_bar: bool = false,
 drag: bool = false,
 drag_scale: i32 = 1,
-fn_table: std.array_hash_map.StringArrayHashMap(types.MepoFn),
 fonts: [50]*sdl.TTF_Font,
 help: bool = false,
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -444,7 +443,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         if (statement.len < 1) continue;
 
         // Lookup and run fn
-        if (mepo.fn_table.get(statement[0])) |func| {
+        if (FnTable.get(statement[0])) |func| {
             const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.mepolang_argize(&arena.allocator, statement[1..statement.len]);
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
@@ -639,7 +638,6 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
-        .fn_table = try _fn_table.generate_fn_table(allocator),
         .fonts = fonts: {
             // Initialize TTF, load fonts
             try utilsdl.errorcheck(sdl.TTF_Init());
