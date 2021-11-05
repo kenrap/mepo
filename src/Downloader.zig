@@ -1,0 +1,31 @@
+const std = @import("std");
+const TileCache = @import("./TileCache.zig");
+
+pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void {
+    std.debug.warn("Downloading based on BBox request: {s}", .{download_request});
+    var a_lat : f64 = undefined;
+    var a_lon : f64 = undefined;
+    var b_lat : f64 = undefined;
+    var b_lon : f64 = undefined;
+    var zoom_min : i32 = undefined;
+    var zoom_max : i32 = undefined;
+
+    var tokens_it = std.mem.tokenize(download_request, ",");
+    var i : usize = 0;
+    while (tokens_it.next()) |token| {
+        switch (i) {
+            0 => { a_lat = try std.fmt.parseFloat(f64, token); },
+            1 => { a_lon = try std.fmt.parseFloat(f64, token); },
+            2 => { b_lat = try std.fmt.parseFloat(f64, token); },
+            3 => { b_lon = try std.fmt.parseFloat(f64, token); },
+            4 => { zoom_min = try std.fmt.parseInt(i32, token, 10); },
+            5 => { zoom_max = try std.fmt.parseInt(i32, token, 10); },
+            else => { return error.DownloadBboxTooManyArguments; }
+        }
+        i += 1;
+    }
+    if (i < 6) return error.DownloadBboxTooFewArguments;
+
+    try tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
+    tile_cache.download_loop(false);
+}

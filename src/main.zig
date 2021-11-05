@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const Mepo = @import("./Mepo.zig");
+const Downloader = @import("./Downloader.zig");
 const TileCache = @import("./TileCache.zig");
 const sdl = @import("./sdlshim.zig");
 const utilstrings = @import("./util/utilstrings.zig");
@@ -15,6 +16,7 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
     var mode: enum { Graphical, Download } = .Graphical;
+    var download_request : []const u8 = undefined;
     var cfg: ?[]const u8 = null;
     
     for (try utilstrings.read_args(allocator)) |arg| {
@@ -22,21 +24,24 @@ pub fn main() !void {
             // -i: Read from STDIN
             utildbg.log("Reading from STDIN", .{});
             cfg = try utilstrings.read_stdin(allocator);
-        } else if (std.mem.eql(u8, arg, "-d")) {
+        } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
+            download_request = arg[2..];
         }
     }
 
-    var tile_cache = try TileCache.init(allocator);
-    var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
-    var mepo = try Mepo.init(allocator, &tile_cache, cfg);
-
-    utildbg.log("Boot Mepo in mode: {}", .{mode});
+    utildbg.log("Boot Mepo in mode: {}\n", .{mode});
     switch (mode) {
         .Graphical => { 
+            var tile_cache = try TileCache.init(allocator);
+            var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
+            var mepo = try Mepo.init(allocator, &tile_cache, cfg);
             try mepo.sdl_event_loop(); 
         },
-        .Download => { },
+        .Download => {
+            var tile_cache = try TileCache.init(allocator);
+            try Downloader.download_bbox(&tile_cache, download_request);
+        },
     }
 }
