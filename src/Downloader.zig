@@ -26,6 +26,8 @@ pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void
     }
     if (i < 6) return error.DownloadBboxTooFewArguments;
 
+    try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
+    try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
     try tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
     tile_cache.download_loop(false);
 }
