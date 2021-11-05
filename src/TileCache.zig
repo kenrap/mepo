@@ -78,12 +78,10 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !voi
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
 
-    if (tile_cache.cache_dir) |cache_dir| check_tile_exists: {
+    if (tile_cache.cache_dir) |cache_dir| check_exists: {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
-        cache_dir.access(png, .{}) catch {
-            break :check_tile_exists;
-        };
+        cache_dir.access(png, .{}) catch break :check_exists;
         return;
     }
 
@@ -112,7 +110,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
         while (x <= x_max) : (x += 1) {
             var y: i32 = y_min;
             while (y <= y_max) : (y += 1) {
-                utildbg.log("Queue {d} {d} {d}\n", .{ x, y, z });
+                utildbg.log("Tile cache queueing x={d} y={d} z={d}\n", .{ x, y, z });
                 try tile_cache.tile_queue_no_surface_load(.{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) });
             }
         }
@@ -292,13 +290,13 @@ pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while (should_idle or (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)) {
+    std.debug.warn("TileCache entering download loop with queue LIFO size: {}\n", .{tile_cache.queue_lifo.count()});
+    while (should_idle or tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0) {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
-                    if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     const lock = tile_cache.mutex.acquire();
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
@@ -317,7 +315,6 @@ pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
         }
 
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
-            if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
