@@ -288,7 +288,7 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.Til
     );
 }
 
-fn download_loop(tile_cache: *@This(), should_idle: bool) void {
+pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
