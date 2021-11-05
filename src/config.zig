@@ -45,6 +45,9 @@ pub const DefaultBaseConfig =
     \\ bind_key _ r [preftoggle download_bar];
     \\ bind_key _ c [center_on_mouse];
     \\
+    \\ bind_signal USR1 [zoom_relative 1];
+    \\ bind_signal USR2 [zoom_relative -1];
+    \\
     \\ center_on_coords 40.78392 -73.96442;
     \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;

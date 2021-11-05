@@ -3,6 +3,7 @@ const std = @import("std");
 
 const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
     .{ .name = "bind_key", .func = @import("bind_key.zig").f_bind_key },
+    .{ .name = "bind_signal", .func = @import("bind_signal.zig").f_bind_signal },
     .{ .name = "center_on_coords", .func = @import("center_on_coords.zig").f_center_on_coords },
     .{ .name = "center_on_mouse", .func = @import("center_on_mouse.zig").f_center_on_mouse },
     .{ .name = "download_bbox", .func = @import("download_bbox.zig").f_download_bbox },

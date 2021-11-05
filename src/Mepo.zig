@@ -12,6 +12,8 @@ const utilsdl = @import("util/utilsdl.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
+var signals_flags: u6 = 0;
+
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
@@ -31,6 +33,7 @@ pin_active: ?[]const u8 = null,
 pin_table: std.hash_map.StringHashMap(types.Pin),
 redraw_requested_at_ms_ticks: ?u32 = null,
 renderer: *sdl.SDL_Renderer,
+signals_table: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
@@ -405,7 +408,16 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
         .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
     })) |run_expression| {
-        utildbg.log("Got table function {s}\n", .{run_expression});
+        utildbg.log("Got keybindings table function {s}\n", .{run_expression});
+        mepo.mepolang_execute(run_expression) catch unreachable;
+        return .Redraw;
+    }
+    return .None;
+}
+
+fn event_signal(mepo: *@This()) types.Pending {
+    if (mepo.signals_table.get(signals_flags)) |run_expression| {
+        utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
     }
@@ -484,6 +496,12 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 .SDL_WINDOWEVENT => event_windowevent,
                 else => event_unhandled,
             }(mepo, e);
+        }
+
+        // Process user signals
+        if (signals_flags > 0) {
+            pending = event_signal(mepo);
+            signals_flags = 0;
         }
     }
 }
@@ -619,6 +637,11 @@ pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
     graceful_terminate();
 }
 
+pub fn sighandle_user(arg: c_int) callconv(.C) void {
+    utildbg.log("User signal: {}\n", .{arg});
+    signals_flags = @truncate(u6, @bitCast(c_uint, arg));
+}
+
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
     // Initialize video, create window
     const window = window: {
@@ -660,6 +683,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
+        .signals_table = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
         .window = window,
     });
