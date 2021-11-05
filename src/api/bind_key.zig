@@ -35,9 +35,15 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         return error.UnableToLookupKeyName;
     }
 
-    const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.keybindings_table.put(.{
+    const key = .{
         .keymod = @intToEnum(sdl.SDL_Keymod, keymod),
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
-    }, expression_mepo_allocated);
+    };
+
+    if (mepo.keybindings_table.get(key)) |heap_str| {
+        mepo.allocator.free(heap_str);
+        _ = mepo.keybindings_table.swapRemove(key);
+    }
+    const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
+    try mepo.keybindings_table.put(key, expression_mepo_allocated);
 }
