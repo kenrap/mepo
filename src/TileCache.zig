@@ -288,11 +288,11 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.Til
     );
 }
 
-fn download_loop(tile_cache: *@This()) void {
+fn download_loop(tile_cache: *@This(), should_idle: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while (true) {
+    while (should_idle or (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)) {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
@@ -333,7 +333,7 @@ fn download_loop(tile_cache: *@This()) void {
 
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
-    tile_cache.download_loop();
+    tile_cache.download_loop(true);
     return 0;
 }
 
