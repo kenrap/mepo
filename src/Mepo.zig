@@ -12,8 +12,7 @@ const utilsdl = @import("util/utilsdl.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
-var signals_flags: u6 = 0;
-
+var pending_signal: ?u6 = null;
 allocator: *std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u32 = 10,
@@ -415,8 +414,8 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_signal(mepo: *@This()) types.Pending {
-    if (mepo.signals_table.get(signals_flags)) |run_expression| {
+fn event_signal(mepo: *@This(), signal: u6) types.Pending {
+    if (mepo.signals_table.get(signal)) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
@@ -499,9 +498,9 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         }
 
         // Process user signals
-        if (signals_flags > 0) {
-            pending = event_signal(mepo);
-            signals_flags = 0;
+        if (pending_signal) |sig| {
+            pending = mepo.event_signal(sig);
+            pending_signal = null;
         }
     }
 }
@@ -639,7 +638,7 @@ pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
 
 pub fn sighandle_user(arg: c_int) callconv(.C) void {
     utildbg.log("User signal: {}\n", .{arg});
-    signals_flags = @truncate(u6, @bitCast(c_uint, arg));
+    pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
