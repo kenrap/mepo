@@ -32,6 +32,10 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
         return error.FailedToSetupSighandler;
     }
 
-    const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.signals_table.put(signo, expression_mepo_allocated);
+    if (mepo.signals_table.get(signo)) |heap_str| {
+        mepo.allocator.free(heap_str);
+        _ = mepo.signals_table.swapRemove(signo);
+    }
+    const expression_heap_allocated = try mepo.allocator.dupe(u8, expression);
+    try mepo.signals_table.put(signo, expression_heap_allocated);
 }
