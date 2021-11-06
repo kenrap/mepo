@@ -29,8 +29,10 @@ nominatim() {
   echo "$OPTIONS"
   read -p "Pick number: " NUMBER
   BBOX="$(echo "$OPTIONS" | grep -E "^${NUMBER}" | awk -F' ' '{print $NF}')"
-
   echo "$BBOX" | grep . || errdie "Invalid option"
+
+  # Nominatim BBOX south lat , north lat, west lon, east lon -> conv to mepo format lat1,lon1,lat2,lon2Q
+  BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
 
   read -p "Zoom minimum (0-19): " ZOOM_MIN
   read -p "Zoom maximum (0-19): " ZOOM_MAX
