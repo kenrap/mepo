@@ -74,7 +74,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     };
 }
 
-fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !void {
+fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !bool {
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
 
@@ -82,13 +82,19 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !voi
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
         cache_dir.access(png, .{}) catch break :check_exists;
-        return;
+        return false;
     }
 
     try tile_cache.queue_lifo.put(coords, false);
+    return true;
 }
 
-pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
+const QueuedInfo = struct {
+    n_queued: usize,
+    n_cached: usize 
+};
+
+pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !QueuedInfo {
     const lat_min = if (a_lat < b_lat) a_lat else b_lat;
     const lat_max = if (a_lat > b_lat) a_lat else b_lat;
     const lon_min = if (a_lon < b_lon) a_lon else b_lon;
@@ -99,6 +105,9 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
         zoom_max > 19 or
         zoom_min < 0 or
         zoom_min > 19) return error.InvalidZoomRange;
+
+    var n_cached : usize = 0;
+    var n_queued: usize = 0;
 
     var z: u32 = @intCast(u32, zoom_min);
     while (z <= zoom_max) : (z += 1) {
@@ -111,10 +120,19 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
             var y: i32 = y_min;
             while (y <= y_max) : (y += 1) {
                 utildbg.log("Tile cache queueing x={d} y={d} z={d}\n", .{ x, y, z });
-                try tile_cache.tile_queue_no_surface_load(.{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) });
+                if (try tile_cache.tile_queue_no_surface_load(.{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) })) {
+                    n_queued += 1;
+                } else {
+                    n_cached += 1;
+                }
             }
         }
     }
+
+    return QueuedInfo{
+        .n_cached = n_cached,
+        .n_queued = n_queued,
+    };
 }
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_texture: bool) !void {
@@ -290,13 +308,13 @@ pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    std.debug.warn("TileCache entering download loop with queue LIFO size: {}\n", .{tile_cache.queue_lifo.count()});
     while (should_idle or tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0) {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
+                    //if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     const lock = tile_cache.mutex.acquire();
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
@@ -315,6 +333,7 @@ pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
         }
 
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
+            //if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
