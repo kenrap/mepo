@@ -28,13 +28,22 @@ pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void
 
     try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
     try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
-    const stats = try tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
 
-    std.debug.warn("Bbox queued ({} tiles): {} tiles queued; {} tiles already cached\n", .{
+    const stats = try tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
+    const average_tile_size_bytes = 1024 * 20;
+    std.debug.warn(
+      \\Bbox queued ({} tiles): {} tiles queued; {} tiles already cached
+      \\Estimate download: {} megabytes
+      \\
+      , 
+      .{
         stats.n_queued + stats.n_cached,
         stats.n_queued,
-        stats.n_cached
-    });
+        stats.n_cached,
+        @divFloor(average_tile_size_bytes * stats.n_queued, (1024 * 1024))
+      },
+    );
+
     std.debug.warn("Begining downloads in 3s\n", .{});
     std.time.sleep(std.time.ns_per_s * 3);
     const result = tile_cache.download_loop(false);
