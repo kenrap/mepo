@@ -33,7 +33,7 @@ pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void
     const average_tile_size_bytes = 1024 * 20;
     std.debug.warn(
       \\Bbox queued ({} tiles): {} tiles queued; {} tiles already cached
-      \\Estimate download: {} megabytes
+      \\Estimate download: {d:.5} megabytes
       \\
       , 
       .{
