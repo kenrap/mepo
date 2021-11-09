@@ -89,10 +89,7 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !boo
     return true;
 }
 
-const QueuedInfo = struct {
-    n_queued: usize,
-    n_cached: usize 
-};
+const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
 pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !QueuedInfo {
     const lat_min = if (a_lat < b_lat) a_lat else b_lat;
@@ -106,7 +103,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
         zoom_min < 0 or
         zoom_min > 19) return error.InvalidZoomRange;
 
-    var n_cached : usize = 0;
+    var n_cached: usize = 0;
     var n_queued: usize = 0;
 
     var z: u32 = @intCast(u32, zoom_min);

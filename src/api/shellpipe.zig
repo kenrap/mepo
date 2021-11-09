@@ -15,14 +15,16 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
 
     const env_vars = env_vars: {
         var v = try std.process.getEnvMap(&arena.allocator);
+        const bbox = mepo.bounding_box();
+
         try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_w}));
         try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_h}));
         try v.put("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
         try v.put("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
-        try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom)}));
-        try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom)}));
-        try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{utilconversion.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom)}));
-        try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{utilconversion.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom)}));
+        try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lat}));
+        try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lon}));
+        try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lat}));
+        try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lon}));
         break :env_vars v;
     };
 

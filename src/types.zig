@@ -32,6 +32,13 @@ pub const Color = struct {
     }
 };
 
+pub const LatLonBox = struct {
+    topleft_lat: f64,
+    topleft_lon: f64,
+    bottomright_lat: f64,
+    bottomright_lon: f64,
+};
+
 pub const BoxAlignment = struct {
     w: ?usize = null,
     h: ?usize = null,

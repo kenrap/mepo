@@ -150,6 +150,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 
 fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
+        const bbox = mepo.bounding_box();
         try mepo.blit_multiline_text(
             0x000000,
             null,
@@ -157,8 +158,21 @@ fn blit_debug(mepo: *@This()) !void {
             5,
             5,
             null,
-            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}",
-            .{ mepo.get_x(), mepo.get_y(), mepo.zoom, mepo.lat, mepo.lon },
+            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nviewport {d:.5}x{d:.5}km",
+            .{
+                mepo.get_x(),
+                mepo.get_y(),
+                mepo.zoom,
+                mepo.lat,
+                mepo.lon,
+                utilconversion.distance_km_haversine(
+                    bbox.topleft_lat,
+                    bbox.topleft_lon,
+                    bbox.bottomright_lat,
+                    bbox.bottomright_lon,
+                ),
+                0,
+            },
         );
     }
 
@@ -622,6 +636,15 @@ pub fn set_x(mepo: *@This(), x: i32) void {
 
 pub fn set_y(mepo: *@This(), y: i32) void {
     mepo.lat = utilconversion.px_y_to_lat(y, mepo.zoom);
+}
+
+pub fn bounding_box(mepo: *@This()) types.LatLonBox {
+    return .{
+        .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom),
+        .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom),
+        .bottomright_lat = utilconversion.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom),
+        .bottomright_lon = utilconversion.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom),
+    };
 }
 
 pub fn graceful_terminate() void {
