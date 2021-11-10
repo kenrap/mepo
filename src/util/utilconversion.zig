@@ -44,7 +44,9 @@ pub fn distance_km_haversine(lat_a: f64, lon_a: f64, lat_b: f64, lon_b: f64) f64
     const arc = std.math.acos(c);
     const km_radius = 6371.0;
 
-    return arc * km_radius;
+    const distance = arc * km_radius;
+
+    return if (std.math.isNan(distance)) 0 else distance;
 }
 
 fn zoom_bit(zoom: u32) f32 {
