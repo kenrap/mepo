@@ -7,8 +7,15 @@ errdie() {
 
 bbox() {
   DOWNLOAD_REQUEST=$1
-  cd "$(realpath $(dirname "$0"))"/..
-  zig build && ./zig-out/bin/mepo -d${DOWNLOAD_REQUEST}
+
+  if [ -f "$(realpath $(dirname "$0"))/../build.zig" ]; then
+    # E.g. dev testing
+    cd "$(realpath $(dirname "$0"))"/..
+    zig build && ./zig-out/bin/mepo -d${DOWNLOAD_REQUEST}
+  else
+    # E.g. installed to system
+    mepo -d${DOWNLOAD_REQUEST}
+  fi
 }
 
 nominatim() {
