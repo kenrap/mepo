@@ -27,7 +27,7 @@ the bounding box to download and then feeds this into `mepo -d`.
 Run this script as:
 
 ```sh
-mepo_dl.sh nominatim
+mepo_dl.sh
 ```
 
 ## Using a custom configuration
