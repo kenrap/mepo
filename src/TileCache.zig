@@ -301,17 +301,20 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.Til
     );
 }
 
-pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
+/// Downloads tiles continuously
+/// If graphical_mode is true, will idle even when queue_lifo is empty.
+/// If graphical_mode is false, will terminate once queue_lifo is empty.
+pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while (should_idle or tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0) {
+    while (graphical_mode or tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0) {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
             switch (msg.*.msg) {
                 ._DONE => {
-                    //if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+                    if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     const lock = tile_cache.mutex.acquire();
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
@@ -330,7 +333,7 @@ pub fn download_loop(tile_cache: *@This(), should_idle: bool) void {
         }
 
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
-            //if (sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+            if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
