@@ -20,14 +20,14 @@ mepo -d40.74946,-74.04673,40.818358,-73.88211,3,16
 ```
 
 This may be a bit more involved then you would like to get, so as an
-alternative you can use the provided `mepo_download.sh` script which
+alternative you can use the provided `mepo_dl.sh` script which
 provides a prompt-driven dialog which queries [nominatim]() to determine
 the bounding box to download and then feeds this into `mepo -d`.
 
 Run this script as:
 
 ```sh
-mepo_download.sh nominatim
+mepo_dl.sh nominatim
 ```
 
 ## Using a custom configuration
