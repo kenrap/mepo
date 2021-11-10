@@ -3,7 +3,7 @@ const utilconversion = @import("util/utilconversion.zig");
 const TileCache = @import("./TileCache.zig");
 
 pub fn download_bbox(tile_cache: *TileCache, download_request: []const u8) !void {
-    std.debug.warn("Downloading based on BBox request: {s}", .{download_request});
+    std.debug.warn("Downloading based on BBox request: {s}\n", .{download_request});
     var a_lat: f64 = undefined;
     var a_lon: f64 = undefined;
     var b_lat: f64 = undefined;
