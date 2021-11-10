@@ -43,7 +43,7 @@ pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !
         \\Bbox Tiles queued ({} tiles): {} tiles queued; {} tiles already cached
         \\Estimate download: {d:.5} megabytes
         \\
-        \\ Begining download in {d}s
+        \\Begining download in {d}s
         \\
     ,
         .{

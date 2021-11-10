@@ -5,20 +5,21 @@ errdie() {
   exit 1
 }
 
-bbox() {
+mepo_dashd_download() {
   DOWNLOAD_REQUEST=$1
 
   if [ -f "$(realpath $(dirname "$0"))/../build.zig" ]; then
     # E.g. dev testing
     cd "$(realpath $(dirname "$0"))"/..
-    zig build && ./zig-out/bin/mepo -d${DOWNLOAD_REQUEST} else
+    zig build && ./zig-out/bin/mepo -d${DOWNLOAD_REQUEST}
+  else
     # E.g. installed to system
     mepo -d${DOWNLOAD_REQUEST}
   fi
 }
 
 sep() {
-  echo "$(tput bold)================================$(tput sgr0)"
+  echo "$(tput bold)================================$(tput sgr0)" >&2
 }
 
 prompt() {
@@ -27,16 +28,16 @@ prompt() {
   echo "$RES"
 }
 
-nominatim() {
+nominatim_spec() {
   BBOX=""
   ZOOM_MIN=""
   ZOOM_MAX=""
 
-  echo "$(tput bold)$(basename $0): nominatim$(tput sgr0):"
+  echo "$(tput bold)$(basename $0): nominatim_dl$(tput sgr0)" >&2
   sep
 
   # Location query
-  echo "Target download location (city like New York City, country like Italy, state like Texas)"
+  echo "Target download location (city like New York City, country like Italy, state like Texas)" >&2
   LOCATION="$(prompt Location: | sed 's/ /%20/g')"
 
   OPTIONS="$(
@@ -52,10 +53,10 @@ nominatim() {
 
   # Pick location from list
   while [ -z "$BBOX" ]; do
-    echo "$OPTIONS"
+    echo "$OPTIONS" >&2
     NUMBER="$(prompt "Pick number:")"
     BBOX="$(echo "$OPTIONS" | grep -E "^${NUMBER}" | awk -F' ' '{print $NF}')"
-    [ -z "$BBOX" ] && echo "Invalid option" && continue
+    [ -z "$BBOX" ] && echo "Invalid option" >&2 && continue
     # Nominatim BBOX south lat , north lat, west lon, east lon -> conv to mepo format lat1,lon1,lat2,lon2Q
     BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
   done
@@ -69,13 +70,22 @@ nominatim() {
   done
 
   sep
-  bbox "$BBOX,$ZOOM_MIN,$ZOOM_MAX"
+
+  echo "$BBOX,$ZOOM_MIN,$ZOOM_MAX"
 }
 
+nominatim_dl() {
+  SPEC="$(nominatim_spec)"
+  mepo_dashd_download "$SPEC"
+}
 
 test() {
   DOWNLOAD_REQUEST="40.74946,-74.04673,40.818358,-73.88211,3,16"
-  bbox "$DOWNLOAD_REQUEST"
+  mepo_dashd_download "$DOWNLOAD_REQUEST"
 }
 
-[ -z "$1" ] && errdie "Usage: $0 {nominatim,test}" || "$@"
+usage() {
+  errdie "Usage: $0 {nominatim_dl,nominatim_spec,test,usage}"
+}
+
+[ -z "$1" ] && nominatim_dl || "$@"
