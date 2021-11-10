@@ -19,7 +19,7 @@ Alpine linux dependencies:
 apk add curl-dev sdl2-dev sdl2_image-dev sdl2_ttf-dev
 ```
 
-# Code Style
+## Code Style
 
 Run all files through zig fmt:
 
