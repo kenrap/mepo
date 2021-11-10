@@ -158,7 +158,7 @@ fn blit_debug(mepo: *@This()) !void {
             5,
             5,
             null,
-            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nviewport {d:.5}x{d:.5}km",
+            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nbbox: {d:.3}x{d:.3}km",
             .{
                 mepo.get_x(),
                 mepo.get_y(),
@@ -169,9 +169,14 @@ fn blit_debug(mepo: *@This()) !void {
                     bbox.topleft_lat,
                     bbox.topleft_lon,
                     bbox.bottomright_lat,
+                    bbox.topleft_lon,
+                ),
+                utilconversion.distance_km_haversine(
+                    bbox.topleft_lat,
+                    bbox.topleft_lon,
+                    bbox.topleft_lat,
                     bbox.bottomright_lon,
                 ),
-                0,
             },
         );
     }
