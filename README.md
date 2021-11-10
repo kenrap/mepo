@@ -12,7 +12,7 @@ Mepo is a fast, simple, and hackable OSM map viewer for desktop linux
 environment's various user interfaces (Wayland & X inclusive). Mepo
 works both offline and online, features a minimalist both touch/mouse
 and keyboard compatible interface, and offers a UNIX-philosophy inspired
-underlying design, exposing a powerful command language called [mepolang](doc/mepolang.md)
+underlying design, exposing a powerful command language called [mepolang](doc/userguide.md#Mepolang)
 capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
@@ -26,7 +26,7 @@ search scripts, bookmarks, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/mepolang.md)**:
+- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/userguide.md#Mepolang)**:
   - Mepo's UI is built **to do one thing well**: download & render maps.
     Extra functionality is enabled via its command language / API (mepolang).
   - Reduces overall application logic complexity, handing over to
@@ -247,7 +247,7 @@ development possible!
 Mepo is surely welcome to contributors who have experience or interest
 in mobile Linux, OSM, and/or Zig.
 
-- **Development Guide**: [here](doc/develop.md)
+- **Development Guide**: [here](doc/developguide.md)
 - **Mailing List**: [mepo-devel](https://lists.sr.ht/~mil/mepo-devel)
 - **Tickets**: [mepo-tickets](https://todo.sr.ht/~mil/mepo-tickets)
 - **IRC**: #mepo on irc.oftc.net (mla is my nick)
