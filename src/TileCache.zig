@@ -16,7 +16,7 @@ const datastructure = @import("./datastructure/datastructure.zig");
 
 pub const TransferDatum = struct {
     client: *curl.CURL,
-    coords: types.TileSpec,
+    coords: types.XYZ,
     data_arraylist: std.ArrayList(u8),
     progress_dl_now: ?c_long,
     progress_dl_total: ?c_long,
@@ -38,13 +38,13 @@ cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
 mutex: std.Thread.Mutex,
 n_current_transfers: u32,
-queue_lifo: datastructure.Lifo(types.TileSpec, bool),
+queue_lifo: datastructure.Lifo(types.XYZ, bool),
 renderer: ?*sdl.SDL_Renderer,
 source_url: ?[:0]const u8,
-texture_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture),
-transfer_map: std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum),
+texture_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture),
+transfer_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum),
 
-pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
+pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
 
@@ -74,7 +74,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.TileSpec) !TileData {
     };
 }
 
-fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.TileSpec) !bool {
+fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
 
@@ -132,7 +132,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
     };
 }
 
-fn add_to_curl_multi(tile_cache: *@This(), coords: types.TileSpec, load_to_texture: bool) !void {
+fn add_to_curl_multi(tile_cache: *@This(), coords: types.XYZ, load_to_texture: bool) !void {
     var transfer_datum: *TransferDatum = datum: {
         var dat = try tile_cache.allocator.create(TransferDatum);
         dat.client = curl.curl_easy_init().?;
@@ -187,7 +187,7 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
     }
 }
 
-fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec {
+fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.XYZ {
     var it = tile_cache.transfer_map.iterator();
     while (it.next()) |kv| {
         if (kv.value_ptr.*.client == msg.*.easy_handle) {
@@ -197,7 +197,7 @@ fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.TileSpec 
     return null;
 }
 
-fn load_data_to_texture(tile_cache: *@This(), coords: types.TileSpec, data: []u8) !*sdl.SDL_Texture {
+fn load_data_to_texture(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*sdl.SDL_Texture {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
     const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)));
@@ -291,7 +291,7 @@ fn tile_write_curl_callback(
     return nmemb * size;
 }
 
-fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.TileSpec) ![]u8 {
+fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ) ![]u8 {
     var source_hash: [32:0]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
     return try std.fmt.allocPrint(
@@ -391,9 +391,9 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .cache_dir = null,
             .renderer = null,
             .n_current_transfers = 0,
-            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *TransferDatum).init(allocator),
-            .texture_map = std.array_hash_map.AutoArrayHashMap(types.TileSpec, *sdl.SDL_Texture).init(allocator),
-            .queue_lifo = datastructure.Lifo(types.TileSpec, bool).init(allocator),
+            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum).init(allocator),
+            .texture_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
+            .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
         });
     } else {
