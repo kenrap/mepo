@@ -14,6 +14,9 @@ const DownloadRequest = struct {
 pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !void {
     std.debug.warn("Downloading based on BBox request: {s}\n", .{download_request_str});
 
+    try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
+    try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
+
     const delay_seconds = 3;
     const average_tile_size_bytes = 1024 * 20;
     const dl_req = try parse_download_request(download_request_str);
@@ -58,9 +61,6 @@ pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !
         },
     );
     std.time.sleep(std.time.ns_per_s * delay_seconds);
-
-    try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
-    try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
     const result = tile_cache.download_loop(false);
 }
 
