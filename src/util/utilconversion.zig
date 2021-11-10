@@ -28,13 +28,23 @@ pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
     return 180.0 / std.math.pi * std.math.atan(0.5 * (std.math.exp(n) - std.math.exp(-n)));
 }
 
-pub fn distance_km_haversine(from_lat: f64, from_lon: f64, to_lat: f64, to_lon: f64) f64 {
-    const lat_a = std.math.pi / 180.00 * from_lat;
-    const lat_b = std.math.pi / 180.00 * to_lat;
-    const lon_a = std.math.pi / 180.00 * from_lon;
-    const lon_b = std.math.pi / 180.00 * to_lon;
+pub fn distance_km_haversine(lat_a: f64, lon_a: f64, lat_b: f64, lon_b: f64) f64 {
+    const phi_a = (90.0 - lat_a) * std.math.pi / 180.0;
+    const phi_b = (90.0 - lat_b ) * std.math.pi / 180.0;
+    const theta_a = lon_a * std.math.pi / 180.0;
+    const theta_b = lon_b * std.math.pi / 180.0;
 
-    return 0;
+    const c = (
+        std.math.sin(phi_a) *
+        std.math.sin(phi_b) *
+        std.math.cos(theta_a - theta_b) +
+        std.math.cos(phi_a) *
+        std.math.cos(phi_b)
+    );
+    const arc = std.math.acos(c);
+    const km_radius = 6371.0;
+
+    return arc * km_radius;
 }
 
 fn zoom_bit(zoom: u32) f32 {
