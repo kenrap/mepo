@@ -240,8 +240,17 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             5,
             y_pos,
             null,
-            "Pin: {s}\nlat: {d}\nlon: {d}",
-            .{ pin.name, pin.lat, pin.lon },
+            \\Pin: {s}
+            \\lat: {d:.5}
+            \\lon: {d:.5}
+            \\dist: {d:.2}km away
+            ,
+            .{
+                pin.name, 
+                pin.lat, 
+                pin.lon,
+                utilconversion.distance_km_haversine(mepo.lat, mepo.lon, pin.lat, pin.lon),
+            },
         );
         try mepo.blit_multiline_text(
             0x000000,
