@@ -14,3 +14,4 @@
 - Busybox: Used for base shell & provide tools for scripts
 - Jq: Used for parsing JSON datastructures from external sources
 - Xmllint: Used for extracting XML from OSM API via XPath
+- Ncurses: Use for tput/colorizing scripts
