@@ -51,8 +51,13 @@ nominatim() {
     BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
   done
 
-  read -p "Zoom minimum (0-19): " ZOOM_MIN
-  read -p "Zoom maximum (0-19): " ZOOM_MAX
+  while ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt 0 ] && [ "$ZOOM_MIN" -lt 19 ]); do
+    read -p "Zoom minimum (0-19): " ZOOM_MIN
+  done
+
+  while ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt 0 ] && [ "$ZOOM_MAX" -lt 19 ]); do
+    read -p "Zoom maximum (0-19): " ZOOM_MAX
+  done
 
   bbox "$BBOX,$ZOOM_MIN,$ZOOM_MAX"
 }
