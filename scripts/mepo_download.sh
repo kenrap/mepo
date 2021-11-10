@@ -46,4 +46,4 @@ test() {
   bbox "$DOWNLOAD_REQUEST"
 }
 
-"$@"
+[ -z "$1" ] && errdie "Usage: mepo_download.sh {nominatim,test}" || "$@"
