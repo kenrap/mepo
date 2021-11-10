@@ -1,4 +1,5 @@
 const std = @import("std");
+const utilconversion = @import("util/utilconversion.zig");
 const TileCache = @import("./TileCache.zig");
 
 pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void {
@@ -31,12 +32,19 @@ pub fn download_bbox(tile_cache :*TileCache, download_request: []const u8) !void
 
     const stats = try tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
     const average_tile_size_bytes = 1024 * 20;
+    const dist_w = utilconversion.distance_km_haversine(a_lat, a_lon, a_lat, b_lon);
+    const dist_h = utilconversion.distance_km_haversine(a_lat, a_lon, b_lat, a_lon);
+
     std.debug.warn(
-      \\Bbox queued ({} tiles): {} tiles queued; {} tiles already cached
+      \\Bbox Distance: {d:.3}km squared ({d:.3}m x {d:.3}m)
+      \\Bbox Tiles queued ({} tiles): {} tiles queued; {} tiles already cached
       \\Estimate download: {d:.5} megabytes
       \\
       , 
       .{
+        dist_w * dist_h,
+        dist_w,
+        dist_h,
         stats.n_queued + stats.n_cached,
         stats.n_queued,
         stats.n_cached,
