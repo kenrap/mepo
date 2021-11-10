@@ -244,10 +244,10 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             \\lat: {d:.5}
             \\lon: {d:.5}
             \\dist: {d:.2}km away
-            ,
+        ,
             .{
-                pin.name, 
-                pin.lat, 
+                pin.name,
+                pin.lat,
                 pin.lon,
                 utilconversion.distance_km_haversine(mepo.lat, mepo.lon, pin.lat, pin.lon),
             },
