@@ -21,6 +21,8 @@ bbox() {
 nominatim() {
   echo "Target download location"
   echo "(can be city like New York City, country like Italy, state like Texas)"
+
+  LOCATION=""
   read -p "Location: " LOCATION
   LOCATION="$(echo "$LOCATION" | sed 's/ /%20/g')"
 
@@ -33,13 +35,21 @@ nominatim() {
       nl |
       sed 's/^ *//g'
   )"
-  echo "$OPTIONS"
-  read -p "Pick number: " NUMBER
-  BBOX="$(echo "$OPTIONS" | grep -E "^${NUMBER}" | awk -F' ' '{print $NF}')"
-  echo "$BBOX" | grep . || errdie "Invalid option"
 
-  # Nominatim BBOX south lat , north lat, west lon, east lon -> conv to mepo format lat1,lon1,lat2,lon2Q
-  BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
+  [ -z "$OPTIONS" ] && errdie "Problem fetching from nominatim for request: $LOCATION"
+
+  BBOX=""
+  ZOOM_MIN=""
+  ZOOM_MAX=""
+
+  while [ -z "$BBOX" ]; do
+    echo "$OPTIONS"
+    read -p "Pick number: " NUMBER
+    BBOX="$(echo "$OPTIONS" | grep -E "^${NUMBER}" | awk -F' ' '{print $NF}')"
+    [ -z "$BBOX" ] && echo "Invalid option" && continue
+    # Nominatim BBOX south lat , north lat, west lon, east lon -> conv to mepo format lat1,lon1,lat2,lon2Q
+    BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
+  done
 
   read -p "Zoom minimum (0-19): " ZOOM_MIN
   read -p "Zoom maximum (0-19): " ZOOM_MAX
