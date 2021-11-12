@@ -34,6 +34,7 @@ pub const TileData = union(TileDataTag) {
 };
 
 allocator: *std.mem.Allocator,
+byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
 mutex: std.Thread.Mutex,
@@ -220,6 +221,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
             if (tile_cache.curl_msg_to_coords(msg)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
                 const datum_array = transfer_datum.data_arraylist.items;
+                tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
                 if (tile_cache.cache_dir) |cache_dir| {
                     // Save to FS
