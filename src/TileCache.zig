@@ -307,6 +307,7 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
 pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
+    const initial_queue_size = tile_cache.queue_lifo.count();
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
@@ -341,6 +342,26 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
             tile_cache.n_current_transfers += 1;
             lock.release();
+        }
+
+        // Progress indicator for non graphical mode
+        if (!graphical_mode) {
+            std.debug.warn("\x1b[1;1H\x1b[2J", .{});
+            std.debug.warn(
+                \\Mepo - download mode
+                \\====================
+                \\Progress: {d:.2}% ({}/{} tiles downloaded)
+                \\Bandwidth used: {} megabytes
+                \\
+            ,
+                .{
+                    100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo.count()) /
+                        @intToFloat(f32, initial_queue_size)),
+                    initial_queue_size - tile_cache.queue_lifo.count(),
+                    initial_queue_size,
+                    tile_cache.byte_counter / 1024 / 1024,
+                },
+            );
         }
 
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
