@@ -66,3 +66,13 @@ test "lat_to_px_y roundtrips with px_y_to_lat" {
     const conv_lat = px_y_to_lat(conv_y, zoom);
     try std.testing.expect(std.math.approxEqAbs(f64, lat, conv_lat, 0.2));
 }
+
+test "distance_km_haversine" {
+    const lat_a: f64 = 22.0;
+    const lon_a: f64 = 10.0;
+    const lat_b: f64 = 24.0;
+    const lon_b: f64 = 32.0;
+    const expect_result = 2260.47;
+    const result = distance_km_haversine(lat_a, lon_a, lat_b, lon_b);
+    try std.testing.expect(std.math.approxEqAbs(f64, result, expect_result, 0.2));
+}
