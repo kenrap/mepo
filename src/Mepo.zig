@@ -268,7 +268,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 fn blit_download_bar(mepo: *@This()) !void {
     if (!mepo.download_bar) return;
 
-    try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff, .opacity = 50 }, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff, .opacity = 100 }, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.win_h) - 20,
         .w = @intCast(i32, mepo.win_w),
@@ -283,11 +283,21 @@ fn blit_download_bar(mepo: *@This()) !void {
     try mepo.blit_multiline_text(
         0x000000,
         null,
+        .{.align_x = .Right },
+        0,
+        @intCast(i32, mepo.win_h) - 20 + 3,
+        null,
+        "Dl: {d:.2}Mb ",
+        .{ @intToFloat(f32, mepo.tile_cache.byte_counter) / 1024 / 1024  },
+    );
+    try mepo.blit_multiline_text(
+        0x000000,
+        null,
         .{},
         5,
         @intCast(i32, mepo.win_h) - 20 + 3,
         null,
-        "Queued: {d} / Currently downloading: {d} / Cached Tiles: {d}",
+        "Tiles Queued: {d} / Downloading: {d} / Memory: {d}",
         .{ mepo.tile_cache.queue_lifo.count(), mepo.tile_cache.n_current_transfers, mepo.tile_cache.texture_map.count() },
     );
 }
