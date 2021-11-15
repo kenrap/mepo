@@ -6,19 +6,15 @@ const utildbg = @import("../util/utildbg.zig");
 pub fn f_preftoggle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
-    if (std.mem.eql(u8, "help", name)) {
-        mepo.help = !mepo.help;
-    } else if (std.mem.eql(u8, "download_bar", name)) {
-        mepo.download_bar = !mepo.download_bar;
-    } else if (std.mem.eql(u8, "debug_vars", name)) {
-        mepo.debug_vars = !mepo.debug_vars;
-    } else if (std.mem.eql(u8, "debug_message_enabled", name)) {
-        mepo.debug_message_enabled = !mepo.debug_message_enabled;
-    } else if (std.mem.eql(u8, "debug_tiles", name)) {
-        mepo.debug_tiles = !mepo.debug_tiles;
-    } else if (std.mem.eql(u8, "debug_stderr", name)) {
-        utildbg.debug_stderr = !utildbg.debug_stderr;
-    } else if (std.mem.eql(u8, "crosshair_on", name)) {
-        mepo.crosshair_on = !mepo.crosshair_on;
+    for (&[_]struct{ prop: []const u8, ptr: *bool }{
+        .{ .prop = "help", .ptr = &mepo.help },
+        .{ .prop = "download_bar", .ptr = &mepo.download_bar },
+        .{ .prop = "debug_vars", .ptr = &mepo.debug_vars },
+        .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
+        .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },
+        .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },
+        .{ .prop = "crosshair_on", .ptr = &mepo.crosshair_on },
+    }) |stg| {
+        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = !stg.ptr.*;
     }
 }
