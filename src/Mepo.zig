@@ -59,11 +59,14 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     ));
 }
 
-pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zoom: u8) !void {
+pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
+
+    const vpx = utilconversion.lon_to_px_x(mepo.lon, zoom) - @divTrunc(@intCast(i32, mepo.win_w), 2);
+    const vpy = utilconversion.lat_to_px_y(mepo.lat, zoom) - @divTrunc(@intCast(i32, mepo.win_h), 2);
     const begx = vpx - config.Tsize;
     const begy = vpy - config.Tsize;
-    const endx = vpx + @intCast(i32, vpw) + config.Tsize;
-    const endy = vpy + @intCast(i32, vph) + config.Tsize;
+    const endx = vpx + @intCast(i32, bbox.w) + config.Tsize;
+    const endy = vpy + @intCast(i32, bbox.h) + config.Tsize;
 
     var tilex: i32 = @intCast(i32, @divFloor(begx, config.Tsize));
     var tiley: i32 = @intCast(i32, @divFloor(begy, config.Tsize));
@@ -74,7 +77,10 @@ pub fn blit_tiles_all(mepo: *@This(), vpx: i32, vpy: i32, vpw: u32, vph: u32, zo
         tiley = @intCast(i32, @divFloor(begy, config.Tsize));
         while (y < endy) {
             if (tilex >= 0 and tiley >= 0 and tilex <= std.math.pow(u32, 2, zoom) - 1 and tiley <= std.math.pow(u32, 2, zoom) - 1) {
-                try mepo.blit_tile_surface(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
+                try mepo.blit_tile_surface(
+                    @intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy,
+                    bbox,
+                 );
                 try mepo.blit_tile_text(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
             } else {
                 utildbg.log("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
@@ -116,7 +122,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     );
 }
 
-pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
+pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32, bbox: sdl.SDL_Rect) !void {
     const rect_dest = sdl.SDL_Rect{
         .x = @intCast(i32, tile_x * config.Tsize) - x_off,
         .y = @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -126,12 +132,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 
     var rect_intersect: sdl.SDL_Rect = undefined;
 
-    if (@intToEnum(sdl.SDL_bool, sdl.SDL_FALSE) == sdl.SDL_IntersectRect(&rect_dest, &sdl.SDL_Rect{
-        .x = 0,
-        .y = 0,
-        .w = @intCast(c_int, mepo.win_w),
-        .h = @intCast(c_int, mepo.win_h),
-    }, &rect_intersect)) return;
+    if (@intToEnum(sdl.SDL_bool, sdl.SDL_FALSE) == sdl.SDL_IntersectRect(&rect_dest, &bbox, &rect_intersect)) return;
 
     const rect_src = sdl.SDL_Rect{
         .x = if (rect_intersect.x > rect_dest.x) rect_dest.w - rect_intersect.w else 0,
@@ -368,10 +369,12 @@ fn blit_help(mepo: *@This()) !void {
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
     try mepo.blit_tiles_all(
-        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2),
-        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2),
-        mepo.win_w,
-        mepo.win_h,
+        .{
+             .x = 0,
+             .y = 0,
+             .w = @intCast(c_int, mepo.win_w),
+             .h = @intCast(c_int, mepo.win_h),
+        },
         mepo.zoom,
     );
     try mepo.blit_debug();
