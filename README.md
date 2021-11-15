@@ -103,7 +103,7 @@ search scripts, bookmarks, and more.
       debugging STDERR messages.
     - Resolve existing memory leaks in the application.
     - Provide an initial tag for package maintainers (0.1).
-- **Milestone 2: Offline Mode & Noninteractive Downloading**
+- **Milestone 2: Offline Mode & Noninteractive Downloading** (In-progress)
   - **Todo:**
     - Rework main application / boot logic to enable fully noninteractive mode
       (free of SDL/Video context) to allow for CLI-based downloading of tiles.
