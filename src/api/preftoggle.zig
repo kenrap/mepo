@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 pub fn f_preftoggle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
-    for (&[_]struct{ prop: []const u8, ptr: *bool }{
+    for (&[_]struct { prop: []const u8, ptr: *bool }{
         .{ .prop = "help", .ptr = &mepo.help },
         .{ .prop = "download_bar", .ptr = &mepo.download_bar },
         .{ .prop = "debug_vars", .ptr = &mepo.debug_vars },

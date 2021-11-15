@@ -7,7 +7,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
     // Bools
-    for (&[_]struct{ prop: []const u8, ptr: *bool }{
+    for (&[_]struct { prop: []const u8, ptr: *bool }{
         .{ .prop = "help", .ptr = &mepo.help },
         .{ .prop = "download_bar", .ptr = &mepo.download_bar },
         .{ .prop = "debug_vars", .ptr = &mepo.debug_vars },
@@ -20,7 +20,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     }
 
     // Ints
-    for (&[_]struct{ prop: []const u8, ptr: *u8 }{
+    for (&[_]struct { prop: []const u8, ptr: *u8 }{
         .{ .prop = "drag_scale", .ptr = &mepo.drag_scale },
         .{ .prop = "zoom", .ptr = &mepo.zoom },
         .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },

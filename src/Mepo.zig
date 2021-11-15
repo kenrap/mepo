@@ -124,13 +124,13 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .h = config.Tsize,
     };
 
-    var rect_intersect : sdl.SDL_Rect = undefined;
+    var rect_intersect: sdl.SDL_Rect = undefined;
 
     if (@intToEnum(sdl.SDL_bool, sdl.SDL_FALSE) == sdl.SDL_IntersectRect(&rect_dest, &sdl.SDL_Rect{
-        .x = 10,
-        .y = 10,
-        .w = @intCast(c_int, mepo.win_w - 20),
-        .h = @intCast(c_int, mepo.win_h - 20),
+        .x = 0,
+        .y = 0,
+        .w = @intCast(c_int, mepo.win_w),
+        .h = @intCast(c_int, mepo.win_h),
     }, &rect_intersect)) return;
 
     const rect_src = sdl.SDL_Rect{
@@ -139,7 +139,6 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .w = rect_intersect.w,
         .h = rect_intersect.h,
     };
-
 
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
@@ -300,12 +299,12 @@ fn blit_download_bar(mepo: *@This()) !void {
     try mepo.blit_multiline_text(
         0x000000,
         null,
-        .{.align_x = .Right },
+        .{ .align_x = .Right },
         0,
         @intCast(i32, mepo.win_h) - 20 + 3,
         null,
         "Dl: {d:.2}Mb ",
-        .{ @intToFloat(f32, mepo.tile_cache.byte_counter) / 1024 / 1024  },
+        .{@intToFloat(f32, mepo.tile_cache.byte_counter) / 1024 / 1024},
     );
     try mepo.blit_multiline_text(
         0x000000,
