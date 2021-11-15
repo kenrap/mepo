@@ -6,7 +6,6 @@ pub const InitWindowH = 950;
 pub const InitWindowW = 720;
 pub const InitWindowX = 0;
 pub const InitWindowY = 0;
-pub const MaxNTransfers = 20;
 pub const Tsize = 256;
 pub const ClickTimeoutMs = 200;
 
@@ -57,9 +56,10 @@ pub const DefaultBaseConfig =
     \\ prefset debug_tiles 0;
     \\ prefset debug_vars 1;
     \\ prefset download_bar 0;
+    \\ prefset zoom 14;
+    \\ prefset tile_cache_max_n_transfers 20;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
-    \\ prefset zoom 14;
     \\
     \\ pin_add 40.7418 -73.9899 baz;
     \\

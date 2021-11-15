@@ -37,6 +37,7 @@ allocator: *std.mem.Allocator,
 byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
+max_n_transfers: usize = 20,
 mutex: std.Thread.Mutex,
 n_current_transfers: u32,
 queue_lifo: datastructure.Lifo(types.XYZ, bool),
@@ -335,7 +336,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
-        while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < config.MaxNTransfers) {
+        while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < tile_cache.max_n_transfers) {
             if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
@@ -403,6 +404,10 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
 
 pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
     tile_cache.renderer = renderer;
+}
+
+pub fn set_max_n_transfers(tile_cache: *@This(), max_n_transfers: usize) void {
+    tile_cache.max_n_transfers = max_n_transfers;
 }
 
 pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {

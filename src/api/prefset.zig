@@ -30,5 +30,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         try mepo.tile_cache.set_cache_dir(args[1].Text);
     } else if (std.mem.eql(u8, "tile_cache_url", name)) {
         try mepo.tile_cache.set_cache_url(args[1].Text);
+    } else if (std.mem.eql(u8, "tile_cache_max_n_transfers", name)) {
+        mepo.tile_cache.set_max_n_transfers(@floatToInt(usize, args[1].Number));
     }
 }
