@@ -22,4 +22,6 @@ echo "
     $ZOOM_MIN
     $ZOOM_MAX 
   ;
+
+  prefset download_bar 1;
 "
