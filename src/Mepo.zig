@@ -117,20 +117,37 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
 }
 
 pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
-    const dest = sdl.SDL_Rect{
+    const rect_dest = sdl.SDL_Rect{
         .x = @intCast(i32, tile_x * config.Tsize) - x_off,
         .y = @intCast(i32, tile_y * config.Tsize) - y_off,
         .w = config.Tsize,
         .h = config.Tsize,
     };
 
+    var rect_intersect : sdl.SDL_Rect = undefined;
+
+    if (@intToEnum(sdl.SDL_bool, sdl.SDL_FALSE) == sdl.SDL_IntersectRect(&rect_dest, &sdl.SDL_Rect{
+        .x = 10,
+        .y = 10,
+        .w = @intCast(c_int, mepo.win_w - 20),
+        .h = @intCast(c_int, mepo.win_h - 20),
+    }, &rect_intersect)) return;
+
+    const rect_src = sdl.SDL_Rect{
+        .x = if (rect_intersect.x > rect_dest.x) rect_dest.w - rect_intersect.w else 0,
+        .y = if (rect_intersect.y > rect_dest.y) rect_dest.h - rect_intersect.h else 0,
+        .w = rect_intersect.w,
+        .h = rect_intersect.h,
+    };
+
+
     switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
-            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest));
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
         },
         .queued_position => |queued_position| {
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, dest, .Fill);
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, dest, .Draw);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, rect_intersect, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
             try mepo.blit_multiline_text(
                 0x000000,
                 null,
@@ -143,7 +160,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             );
         },
         .transfer_datum => {
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, dest, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
         },
     }
 }
