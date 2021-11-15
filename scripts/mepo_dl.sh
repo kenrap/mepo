@@ -75,8 +75,7 @@ nominatim_spec() {
 }
 
 nominatim_dl() {
-  SPEC="$(nominatim_spec)"
-  mepo_dashd_download "$SPEC"
+  SPEC="$(nominatim_spec)" && mepo_dashd_download "$SPEC"
 }
 
 test() {
