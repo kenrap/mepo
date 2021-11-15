@@ -50,7 +50,7 @@ pub const DefaultBaseConfig =
     \\
     \\ center_on_coords 40.78392 -73.96442;
     \\ prefset crosshair_on 1;
-    \\ prefset crosshair_size 15;
+    \\ prefset crosshair_size 40;
     \\ prefset debug_message_enabled 1;
     \\ prefset debug_stderr 1;
     \\ prefset debug_tiles 0;
