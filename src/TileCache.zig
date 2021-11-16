@@ -313,7 +313,9 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while (graphical_mode or tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0) {
+    while ((graphical_mode and tile_cache.download_thread != null) or
+        (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)))
+    {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null) {
@@ -380,8 +382,9 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 
 pub fn set_network(tile_cache: *@This(), enable: bool) void {
     if (!enable and tile_cache.download_thread != null) {
-        // Logic to cancel download thread here
+        const orphan_thread = tile_cache.download_thread.?;
         tile_cache.download_thread = null;
+        sdl.SDL_DetachThread(orphan_thread);
     } else if (enable and tile_cache.download_thread == null) {
         tile_cache.download_thread = sdl.SDL_CreateThread(
             download_loop_sdl_threadable,
