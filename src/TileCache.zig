@@ -384,6 +384,10 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     if (!enable and tile_cache.download_thread != null) {
         const orphan_thread = tile_cache.download_thread.?;
         tile_cache.download_thread = null;
+        const lock = tile_cache.mutex.acquire();
+        tile_cache.queue_lifo.clearAndFree();
+        // TODO: clear in-progress transfers here
+        lock.release();
         sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.download_thread == null) {
         tile_cache.download_thread = sdl.SDL_CreateThread(
@@ -408,6 +412,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
+    // TODO: clear in-progress transfers here
 
     // Set new URL
     if (tile_cache.source_url) |present_source_url| {
