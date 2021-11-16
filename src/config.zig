@@ -57,6 +57,7 @@ pub const DefaultBaseConfig =
     \\ prefset debug_vars 1;
     \\ prefset download_bar 0;
     \\ prefset zoom 14;
+    \\ prefset tile_cache_network 1;
     \\ prefset tile_cache_max_n_transfers 20;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;

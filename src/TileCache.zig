@@ -34,6 +34,7 @@ pub const TileData = union(TileDataTag) {
 };
 
 allocator: *std.mem.Allocator,
+download_thread: ?*sdl.SDL_Thread,
 byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
@@ -377,6 +378,19 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     return 0;
 }
 
+pub fn set_network(tile_cache: *@This(), enable: bool) void {
+    if (!enable and tile_cache.download_thread != null) {
+        // Logic to cancel download thread here
+        tile_cache.download_thread = null;
+    } else if (enable and tile_cache.download_thread == null) {
+        tile_cache.download_thread = sdl.SDL_CreateThread(
+            download_loop_sdl_threadable,
+            "Tile_Download_Thread",
+            tile_cache,
+        );
+    }
+}
+
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
     const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, path);
     defer tile_cache.allocator.free(expanded_path);
@@ -413,16 +427,17 @@ pub fn set_max_n_transfers(tile_cache: *@This(), max_n_transfers: usize) void {
 pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |curl_multi| {
         return @as(@This(), .{
-            .mutex = std.Thread.Mutex{},
             .allocator = allocator,
-            .source_url = null,
             .cache_dir = null,
-            .renderer = null,
-            .n_current_transfers = 0,
-            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum).init(allocator),
-            .texture_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
-            .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
             .curl_multi = curl.curl_multi_init().?,
+            .download_thread = null,
+            .mutex = std.Thread.Mutex{},
+            .n_current_transfers = 0,
+            .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
+            .renderer = null,
+            .source_url = null,
+            .texture_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
+            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
     } else {
         return error.MultiInitFail;

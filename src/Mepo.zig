@@ -60,7 +60,6 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
 }
 
 pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
-
     const vpx = utilconversion.lon_to_px_x(mepo.lon, zoom) - @divTrunc(@intCast(i32, mepo.win_w), 2);
     const vpy = utilconversion.lat_to_px_y(mepo.lat, zoom) - @divTrunc(@intCast(i32, mepo.win_h), 2);
     const begx = vpx - config.Tsize;
@@ -78,9 +77,13 @@ pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
         while (y < endy) {
             if (tilex >= 0 and tiley >= 0 and tilex <= std.math.pow(u32, 2, zoom) - 1 and tiley <= std.math.pow(u32, 2, zoom) - 1) {
                 try mepo.blit_tile_surface(
-                    @intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy,
+                    @intCast(u32, tilex),
+                    @intCast(u32, tiley),
+                    zoom,
+                    vpx,
+                    vpy,
                     bbox,
-                 );
+                );
                 try mepo.blit_tile_text(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
             } else {
                 utildbg.log("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
@@ -370,10 +373,10 @@ pub fn blit(mepo: *@This()) !void {
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
     try mepo.blit_tiles_all(
         .{
-             .x = 0,
-             .y = 0,
-             .w = @intCast(c_int, mepo.win_w),
-             .h = @intCast(c_int, mepo.win_h),
+            .x = 0,
+            .y = 0,
+            .w = @intCast(c_int, mepo.win_w),
+            .h = @intCast(c_int, mepo.win_h),
         },
         mepo.zoom,
     );

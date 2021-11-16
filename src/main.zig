@@ -35,7 +35,6 @@ pub fn main() !void {
     switch (mode) {
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            var tile_download_thread = sdl.SDL_CreateThread(TileCache.download_loop_sdl_threadable, "Tile_Download_Thread", &tile_cache);
             var mepo = try Mepo.init(allocator, &tile_cache, cfg);
             mepo.sdl_event_loop() catch Mepo.graceful_terminate();
         },
