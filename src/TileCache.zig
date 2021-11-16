@@ -384,7 +384,7 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     if (!enable and tile_cache.download_thread != null) {
         const orphan_thread = tile_cache.download_thread.?;
         tile_cache.download_thread = null;
-        sdl.SDL_DetachThread(orphan_thread);
+        sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.download_thread == null) {
         tile_cache.download_thread = sdl.SDL_CreateThread(
             download_loop_sdl_threadable,

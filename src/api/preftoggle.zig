@@ -19,6 +19,6 @@ pub fn f_preftoggle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     }
 
     if (std.mem.eql(u8, "tile_cache_network", name)) {
-        mepo.tile_cache.set_network(mepo.tile_cache.download_thread == null);
+        mepo.tile_cache.set_network(!(mepo.tile_cache.download_thread != null));
     }
 }
