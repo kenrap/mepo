@@ -385,6 +385,10 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     }
 }
 
+pub fn terminate_inprogress_transfers(tile_cache: *@This()) void {
+    // TODO
+}
+
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
     tile_cache.download_loop(true);
@@ -397,7 +401,7 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
         tile_cache.download_thread = null;
         const lock = tile_cache.mutex.acquire();
         tile_cache.queue_lifo.clearAndFree();
-        // TODO: clear in-progress transfers here
+        tile_cache.terminate_inprogress_transfers();
         lock.release();
         sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.download_thread == null) {
@@ -423,7 +427,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
-    // TODO: clear in-progress transfers here
+    tile_cache.terminate_inprogress_transfers();
 
     // Set new URL
     if (tile_cache.source_url) |present_source_url| {
