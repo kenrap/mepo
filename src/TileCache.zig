@@ -49,6 +49,9 @@ source_url: ?[:0]const u8,
 texture_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture),
 transfer_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum),
 
+/// Retreives a tile from cache
+/// If tile is not present & will queue tile to be downloaded if downloading
+/// thread is present
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
@@ -82,6 +85,9 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     }
 }
 
+/// Queues tile without loading to surface/memory
+/// Will queue tiles indiscriminate of whether downloading thread is
+/// present.
 fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
     const lock = tile_cache.mutex.acquire();
     defer lock.release();
