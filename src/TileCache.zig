@@ -26,11 +26,13 @@ const TileDataTag = enum {
     transfer_datum,
     texture,
     queued_position,
+    error_type,
 };
 pub const TileData = union(TileDataTag) {
     transfer_datum: TransferDatum,
     texture: *sdl.SDL_Texture,
     queued_position: u32,
+    error_type: enum { Offline },
 };
 
 allocator: *std.mem.Allocator,
@@ -70,11 +72,14 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
         }
     }
 
-    try tile_cache.queue_lifo.put(coords, true);
-
-    return TileData{
-        .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0),
-    };
+    if (tile_cache.download_thread == null) {
+        return TileData{ .error_type = .Offline };
+    } else {
+        try tile_cache.queue_lifo.put(coords, true);
+        return TileData{
+            .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0),
+        };
+    }
 }
 
 fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {

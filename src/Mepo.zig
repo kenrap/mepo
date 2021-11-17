@@ -165,6 +165,20 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .transfer_datum => {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
         },
+        .error_type => |error_type| {
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, rect_intersect, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
+            try mepo.blit_multiline_text(
+                0x000000,
+                null,
+                .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
+                @intCast(i32, tile_x * config.Tsize) - x_off,
+                @intCast(i32, tile_y * config.Tsize) - y_off,
+                20,
+                "Offline",
+                .{},
+            );
+        },
     }
 }
 
@@ -323,9 +337,8 @@ fn blit_download_bar(mepo: *@This()) !void {
             online_offline,
             mepo.tile_cache.queue_lifo.count(),
             mepo.tile_cache.n_current_transfers,
-            mepo.tile_cache.texture_map.count()
+            mepo.tile_cache.texture_map.count(),
         },
-
     );
 }
 
