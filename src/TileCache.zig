@@ -425,9 +425,14 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 /// Caller passed ptr url may be safely freed
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Cache
+    const lock = tile_cache.mutex.acquire();
+    for (tile_cache.texture_map.values()) |texture| {
+        sdl.SDL_DestroyTexture(texture);
+    }
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
     tile_cache.terminate_inprogress_transfers();
+    defer lock.release();
 
     // Set new URL
     if (tile_cache.source_url) |present_source_url| {
