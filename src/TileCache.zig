@@ -42,7 +42,6 @@ cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
 max_n_transfers: usize = 20,
 mutex: std.Thread.Mutex,
-n_current_transfers: u32,
 queue_lifo: datastructure.Lifo(types.XYZ, bool),
 renderer: ?*sdl.SDL_Renderer,
 source_url: ?[:0]const u8,
@@ -274,9 +273,6 @@ fn transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
     try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
     curl.curl_easy_cleanup(client);
 
-    if (tile_cache.n_current_transfers > 0) {
-        tile_cache.n_current_transfers -= 1;
-    }
     utilsdl.sdl_push_resize_event();
 }
 
@@ -351,12 +347,11 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
-        while (tile_cache.queue_lifo.count() > 0 and tile_cache.n_current_transfers < tile_cache.max_n_transfers) {
+        while (tile_cache.queue_lifo.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
             if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
-            tile_cache.n_current_transfers += 1;
             lock.release();
         }
 
@@ -469,7 +464,6 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .curl_multi = curl.curl_multi_init().?,
             .download_thread = null,
             .mutex = std.Thread.Mutex{},
-            .n_current_transfers = 0,
             .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
             .renderer = null,
             .source_url = null,

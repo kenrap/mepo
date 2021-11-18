@@ -336,7 +336,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         .{
             online_offline,
             mepo.tile_cache.queue_lifo.count(),
-            mepo.tile_cache.n_current_transfers,
+            mepo.tile_cache.transfer_map.count(),
             mepo.tile_cache.texture_map.count(),
         },
     );
