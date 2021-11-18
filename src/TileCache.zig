@@ -201,10 +201,10 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
     }
 }
 
-fn curl_msg_to_coords(tile_cache: *@This(), msg: *curl.CURLMsg) ?types.XYZ {
+fn curl_client_to_coords(tile_cache: *@This(), client: ?*curl.CURL) ?types.XYZ {
     var it = tile_cache.transfer_map.iterator();
     while (it.next()) |kv| {
-        if (kv.value_ptr.*.client == msg.*.easy_handle) {
+        if (kv.value_ptr.*.client == client) {
             return kv.value_ptr.*.coords;
         }
     }
@@ -231,7 +231,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
             utildbg.log("Curl timed out for msg: {}\n", .{msg});
         },
         .CURLE_OK => {
-            if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+            if (tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
                 const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
@@ -260,18 +260,19 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
 // SDL resize (refresh event). By effect, if tile is loaded in texture
 // map rendering thread fetches and updates it; if CURLE_OK wasn't
 // there - the item will get repushed back into queue
-fn transfer_cleanup(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
-    if (tile_cache.curl_msg_to_coords(msg)) |coords| {
+fn transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
+    if (tile_cache.curl_client_to_coords(client)) |coords| {
         const transfer_datum = tile_cache.transfer_map.get(coords).?;
         const datum_array = transfer_datum.data_arraylist.items;
         tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
+    } else {
+        return;
     }
 
-    try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, msg.*.easy_handle));
-
-    curl.curl_easy_cleanup(msg.*.easy_handle);
+    try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
+    curl.curl_easy_cleanup(client);
 
     if (tile_cache.n_current_transfers > 0) {
         tile_cache.n_current_transfers -= 1;
@@ -328,16 +329,16 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
         (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)))
     {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
-        var msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
-        while (msg != null) {
-            switch (msg.*.msg) {
+        var msg: ?*curl.CURLMsg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
+        while (msg != null and tile_cache.download_thread != null) {
+            switch (msg.?.*.msg) {
                 ._DONE => {
                     if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     const lock = tile_cache.mutex.acquire();
-                    tile_cache.transfer_complete(msg) catch |err| {
+                    tile_cache.transfer_complete(msg.?) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
-                    tile_cache.transfer_cleanup(msg) catch |err| {
+                    tile_cache.transfer_cleanup(msg.?.easy_handle) catch |err| {
                         utildbg.log("Failed to successfully cleanup transfer: {}!\n", .{err});
                     };
                     lock.release();
