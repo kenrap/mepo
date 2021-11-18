@@ -384,11 +384,19 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             utildbg.log("Curl multi wait fail: {}\n", .{e});
         };
     }
+
+    if (tile_cache.download_thread == null) {
+        for (tile_cache.transfer_map.keys()) |transfer_key| {
+            if (tile_cache.transfer_map.get(transfer_key)) |transfer| {
+                tile_cache.transfer_cleanup(transfer.client) catch |err| {
+                    utildbg.log("Failed to cleanup inprogress transfer on thread terminate: {}", .{err});
+                };
+            }
+        }
+    }
 }
 
-pub fn terminate_inprogress_transfers(tile_cache: *@This()) void {
-    // TODO
-}
+pub fn terminate_inprogress_transfers(tile_cache: *@This()) !void {}
 
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
@@ -400,10 +408,10 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     if (!enable and tile_cache.download_thread != null) {
         const orphan_thread = tile_cache.download_thread.?;
         tile_cache.download_thread = null;
-        const lock = tile_cache.mutex.acquire();
         tile_cache.queue_lifo.clearAndFree();
-        tile_cache.terminate_inprogress_transfers();
-        lock.release();
+        tile_cache.terminate_inprogress_transfers() catch |err| {
+            std.debug.warn("Failed to terminate inprogress transfers: {}\n", .{err});
+        };
         sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.download_thread == null) {
         tile_cache.download_thread = sdl.SDL_CreateThread(
@@ -432,7 +440,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     }
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
-    tile_cache.terminate_inprogress_transfers();
+    try tile_cache.terminate_inprogress_transfers();
     defer lock.release();
 
     // Set new URL
