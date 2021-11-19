@@ -1,6 +1,6 @@
 # Mepo: **User Guide**
 
-## Downloading & offline usage
+## Downloading tiles & offline usage
 
 It's a common usecase to need to download an entire block / bounding box
 of tiles while online before going offline. For example, say if you want
@@ -29,6 +29,24 @@ Run this script as:
 ```sh
 mepo_dl.sh
 ```
+
+See below section for information about offline usage.
+
+## Offline usage
+
+If you have already used mepo to download tiles, either interactively or
+through the `mepo_dl.sh` script as described above; you may use mepo entirely
+offline by setting the preference `tile_cache_network` to `0`.
+
+```sh
+echo "prefset tile_cache_network 0;" | mepo -i
+```
+
+You'll see this noted noted in the download bar as `Offline`.
+
+This mode is helpful if you have bandwidth limitations (e.g. for your dataplan
+or similar) and want to make sure mepo does not make **any** network requests.
+
 
 ## Using a custom configuration
 
