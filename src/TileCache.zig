@@ -312,6 +312,12 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ
     );
 }
 
+fn should_continue_download_loop(tile_cache: *@This(), graphical_mode: bool) bool {
+    const graphical_and_online = (graphical_mode and tile_cache.download_thread != null);
+    const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0));
+    return graphical_and_online or nongraphical_and_pending;
+}
+
 /// Downloads tiles continuously
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
@@ -320,44 +326,41 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while ((graphical_mode and tile_cache.download_thread != null) or
-        (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)))
-    {
-        try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
-        var msg: ?*curl.CURLMsg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
-        while (msg != null and (!graphical_mode or (tile_cache.download_thread != null and graphical_mode))) {
-            switch (msg.?.*.msg) {
-                ._DONE => {
-                    if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+    while (tile_cache.should_continue_download_loop(graphical_mode)) {
+        // 1. Use curl multi interface to loop through completed transfers
+        //    transfers out to textures & cleans up
+        curl_processing_loop: while (tile_cache.should_continue_download_loop(graphical_mode)) {
+            try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
+            if (curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs)) |msg| {
+                if (msg.?.*.msg == ._DONE) {
+                    //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     const lock = tile_cache.mutex.acquire();
-                    tile_cache.transfer_complete(msg.?) catch |err| {
+                    tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
-                    tile_cache.transfer_cleanup(msg.?.easy_handle) catch |err| {
+                    tile_cache.transfer_cleanup(msg.*.easy_handle) catch |err| {
                         utildbg.log("Failed to successfully cleanup transfer: {}!\n", .{err});
                     };
                     lock.release();
-                },
-                else => {
-                    // Will timeout and trigger ._DONE in anycase
-                },
-            }
-            try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
-            msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
+                }
+            } else break :curl_processing_loop;
         }
 
+        // 2. Transfer from LIFO into transfers
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
-            if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
+            //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             try tile_cache.add_to_curl_multi(coords.key, coords.value);
             lock.release();
         }
 
+        // 3. Print status message if non graphical
         if (!graphical_mode) tile_cache.download_mode_progress_indicator(initial_queue_size);
 
+        // 4. Idle and poll on curl multi
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
-            utildbg.log("Curl multi wait fail: {}\n", .{e});
+            utildbg.log("Curl multi poll fail: {}\n", .{e});
         };
     }
 
