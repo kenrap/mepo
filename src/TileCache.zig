@@ -380,12 +380,10 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     }
 
     if (tile_cache.download_thread == null) {
-        for (tile_cache.transfer_map.keys()) |transfer_key| {
-            if (tile_cache.transfer_map.get(transfer_key)) |transfer| {
-                tile_cache.transfer_cleanup(transfer.client) catch |err| {
-                    utildbg.log("Failed to cleanup inprogress transfer on thread terminate: {}", .{err});
-                };
-            }
+        while (tile_cache.transfer_map.count() > 0) {
+            tile_cache.transfer_cleanup(tile_cache.transfer_map.values()[0].client) catch |e| {
+                utildbg.log("Failed to cleanup in-progress transfer on download thread termination: {}\n", .{e});
+            };
         }
     }
 }
