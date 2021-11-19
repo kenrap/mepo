@@ -325,7 +325,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     {
         curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
         var msg: ?*curl.CURLMsg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
-        while (msg != null and tile_cache.download_thread != null) {
+        while (msg != null and (!graphical_mode or (tile_cache.download_thread != null and graphical_mode))) {
             switch (msg.?.*.msg) {
                 ._DONE => {
                     if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
@@ -354,38 +354,38 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             lock.release();
         }
 
-        // Progress indicator for non graphical mode
-        if (!graphical_mode) {
-            std.debug.warn("\x1b[1;1H\x1b[2J", .{});
-            std.debug.warn(
-                \\Mepo - download mode
-                \\====================
-                \\Progress: {d:.2}% ({}/{} tiles downloaded)
-                \\Bandwidth used: {} megabytes
-                \\
-            ,
-                .{
-                    100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo.count()) /
-                        @intToFloat(f32, initial_queue_size)),
-                    initial_queue_size - tile_cache.queue_lifo.count(),
-                    initial_queue_size,
-                    tile_cache.byte_counter / 1024 / 1024,
-                },
-            );
-        }
+        if (!graphical_mode) tile_cache.download_mode_progress_indicator(initial_queue_size);
 
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
             utildbg.log("Curl multi wait fail: {}\n", .{e});
         };
     }
 
-    if (tile_cache.download_thread == null) {
-        while (tile_cache.transfer_map.count() > 0) {
-            tile_cache.transfer_cleanup(tile_cache.transfer_map.values()[0].client) catch |e| {
-                utildbg.log("Failed to cleanup in-progress transfer on download thread termination: {}\n", .{e});
-            };
-        }
+    // Purge out in-progress transfers on thread termination
+    while (tile_cache.transfer_map.count() > 0) {
+        tile_cache.transfer_cleanup(tile_cache.transfer_map.values()[0].client) catch |e| {
+            utildbg.log("Failed to cleanup in-progress transfer on download thread termination: {}\n", .{e});
+        };
     }
+}
+
+pub fn download_mode_progress_indicator(tile_cache: *@This(), initial_queue_size: usize) void {
+    std.debug.warn("\x1b[1;1H\x1b[2J", .{});
+    std.debug.warn(
+        \\Mepo - download mode
+        \\====================
+        \\Progress: {d:.2}% ({}/{} tiles downloaded)
+        \\Bandwidth used: {} megabytes
+        \\
+    ,
+        .{
+            100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo.count()) /
+                @intToFloat(f32, initial_queue_size)),
+            initial_queue_size - tile_cache.queue_lifo.count(),
+            initial_queue_size,
+            tile_cache.byte_counter / 1024 / 1024,
+        },
+    );
 }
 
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
