@@ -56,7 +56,7 @@ pub const DefaultBaseConfig =
     \\ prefset debug_stderr 1;
     \\ prefset debug_tiles 0;
     \\ prefset debug_vars 1;
-    \\ prefset download_bar 0;
+    \\ prefset download_bar 1;
     \\ prefset zoom 14;
     \\ prefset tile_cache_network 1;
     \\ prefset tile_cache_max_n_transfers 20;
