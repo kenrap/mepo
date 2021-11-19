@@ -420,23 +420,23 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 ///
 /// Caller passed ptr url may be safely freed
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
-    // Empty Cache
-    const lock = tile_cache.mutex.acquire();
-    for (tile_cache.texture_map.values()) |texture| {
-        sdl.SDL_DestroyTexture(texture);
+    if (tile_cache.download_thread != null) {
+        // Set's network off (cancels inprogress transfers, resumes on switch)
+        tile_cache.set_network(false);
+        defer tile_cache.set_network(true);
     }
+    defer utilsdl.sdl_push_resize_event();
+
+    // Empty Texture map & queue
+    for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
-    defer lock.release();
 
     // Set new URL
     if (tile_cache.source_url) |present_source_url| {
         tile_cache.allocator.free(present_source_url);
     }
     tile_cache.source_url = try tile_cache.allocator.dupeZ(u8, url);
-
-    // Resize
-    utilsdl.sdl_push_resize_event();
 }
 
 pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
