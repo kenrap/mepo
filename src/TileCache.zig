@@ -268,12 +268,11 @@ fn transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
         tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
+
+        try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
+        curl.curl_easy_cleanup(client);
+        utilsdl.sdl_push_resize_event();
     }
-
-    try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
-    curl.curl_easy_cleanup(client);
-
-    utilsdl.sdl_push_resize_event();
 }
 
 fn tile_xferinfo_curl_callback(
