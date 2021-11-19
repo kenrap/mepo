@@ -146,6 +146,8 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: 
 }
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.XYZ, load_to_texture: bool) !void {
+    if (tile_cache.transfer_map.get(coords)) |_| return;
+
     var transfer_datum: *TransferDatum = datum: {
         var dat = try tile_cache.allocator.create(TransferDatum);
         dat.client = curl.curl_easy_init().?;
@@ -266,8 +268,6 @@ fn transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
         tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
-    } else {
-        return;
     }
 
     try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
