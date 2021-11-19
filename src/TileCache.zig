@@ -315,7 +315,7 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ
 /// Downloads tiles continuously
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
-pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
+pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
     const initial_queue_size = tile_cache.queue_lifo.count();
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
@@ -323,7 +323,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     while ((graphical_mode and tile_cache.download_thread != null) or
         (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0)))
     {
-        curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
+        try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
         var msg: ?*curl.CURLMsg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         while (msg != null and (!graphical_mode or (tile_cache.download_thread != null and graphical_mode))) {
             switch (msg.?.*.msg) {
@@ -342,7 +342,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
                     // Will timeout and trigger ._DONE in anycase
                 },
             }
-            curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running)) catch unreachable;
+            try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
             msg = curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs);
         }
 
@@ -350,7 +350,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
             if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
-            tile_cache.add_to_curl_multi(coords.key, coords.value) catch unreachable;
+            try tile_cache.add_to_curl_multi(coords.key, coords.value);
             lock.release();
         }
 
@@ -390,7 +390,9 @@ pub fn download_mode_progress_indicator(tile_cache: *@This(), initial_queue_size
 
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
-    tile_cache.download_loop(true);
+    tile_cache.download_loop(true) catch |e| {
+        utildbg.log("Error running download loop: {}\n", .{e});
+    };
     return 0;
 }
 
