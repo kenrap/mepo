@@ -391,8 +391,6 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) void {
     }
 }
 
-pub fn terminate_inprogress_transfers(tile_cache: *@This()) !void {}
-
 pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
     tile_cache.download_loop(true);
@@ -404,9 +402,6 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
         const orphan_thread = tile_cache.download_thread.?;
         tile_cache.download_thread = null;
         tile_cache.queue_lifo.clearAndFree();
-        tile_cache.terminate_inprogress_transfers() catch |err| {
-            std.debug.warn("Failed to terminate inprogress transfers: {}\n", .{err});
-        };
         sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.download_thread == null) {
         tile_cache.download_thread = sdl.SDL_CreateThread(
@@ -435,7 +430,6 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     }
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo.clearAndFree();
-    try tile_cache.terminate_inprogress_transfers();
     defer lock.release();
 
     // Set new URL
