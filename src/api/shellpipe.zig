@@ -34,6 +34,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
 
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
+        try mepo.update_debug_message(null);
     } else {
         utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
         try mepo.update_debug_message(process_result.stderr);

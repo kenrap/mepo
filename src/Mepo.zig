@@ -680,11 +680,13 @@ pub fn blit_multiline_text(
     }
 }
 
-pub fn update_debug_message(mepo: *@This(), new_msg: []const u8) !void {
-    if (mepo.debug_message) |dbg_msg| {
-        mepo.allocator.free(dbg_msg);
+pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
+    if (mepo.debug_message) |dbg_msg| mepo.allocator.free(dbg_msg);
+    if (new_msg_opt) |new_msg| {
+        mepo.debug_message = try mepo.allocator.dupe(u8, new_msg);
+    } else {
+        mepo.debug_message = null;
     }
-    mepo.debug_message = try mepo.allocator.dupe(u8, new_msg);
     utilsdl.sdl_push_resize_event();
 }
 
