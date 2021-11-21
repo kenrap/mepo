@@ -13,6 +13,16 @@ ZOOM_MAX="$(
   mepo_helper_menu.sh "Download Zoom Max:"
 )"
 
+if ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); then
+  echo "Invalid minimum zoom level" >&2
+  exit 1
+fi
+
+if ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]); then
+  echo "Invalid maximum zoom level" >&2
+  exit 1
+fi
+
 echo "
   download_bbox
     $MEPO_BR_LAT
