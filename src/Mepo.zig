@@ -218,9 +218,9 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
         try mepo.blit_multiline_text(
             0xff0000,
-            null,
+            types.Color{ .value = 0xffffff, .opacity = 200 },
             .{ .align_x = .Right },
-            @intCast(i32, mepo.win_w - 5),
+            0,
             5,
             null,
             "DEBUG: {s}",
