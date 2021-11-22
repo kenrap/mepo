@@ -245,6 +245,7 @@ fn transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
                     // Load to surface
                     _ = try tile_cache.load_data_to_texture(coords, datum_array);
+                    utilsdl.sdl_push_resize_event();
                 }
             } else {
                 utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});
@@ -271,7 +272,6 @@ fn transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
 
         try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
         curl.curl_easy_cleanup(client);
-        utilsdl.sdl_push_resize_event();
     }
 }
 
