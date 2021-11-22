@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn Lifo(comptime key_type: type, comptime metadata_type: type) type {
+pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type {
     return struct {
         array_hash_map: std.array_hash_map.AutoArrayHashMap(comptime key_type, comptime metadata_type),
         mutex: std.Thread.Mutex,

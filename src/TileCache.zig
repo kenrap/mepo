@@ -53,11 +53,11 @@ cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
 max_n_transfers: usize = 20,
 mutex: std.Thread.Mutex,
-queue_lifo: datastructure.Lifo(types.XYZ, bool),
+queue_lifo: datastructure.QueueHashMap(types.XYZ, bool),
 renderer: ?*sdl.SDL_Renderer,
 source_url: ?[:0]const u8,
-texture_map: datastructure.Lifo(types.XYZ, *sdl.SDL_Texture),
-transfer_map: datastructure.Lifo(types.XYZ, *TransferDatum),
+texture_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture),
+transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 
 /// Retreives a tile from cache
 /// If tile is not present & will queue tile to be downloaded if downloading
@@ -486,11 +486,11 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .curl_multi = curl.curl_multi_init().?,
             .thread_download = null,
             .mutex = std.Thread.Mutex{},
-            .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
+            .queue_lifo = datastructure.QueueHashMap(types.XYZ, bool).init(allocator),
             .renderer = null,
             .source_url = null,
-            .texture_map = datastructure.Lifo(types.XYZ, *sdl.SDL_Texture).init(allocator),
-            .transfer_map = datastructure.Lifo(types.XYZ, *TransferDatum).init(allocator),
+            .texture_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
+            .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
     } else {
         return error.MultiInitFail;
