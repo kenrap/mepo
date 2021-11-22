@@ -17,5 +17,12 @@ pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !voi
 }
 
 fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
-    _ = try mepo.tile_cache.tile_queue_no_surface_load_bbox(a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
+    _ = try mepo.tile_cache.tile_queue_no_surface_load_bbox(.{
+        .a_lat = a_lat,
+        .a_lon = a_lon,
+        .b_lat = b_lat,
+        .b_lon = b_lon,
+        .zoom_min = zoom_min,
+        .zoom_max = zoom_max,
+    });
 }

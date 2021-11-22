@@ -2,15 +2,6 @@ const std = @import("std");
 const utilconversion = @import("util/utilconversion.zig");
 const TileCache = @import("./TileCache.zig");
 
-const DownloadRequest = struct {
-    a_lat: f64,
-    a_lon: f64,
-    b_lat: f64,
-    b_lon: f64,
-    zoom_min: i32,
-    zoom_max: i32,
-};
-
 pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !void {
     std.debug.warn("Downloading based on BBox request: {s}\n", .{download_request_str});
 
@@ -20,14 +11,7 @@ pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !
     const delay_seconds = 3;
     const average_tile_size_bytes = 1024 * 20;
     const dl_req = try parse_download_request(download_request_str);
-    const stats = try tile_cache.tile_queue_no_surface_load_bbox(
-        dl_req.a_lat,
-        dl_req.a_lon,
-        dl_req.b_lat,
-        dl_req.b_lon,
-        dl_req.zoom_min,
-        dl_req.zoom_max,
-    );
+    const stats = try tile_cache.tile_queue_no_surface_load_bbox(dl_req);
     const dist_w = utilconversion.distance_km_haversine(
         dl_req.a_lat,
         dl_req.a_lon,
@@ -64,7 +48,7 @@ pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !
     const result = tile_cache.download_loop(false);
 }
 
-fn parse_download_request(download_request_str: []const u8) !DownloadRequest {
+fn parse_download_request(download_request_str: []const u8) !TileCache.DownloadBBoxRequest {
     var a_lat: f64 = undefined;
     var a_lon: f64 = undefined;
     var b_lat: f64 = undefined;
@@ -88,7 +72,7 @@ fn parse_download_request(download_request_str: []const u8) !DownloadRequest {
     }
     if (i < 6) return error.DownloadBboxTooFewArguments;
 
-    return DownloadRequest{
+    return TileCache.DownloadBBoxRequest{
         .a_lat = a_lat,
         .a_lon = a_lon,
         .b_lat = b_lat,

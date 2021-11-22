@@ -14,6 +14,15 @@ const utilfile = @import("./util/utilfile.zig");
 const utildbg = @import("./util/utildbg.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
+pub const DownloadBBoxRequest = struct {
+    a_lat: f64,
+    a_lon: f64,
+    b_lat: f64,
+    b_lon: f64,
+    zoom_min: i32,
+    zoom_max: i32,
+};
+
 pub const TransferDatum = struct {
     client: *curl.CURL,
     coords: types.XYZ,
@@ -104,23 +113,23 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
 
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
-pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !QueuedInfo {
-    const lat_min = if (a_lat < b_lat) a_lat else b_lat;
-    const lat_max = if (a_lat > b_lat) a_lat else b_lat;
-    const lon_min = if (a_lon < b_lon) a_lon else b_lon;
-    const lon_max = if (a_lon > b_lon) a_lon else b_lon;
+pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !QueuedInfo {
+    const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
+    const lat_max = if (dl_req.a_lat > dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
+    const lon_min = if (dl_req.a_lon < dl_req.b_lon) dl_req.a_lon else dl_req.b_lon;
+    const lon_max = if (dl_req.a_lon > dl_req.b_lon) dl_req.a_lon else dl_req.b_lon;
 
-    if (zoom_min > zoom_max or
-        zoom_max < 0 or
-        zoom_max > 19 or
-        zoom_min < 0 or
-        zoom_min > 19) return error.InvalidZoomRange;
+    if (dl_req.zoom_min > dl_req.zoom_max or
+        dl_req.zoom_max < 0 or
+        dl_req.zoom_max > 19 or
+        dl_req.zoom_min < 0 or
+        dl_req.zoom_min > 19) return error.InvalidZoomRange;
 
     var n_cached: usize = 0;
     var n_queued: usize = 0;
 
-    var z: u32 = @intCast(u32, zoom_min);
-    while (z <= zoom_max) : (z += 1) {
+    var z: u32 = @intCast(u32, dl_req.zoom_min);
+    while (z <= dl_req.zoom_max) : (z += 1) {
         const x_min = @divFloor(utilconversion.lon_to_px_x(lon_min, z), config.Tsize);
         const x_max = @divFloor(utilconversion.lon_to_px_x(lon_max, z), config.Tsize);
         const y_min = @divFloor(utilconversion.lat_to_px_y(lat_max, z), config.Tsize);
