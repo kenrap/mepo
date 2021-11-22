@@ -56,16 +56,13 @@ mutex: std.Thread.Mutex,
 queue_lifo: datastructure.Lifo(types.XYZ, bool),
 renderer: ?*sdl.SDL_Renderer,
 source_url: ?[:0]const u8,
-texture_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture),
-transfer_map: std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum),
+texture_map: datastructure.Lifo(types.XYZ, *sdl.SDL_Texture),
+transfer_map: datastructure.Lifo(types.XYZ, *TransferDatum),
 
 /// Retreives a tile from cache
 /// If tile is not present & will queue tile to be downloaded if downloading
 /// thread is present
 pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
-    const lock = tile_cache.mutex.acquire();
-    defer lock.release();
-
     var file_cached_png_opt: ?[]u8 = null;
 
     if (tile_cache.texture_map.get(coords)) |tile| {
@@ -99,9 +96,6 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
 /// Will queue tiles indiscriminate of whether downloading thread is
 /// present.
 fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
-    const lock = tile_cache.mutex.acquire();
-    defer lock.release();
-
     if (tile_cache.cache_dir) |cache_dir| check_exists: {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
@@ -370,14 +364,12 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
             if (curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs)) |msg| {
                 if (msg.?.*.msg == ._DONE) {
                     //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
-                    const lock = tile_cache.mutex.acquire();
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
                     tile_cache.transfer_cleanup(msg.*.easy_handle) catch |err| {
                         utildbg.log("Failed to successfully cleanup transfer: {}!\n", .{err});
                     };
-                    lock.release();
                 }
             } else break :curl_processing_loop;
         }
@@ -385,10 +377,8 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
         // 2. Transfer from LIFO into transfers
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
             //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
-            const lock = tile_cache.mutex.acquire();
             var coords = tile_cache.queue_lifo.pop();
             try tile_cache.add_to_curl_multi(coords.key, coords.value);
-            lock.release();
         }
 
         // 3. Print status message if non graphical
@@ -499,8 +489,8 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
             .renderer = null,
             .source_url = null,
-            .texture_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
-            .transfer_map = std.array_hash_map.AutoArrayHashMap(types.XYZ, *TransferDatum).init(allocator),
+            .texture_map = datastructure.Lifo(types.XYZ, *sdl.SDL_Texture).init(allocator),
+            .transfer_map = datastructure.Lifo(types.XYZ, *TransferDatum).init(allocator),
         });
     } else {
         return error.MultiInitFail;
