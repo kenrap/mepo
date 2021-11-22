@@ -45,7 +45,9 @@ pub const TileData = union(TileDataTag) {
 };
 
 allocator: *std.mem.Allocator,
-thread_download: ?*sdl.SDL_Thread,
+thread_download: ?*sdl.SDL_Thread = null,
+thread_queuebbox: ?*sdl.SDL_Thread = null,
+bbox_queue: ?DownloadBBoxRequest = null,
 byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
@@ -114,6 +116,7 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
 pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !QueuedInfo {
+    std.debug.warn("actually running bbox fn!!!\n", .{});
     const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lat_max = if (dl_req.a_lat > dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lon_min = if (dl_req.a_lon < dl_req.b_lon) dl_req.a_lon else dl_req.b_lon;
@@ -152,6 +155,30 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
         .n_cached = n_cached,
         .n_queued = n_queued,
     };
+}
+
+pub fn tile_queue_no_surface_load_bbox_threadable(userdata: ?*c_void) callconv(.C) c_int {
+    var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    std.debug.warn("Launching!!!\n", .{});
+
+    if (tile_cache.tile_queue_no_surface_load_bbox(tile_cache.bbox_queue.?)) |q| {
+        utildbg.log("Done: {}\n", .{q});
+    } else |err| {
+        utildbg.log("Error running bbox loop: {}\n", .{err});
+    }
+
+    std.debug.warn("done wit q!!!\n", .{});
+    return 0;
+}
+
+pub fn tile_queue_no_surface_load_bbox_threadlaunch(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
+    tile_cache.bbox_queue = dl_req;
+    std.debug.warn("crat thread!!!\n", .{});
+    tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
+        tile_queue_no_surface_load_bbox_threadable,
+        "Queueing_Thread",
+        tile_cache,
+    );
 }
 
 fn add_to_curl_multi(tile_cache: *@This(), coords: types.XYZ, load_to_texture: bool) !void {
