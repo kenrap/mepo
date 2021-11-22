@@ -324,7 +324,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         "Dl: {d:.2}Mb ",
         .{@intToFloat(f32, mepo.tile_cache.byte_counter) / 1024 / 1024},
     );
-    const online_offline = if (mepo.tile_cache.download_thread == null) "Offline" else "Online ";
+    const online_offline = if (mepo.tile_cache.thread_download == null) "Offline" else "Online ";
     try mepo.blit_multiline_text(
         0x000000,
         null,

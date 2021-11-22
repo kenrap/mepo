@@ -45,7 +45,7 @@ pub const TileData = union(TileDataTag) {
 };
 
 allocator: *std.mem.Allocator,
-download_thread: ?*sdl.SDL_Thread,
+thread_download: ?*sdl.SDL_Thread,
 byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
@@ -83,7 +83,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
         }
     }
 
-    if (tile_cache.download_thread == null) {
+    if (tile_cache.thread_download == null) {
         return TileData{ .error_type = .Offline };
     } else {
         try tile_cache.queue_lifo.put(coords, true);
@@ -322,7 +322,7 @@ fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ
 }
 
 fn should_continue_download_loop(tile_cache: *@This(), graphical_mode: bool) bool {
-    const graphical_and_online = (graphical_mode and tile_cache.download_thread != null);
+    const graphical_and_online = (graphical_mode and tile_cache.thread_download != null);
     const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0));
     return graphical_and_online or nongraphical_and_pending;
 }
@@ -409,13 +409,13 @@ pub fn download_loop_sdl_threadable(userdata: ?*c_void) callconv(.C) c_int {
 }
 
 pub fn set_network(tile_cache: *@This(), enable: bool) void {
-    if (!enable and tile_cache.download_thread != null) {
-        const orphan_thread = tile_cache.download_thread.?;
-        tile_cache.download_thread = null;
+    if (!enable and tile_cache.thread_download != null) {
+        const orphan_thread = tile_cache.thread_download.?;
+        tile_cache.thread_download = null;
         tile_cache.queue_lifo.clearAndFree();
         sdl.SDL_WaitThread(orphan_thread, null);
-    } else if (enable and tile_cache.download_thread == null) {
-        tile_cache.download_thread = sdl.SDL_CreateThread(
+    } else if (enable and tile_cache.thread_download == null) {
+        tile_cache.thread_download = sdl.SDL_CreateThread(
             download_loop_sdl_threadable,
             "Tile_Download_Thread",
             tile_cache,
@@ -434,7 +434,7 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 ///
 /// Caller passed ptr url may be safely freed
 pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
-    if (tile_cache.download_thread != null) {
+    if (tile_cache.thread_download != null) {
         // Set's network off (cancels inprogress transfers, resumes on switch)
         tile_cache.set_network(false);
         defer tile_cache.set_network(true);
@@ -467,7 +467,7 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .allocator = allocator,
             .cache_dir = null,
             .curl_multi = curl.curl_multi_init().?,
-            .download_thread = null,
+            .thread_download = null,
             .mutex = std.Thread.Mutex{},
             .queue_lifo = datastructure.Lifo(types.XYZ, bool).init(allocator),
             .renderer = null,
