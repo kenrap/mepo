@@ -31,7 +31,8 @@ pub const DefaultBaseConfig =
     \\ bind_key _ z [shellpipe mepo_script_zoomlevelset.sh];
     \\ bind_key _ b [shellpipe mepo_script_bbox_search.sh];
     \\ bind_key _ s [shellpipe mepo_script_relationloader.sh];
-    \\ bind_key _ q [shellpipe mepo_script_bbox_queuedownload.sh];
+    \\ bind_key _ q [shellpipe [mepo_script_bbox_queuedownload.sh interactive]];
+    \\ bind_key s q [shellpipe [mepo_script_bbox_queuedownload.sh noninteractive]];
     \\ bind_key _ u [shellpipe mepo_script_urlsourceset.sh];
     \\ bind_key _ a [shellpipe mepo_script_apilangexec.sh];
     \\ bind_key c f [shellpipe [mepo_script_panscreen.sh h 1]];

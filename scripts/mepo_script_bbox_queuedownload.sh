@@ -1,37 +1,58 @@
 #!/usr/bin/env sh
-
 BOUND_LOWER=1
 BOUND_UPPER=19
 
-ZOOM_MIN="$(
-  seq $BOUND_LOWER $BOUND_UPPER |
-  mepo_helper_menu.sh "Download Zoom Min:"
-)"
+noninteractive() {
+  ZOOM_MIN=$MEPO_ZOOM
+  ZOOM_MAX="$(echo -e "19\n$MEPO_ZOOM" | sort -rn | head -n1)"
 
-ZOOM_MAX="$(
-  seq $BOUND_LOWER $BOUND_UPPER |
-  mepo_helper_menu.sh "Download Zoom Max:"
-)"
+  echo "
+    download_bbox
+      $MEPO_BR_LAT
+      $MEPO_TL_LON
+      $MEPO_TL_LAT
+      $MEPO_BR_LON
+      $ZOOM_MIN
+      $ZOOM_MAX 
+    ;
 
-if ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); then
-  echo "Invalid minimum zoom level" >&2
-  exit 1
-fi
+    prefset download_bar 1;
+  "
+}
 
-if ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]); then
-  echo "Invalid maximum zoom level" >&2
-  exit 1
-fi
+interactive() {
+  ZOOM_MIN="$(
+    seq $BOUND_LOWER $BOUND_UPPER |
+    mepo_helper_menu.sh "Download Zoom Min:"
+  )"
 
-echo "
-  download_bbox
-    $MEPO_BR_LAT
-    $MEPO_TL_LON
-    $MEPO_TL_LAT
-    $MEPO_BR_LON
-    $ZOOM_MIN
-    $ZOOM_MAX 
-  ;
+  ZOOM_MAX="$(
+    seq $BOUND_LOWER $BOUND_UPPER |
+    mepo_helper_menu.sh "Download Zoom Max:"
+  )"
 
-  prefset download_bar 1;
-"
+  if ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); then
+    echo "Invalid minimum zoom level" >&2
+    exit 1
+  fi
+
+  if ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]); then
+    echo "Invalid maximum zoom level" >&2
+    exit 1
+  fi
+
+  echo "
+    download_bbox
+      $MEPO_BR_LAT
+      $MEPO_TL_LON
+      $MEPO_TL_LAT
+      $MEPO_BR_LON
+      $ZOOM_MIN
+      $ZOOM_MAX 
+    ;
+
+    prefset download_bar 1;
+  "
+}
+
+"$@"
