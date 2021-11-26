@@ -109,7 +109,7 @@ fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
 
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
-pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !QueuedInfo {
+pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
     const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lat_max = if (dl_req.a_lat > dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lon_min = if (dl_req.a_lon < dl_req.b_lon) dl_req.a_lon else dl_req.b_lon;
@@ -135,6 +135,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
             var y: i32 = y_min;
             while (y <= y_max) : (y += 1) {
                 utildbg.log("Tile cache queueing x={d} y={d} z={d}\n", .{ x, y, z });
+                if (cancellable and tile_cache.thread_queuebbox == null) return error.EarlyQueueBboxTermination;
                 if (try tile_cache.tile_queue_no_surface_load(.{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) })) {
                     n_queued += 1;
                 } else {
@@ -153,7 +154,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
 pub fn tile_queue_no_surface_load_bbox_threadable(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
 
-    if (tile_cache.tile_queue_no_surface_load_bbox(tile_cache.bbox_queue.?)) |q| {
+    if (tile_cache.tile_queue_no_surface_load_bbox(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
     } else |err| {
         utildbg.log("Error running bbox loop: {}\n", .{err});
@@ -164,6 +165,12 @@ pub fn tile_queue_no_surface_load_bbox_threadable(userdata: ?*c_void) callconv(.
 
 pub fn tile_queue_no_surface_load_bbox_threadlaunch(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
     tile_cache.bbox_queue = dl_req;
+    if (tile_cache.thread_queuebbox) |thread_queuebbox| {
+        const orphan_thread = thread_queuebbox;
+        tile_cache.thread_queuebbox = null;
+        sdl.SDL_WaitThread(orphan_thread, null);
+    }
+
     tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
         tile_queue_no_surface_load_bbox_threadable,
         "Queueing_Thread",
