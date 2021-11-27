@@ -356,6 +356,7 @@ fn should_continue_download_loop(tile_cache: *@This(), graphical_mode: bool) boo
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
 pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
     const initial_queue_size = tile_cache.queue_lifo.count();
+    var ui_last_update_ticks = sdl.SDL_GetTicks();
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
@@ -366,7 +367,6 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
             try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
             if (curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs)) |msg| {
                 if (msg.?.*.msg == ._DONE) {
-                    //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
                     tile_cache.transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
@@ -379,7 +379,6 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
 
         // 2. Transfer from LIFO into transfers
         while (tile_cache.queue_lifo.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
-            //if (graphical_mode and sdl.SDL_HasEvents(0, 99999999) == sdl.SDL_bool.SDL_TRUE) continue;
             var coords = tile_cache.queue_lifo.pop();
             try tile_cache.add_to_curl_multi(coords.key, coords.value);
         }
@@ -391,6 +390,12 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
             utildbg.log("Curl multi poll fail: {}\n", .{e});
         };
+
+        // 5. Refresh UI if greater then threshold
+        if (graphical_mode and sdl.SDL_GetTicks() > ui_last_update_ticks + 1000) {
+            ui_last_update_ticks = sdl.SDL_GetTicks();
+            utilsdl.sdl_push_resize_event();
+        }
     }
 
     // Purge out in-progress transfers on thread termination
