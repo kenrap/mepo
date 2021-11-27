@@ -6,6 +6,10 @@ const utildbg = @import("./utildbg.zig");
 const RectOpt = enum { Draw, Fill };
 
 pub fn sdl_push_resize_event() void {
+    const pending_drag = sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION));
+    const pending_redraw = sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_WINDOWEVENT));
+    if (pending_drag or pending_redraw) return;
+
     var sdlevent: sdl.SDL_Event = undefined;
     sdlevent.type = sdl.SDL_WINDOWEVENT;
     sdlevent.window.event = sdl.SDL_WINDOWEVENT_EXPOSED;
