@@ -12,13 +12,15 @@ pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !
     const average_tile_size_bytes = 1024 * 20;
     const dl_req = try parse_download_request(download_request_str);
     const stats = try tile_cache.tile_queue_no_surface_load_bbox(dl_req, false);
-    const dist_w = utilconversion.distance_km_haversine(
+    const dist_w = utilconversion.distance_haversine(
+        .Km,
         dl_req.a_lat,
         dl_req.a_lon,
         dl_req.a_lat,
         dl_req.b_lon,
     );
-    const dist_h = utilconversion.distance_km_haversine(
+    const dist_h = utilconversion.distance_haversine(
+        .Km,
         dl_req.a_lat,
         dl_req.a_lon,
         dl_req.b_lat,

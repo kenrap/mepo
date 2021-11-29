@@ -51,6 +51,7 @@ pub const DefaultBaseConfig =
     \\ bind_signal USR2 [zoom_relative -1];
     \\
     \\ center_on_coords 40.78392 -73.96442;
+    \\ prefset distance_unit_tf_km_mi 0;
     \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;
     \\ prefset debug_message_enabled 1;

@@ -15,6 +15,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },
         .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },
         .{ .prop = "crosshair_on", .ptr = &mepo.crosshair_on },
+        .{ .prop = "distance_unit_tf_km_mi", .ptr = &mepo.distance_unit_tf_km_mi },
     }) |stg| {
         if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = args[1].Number == 1;
     }

@@ -19,6 +19,7 @@ crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
 debug_tiles: bool = false,
+distance_unit_tf_km_mi: bool = false,
 debug_vars: bool = false,
 download_bar: bool = false,
 drag: bool = false,
@@ -185,6 +186,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
         const bbox = mepo.bounding_box();
+        const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
         try mepo.blit_multiline_text(
             0x000000,
             null,
@@ -192,25 +194,28 @@ fn blit_debug(mepo: *@This()) !void {
             5,
             5,
             null,
-            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nbbox: {d:.3}x{d:.3}km",
+            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nbbox: {d:.3}x{d:.3}{s}",
             .{
                 mepo.get_x(),
                 mepo.get_y(),
                 mepo.zoom,
                 mepo.lat,
                 mepo.lon,
-                utilconversion.distance_km_haversine(
+                utilconversion.distance_haversine(
+                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                     bbox.topleft_lat,
                     bbox.topleft_lon,
                     bbox.bottomright_lat,
                     bbox.topleft_lon,
                 ),
-                utilconversion.distance_km_haversine(
+                utilconversion.distance_haversine(
+                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                     bbox.topleft_lat,
                     bbox.topleft_lon,
                     bbox.topleft_lat,
                     bbox.bottomright_lon,
                 ),
+                d_unit,
             },
         );
     }
@@ -267,6 +272,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
     }, .Fill);
 
     if (mepo.pin_table.get(mepo.pin_active.?)) |pin| {
+        const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
         try mepo.blit_multiline_text(
             0x000000,
             null,
@@ -277,13 +283,20 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             \\Pin: {s}
             \\lat: {d:.5}
             \\lon: {d:.5}
-            \\dist: {d:.2}km away
+            \\dist: {d:.2}{s} away
         ,
             .{
                 pin.name,
                 pin.lat,
                 pin.lon,
-                utilconversion.distance_km_haversine(mepo.lat, mepo.lon, pin.lat, pin.lon),
+                utilconversion.distance_haversine(
+                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                    mepo.lat,
+                    mepo.lon,
+                    pin.lat,
+                    pin.lon,
+                ),
+                d_unit,
             },
         );
         try mepo.blit_multiline_text(

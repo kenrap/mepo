@@ -28,7 +28,7 @@ pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
     return 180.0 / std.math.pi * std.math.atan(0.5 * (std.math.exp(n) - std.math.exp(-n)));
 }
 
-pub fn distance_km_haversine(lat_a: f64, lon_a: f64, lat_b: f64, lon_b: f64) f64 {
+pub fn distance_haversine(distance_unit: enum { Km, Mi }, lat_a: f64, lon_a: f64, lat_b: f64, lon_b: f64) f64 {
     const phi_a = (90.0 - lat_a) * std.math.pi / 180.0;
     const phi_b = (90.0 - lat_b) * std.math.pi / 180.0;
     const theta_a = lon_a * std.math.pi / 180.0;
@@ -40,9 +40,10 @@ pub fn distance_km_haversine(lat_a: f64, lon_a: f64, lat_b: f64, lon_b: f64) f64
         std.math.cos(phi_a) *
         std.math.cos(phi_b));
     const arc = std.math.acos(c);
-    const km_radius = 6371.0;
 
-    const distance = arc * km_radius;
+    const scale: f64 = if (distance_unit == .Km) 6371.0 else 3959.0;
+
+    const distance = arc * scale;
 
     return if (std.math.isNan(distance)) 0 else distance;
 }
@@ -67,12 +68,12 @@ test "lat_to_px_y roundtrips with px_y_to_lat" {
     try std.testing.expect(std.math.approxEqAbs(f64, lat, conv_lat, 0.2));
 }
 
-test "distance_km_haversine" {
+test "distance_haversine" {
     const lat_a: f64 = 22.0;
     const lon_a: f64 = 10.0;
     const lat_b: f64 = 24.0;
     const lon_b: f64 = 32.0;
     const expect_result = 2260.47;
-    const result = distance_km_haversine(lat_a, lon_a, lat_b, lon_b);
+    const result = distance_haversine(.Km, lat_a, lon_a, lat_b, lon_b);
     try std.testing.expect(std.math.approxEqAbs(f64, result, expect_result, 0.2));
 }
