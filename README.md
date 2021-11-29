@@ -105,22 +105,23 @@ search scripts, bookmarks, and more.
     - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading** (In-progress)
   - **Todo:**
-    - Rework main application / boot logic to enable fully noninteractive mode
-      (free of SDL/Video context) to allow for CLI-based downloading of tiles.
-    - Remove SDL delay from TileCache downloading logic / properly wait on file
-      descriptors instead using curl_multi_wait.
-    - Add error handling logic to existing bounding-box based mepolang download
-      command to ensure valid bounding-box provided by user.
     - Add radius-based download command allowing user to download tiles based on
       coordinate with a given radius (km distance) for specified zoom-levels.
     - Add distance to lat-lon conversion functions to assist in above (along
       with unit tests) and to later be used for measuring distance between
       pins in ordered groups.
+    - Create mepolang command to selectively clear download cache so
+      tiles can be updated if outdated.
+  - **Done:**
+    - Add error handling logic to existing bounding-box based mepolang download
+      command to ensure valid bounding-box provided by user.
+    - Rework main application / boot logic to enable fully noninteractive mode
+      (free of SDL/Video context) to allow for CLI-based downloading of tiles.
+    - Remove SDL delay from TileCache downloading logic / properly wait on file
+      descriptors instead using curl_multi_wait.
     - Add a shell script to allow downloading either interactively or
       non-interactively based on Nominatim search query result so you can say
       download an entire city for example.
-    - Create mepolang command to selectively clear download cache so
-      tiles can be updated if outdated.
     - Parameterize max number of concurrent downloads as a setting accessible
       via prefset.
     - Add configuration parameter to set an offline mode; when set to true
