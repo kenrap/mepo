@@ -7,7 +7,7 @@ noninteractive() {
   ZOOM_MAX="$(echo -e "19\n$MEPO_ZOOM" | sort -rn | head -n1)"
 
   echo "
-    download_bbox
+    cache_bboxdl
       $MEPO_BR_LAT
       $MEPO_TL_LON
       $MEPO_TL_LAT
@@ -42,7 +42,7 @@ interactive() {
   fi
 
   echo "
-    download_bbox
+    cache_bboxdl
       $MEPO_BR_LAT
       $MEPO_TL_LON
       $MEPO_TL_LAT

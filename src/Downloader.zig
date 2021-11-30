@@ -2,7 +2,7 @@ const std = @import("std");
 const utilconversion = @import("util/utilconversion.zig");
 const TileCache = @import("./TileCache.zig");
 
-pub fn download_bbox(tile_cache: *TileCache, download_request_str: []const u8) !void {
+pub fn cache_bboxdl(tile_cache: *TileCache, download_request_str: []const u8) !void {
     std.debug.warn("Downloading based on BBox request: {s}\n", .{download_request_str});
 
     try tile_cache.set_cache_dir("~/.cache/mepo/tiles");

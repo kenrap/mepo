@@ -5,7 +5,7 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
-pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+pub fn f_cache_bboxdl(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const a_lat = args[0].Number;
     const a_lon = args[1].Number;
     const b_lat = args[2].Number;
@@ -13,10 +13,10 @@ pub fn f_download_bbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !voi
     const zoom_min = @floatToInt(i32, args[4].Number);
     const zoom_max = @floatToInt(i32, args[5].Number);
 
-    try download_bbox(mepo, a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
+    try cache_bboxdl(mepo, a_lat, a_lon, b_lat, b_lon, zoom_min, zoom_max);
 }
 
-fn download_bbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
+fn cache_bboxdl(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
     _ = try mepo.tile_cache.tile_queue_no_surface_load_bbox_threadlaunch(.{
         .a_lat = a_lat,
         .a_lon = a_lon,

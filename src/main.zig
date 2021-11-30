@@ -40,7 +40,7 @@ pub fn main() !void {
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);
-            try Downloader.download_bbox(&tile_cache, download_request);
+            try Downloader.cache_bboxdl(&tile_cache, download_request);
         },
     }
 }
