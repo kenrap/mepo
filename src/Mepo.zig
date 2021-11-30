@@ -86,8 +86,6 @@ pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
                     bbox,
                 );
                 try mepo.blit_tile_text(@intCast(u32, tilex), @intCast(u32, tiley), zoom, vpx, vpy);
-            } else {
-                utildbg.log("Blit wont blit for neg x={d} y={d}\n", .{ tilex, tiley });
             }
             y += config.Tsize;
             tiley += 1;
