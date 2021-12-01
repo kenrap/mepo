@@ -22,13 +22,13 @@ fn cache_radiusdl(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, 
     var start_lon = center_lon;
     var end_lon = center_lon;
 
-    while (km_radius < utilconversion.distance_haversine(.Km, start_lat, center_lon, center_lat, center_lon))
+    while (km_radius > utilconversion.distance_haversine(.Km, start_lat, center_lon, center_lat, center_lon))
         start_lat -= 1;
-    while (km_radius < utilconversion.distance_haversine(.Km, end_lat, center_lon, center_lat, center_lon))
+    while (km_radius > utilconversion.distance_haversine(.Km, end_lat, center_lon, center_lat, center_lon))
         end_lat += 1;
-    while (km_radius < utilconversion.distance_haversine(.Km, center_lat, start_lon, center_lat, center_lon))
+    while (km_radius > utilconversion.distance_haversine(.Km, center_lat, start_lon, center_lat, center_lon))
         start_lon -= 1;
-    while (km_radius < utilconversion.distance_haversine(.Km, center_lat, end_lon, center_lat, center_lon))
+    while (km_radius > utilconversion.distance_haversine(.Km, center_lat, end_lon, center_lat, center_lon))
         end_lon += 1;
 
     std.debug.warn("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon});
