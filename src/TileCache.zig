@@ -101,7 +101,11 @@ fn tile_exists_in_fs(tile_cache: *@This(), coords: types.XYZ) !bool {
     if (tile_cache.cache_dir) |cache_dir| {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
-        cache_dir.access(png, .{}) catch return false;
+        const tile_file = cache_dir.openFile(png, .{}) catch |_| {
+            return false;
+        };
+        defer tile_file.close();
+        const tile_file_stat = tile_file.stat();
         return true;
     }
     return false;
