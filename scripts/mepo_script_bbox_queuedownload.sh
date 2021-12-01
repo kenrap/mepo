@@ -41,18 +41,37 @@ interactive() {
     exit 1
   fi
 
-  echo "
-    cache_bboxdl
-      $MEPO_BR_LAT
-      $MEPO_TL_LON
-      $MEPO_TL_LAT
-      $MEPO_BR_LON
-      $ZOOM_MIN
-      $ZOOM_MAX 
-    ;
+  TARGET="$(
+    printf %b "bbox\n1km\n2km\n3km\n4km\n10km\n100km" |
+    mepo_helper_menu.sh "Target (bbox or #km):"
+  )"
 
-    prefset download_bar 1;
-  "
+  if [ "$TARGET" = bbox ]; then
+    # Bbox based downloading
+    echo "
+      cache_bboxdl
+        $MEPO_BR_LAT
+        $MEPO_TL_LON
+        $MEPO_TL_LAT
+        $MEPO_BR_LON
+        $ZOOM_MIN
+        $ZOOM_MAX 
+      ;
+      prefset download_bar 1;
+    "
+  else
+    # Radius-based downloading
+    echo "
+      cache_radiusdl
+        $MEPO_C_LAT
+        $MEPO_C_LON
+        $ZOOM_MIN
+        $ZOOM_MAX 
+        $(echo "$TARGET" | tr -dc '[0-9.]')
+      ;
+      prefset download_bar 1;
+    "
+  fi
 }
 
 "$@"
