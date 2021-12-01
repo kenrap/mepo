@@ -31,8 +31,8 @@ fn cache_radiusdl(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, 
     while (km_radius > utilconversion.distance_haversine(.Km, center_lat, end_lon, center_lat, center_lon))
         end_lon += 1;
 
-    std.debug.warn("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon});
-    
+    std.debug.warn("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{ start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon });
+
     _ = try mepo.tile_cache.tile_queue_no_surface_load_bbox_threadlaunch(.{
         .a_lat = start_lat,
         .a_lon = start_lon,

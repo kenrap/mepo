@@ -69,15 +69,21 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
-        const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
-        defer tile_cache.allocator.free(png);
-        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
-        if (file_cached_png_opt) |file_cached_png| {
-            defer tile_cache.allocator.free(file_cached_png);
-            const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
-                break :load_from_fs;
-            };
-            return TileData{ .texture = text };
+        // Check tile exists
+        if (!try tile_cache.tile_exists_in_fs(coords)) break :load_from_fs;
+
+        // Load tile
+        {
+            const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
+            defer tile_cache.allocator.free(png);
+            file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
+            if (file_cached_png_opt) |file_cached_png| {
+                defer tile_cache.allocator.free(file_cached_png);
+                const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
+                    break :load_from_fs;
+                };
+                return TileData{ .texture = text };
+            }
         }
     }
 
@@ -91,17 +97,21 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     }
 }
 
+fn tile_exists_in_fs(tile_cache: *@This(), coords: types.XYZ) !bool {
+    if (tile_cache.cache_dir) |cache_dir| {
+        const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
+        defer tile_cache.allocator.free(png);
+        cache_dir.access(png, .{}) catch return false;
+        return true;
+    }
+    return false;
+}
+
 /// Queues tile without loading to surface/memory
 /// Will queue tiles indiscriminate of whether downloading thread is
 /// present.
 fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
-    if (tile_cache.cache_dir) |cache_dir| check_exists: {
-        const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
-        defer tile_cache.allocator.free(png);
-        cache_dir.access(png, .{}) catch break :check_exists;
-        return false;
-    }
-
+    if (try tile_cache.tile_exists_in_fs(coords)) return false;
     try tile_cache.queue_lifo.put(coords, false);
     return true;
 }
