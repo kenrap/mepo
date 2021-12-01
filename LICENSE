@@ -13,3 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+---
+
+Mepo is bundled with the Inconsolata font (assets/inconsolata.ttf)
+which is licensed under the SIL.  Copyright 2006 The Inconsolata Project
+Authors (https://github.com/cyrealtype/Inconsolata). This Font Software
+is licensed under the SIL Open Font License, Version 1.1.  This license
+is available with a FAQ at: http://scripts.sil.org/OFL

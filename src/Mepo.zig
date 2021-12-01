@@ -635,7 +635,7 @@ pub fn blit_multiline_text(
 
             const text_surf = try utilsdl.errorcheck_ptr(
                 sdl.SDL_Surface,
-                sdl.TTF_RenderText_Solid(mepo.fonts[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).sdl()),
+                sdl.TTF_RenderText_Blended(mepo.fonts[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).sdl()),
             );
             defer sdl.SDL_FreeSurface(text_surf);
 
@@ -766,7 +766,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             // Initialize TTF, load fonts
             try utilsdl.errorcheck(sdl.TTF_Init());
 
-            const font_dat = @embedFile("../assets/terminus.ttf");
+            const font_dat = @embedFile("../assets/inconsolata.ttf");
             var fonts: [50]*sdl.TTF_Font = undefined;
             var font_size: usize = 0;
             while (font_size < fonts.len) : (font_size += 1) {
