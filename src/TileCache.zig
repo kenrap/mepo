@@ -71,7 +71,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         // Check tile exists
-        if (!try tile_cache.tile_exists_in_fs(coords)) break :load_from_fs;
+        if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
 
         // Load tile
         {
@@ -98,7 +98,7 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
     }
 }
 
-fn tile_exists_in_fs(tile_cache: *@This(), coords: types.XYZ) !bool {
+fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !bool {
     if (tile_cache.cache_dir) |cache_dir| {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
         defer tile_cache.allocator.free(png);
@@ -106,8 +106,9 @@ fn tile_exists_in_fs(tile_cache: *@This(), coords: types.XYZ) !bool {
             return false;
         };
         defer tile_file.close();
-        const tile_file_stat = tile_file.stat();
-        return true;
+        if (tile_cache.expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + tile_cache.expiry_seconds) {
+            return true;
+        }
     }
     return false;
 }
@@ -116,7 +117,7 @@ fn tile_exists_in_fs(tile_cache: *@This(), coords: types.XYZ) !bool {
 /// Will queue tiles indiscriminate of whether downloading thread is
 /// present.
 fn tile_queue_no_surface_load(tile_cache: *@This(), coords: types.XYZ) !bool {
-    if (try tile_cache.tile_exists_in_fs(coords)) return false;
+    if (try tile_cache.tile_exists_in_fs_and_non_expired(coords)) return false;
     try tile_cache.queue_lifo.put(coords, false);
     return true;
 }
