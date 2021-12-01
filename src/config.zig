@@ -64,6 +64,8 @@ pub const DefaultBaseConfig =
     \\ prefset tile_cache_max_n_transfers 20;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
+    // E.g. default 30 day expiry: 60s * 60m * 24h * 30 days
+    \\ prefset tile_cache_expiry_seconds 2592000;
     \\
     \\ pin_add 40.7418 -73.9899 baz;
     \\
