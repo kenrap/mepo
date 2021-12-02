@@ -1,4 +1,5 @@
 const Mepo = @import("../Mepo.zig");
+const TileCache = @import("../TileCache.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
@@ -17,7 +18,7 @@ pub fn f_cache_dlbbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void
 }
 
 fn cache_dlbbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {
-    _ = try mepo.tile_cache.set_queue_bbox(.{
+    mepo.tile_cache.set_queue(TileCache.DownloadBBoxRequest{
         .a_lat = a_lat,
         .a_lon = a_lon,
         .b_lat = b_lat,

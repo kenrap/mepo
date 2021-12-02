@@ -10,5 +10,5 @@ pub fn f_cache_queueclear(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !
 }
 
 fn cache_queueclear(mepo: *Mepo) !void {
-    mepo.tile_cache.set_queue_empty();
+    mepo.tile_cache.set_queue(null);
 }

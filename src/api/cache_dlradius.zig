@@ -1,4 +1,5 @@
 const Mepo = @import("../Mepo.zig");
+const TileCache = @import("../TileCache.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
@@ -33,7 +34,7 @@ fn cache_dlradius(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, 
 
     std.debug.warn("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{ start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon });
 
-    _ = try mepo.tile_cache.set_queue_bbox(.{
+    mepo.tile_cache.set_queue(TileCache.DownloadBBoxRequest{
         .a_lat = start_lat,
         .a_lon = start_lon,
         .b_lat = end_lat,

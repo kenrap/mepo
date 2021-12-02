@@ -138,8 +138,10 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
     tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
 }
 
+/// E.g. esentially the one function responsibel for launching/termination
+/// of the download thread
 pub fn set_network(tile_cache: *@This(), enable: bool) void {
-    tile_cache.set_queue_empty();
+    tile_cache.set_queue(null);
     if (!enable and tile_cache.thread_download != null) {
         const orphan_thread = tile_cache.thread_download.?;
         tile_cache.thread_download = null;
@@ -153,26 +155,28 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     }
 }
 
-pub fn set_queue_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
-    tile_cache.bbox_queue = dl_req;
-    tile_cache.set_queue_empty();
-    tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
-        threadable_tile_queue_no_surface_load_bbox,
-        "Queueing_Thread",
-        tile_cache,
-    );
-}
-
-pub fn set_queue_empty(tile_cache: *@This()) void {
-    // Cancel queueing thread
+/// E.g. essentially the one function responsible for launching/termination
+/// of the queuer thread
+pub fn set_queue(tile_cache: *@This(), dl_req_opt: ?DownloadBBoxRequest) void {
+    // Cancel any existing queueing thread
     if (tile_cache.thread_queuebbox) |thread_queuebbox| {
         const orphan_thread = thread_queuebbox;
         tile_cache.thread_queuebbox = null;
         sdl.SDL_WaitThread(orphan_thread, null);
     }
 
-    // Clear queue
+    // Purge queue
     tile_cache.queue_lifo.clearAndFree();
+
+    // Launch new thread if requesting download
+    if (dl_req_opt) |dl_req| {
+        tile_cache.bbox_queue = dl_req;
+        tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
+            threadable_tile_queue_no_surface_load_bbox,
+            "Queueing_Thread",
+            tile_cache,
+        );
+    }
 }
 
 /// Retreives a tile from cache
