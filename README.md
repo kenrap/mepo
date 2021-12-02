@@ -105,13 +105,9 @@ search scripts, bookmarks, and more.
     - Provide an initial tag for package maintainers (0.1).
 - **Milestone 2: Offline Mode & Noninteractive Downloading** (In-progress)
   - **Todo:**
-    - Add radius-based download command allowing user to download tiles based on
-      coordinate with a given radius (km distance) for specified zoom-levels.
     - Add distance to lat-lon conversion functions to assist in above (along
       with unit tests) and to later be used for measuring distance between
       pins in ordered groups.
-    - Create mepolang command to selectively clear download cache so
-      tiles can be updated if outdated.
   - **Done:**
     - Add error handling logic to existing bounding-box based mepolang download
       command to ensure valid bounding-box provided by user.
@@ -129,6 +125,11 @@ search scripts, bookmarks, and more.
       bandwidth conscience.
     - Rework UI logic to adjust downloading bar to not overlap with pin details
       overlay.
+    - Create mepolang command to selectively clear download cache so
+      tiles can be updated if outdated. (Note: decided to implemented expiry
+      seconds preference instead)
+    - Add radius-based download command allowing user to download tiles based on
+      coordinate with a given radius (km distance) for specified zoom-levels.
 - **Milestone 3: Powerful, Robust Pin API**
   - **Todo:**
     - Correct pin-selection mode cycling to properly respect delta values.
