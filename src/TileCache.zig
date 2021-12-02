@@ -205,6 +205,8 @@ pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
 }
 
 pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
+    if (cancellable and tile_cache.thread_download == null) return error.NoDownloadThread;
+
     const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lat_max = if (dl_req.a_lat > dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
     const lon_min = if (dl_req.a_lon < dl_req.b_lon) dl_req.a_lon else dl_req.b_lon;
