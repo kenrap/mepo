@@ -84,10 +84,10 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 }
 
 pub fn set_network(tile_cache: *@This(), enable: bool) void {
+    tile_cache.set_queue_empty();
     if (!enable and tile_cache.thread_download != null) {
         const orphan_thread = tile_cache.thread_download.?;
         tile_cache.thread_download = null;
-        tile_cache.queue_lifo.clearAndFree();
         sdl.SDL_WaitThread(orphan_thread, null);
     } else if (enable and tile_cache.thread_download == null) {
         tile_cache.thread_download = sdl.SDL_CreateThread(
@@ -98,7 +98,7 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     }
 }
 
-pub fn queue_clear(tile_cache: *@This()) void {
+pub fn set_queue_empty(tile_cache: *@This()) void {
     // Cancel queueing thread
     if (tile_cache.thread_queuebbox) |thread_queuebbox| {
         const orphan_thread = thread_queuebbox;
@@ -109,7 +109,6 @@ pub fn queue_clear(tile_cache: *@This()) void {
     // Clear queue
     tile_cache.queue_lifo.clearAndFree();
 }
-
 
 
 /// Retreives a tile from cache
@@ -195,7 +194,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
 
 pub fn tile_queue_no_surface_load_bbox_threadlaunch(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
     tile_cache.bbox_queue = dl_req;
-    tile_cache.queue_clear();
+    tile_cache.set_queue_empty();
     tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
         threadable_tile_queue_no_surface_load_bbox,
         "Queueing_Thread",
