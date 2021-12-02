@@ -47,7 +47,7 @@ byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir,
 curl_multi: *curl.CURLM,
 expiry_seconds: i32 = -1,
-max_n_transfers: usize = 20,
+max_n_transfers: u8 = 20,
 queue_lifo: datastructure.QueueHashMap(types.XYZ, bool),
 renderer: ?*sdl.SDL_Renderer,
 source_url: ?[:0]const u8,
@@ -74,14 +74,6 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
         tile_cache.allocator.free(present_source_url);
     }
     tile_cache.source_url = try tile_cache.allocator.dupeZ(u8, url);
-}
-
-pub fn set_renderer(tile_cache: *@This(), renderer: *sdl.SDL_Renderer) void {
-    tile_cache.renderer = renderer;
-}
-
-pub fn set_max_n_transfers(tile_cache: *@This(), max_n_transfers: usize) void {
-    tile_cache.max_n_transfers = max_n_transfers;
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {

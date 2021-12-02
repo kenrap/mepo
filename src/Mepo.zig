@@ -790,7 +790,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     });
 
     // Set renderer for tile cache
-    tile_cache.set_renderer(instance.renderer);
+    tile_cache.renderer = instance.renderer;
 
     // Run config (base and then user provided STDIN)
     {

@@ -25,6 +25,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "drag_scale", .ptr = &mepo.drag_scale },
         .{ .prop = "zoom", .ptr = &mepo.zoom },
         .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },
+        .{ .prop = "tile_cache_max_n_transfers", .ptr = &mepo.tile_cache.max_n_transfers },
     }) |stg| {
         if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(u8, args[1].Number);
     }
@@ -41,8 +42,6 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         try mepo.tile_cache.set_cache_dir(args[1].Text);
     } else if (std.mem.eql(u8, "tile_cache_url", name)) {
         try mepo.tile_cache.set_cache_url(args[1].Text);
-    } else if (std.mem.eql(u8, "tile_cache_max_n_transfers", name)) {
-        mepo.tile_cache.set_max_n_transfers(@floatToInt(usize, args[1].Number));
     } else if (std.mem.eql(u8, "tile_cache_network", name)) {
         mepo.tile_cache.set_network(args[1].Number == 1);
     }
