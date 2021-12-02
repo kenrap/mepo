@@ -153,6 +153,16 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
     }
 }
 
+pub fn set_queue_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
+    tile_cache.bbox_queue = dl_req;
+    tile_cache.set_queue_empty();
+    tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
+        threadable_tile_queue_no_surface_load_bbox,
+        "Queueing_Thread",
+        tile_cache,
+    );
+}
+
 pub fn set_queue_empty(tile_cache: *@This()) void {
     // Cancel queueing thread
     if (tile_cache.thread_queuebbox) |thread_queuebbox| {
@@ -249,16 +259,6 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
         .n_cached = n_cached,
         .n_queued = n_queued,
     };
-}
-
-pub fn tile_queue_no_surface_load_bbox_threadlaunch(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
-    tile_cache.bbox_queue = dl_req;
-    tile_cache.set_queue_empty();
-    tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
-        threadable_tile_queue_no_surface_load_bbox,
-        "Queueing_Thread",
-        tile_cache,
-    );
 }
 
 // ////////////////////////////////////////////////////////////////////////////
