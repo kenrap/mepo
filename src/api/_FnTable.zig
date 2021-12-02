@@ -7,6 +7,7 @@ const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
     .{ .name = "center_on_coords", .func = @import("center_on_coords.zig").f_center_on_coords },
     .{ .name = "center_on_mouse", .func = @import("center_on_mouse.zig").f_center_on_mouse },
     .{ .name = "cache_dlbbox", .func = @import("cache_dlbbox.zig").f_cache_dlbbox },
+    .{ .name = "cache_queueclear", .func = @import("cache_queueclear.zig").f_cache_queueclear },
     .{ .name = "cache_dlradius", .func = @import("cache_dlradius.zig").f_cache_dlradius },
     .{ .name = "fileload", .func = @import("fileload.zig").f_fileload },
     .{ .name = "move_relative", .func = @import("move_relative.zig").f_move_relative },

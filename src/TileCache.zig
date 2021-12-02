@@ -180,12 +180,7 @@ pub fn tile_queue_no_surface_load_bbox_threadable(userdata: ?*c_void) callconv(.
 
 pub fn tile_queue_no_surface_load_bbox_threadlaunch(tile_cache: *@This(), dl_req: DownloadBBoxRequest) !void {
     tile_cache.bbox_queue = dl_req;
-    if (tile_cache.thread_queuebbox) |thread_queuebbox| {
-        const orphan_thread = thread_queuebbox;
-        tile_cache.thread_queuebbox = null;
-        sdl.SDL_WaitThread(orphan_thread, null);
-    }
-
+    tile_cache.queue_clear();
     tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
         tile_queue_no_surface_load_bbox_threadable,
         "Queueing_Thread",
@@ -468,6 +463,18 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
     defer tile_cache.allocator.free(expanded_path);
     try std.fs.cwd().makePath(expanded_path);
     tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
+}
+
+pub fn queue_clear(tile_cache: *@This()) void {
+    // Cancel queueing thread
+    if (tile_cache.thread_queuebbox) |thread_queuebbox| {
+        const orphan_thread = thread_queuebbox;
+        tile_cache.thread_queuebbox = null;
+        sdl.SDL_WaitThread(orphan_thread, null);
+    }
+
+    // Clear queue
+    tile_cache.queue_lifo.clearAndFree();
 }
 
 /// Sets the cache URL, making copy of str
