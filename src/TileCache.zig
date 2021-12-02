@@ -22,7 +22,7 @@ pub const DownloadBBoxRequest = struct {
     zoom_min: i32,
     zoom_max: i32,
 };
-pub const TransferDatum = struct {
+const TransferDatum = struct {
     client: *curl.CURL,
     coords: types.XYZ,
     data_arraylist: std.ArrayList(u8),
@@ -30,7 +30,7 @@ pub const TransferDatum = struct {
     progress_dl_total: ?c_long,
     load_to_texture: bool,
 };
-pub const TileData = union(TileDataTag) {
+const TileData = union(TileDataTag) {
     transfer_datum: TransferDatum,
     texture: *sdl.SDL_Texture,
     queued_position: u32,
