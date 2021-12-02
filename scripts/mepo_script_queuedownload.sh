@@ -7,7 +7,7 @@ noninteractive() {
   ZOOM_MAX="$(echo -e "19\n$MEPO_ZOOM" | sort -rn | head -n1)"
 
   echo "
-    cache_bboxdl
+    cache_dlbbox
       $MEPO_BR_LAT
       $MEPO_TL_LON
       $MEPO_TL_LAT
@@ -49,7 +49,7 @@ interactive() {
   if [ "$TARGET" = bbox ]; then
     # Bbox based downloading
     echo "
-      cache_bboxdl
+      cache_dlbbox
         $MEPO_BR_LAT
         $MEPO_TL_LON
         $MEPO_TL_LAT
@@ -62,7 +62,7 @@ interactive() {
   else
     # Radius-based downloading
     echo "
-      cache_radiusdl
+      cache_dlradius
         $MEPO_C_LAT
         $MEPO_C_LON
         $ZOOM_MIN

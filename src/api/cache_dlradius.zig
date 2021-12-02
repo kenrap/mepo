@@ -5,17 +5,17 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
-pub fn f_cache_radiusdl(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+pub fn f_cache_dlradius(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const lat = args[0].Number;
     const lon = args[1].Number;
     const zoom_min = @floatToInt(i32, args[2].Number);
     const zoom_max = @floatToInt(i32, args[3].Number);
     const km_radius = args[4].Number;
 
-    try cache_radiusdl(mepo, lat, lon, zoom_min, zoom_max, km_radius);
+    try cache_dlradius(mepo, lat, lon, zoom_min, zoom_max, km_radius);
 }
 
-fn cache_radiusdl(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, zoom_max: i32, km_radius: f64) !void {
+fn cache_dlradius(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, zoom_max: i32, km_radius: f64) !void {
     const step_km = 1;
     var start_lat = center_lat;
     var end_lat = center_lat;
