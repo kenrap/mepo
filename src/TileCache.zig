@@ -93,15 +93,15 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
             try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
         }
 
-        // 3. Print status message if non graphical
+        // 4. Print status message if non graphical
         if (!graphical_mode) tile_cache.download_loop_progress_indicator(initial_queue_bg_size);
 
-        // 4. Idle and poll on curl multi
+        // 5. Idle and poll on curl multi
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
             utildbg.log("Curl multi poll fail: {}\n", .{e});
         };
 
-        // 5. Refresh UI if greater then threshold
+        // 6. Refresh UI if greater then threshold
         if (graphical_mode and sdl.SDL_GetTicks() > ui_last_update_ticks + 1000) {
             ui_last_update_ticks = sdl.SDL_GetTicks();
             utilsdl.sdl_push_resize_event();
