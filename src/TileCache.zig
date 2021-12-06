@@ -48,7 +48,8 @@ cache_dir: ?std.fs.Dir = null,
 curl_multi: *curl.CURLM,
 expiry_seconds: i32 = -1,
 max_n_transfers: u8 = 20,
-queue_lifo: datastructure.QueueHashMap(types.XYZ, bool),
+queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
+queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
 source_url: ?[:0]const u8 = null,
 texture_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture),
@@ -58,7 +59,7 @@ transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
 pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
-    const initial_queue_size = tile_cache.queue_lifo.count();
+    const initial_queue_bg_size = tile_cache.queue_lifo_bg.count();
     var ui_last_update_ticks = sdl.SDL_GetTicks();
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
@@ -80,14 +81,20 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
             } else break :curl_processing_loop;
         }
 
-        // 2. Transfer from LIFO into transfers
-        while (tile_cache.queue_lifo.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
-            var coords = tile_cache.queue_lifo.pop();
-            try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, coords.value);
+        // 2. Transfer from UI LIFO into transfers
+        while (tile_cache.queue_lifo_ui.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
+            var coords = tile_cache.queue_lifo_ui.pop();
+            try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
+        }
+
+        // 3. Transfer from BG LIFO into transfers
+        while (tile_cache.queue_lifo_bg.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
+            var coords = tile_cache.queue_lifo_bg.pop();
+            try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
         }
 
         // 3. Print status message if non graphical
-        if (!graphical_mode) tile_cache.download_loop_progress_indicator(initial_queue_size);
+        if (!graphical_mode) tile_cache.download_loop_progress_indicator(initial_queue_bg_size);
 
         // 4. Idle and poll on curl multi
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
@@ -122,7 +129,8 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     // Empty Texture map & queue
     for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
     tile_cache.texture_map.clearAndFree();
-    tile_cache.queue_lifo.clearAndFree();
+    tile_cache.queue_lifo_ui.clearAndFree();
+    tile_cache.queue_lifo_bg.clearAndFree();
 
     // Set new URL
     if (tile_cache.source_url) |present_source_url| {
@@ -166,59 +174,22 @@ pub fn set_queue(tile_cache: *@This(), dl_req_opt: ?DownloadBBoxRequest) void {
     }
 
     // Purge queue
-    tile_cache.queue_lifo.clearAndFree();
+    tile_cache.queue_lifo_ui.clearAndFree();
+    tile_cache.queue_lifo_bg.clearAndFree();
 
     // Launch new thread if requesting download
     if (dl_req_opt) |dl_req| {
         tile_cache.bbox_queue = dl_req;
         tile_cache.thread_queuebbox = sdl.SDL_CreateThread(
-            threadable_tile_queue_no_surface_load_bbox,
+            threadable_tile_bg_bbox_queue,
             "Queueing_Thread",
             tile_cache,
         );
     }
 }
 
-/// Retreives a tile from cache
-/// If tile is not present & will queue tile to be downloaded if downloading
-/// thread is present
-pub fn tile_retrieve(tile_cache: *@This(), coords: types.XYZ) !TileData {
-    var file_cached_png_opt: ?[]u8 = null;
 
-    if (tile_cache.texture_map.get(coords)) |tile| {
-        return TileData{ .texture = tile };
-    } else if (tile_cache.transfer_map.get(coords)) |transfer| {
-        return TileData{ .transfer_datum = transfer.* };
-    } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
-        // Check tile exists
-        if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
-
-        // Load tile
-        {
-            const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
-            defer tile_cache.allocator.free(png);
-            file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
-            if (file_cached_png_opt) |file_cached_png| {
-                defer tile_cache.allocator.free(file_cached_png);
-                const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
-                    break :load_from_fs;
-                };
-                return TileData{ .texture = text };
-            }
-        }
-    }
-
-    if (tile_cache.thread_download == null) {
-        return TileData{ .error_type = .Offline };
-    } else {
-        try tile_cache.queue_lifo.put(coords, true);
-        return TileData{
-            .queued_position = @intCast(u32, if (tile_cache.queue_lifo.getIndex(coords)) |index| index else 0),
-        };
-    }
-}
-
-pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
+pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
     if (cancellable and tile_cache.thread_download == null) return error.NoDownloadThread;
 
     const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
@@ -253,7 +224,7 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
                     n_cached += 1;
                 } else {
                     n_queued += 1;
-                    try tile_cache.queue_lifo.put(coords, false);
+                    try tile_cache.queue_lifo_bg.put(coords, void{});
                 }
             }
         }
@@ -263,6 +234,45 @@ pub fn tile_queue_no_surface_load_bbox(tile_cache: *@This(), dl_req: DownloadBBo
         .n_cached = n_cached,
         .n_queued = n_queued,
     };
+}
+
+/// Retreives a tile from cache
+/// If tile is not present & will queue tile to be downloaded if downloading
+/// thread is present
+pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileData {
+    var file_cached_png_opt: ?[]u8 = null;
+
+    if (tile_cache.texture_map.get(coords)) |tile| {
+        return TileData{ .texture = tile };
+    } else if (tile_cache.transfer_map.get(coords)) |transfer| {
+        return TileData{ .transfer_datum = transfer.* };
+    } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
+        // Check tile exists
+        if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
+
+        // Load tile
+        {
+            const png = try png_path(tile_cache.allocator, tile_cache.source_url.?, coords);
+            defer tile_cache.allocator.free(png);
+            file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
+            if (file_cached_png_opt) |file_cached_png| {
+                defer tile_cache.allocator.free(file_cached_png);
+                const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
+                    break :load_from_fs;
+                };
+                return TileData{ .texture = text };
+            }
+        }
+    }
+
+    if (tile_cache.thread_download == null) {
+        return TileData{ .error_type = .Offline };
+    } else {
+        try tile_cache.queue_lifo_ui.put(coords, void{});
+        return TileData{
+            .queued_position = @intCast(u32, if (tile_cache.queue_lifo_ui.getIndex(coords)) |index| index else 0),
+        };
+    }
 }
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -370,9 +380,9 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
         \\
     ,
         .{
-            100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo.count()) /
+            100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo_bg.count()) /
                 @intToFloat(f32, initial_queue_size)),
-            initial_queue_size - tile_cache.queue_lifo.count(),
+            initial_queue_size - tile_cache.queue_lifo_bg.count(),
             initial_queue_size,
             tile_cache.byte_counter / 1024 / 1024,
         },
@@ -383,7 +393,7 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
 /// if in graphical mode or non-empty queu
 fn download_loop_should_continue(tile_cache: *@This(), graphical_mode: bool) bool {
     const graphical_and_online = (graphical_mode and tile_cache.thread_download != null);
-    const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo.count() > 0 or tile_cache.transfer_map.count() > 0));
+    const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo_bg.count() > 0 or tile_cache.transfer_map.count() > 0));
     return graphical_and_online or nongraphical_and_pending;
 }
 
@@ -477,9 +487,9 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
     return false;
 }
 
-fn threadable_tile_queue_no_surface_load_bbox(userdata: ?*c_void) callconv(.C) c_int {
+fn threadable_tile_bg_bbox_queue(userdata: ?*c_void) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
-    if (tile_cache.tile_queue_no_surface_load_bbox(tile_cache.bbox_queue.?, true)) |q| {
+    if (tile_cache.tile_bg_bbox_queue(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
     } else |err| {
         utildbg.log("Error running bbox loop: {}\n", .{err});
@@ -501,7 +511,8 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
         return @as(@This(), .{
             .allocator = allocator,
             .curl_multi = curl.curl_multi_init().?,
-            .queue_lifo = datastructure.QueueHashMap(types.XYZ, bool).init(allocator),
+            .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
+            .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .texture_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });

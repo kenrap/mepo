@@ -100,7 +100,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     var dl_now: c_long = 0;
     var dl_total: c_long = 0;
 
-    switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
+    switch (try mepo.tile_cache.tile_ui_retreive_or_queue(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .transfer_datum => |transfer_datum| {
             if (transfer_datum.progress_dl_now) |dln| {
                 dl_now = dln;
@@ -143,7 +143,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .h = rect_intersect.h,
     };
 
-    switch (try mepo.tile_cache.tile_retrieve(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
+    switch (try mepo.tile_cache.tile_ui_retreive_or_queue(.{ .x = tile_x, .y = tile_y, .z = zoom })) {
         .texture => |text| {
             try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
         },
@@ -343,10 +343,11 @@ fn blit_download_bar(mepo: *@This()) !void {
         5,
         @intCast(i32, mepo.win_h) - 20 + 3,
         null,
-        "{s} / Tiles Queued: {d} / Downloading: {d} / Memory: {d}",
+        "{s} / UI Queued: {d} / Bg Queued: {d} / Downloading: {d} / Memory: {d}",
         .{
             online_offline,
-            mepo.tile_cache.queue_lifo.count(),
+            mepo.tile_cache.queue_lifo_ui.count(),
+            mepo.tile_cache.queue_lifo_bg.count(),
             mepo.tile_cache.transfer_map.count(),
             mepo.tile_cache.texture_map.count(),
         },
