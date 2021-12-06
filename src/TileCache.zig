@@ -219,6 +219,7 @@ pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, can
                 utildbg.log("Tile cache queueing x={d} y={d} z={d}\n", .{ x, y, z });
                 if (cancellable and tile_cache.thread_queuebbox == null) return error.EarlyQueueBboxTermination;
 
+                if (x < 0 or y < 0 or z < 0) continue;
                 const coords = .{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) };
                 if (try tile_cache.tile_exists_in_fs_and_non_expired(coords)) {
                     n_cached += 1;
