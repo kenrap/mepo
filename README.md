@@ -1,9 +1,9 @@
 # [**Mepo**](https://sr.ht/mil/Mepo/)
 
-> **Note:** Mepo is currently in an alpha state although quickly making progress.
-> An initial first tagged release (0.1) is available and [packaged for Alpine](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/27096).
-> See below for the high-level goals, current state of Mepo, the path to 1.0,
-> and information on contributing!
+> **Note:** Mepo is currently in active development and while functional,
+> largely intended currently for early adopters (prior to the 1.0 release).
+> See below for the high-level goals, current state of Mepo, the path to
+> 1.0, and information on contributing!
 
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
@@ -76,7 +76,7 @@ search scripts, bookmarks, and more.
 
 
 ## **Roadmap to 1.0 release:**
-- **Milestone 1: Overall Stability** (Complete: 10/31/2021)
+- **Milestone 1: Overall Stability** (Complete: 10/31/2021, tag: 0.1)
   - **Done:**
     - Improve current stability of the application and resolve intermittent
       crashes related to tile downloading.
@@ -103,11 +103,7 @@ search scripts, bookmarks, and more.
       debugging STDERR messages.
     - Resolve existing memory leaks in the application.
     - Provide an initial tag for package maintainers (0.1).
-- **Milestone 2: Offline Mode & Noninteractive Downloading** (In-progress)
-  - **Todo:**
-    - Add distance to lat-lon conversion functions to assist in above (along
-      with unit tests) and to later be used for measuring distance between
-      pins in ordered groups.
+- **Milestone 2: Offline Mode & Noninteractive Downloading** (Complete: 12/06/2021, tag: 0.2)
   - **Done:**
     - Add error handling logic to existing bounding-box based mepolang download
       command to ensure valid bounding-box provided by user.
@@ -130,7 +126,10 @@ search scripts, bookmarks, and more.
       seconds preference instead)
     - Add radius-based download command allowing user to download tiles based on
       coordinate with a given radius (km distance) for specified zoom-levels.
-- **Milestone 3: Powerful, Robust Pin API**
+    - Add distance to lat-lon conversion functions to assist in above (along
+      with unit tests) and to later be used for measuring distance between
+      pins in ordered groups.
+- **Milestone 3: Powerful, Robust Pin API** (In-progress)
   - **Todo:**
     - Correct pin-selection mode cycling to properly respect delta values.
     - Add ability to cycle through pins based on both: viewport visible pins

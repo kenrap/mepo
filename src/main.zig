@@ -15,7 +15,7 @@ pub fn main() !void {
     }
 
     const allocator = std.heap.c_allocator;
-    var mode: enum { Graphical, Download } = .Graphical;
+    var mode: enum { Graphical, Download, Version } = .Graphical;
     var download_request: []const u8 = undefined;
     var cfg: ?[]const u8 = null;
 
@@ -28,6 +28,9 @@ pub fn main() !void {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
             download_request = arg[2..];
+        } else if (std.mem.startsWith(u8, arg, "-v")) {
+            // -v: Version
+            mode = .Version;
         }
     }
 
@@ -41,6 +44,9 @@ pub fn main() !void {
         .Download => {
             var tile_cache = try TileCache.init(allocator);
             try Downloader.cache_dlbbox(&tile_cache, download_request);
+        },
+        .Version => {
+            utildbg.log("Mepo - version {d}\n", .{0.2});
         },
     }
 }
