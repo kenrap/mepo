@@ -45,7 +45,7 @@ search scripts, bookmarks, and more.
     for user input and list selection rather then implementing application-specific input logic.
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
-    through mepolang.
+    through a command-line flag.
   - Users can download based on a bounding-box or a user-specified radius
     from a specific point for multiple zoom levels.
   - Offline usage is a primary usecase and should be treated as such, we 
