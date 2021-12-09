@@ -20,7 +20,8 @@ pub const DefaultBaseConfig =
     \\ bind_key s l [move_relative 100 0];
     \\ bind_key _ = [zoom_relative 1];
     \\ bind_key _ - [zoom_relative -1];
-    \\ bind_key _ n [pin_cycle 1];
+    \\ bind_key _ n [pin_cycle 1 0];
+    \\ bind_key s n [pin_cycle 1 1];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ p [pin_purge];
     \\
