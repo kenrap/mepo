@@ -27,10 +27,11 @@ pub const DefaultBaseConfig =
     \\
     \\ bind_key c c [quit];
     \\ 
-    \\ bind_key _ g [shellpipe [mepo_script_nominatim_searchprompt.sh center]];
-    \\ bind_key s g [shellpipe [mepo_script_nominatim_searchprompt.sh pindrop]];
+    \\ bind_key _ g [shellpipe [mepo_script_nominatim.sh searchworldpickandgo]];
+    \\ bind_key s g [shellpipe [mepo_script_nominatim.sh searchbboxandpindrops]];
+    \\ bind_key _ b [shellpipe [mepo_script_overpass.sh]];
+
     \\ bind_key _ z [shellpipe mepo_script_zoomlevelset.sh];
-    \\ bind_key _ b [shellpipe mepo_script_bbox_search.sh];
     \\ bind_key _ s [shellpipe mepo_script_relationloader.sh];
     \\ bind_key _ q [shellpipe [mepo_script_queuedownload.sh interactive]];
     \\ bind_key s q [shellpipe [mepo_script_queuedownload.sh noninteractive]];
