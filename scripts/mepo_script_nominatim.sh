@@ -1,26 +1,36 @@
 #!/usr/bin/env sh
-OPTIONS='
-  Amsterdam
-  Paris
-  NYC
-  Boston
-  India
-  Romania
-  Iraq
-'
-
 queryprompt() {
   PROMPT="$1"
   
-  echo "$OPTIONS" |
-    awk '{$1=$1};1' | 
-    grep . | 
-    mepo_helper_menu.sh "$PROMPT" |
-    sed 's/ /%20/g'
+}
+
+nominatimspecialphrasesfromwiki() {
+  curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |
+    grep '^| ' |
+    grep -v '| -' |
+    sed -E 's/\|\|.+$//g' |
+    sed -E 's/^\| //g' |
+    sort
 }
 
 searchworldpickandgo() {
-  QUERY="$(queryprompt "Nominatim world search")"
+  OPTIONS='
+    Amsterdam
+    Paris
+    NYC
+    Boston
+    India
+    Romania
+    Iraq
+  '
+
+  QUERY="$(
+    echo "$OPTIONS" |
+      awk '{$1=$1};1' | 
+      grep . | 
+      mepo_helper_menu.sh "Nominatim world search" |
+      sed 's/ /%20/g'
+  )"
 
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
@@ -44,12 +54,17 @@ searchworldpickandgo() {
 }
 
 searchbboxandpindrops() {
-  QUERY="$(queryprompt "Nominatim Bbox search")"
+  QUERY="$(
+    nominatimspecialphrasesfromwiki |
+      awk '{$1=$1};1' | 
+      grep . | 
+      mepo_helper_menu.sh "Nominatim search Bbox" |
+      sed 's/ /%20/g'
+  )"
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
-  echo curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1" > /home/m/debugq
   RESULTS="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1" |
+    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
       jq '.[] | "\(.lat) \(.lon) \(.display_name)" '
   )"
 
