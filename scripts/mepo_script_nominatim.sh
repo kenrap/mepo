@@ -68,8 +68,6 @@ searchbboxandpindrops() {
       jq '.[] | "\(.lat) \(.lon) \(.display_name)" '
   )"
 
-  echo "$RESULTS" > /home/m/debug
-
   echo "pin_purge"
   echo "$RESULTS" |
     grep . |
