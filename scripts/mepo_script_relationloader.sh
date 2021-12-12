@@ -25,7 +25,7 @@ JSON_RESULTS="$(
     echo '
       [out:json][timeout:25];
       rel(RELATIONID);
-      node(r);
+      (._;>>;);
       out+body;
       >;
       out+skel+qt;
@@ -33,14 +33,33 @@ JSON_RESULTS="$(
   )"
 )"
 
+
+# E.g. get order of reference ids in relation
+SORTED_REFS="$(
+  echo "$JSON_RESULTS" | 
+    jq '.elements | .[] | select(.type=="relation") | .members | .[].ref'
+)"
+FILEREFSORDER="$(mktemp)"
+echo "$SORTED_REFS" > "$FILEREFSORDER"
+
+# E.g. get all nodes with tags
+NODES="$(
+  echo "$JSON_RESULTS" |
+    jq '.elements | .[] | "\(.lat) \(.lon) \(.id) \(.tags.name)" ' |
+    tr -d \" |
+    grep -vE 'null$' |
+    grep -vE '^null' |
+    awk -F' ' '{lat=$1; lon=$2; id=$3; $1=""; $2=""; $3=""; gsub(/^[ \t]+/,"",$0); print id " " lat " " lon " [" $0 "]"}'
+)"
+FILENODES="$(mktemp)"
+echo "$NODES" > "$FILENODES"
+
 echo "pin_purge;"
-echo "$JSON_RESULTS" |
-  jq '.elements | .[] | "\(.lat) \(.lon) \(.tags.name)" ' |
-  tr -d \" |
-  grep -vE 'null$' |
-  grep -vE '^null' |
-  awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
+# Sort nodes based on reference ids, delete first item, only show printable chars
+# and pin add each entry
+
+awk 'FNR==NR {x2[$1] = $0; next} $1 in x2 {print x2[$1]}' "$FILENODES" "$FILEREFSORDER" |
+  cut -f 2- -d ' ' |
   sed 's/[^[:print:]]//g' |
   sed "s/'/\\\'/g" |
   xargs -ID echo 'pin_add D;'
-
