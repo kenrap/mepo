@@ -9,29 +9,17 @@ pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_cycle(mepo: *Mepo, index: i32, center_pin: bool) !void {
-    var active_next: bool = false;
-
-    var it = mepo.pin_table.iterator();
-    while (it.next()) |item| {
-        if (active_next) {
-            mepo.pin_active = item.key_ptr.*;
-            if (center_pin) {
-                mepo.lat = item.value_ptr.lat;
-                mepo.lon = item.value_ptr.lon;
-            }
-            return;
-        }
-        if (mepo.pin_active != null and std.mem.eql(u8, mepo.pin_active.?, item.key_ptr.*)) {
-            active_next = true;
-        }
+    if ((mepo.pin_group_active_item == null and mepo.pin_groups[mepo.pin_group_active].pins.items.len > 0) or
+        (mepo.pin_group_active_item != null and mepo.pin_group_active_item.? + 1 == mepo.pin_groups[mepo.pin_group_active].pins.items.len))
+    {
+        mepo.pin_group_active_item = 0;
+    } else if (mepo.pin_group_active_item != null) {
+        mepo.pin_group_active_item.? += 1;
     }
 
-    if (mepo.pin_table.count() > 0) {
-        const first = mepo.pin_table.iterator().next().?;
-        mepo.pin_active = first.key_ptr.*;
-        if (center_pin) {
-            mepo.lat = first.value_ptr.lat;
-            mepo.lon = first.value_ptr.lon;
-        }
+    if (center_pin and mepo.pin_group_active_item != null) {
+        const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+        mepo.lat = pin.lat;
+        mepo.lon = pin.lon;
     }
 }

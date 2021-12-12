@@ -188,7 +188,6 @@ pub fn set_queue(tile_cache: *@This(), dl_req_opt: ?DownloadBBoxRequest) void {
     }
 }
 
-
 pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
     if (cancellable and tile_cache.thread_download == null) return error.NoDownloadThread;
 

@@ -29,8 +29,9 @@ help: bool = false,
 keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 lat: f64 = 0,
 lon: f64 = 0,
-pin_active: ?[]const u8 = null,
-pin_table: std.hash_map.StringHashMap(types.Pin),
+pin_groups: [10]types.PinGroup = undefined,
+pin_group_active: u32 = 0,
+pin_group_active_item: ?u32 = null,
 redraw_requested_at_ms_ticks: ?u32 = null,
 renderer: *sdl.SDL_Renderer,
 signals_table: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
@@ -233,12 +234,11 @@ fn blit_debug(mepo: *@This()) !void {
 }
 
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
-    var it = mepo.pin_table.iterator();
-    while (it.next()) |item| {
-        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(item.value_ptr.lon, mepo.zoom));
-        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(item.value_ptr.lat, mepo.zoom));
+    for (mepo.pin_groups[mepo.pin_group_active].pins.items) |item, i| {
+        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(item.lon, mepo.zoom));
+        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(item.lat, mepo.zoom));
         const size: i32 = 10;
-        const color_value: u24 = if (mepo.pin_active != null and std.mem.eql(u8, item.key_ptr.*, mepo.pin_active.?))
+        const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
             0xff0000
         else
             0x000000;
@@ -256,7 +256,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
 }
 
 fn blit_pin_active_text(mepo: *@This()) !void {
-    if (mepo.pin_active == null) return;
+    if (mepo.pin_group_active_item == null) return;
 
     const overlay_height = 70;
     const y_off: i32 = if (mepo.download_bar) 20 else 0;
@@ -269,45 +269,44 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         .h = 200,
     }, .Fill);
 
-    if (mepo.pin_table.get(mepo.pin_active.?)) |pin| {
-        const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-        try mepo.blit_multiline_text(
-            0x000000,
-            null,
-            .{ .align_y = .Center, .h = overlay_height },
-            5,
-            y_pos,
-            null,
-            \\Pin: {s}
-            \\lat: {d:.5}
-            \\lon: {d:.5}
-            \\dist: {d:.2}{s} away
-        ,
-            .{
-                pin.name,
+    const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+    const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
+    try mepo.blit_multiline_text(
+        0x000000,
+        null,
+        .{ .align_y = .Center, .h = overlay_height },
+        5,
+        y_pos,
+        null,
+        \\Pin: {s}
+        \\lat: {d:.5}
+        \\lon: {d:.5}
+        \\dist: {d:.2}{s} away
+    ,
+        .{
+            pin.name,
+            pin.lat,
+            pin.lon,
+            utilconversion.distance_haversine(
+                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                mepo.lat,
+                mepo.lon,
                 pin.lat,
                 pin.lon,
-                utilconversion.distance_haversine(
-                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                    mepo.lat,
-                    mepo.lon,
-                    pin.lat,
-                    pin.lon,
-                ),
-                d_unit,
-            },
-        );
-        try mepo.blit_multiline_text(
-            0x000000,
-            null,
-            .{ .align_y = .Center, .align_x = .Right, .w = mepo.win_w, .h = overlay_height },
-            0,
-            y_pos,
-            null,
-            "{d}",
-            .{mepo.pin_table.count()},
-        );
-    }
+            ),
+            d_unit,
+        },
+    );
+    try mepo.blit_multiline_text(
+        0x000000,
+        null,
+        .{ .align_y = .Center, .align_x = .Right, .w = mepo.win_w, .h = overlay_height },
+        0,
+        y_pos,
+        null,
+        "{d}",
+        .{mepo.pin_groups[mepo.pin_group_active].pins.items.len},
+    );
 }
 
 fn blit_download_bar(mepo: *@This()) !void {
@@ -783,7 +782,6 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             break :fonts fonts;
         },
         .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
-        .pin_table = std.hash_map.StringHashMap(types.Pin).init(allocator),
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
         .signals_table = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
@@ -792,6 +790,12 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
 
     // Set renderer for tile cache
     tile_cache.renderer = instance.renderer;
+
+    // Initialize pin groups
+    for (instance.pin_groups) |*g| {
+        g.ordered = false;
+        g.pins = std.ArrayList(types.Pin).init(allocator);
+    }
 
     // Run config (base and then user provided STDIN)
     {

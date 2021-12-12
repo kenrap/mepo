@@ -7,11 +7,10 @@ pub fn f_pin_purge(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_purge(mepo: *Mepo) !void {
-    mepo.pin_active = null;
+    mepo.pin_group_active_item = null;
 
-    var pin_it = mepo.pin_table.iterator();
-    while (pin_it.next()) |pin| {
-        mepo.allocator.free(pin.key_ptr.*);
+    for (mepo.pin_groups[mepo.pin_group_active].pins.items) |p| {
+        mepo.allocator.free(p.name);
     }
-    mepo.pin_table.clearAndFree();
+    mepo.pin_groups[mepo.pin_group_active].pins.clearAndFree();
 }
