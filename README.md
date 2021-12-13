@@ -16,7 +16,8 @@ underlying design, exposing a powerful command language called [mepolang](doc/us
 capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
-[Videos of User Interface](http://media.lrdu.org/mepo_demos)
+- [Videos of User Interface](http://media.lrdu.org/mepo_demos)
+- [Hotkeys](https://git.sr.ht/~mil/mepo/tree/master/item/src/config.zig#L12)
 
 ## **Goals / overview of Mepo:**
 - **Fast & usable in resource-constrained environments**:
