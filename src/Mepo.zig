@@ -234,9 +234,16 @@ fn blit_debug(mepo: *@This()) !void {
 }
 
 fn blit_pins(mepo: *@This()) errors.SDLError!void {
+    var prev_x : ?i32 = null;
+    var prev_y : ?i32 = null;
+
     for (mepo.pin_groups[mepo.pin_group_active].pins.items) |item, i| {
         const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(item.lon, mepo.zoom));
         const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(item.lat, mepo.zoom));
+        defer {
+            prev_x = x;
+            prev_y = y;
+        }
         const size: i32 = 10;
         const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
             0xff0000
@@ -246,12 +253,24 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         if (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h)
             continue;
 
+        // Draw Pin
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
         }, .Fill);
+
+        // Draw connecting line for ordered pin group
+        if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_x != null and prev_y != null) {
+            try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
+                mepo.renderer,
+                @intCast(c_int, prev_x.?),
+                @intCast(c_int, prev_y.?),
+                @intCast(c_int, x),
+                @intCast(c_int, y),
+            ));
+        }
     }
 }
 
@@ -793,7 +812,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
 
     // Initialize pin groups
     for (instance.pin_groups) |*g| {
-        g.ordered = false;
+        g.ordered = true;
         g.pins = std.ArrayList(types.Pin).init(allocator);
     }
 
