@@ -250,7 +250,10 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         else
             mepo.pin_groups[mepo.pin_group_active].color;
 
-        if (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h)
+        if (
+            (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
+            (prev_x == null or (prev_x.? < 0 or prev_x.? > mepo.win_w or prev_y.? < 0 or prev_y.? > mepo.win_h))
+        )
             continue;
 
         // Draw Pin
