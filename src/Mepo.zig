@@ -30,7 +30,7 @@ keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u
 lat: f64 = 0,
 lon: f64 = 0,
 pin_groups: [10]types.PinGroup = undefined,
-pin_group_active: u32 = 0,
+pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 redraw_requested_at_ms_ticks: ?u32 = null,
 renderer: *sdl.SDL_Renderer,

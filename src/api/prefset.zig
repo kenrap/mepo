@@ -26,6 +26,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "zoom", .ptr = &mepo.zoom },
         .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },
         .{ .prop = "tile_cache_max_n_transfers", .ptr = &mepo.tile_cache.max_n_transfers },
+        .{ .prop = "pin_group_active", .ptr = &mepo.pin_group_active },
     }) |stg| {
         if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(u8, args[1].Number);
     }
