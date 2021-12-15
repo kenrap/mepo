@@ -8,7 +8,8 @@ pub const XYZ = struct { x: u32, y: u32, z: u8 };
 pub const Pin = struct { lat: f64, lon: f64, name: []const u8 };
 pub const PinGroup = struct {
     pins: std.ArrayList(Pin),
-    ordered: bool,
+    ordered: bool = false,
+    color: u24 = 0x000000,
 };
 
 pub const MepoArgTag = enum { Text, Number };

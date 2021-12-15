@@ -12,6 +12,7 @@ const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
     .{ .name = "fileload", .func = @import("fileload.zig").f_fileload },
     .{ .name = "move_relative", .func = @import("move_relative.zig").f_move_relative },
     .{ .name = "pin_add", .func = @import("pin_add.zig").f_pin_add },
+    .{ .name = "pin_groupprefset", .func = @import("pin_groupprefset.zig").f_pin_groupprefset },
     .{ .name = "pin_cycle", .func = @import("pin_cycle.zig").f_pin_cycle },
     .{ .name = "pin_deactivate", .func = @import("pin_deactivate.zig").f_pin_deactivate },
     .{ .name = "pin_purge", .func = @import("pin_purge.zig").f_pin_purge },
