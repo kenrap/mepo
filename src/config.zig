@@ -45,16 +45,16 @@ pub const DefaultBaseConfig =
     \\ bind_key cs f [shellpipe [mepo_script_panscreen.sh w 1]];
     \\ bind_key cs b [shellpipe [mepo_script_panscreen.sh w -1]];
 
-    \\ bind_key _ [1] [prefset pin_group_active 0];
-    \\ bind_key _ [2] [prefset pin_group_active 1];
-    \\ bind_key _ [3] [prefset pin_group_active 2];
-    \\ bind_key _ [4] [prefset pin_group_active 3];
-    \\ bind_key _ [5] [prefset pin_group_active 4];
-    \\ bind_key _ [6] [prefset pin_group_active 5];
-    \\ bind_key _ [7] [prefset pin_group_active 6];
-    \\ bind_key _ [8] [prefset pin_group_active 7];
-    \\ bind_key _ [9] [prefset pin_group_active 8];
-    \\ bind_key _ [0] [prefset pin_group_active 9];
+    \\ bind_key _ [1] [pin_groupprefset 0 active 1];
+    \\ bind_key _ [2] [pin_groupprefset 1 active 1];
+    \\ bind_key _ [3] [pin_groupprefset 2 active 1];
+    \\ bind_key _ [4] [pin_groupprefset 3 active 1];
+    \\ bind_key _ [5] [pin_groupprefset 4 active 1];
+    \\ bind_key _ [6] [pin_groupprefset 5 active 1];
+    \\ bind_key _ [7] [pin_groupprefset 6 active 1];
+    \\ bind_key _ [8] [pin_groupprefset 7 active 1];
+    \\ bind_key _ [9] [pin_groupprefset 8 active 1];
+    \\ bind_key _ [0] [pin_groupprefset 9 active 1];
     \\
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ d [preftoggle debug_tiles];
@@ -83,6 +83,8 @@ pub const DefaultBaseConfig =
     // E.g. default 30 day expiry: 60s * 60m * 24h * 30 days
     \\ prefset tile_cache_expiry_seconds 2592000;
     \\
+    \\ pin_groupprefset 0 color #0000ff;
+    \\ pin_groupprefset 1 color #000000;
     \\ pin_add 40.7418 -73.9899 baz;
     \\
     \\ fileload ~/.mepo/bookmarks;
