@@ -248,7 +248,7 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
             0xff0000
         else
-            0x000000;
+            mepo.pin_groups[mepo.pin_group_active].color;
 
         if (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h)
             continue;
