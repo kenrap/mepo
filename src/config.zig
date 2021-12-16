@@ -44,7 +44,6 @@ pub const DefaultBaseConfig =
     \\ bind_key c b [shellpipe [mepo_script_panscreen.sh h -1]];
     \\ bind_key cs f [shellpipe [mepo_script_panscreen.sh w 1]];
     \\ bind_key cs b [shellpipe [mepo_script_panscreen.sh w -1]];
-
     \\ bind_key _ [1] [pin_groupprefset 0 active 1];
     \\ bind_key _ [2] [pin_groupprefset 1 active 1];
     \\ bind_key _ [3] [pin_groupprefset 2 active 1];

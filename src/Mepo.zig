@@ -233,28 +233,33 @@ fn blit_debug(mepo: *@This()) !void {
     }
 }
 
-fn blit_pins(mepo: *@This()) errors.SDLError!void {
-    var prev_x : ?i32 = null;
-    var prev_y : ?i32 = null;
+fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
+    return switch (lat_or_lon) {
+        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, mepo.zoom)),
+        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, mepo.zoom)),
+    };
+}
 
-    for (mepo.pin_groups[mepo.pin_group_active].pins.items) |item, i| {
-        const x = -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(item.lon, mepo.zoom));
-        const y = -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(item.lat, mepo.zoom));
-        defer {
-            prev_x = x;
-            prev_y = y;
-        }
+fn blit_pins(mepo: *@This()) !void {
+    var prev_pin: ?*types.Pin = null;
+
+    for (mepo.pin_groups[mepo.pin_group_active].pins.items) |*item, i| {
+        defer prev_pin = item;
+
+        const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
+        const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
+        const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
+        const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+
         const size: i32 = 10;
         const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
             0xff0000
         else
             mepo.pin_groups[mepo.pin_group_active].color;
 
-        if (
-            (x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
-            (prev_x == null or (prev_x.? < 0 or prev_x.? > mepo.win_w or prev_y.? < 0 or prev_y.? > mepo.win_h))
-        )
-            continue;
+        // Optimization to never drawoff-screen pins
+        if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
+            (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) continue;
 
         // Draw Pin
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
@@ -265,14 +270,35 @@ fn blit_pins(mepo: *@This()) errors.SDLError!void {
         }, .Fill);
 
         // Draw connecting line for ordered pin group
-        if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_x != null and prev_y != null) {
+        if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_pin != null) {
             try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
                 mepo.renderer,
-                @intCast(c_int, prev_x.?),
-                @intCast(c_int, prev_y.?),
+                @intCast(c_int, prev_pin_x),
+                @intCast(c_int, prev_pin_y),
                 @intCast(c_int, x),
                 @intCast(c_int, y),
             ));
+
+            const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
+            try mepo.blit_multiline_text(
+                0x000000,
+                null,
+                .{},
+                @divFloor(prev_pin_x + x, 2),
+                @divFloor(prev_pin_y + y, 2),
+                null,
+                "{d:.2}{s}",
+                .{
+                    utilconversion.distance_haversine(
+                        if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                        prev_pin.?.lat,
+                        prev_pin.?.lon,
+                        item.lat,
+                        item.lon,
+                    ),
+                    d_unit,
+                },
+            );
         }
     }
 }
