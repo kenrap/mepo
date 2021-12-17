@@ -2,10 +2,12 @@
 BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
 
 OPTIONS='
-  Pizza        ["amenity"="restaurant"]["cuisine"="italian"]
-  Indian       ["amenity"="restaurant"]["cuisine"="indian"]
-  Supermarket  ["shop"="supermarket"]
-  Coffeshop    ["amenity"="cafe"]
+  Pizza         ["amenity"="restaurant"]["cuisine"="italian"]
+  Indian        ["amenity"="restaurant"]["cuisine"="indian"]
+  Supermarket   ["shop"="supermarket"]
+  Coffeshop     ["amenity"="cafe"]
+  Supermarket   ["shop"="supermarket"]
+  Grocery       ["shop"="grocery"]
 '
 
 SCOPE="$(
