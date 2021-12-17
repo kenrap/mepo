@@ -10,6 +10,7 @@ pub const Tsize = 256;
 pub const ClickTimeoutMs = 200;
 
 pub const DefaultBaseConfig =
+    \\ # Keybindings;
     \\ bind_key _ j [move_relative 0 10];
     \\ bind_key s j [move_relative 0 100];
     \\ bind_key _ k [move_relative 0 -10];
@@ -26,9 +27,7 @@ pub const DefaultBaseConfig =
     \\ bind_key s p [pin_cycle -1 1];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ u [pin_purge];
-    \\
     \\ bind_key c c [quit];
-    \\ 
     \\ bind_key _ g [shellpipe [mepo_script_nominatim.sh searchworldpickandgo]];
     \\ bind_key s g [shellpipe [mepo_script_nominatim.sh searchbboxandpindrops]];
     \\ bind_key _ b [shellpipe [mepo_script_overpass.sh]];
@@ -54,7 +53,6 @@ pub const DefaultBaseConfig =
     \\ bind_key _ [8] [pin_groupprefset 7 active 1];
     \\ bind_key _ [9] [pin_groupprefset 8 active 1];
     \\ bind_key _ [0] [pin_groupprefset 9 active 1];
-    \\
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ d [preftoggle debug_tiles];
     \\ bind_key _ e [preftoggle debug_vars];
@@ -62,9 +60,11 @@ pub const DefaultBaseConfig =
     \\ bind_key _ m [preftoggle tile_cache_network];
     \\ bind_key _ c [center_on_mouse];
     \\
+    \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
-    \\
+
+    \\ # Prefs;
     \\ center_on_coords 40.78392 -73.96442;
     \\ prefset distance_unit_tf_km_mi 0;
     \\ prefset crosshair_on 1;
@@ -79,12 +79,14 @@ pub const DefaultBaseConfig =
     \\ prefset tile_cache_max_n_transfers 20;
     \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
-    // E.g. default 30 day expiry: 60s * 60m * 24h * 30 days
+    \\ # E.g. default 30 day expiry: 60s * 60m * 24h * 30 days;
     \\ prefset tile_cache_expiry_seconds 2592000;
     \\
+    \\ # Pins;
     \\ pin_groupprefset 0 color #0000ff;
     \\ pin_groupprefset 1 color #000000;
     \\ pin_add 40.7418 -73.9899 baz;
     \\
+    \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload ~/.mepo/bookmarks;
 ;
