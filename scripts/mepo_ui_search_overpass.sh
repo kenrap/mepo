@@ -14,7 +14,7 @@ SCOPE="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    mepo_helper_menu.sh "Bbox POI Search" |
+    mepo_ui_helper_menu.sh "Bbox POI Search" |
     cut -d ' ' -f2-
 )"
 [ -z "$SCOPE" ] && exit 0

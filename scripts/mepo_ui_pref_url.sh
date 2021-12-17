@@ -17,7 +17,7 @@ SOURCES='
 echo "$SOURCES" | 
   awk '{$1=$1};1' | 
   grep . | 
-  mepo_helper_menu.sh "Tile Source" |
+  mepo_ui_helper_menu.sh "Tile Source" |
   cut -d: -f2- |
   tr -d ' ' |
   xargs -IURL echo 'prefset tile_cache_url URL;'

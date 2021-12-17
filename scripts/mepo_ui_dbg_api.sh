@@ -17,7 +17,7 @@ CMD="$(
   echo "$OPTIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    mepo_helper_menu.sh "Command"
+    mepo_ui_helper_menu.sh "Command"
 )"
 
 echo "$CMD;"

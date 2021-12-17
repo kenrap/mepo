@@ -23,12 +23,12 @@ noninteractive() {
 interactive() {
   ZOOM_MIN="$(
     seq $BOUND_LOWER $BOUND_UPPER |
-    mepo_helper_menu.sh "Download Zoom Min:"
+    mepo_ui_helper_menu.sh "Download Zoom Min:"
   )"
 
   ZOOM_MAX="$(
     seq $BOUND_LOWER $BOUND_UPPER |
-    mepo_helper_menu.sh "Download Zoom Max:"
+    mepo_ui_helper_menu.sh "Download Zoom Max:"
   )"
 
   if ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); then
@@ -43,7 +43,7 @@ interactive() {
 
   TARGET="$(
     printf %b "bbox\n1km\n2km\n3km\n4km\n10km\n100km" |
-    mepo_helper_menu.sh "Target (bbox or #km):"
+    mepo_ui_helper_menu.sh "Target (bbox or #km):"
   )"
 
   if [ "$TARGET" = bbox ]; then

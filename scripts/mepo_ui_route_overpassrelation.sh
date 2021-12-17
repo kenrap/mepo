@@ -16,7 +16,7 @@ RELATIONID="$(
   echo "$RELATIONS" |
     awk '{$1=$1};1' | 
     grep . | 
-    mepo_helper_menu.sh "Relation (or enter custom relation id):" |
+    mepo_ui_helper_menu.sh "Relation (or enter custom relation id):" |
     grep -oE "[0-9^]+$"
 )"
 
