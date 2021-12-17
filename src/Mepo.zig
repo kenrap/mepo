@@ -599,6 +599,8 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
             func(mepo, args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
             };
+        } else if (statement[0].len == 1 and statement[0][0] == '#') {
+            // Comment nop
         } else {
             utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
         }
