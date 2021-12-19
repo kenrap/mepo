@@ -34,7 +34,7 @@ pub const DefaultBaseConfig =
     \\ bind_key _ g [shellpipe mepo_ui_reposition_nominatim.sh];
     \\ bind_key s g [shellpipe mepo_ui_search_nominatim.sh];
     \\ bind_key _ b [shellpipe mepo_ui_search_overpass.sh];
-    \\ bind_key s s [shellpipe mepo_ui_route_overpassrelation.sh];
+    \\ bind_key s r [shellpipe mepo_ui_route_overpassrelation.sh];
     \\ bind_key _ r [shellpipe mepo_ui_route_graphhopper.sh];
 
     \\ bind_key _ z [shellpipe mepo_ui_pref_zoom.sh];
