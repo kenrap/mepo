@@ -262,12 +262,13 @@ fn blit_pins(mepo: *@This()) !void {
             (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) continue;
 
         // Draw Pin
-        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
-            .x = x - @divTrunc(size, 2),
-            .y = y - @divTrunc(size, 2),
-            .w = size,
-            .h = size,
-        }, .Fill);
+        if (item.category == .Instructive)
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
+                .x = x - @divTrunc(size, 2),
+                .y = y - @divTrunc(size, 2),
+                .w = size,
+                .h = size,
+            }, .Fill);
 
         // Draw connecting line for ordered pin group
         if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_pin != null) {
