@@ -4,7 +4,7 @@ OPTIONS='
   center_on_coords (lat) (lon)
   center_on_mouse
   move_relative (x) (y)
-  pin_add (lat) (lon) (name)
+  pin_add (is_structural) (lat) (lon) (name)
   pin_cycle (index)
   pin_deactivate
   pin_purge

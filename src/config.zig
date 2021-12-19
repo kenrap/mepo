@@ -89,7 +89,7 @@ pub const DefaultBaseConfig =
     \\ # Pins;
     \\ pin_groupprefset 0 color #0000ff;
     \\ pin_groupprefset 1 color #000000;
-    \\ pin_add 40.7418 -73.9899 baz;
+    \\ pin_add 0 40.7418 -73.9899 baz;
     \\
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload ~/.mepo/bookmarks;

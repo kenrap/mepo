@@ -33,7 +33,7 @@ searchbboxandpindrops() {
     awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
     sed 's/[^[:print:]]//g' |
     sed "s/'/\\\'/g" |
-    xargs -ID echo 'pin_add D;'
+    xargs -ID echo 'pin_add 0 D;'
 }
 
 searchbboxandpindrops
