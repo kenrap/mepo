@@ -29,25 +29,21 @@ pub const DefaultBaseConfig =
     \\ bind_key _ u [pin_purge];
     \\ bind_key cs q [cache_queueclear];
     \\ bind_key c c [quit];
-
     \\ # Scripts hotkeys;
     \\ bind_key _ g [shellpipe mepo_ui_reposition_nominatim.sh];
     \\ bind_key s g [shellpipe mepo_ui_search_nominatim.sh];
     \\ bind_key _ b [shellpipe mepo_ui_search_overpass.sh];
     \\ bind_key s r [shellpipe mepo_ui_route_overpassrelation.sh];
     \\ bind_key _ r [shellpipe mepo_ui_route_graphhopper.sh];
-
     \\ bind_key _ z [shellpipe mepo_ui_pref_zoom.sh];
     \\ bind_key _ u [shellpipe mepo_ui_pref_url.sh];
     \\ bind_key c f [shellpipe [mepo_pref_pan.sh h 1]];
     \\ bind_key c b [shellpipe [mepo_pref_pan.sh h -1]];
     \\ bind_key cs f [shellpipe [mepo_pref_pan.sh w 1]];
     \\ bind_key cs b [shellpipe [mepo_pref_pan.sh w -1]];
-
     \\ bind_key _ q [shellpipe [mepo_ui_dbg_queuedownload.sh interactive]];
     \\ bind_key s q [shellpipe [mepo_ui_dbg_queuedownload.sh noninteractive]];
     \\ bind_key _ a [shellpipe mepo_ui_dbg_api.sh];
-
     \\ bind_key _ [1] [pin_groupprefset 0 active 1];
     \\ bind_key _ [2] [pin_groupprefset 1 active 1];
     \\ bind_key _ [3] [pin_groupprefset 2 active 1];
@@ -68,7 +64,6 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
-
     \\ # Prefs;
     \\ center_on_coords 40.78392 -73.96442;
     \\ prefset distance_unit_tf_km_mi 0;

@@ -9,15 +9,24 @@ pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_cycle(mepo: *Mepo, delta: i32, center_pin: bool) !void {
-    if ((mepo.pin_group_active_item == null and mepo.pin_groups[mepo.pin_group_active].pins.items.len > 0) or
-        (mepo.pin_group_active_item != null and @intCast(i32, mepo.pin_group_active_item.?) + delta >= @intCast(i32, mepo.pin_groups[mepo.pin_group_active].pins.items.len)))
-    {
-        mepo.pin_group_active_item = 0;
-    } else if (mepo.pin_group_active_item != null and @intCast(i32, mepo.pin_group_active_item.?) + delta < 0) {
-        mepo.pin_group_active_item = @intCast(u32, mepo.pin_groups[mepo.pin_group_active].pins.items.len - 1);
-    } else if (mepo.pin_group_active_item != null) {
-        mepo.pin_group_active_item.? = @intCast(u32, @intCast(i32, mepo.pin_group_active_item.?) + delta);
-    }
+    if (delta != 1 and delta != -1)
+        return error.OnlyOneUnitDeltaSupportedForNow;
+
+    var pin_i: i32 = undefined;
+    if (mepo.pin_groups[mepo.pin_group_active].pins.items.len == 0)
+        return
+    else if (mepo.pin_group_active_item == null)
+        pin_i = 0
+    else
+        pin_i = @intCast(i32, mepo.pin_group_active_item.?) + delta;
+
+    while (pin_i > -1 and
+        mepo.pin_groups[mepo.pin_group_active].pins.items.len > pin_i and
+        mepo.pin_groups[mepo.pin_group_active].pins.items[@intCast(usize, pin_i)].category == .Structural)
+        pin_i += delta;
+
+    if (pin_i > -1 and mepo.pin_groups[mepo.pin_group_active].pins.items.len > pin_i)
+        mepo.pin_group_active_item = @intCast(u32, pin_i);
 
     if (center_pin and mepo.pin_group_active_item != null) {
         const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
