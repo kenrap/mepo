@@ -1,6 +1,38 @@
 #!/usr/bin/env sh
 
+nominatimquerytargetmenu() {
+  QUERY="$(
+      echo "Enter nominatim query" |
+      mepo_ui_helper_menu.sh "Nominatim search to route to" |
+      sed 's/ /%20/g'
+  )"
+
+  VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
+  RESULT="$(
+    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
+      jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
+      mepo_ui_helper_menu.sh "Pick result"
+  )"
+
+  COORDS="$(
+    echo "$RESULT" |
+    busybox grep -oE '(\-|\d|\.)+' |
+    tail -n2 |
+    tr "\n" " "
+  )"
+
+  echo "$COORDS"
+}
+
 curlgraphhopper() {
+  FROM="$1"
+  DEST="$2"
+
+  FROMLAT="$(echo $FROM | cut -d " " -f1)"
+  FROMLON="$(echo $FROM | cut -d " " -f2)"
+  DESTLAT="$(echo $DEST | cut -d " " -f1)"
+  DESTLON="$(echo $DEST | cut -d " " -f2)"
+
   curl \
     -X POST \
     -H "Content-Type: application/json" \
@@ -10,8 +42,8 @@ curlgraphhopper() {
         "elevation": false,
         "points_encoded": false,
         "points": [
-          [-0.087891,51.534377],
-          [-0.090637,51.467697]
+          ['$FROMLON','$FROMLAT'],
+          ['$DESTLON','$DESTLAT']
         ],
         "vehicle": "car"
       }
@@ -71,7 +103,11 @@ errdie() {
 
 main() {
   [ -z "$GRAPHHOPPER_API_KEY" ] && errdie 'Please export $GRAPHHOPPER_API_KEY'
-  printpins "$(curlgraphhopper)"
+  printpins "$(
+    curlgraphhopper \
+      "$MEPO_C_LAT $MEPO_C_LON" \
+      "$(nominatimquerytargetmenu)"
+  )"
 }
 
 main
