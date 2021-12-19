@@ -56,7 +56,8 @@ printpins() {
   COORDS="$(
     echo "$RESPONSE" | 
       jq '.paths[0].points.coordinates | .[] | join(" ")' | 
-      tr -d '"'
+      tr -d '"' |
+      awk '{ print $2, $1 }'
   )"
 
   INSTRUCTIONS="$(
@@ -70,7 +71,7 @@ printpins() {
   )"
 
   echo "$INSTRUCTIONS" | while read -r LINE; do
-    INSTRUCTIONSTART="$(echo "$LINE" | cut -d " " -f1)"
+    INSTRUCTIONSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -ISTART echo START + 1 |  bc)"
     STRUCTURALSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -IEND echo END + 1 |  bc)"
     STRUCTURALEND="$(echo "$LINE" | cut -d " " -f2)"
 
@@ -89,7 +90,7 @@ printpins() {
       echo $(
         printf "pin_add 1 "
         echo "$COORDS" | sed -n ${I}p;
-        printf ";"
+        printf " [structural - TODO];"
       )
       I="$(echo $I + 1 | bc)"
     done
