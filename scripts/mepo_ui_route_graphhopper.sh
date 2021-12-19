@@ -70,6 +70,8 @@ printpins() {
       tr -d '"'
   )"
 
+  echo "pin_purge;"
+
   echo "$INSTRUCTIONS" | while read -r LINE; do
     INSTRUCTIONSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -ISTART echo START + 1 |  bc)"
     STRUCTURALSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -IEND echo END + 1 |  bc)"
