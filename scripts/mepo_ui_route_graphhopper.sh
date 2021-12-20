@@ -36,7 +36,7 @@ curlgraphhopper() {
   curl \
     -X POST \
     -H "Content-Type: application/json" \
-    "https://graphhopper.com/api/1/route?key=$GRAPHHOPPER_API_KEY" \
+    "https://graphhopper.com/api/1/route?key=$MEPO_GRAPHHOPPER_API_KEY" \
     -d '
       {
         "elevation": false,
@@ -105,7 +105,8 @@ errdie() {
 }
 
 main() {
-  [ -z "$GRAPHHOPPER_API_KEY" ] && errdie 'Please export $GRAPHHOPPER_API_KEY'
+  MEPO_GRAPHHOPPER_DEFAULT_API_KEY="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
+  [ -z "$MEPO_GRAPHHOPPER_API_KEY" ] && MEPO_GRAPHHOPPER_API_KEY="$MEPO_GRAPHHOPPER_DEFAULT_API_KEY"
   printpins "$(
     curlgraphhopper \
       "$MEPO_C_LAT $MEPO_C_LON" \
