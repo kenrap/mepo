@@ -32,7 +32,6 @@ lon: f64 = 0,
 pin_groups: [10]types.PinGroup = undefined,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
-redraw_requested_at_ms_ticks: ?u32 = null,
 renderer: *sdl.SDL_Renderer,
 signals_table: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
@@ -508,7 +507,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             return .Redraw;
         } else if (e.button.clicks == 2) {
             zoom_relative(mepo, 1);
-            mepo.redraw_requested_at_ms_ticks = sdl.SDL_GetTicks();
+            return .Redraw;
         } else if (e.button.clicks > 2) {
             // E.g. (-2) since actually button.clicks 2 will have processed
             // with (1)... is there a way to make these evts exclusive?
@@ -615,13 +614,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     while (true) {
         // Redraw
         const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
-        const has_pending_redraw_ms = (mepo.redraw_requested_at_ms_ticks != null and sdl.SDL_GetTicks() > mepo.redraw_requested_at_ms_ticks.? + @intCast(u32, config.ClickTimeoutMs));
-        if (has_pending_redraw_ms or
-            (!has_pending_motion_events and pending == .Drag) or
-            pending == .Redraw)
-        {
+        if ((!has_pending_motion_events and pending == .Drag) or pending == .Redraw) {
             try blit(mepo);
-            mepo.redraw_requested_at_ms_ticks = null;
         }
 
         // Process SDL events
