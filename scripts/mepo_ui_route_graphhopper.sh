@@ -99,11 +99,6 @@ printpins() {
   done
 }
 
-errdie() {
-  echo "$1"
-  exit 1
-}
-
 main() {
   MEPO_GRAPHHOPPER_DEFAULT_API_KEY="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
   [ -z "$MEPO_GRAPHHOPPER_API_KEY" ] && MEPO_GRAPHHOPPER_API_KEY="$MEPO_GRAPHHOPPER_DEFAULT_API_KEY"
