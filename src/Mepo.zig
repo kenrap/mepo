@@ -32,6 +32,7 @@ pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]types.PinGroup = undefined,
 renderer: *sdl.SDL_Renderer,
+table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
@@ -501,24 +502,18 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
         mepo.drag = false;
         return .None;
-    } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-        mepo.drag = false;
-        if (e.button.clicks == 1) {
-            return .Redraw;
-        } else if (e.button.clicks == 2) {
-            zoom_relative(mepo, 1);
-            return .Redraw;
-        } else if (e.button.clicks > 2) {
-            // E.g. (-2) since actually button.clicks 2 will have processed
-            // with (1)... is there a way to make these evts exclusive?
-            zoom_relative(mepo, -2);
-            return .Redraw;
-        }
-    } else if (e.button.button == sdl.SDL_BUTTON_RIGHT) {
-        zoom_relative(mepo, -1);
-        return .Redraw;
     }
-    return .None;
+
+    mepo.drag = false;
+
+    if (mepo.table_clicks.get(.{
+        .button = e.button.button,
+        .clicks = e.button.clicks,
+    })) |run_expression| {
+        utildbg.log("Got click table function {s}\n", .{run_expression});
+        mepo.mepolang_execute(run_expression) catch unreachable;
+    }
+    return .Redraw;
 }
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
@@ -826,8 +821,9 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             }
             break :fonts fonts;
         },
-        .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
+        .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
+        .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
         .window = window,

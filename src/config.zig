@@ -10,6 +10,10 @@ pub const Tsize = 256;
 pub const ClickTimeoutMs = 200;
 
 pub const DefaultBaseConfig =
+    \\ # Clickbindings
+    \\ bind_click 1 2 [zoom_relative 1];
+    \\ bind_click 1 3 [zoom_relative -2];
+    \\ bind_click 2 1 [zoom_relative -1];
     \\ # Keybindings;
     \\ bind_key _ j [move_relative 0 10];
     \\ bind_key s j [move_relative 0 100];
