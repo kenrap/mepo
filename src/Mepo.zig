@@ -243,63 +243,67 @@ fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, Lat
 fn blit_pins(mepo: *@This()) !void {
     var prev_pin: ?*types.Pin = null;
 
-    for (mepo.pin_groups[mepo.pin_group_active].pins.items) |*item, i| {
-        defer prev_pin = item;
+    for (mepo.pin_groups) |pin_group| {
+        if (!pin_group.visible) continue;
 
-        const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
-        const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
-        const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
-        const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+        for (pin_group.pins.items) |*item, i| {
+            defer prev_pin = item;
 
-        const size: i32 = 10;
-        const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
-            0xff0000
-        else
-            mepo.pin_groups[mepo.pin_group_active].color;
+            const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
+            const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
+            const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
+            const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
 
-        // Optimization to never drawoff-screen pins
-        if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
-            (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) continue;
+            const size: i32 = 10;
+            const color_value: u24 = if (mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
+                0xff0000
+            else
+                mepo.pin_groups[mepo.pin_group_active].color;
 
-        // Draw Pin
-        if (item.category == .Instructive)
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
-                .x = x - @divTrunc(size, 2),
-                .y = y - @divTrunc(size, 2),
-                .w = size,
-                .h = size,
-            }, .Fill);
+            // Optimization to never drawoff-screen pins
+            if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
+                (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) continue;
 
-        // Draw connecting line for ordered pin group
-        if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_pin != null) {
-            try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
-                mepo.renderer,
-                @intCast(c_int, prev_pin_x),
-                @intCast(c_int, prev_pin_y),
-                @intCast(c_int, x),
-                @intCast(c_int, y),
-            ));
+            // Draw Pin
+            if (item.category == .Instructive)
+                try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
+                    .x = x - @divTrunc(size, 2),
+                    .y = y - @divTrunc(size, 2),
+                    .w = size,
+                    .h = size,
+                }, .Fill);
 
-            const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-            try mepo.blit_multiline_text(
-                0x000000,
-                null,
-                .{},
-                @divFloor(prev_pin_x + x, 2),
-                @divFloor(prev_pin_y + y, 2),
-                null,
-                "{d:.2}{s}",
-                .{
-                    utilconversion.distance_haversine(
-                        if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                        prev_pin.?.lat,
-                        prev_pin.?.lon,
-                        item.lat,
-                        item.lon,
-                    ),
-                    d_unit,
-                },
-            );
+            // Draw connecting line for ordered pin group
+            if (mepo.pin_groups[mepo.pin_group_active].ordered and prev_pin != null) {
+                try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
+                    mepo.renderer,
+                    @intCast(c_int, prev_pin_x),
+                    @intCast(c_int, prev_pin_y),
+                    @intCast(c_int, x),
+                    @intCast(c_int, y),
+                ));
+
+                const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
+                try mepo.blit_multiline_text(
+                    0x000000,
+                    null,
+                    .{},
+                    @divFloor(prev_pin_x + x, 2),
+                    @divFloor(prev_pin_y + y, 2),
+                    null,
+                    "{d:.2}{s}",
+                    .{
+                        utilconversion.distance_haversine(
+                            if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                            prev_pin.?.lat,
+                            prev_pin.?.lon,
+                            item.lat,
+                            item.lon,
+                        ),
+                        d_unit,
+                    },
+                );
+            }
         }
     }
 }
@@ -328,9 +332,8 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         y_pos,
         null,
         \\Pin: {s}
-        \\lat: {d:.5}
-        \\lon: {d:.5}
-        \\dist: {d:.2}{s} away
+        \\Coordinates: {d:.5} lat / {d:.5} lon
+        \\Distance: {d:.2}{s} away
     ,
         .{
             pin.name,
@@ -353,8 +356,10 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         0,
         y_pos,
         null,
-        "{d}",
-        .{mepo.pin_groups[mepo.pin_group_active].pins.items.len},
+        \\{d} of {d}
+        \\Group {d}
+        ,
+        .{mepo.pin_group_active_item.? + 1, mepo.pin_groups[mepo.pin_group_active].pins.items.len, mepo.pin_group_active},
     );
 }
 

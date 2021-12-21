@@ -12,6 +12,8 @@ pub fn f_pin_groupprefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !
         mepo.pin_groups[group_number].color = color;
     } else if (std.mem.eql(u8, prefname, "ordered")) {
         mepo.pin_groups[group_number].ordered = args[2].Number == 1;
+    } else if (std.mem.eql(u8, prefname, "visible")) {
+        mepo.pin_groups[group_number].visible = args[2].Number == 1;
     } else if (std.mem.eql(u8, prefname, "active") and args[2].Number == 1) {
         mepo.pin_group_active_item = null;
         mepo.pin_group_active = @intCast(u8, group_number);
