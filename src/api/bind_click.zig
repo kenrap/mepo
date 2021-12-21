@@ -12,12 +12,10 @@ pub fn f_bind_click(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn bind_click(mepo: *Mepo, button: u8, clicks: u8, expression: []const u8) !void {
-    utildbg.log("Binding click: button={d} code={d} to expression {s}\n", .{ button, clicks, expression });
+    utildbg.log("Binding click: button={d} clicks={d} to expression {s}\n", .{ button, clicks, expression });
 
-    const click = .{
-        .button = if (button == 1) sdl.SDL_BUTTON_LEFT else sdl.SDL_BUTTON_RIGHT,
-        .clicks = clicks,
-    };
+    const sdl_button: u8 = if (button == 1) sdl.SDL_BUTTON_LEFT else sdl.SDL_BUTTON_RIGHT;
+    const click = .{ .button = sdl_button, .clicks = clicks };
 
     if (mepo.table_clicks.get(click)) |heap_str| {
         mepo.allocator.free(heap_str);

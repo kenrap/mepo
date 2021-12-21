@@ -506,11 +506,12 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
     mepo.drag = false;
 
-    if (mepo.table_clicks.get(.{
+    const key = .{
         .button = e.button.button,
         .clicks = e.button.clicks,
-    })) |run_expression| {
-        utildbg.log("Got click table function {s}\n", .{run_expression});
+    };
+    if (mepo.table_clicks.get(key)) |run_expression| {
+        utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
         mepo.mepolang_execute(run_expression) catch unreachable;
     }
     return .Redraw;
