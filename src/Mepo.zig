@@ -19,21 +19,21 @@ crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
 debug_tiles: bool = false,
-distance_unit_tf_km_mi: bool = false,
 debug_vars: bool = false,
+distance_unit_tf_km_mi: bool = false,
 download_bar: bool = false,
 drag: bool = false,
 drag_scale: u8 = 1,
 fonts: [50]*sdl.TTF_Font,
 help: bool = false,
-keybindings_table: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 lat: f64 = 0,
 lon: f64 = 0,
-pin_groups: [10]types.PinGroup = undefined,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
+pin_groups: [10]types.PinGroup = undefined,
 renderer: *sdl.SDL_Renderer,
-signals_table: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
+table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
+table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
@@ -409,7 +409,7 @@ fn blit_help(mepo: *@This()) !void {
         defer acc.deinit();
         defer for (acc.items) |item| mepo.allocator.free(item);
 
-        var it = mepo.keybindings_table.iterator();
+        var it = mepo.table_keybindings.iterator();
 
         while (it.next()) |kv| {
             const keymod = k: {
@@ -542,7 +542,7 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (mepo.keybindings_table.get(.{
+    if (mepo.table_keybindings.get(.{
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
         .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
     })) |run_expression| {
@@ -554,7 +554,7 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_signal(mepo: *@This(), signal: u6) types.Pending {
-    if (mepo.signals_table.get(signal)) |run_expression| {
+    if (mepo.table_signals.get(signal)) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
@@ -826,9 +826,9 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             }
             break :fonts fonts;
         },
-        .keybindings_table = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
+        .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
-        .signals_table = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
+        .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
         .window = window,
     });

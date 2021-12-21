@@ -40,10 +40,10 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
     };
 
-    if (mepo.keybindings_table.get(key)) |heap_str| {
+    if (mepo.table_keybindings.get(key)) |heap_str| {
         mepo.allocator.free(heap_str);
-        _ = mepo.keybindings_table.swapRemove(key);
+        _ = mepo.table_keybindings.swapRemove(key);
     }
     const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.keybindings_table.put(key, expression_mepo_allocated);
+    try mepo.table_keybindings.put(key, expression_mepo_allocated);
 }
