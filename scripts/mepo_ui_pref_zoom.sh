@@ -1,5 +1,12 @@
 #!/usr/bin/env sh
-echo prefset zoom "$(
-  seq 1 16 |
-  mepo_ui_helper_menu.sh "Zoom"
-);"
+DISPLAYNAME="Update Zoom"
+
+main() {
+  echo prefset zoom "$(
+    seq 1 16 |
+    PROMPT="Zoom" mepo_ui_helper_menu.sh
+  );"
+}
+
+if [ -n "$1" ]; then "$@"; else main; fi
+

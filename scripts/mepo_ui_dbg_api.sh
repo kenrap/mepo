@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+DISPLAYNAME="Debug API"
+
 OPTIONS='
   bind_key (key) (command)
   center_on_coords (lat) (lon)

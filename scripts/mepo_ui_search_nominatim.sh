@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+DISPLAYNAME="POI Search via Nominatim"
 
 nominatimspecialphrasesfromwiki() {
   curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |
@@ -9,12 +10,12 @@ nominatimspecialphrasesfromwiki() {
     sort
 }
 
-searchbboxandpindrops() {
+main() {
   QUERY="$(
     nominatimspecialphrasesfromwiki |
       awk '{$1=$1};1' | 
       grep . | 
-      mepo_ui_helper_menu.sh "Nominatim search Bbox" |
+      PROMPT="Nominatim search Bbox" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
 
@@ -36,4 +37,4 @@ searchbboxandpindrops() {
     xargs -ID echo 'pin_add 0 D;'
 }
 
-searchbboxandpindrops
+if [ -n "$1" ]; then "$@"; else main; fi

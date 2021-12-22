@@ -359,7 +359,11 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         \\{d} of {d}
         \\Group {d}
         ,
-        .{mepo.pin_group_active_item.? + 1, mepo.pin_groups[mepo.pin_group_active].pins.items.len, mepo.pin_group_active},
+        .{
+            mepo.pin_group_active_item.? + 1, 
+            mepo.pin_groups[mepo.pin_group_active].pins.items.len,
+            mepo.pin_group_active + 1,
+        },
     );
 }
 

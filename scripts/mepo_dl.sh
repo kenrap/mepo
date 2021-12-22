@@ -74,7 +74,7 @@ nominatim_spec() {
   echo "$BBOX,$ZOOM_MIN,$ZOOM_MAX"
 }
 
-nominatim_dl() {
+main() {
   SPEC="$(nominatim_spec)" && mepo_dashd_download "$SPEC"
 }
 
@@ -84,7 +84,7 @@ test() {
 }
 
 usage() {
-  errdie "Usage: $0 {nominatim_dl,nominatim_spec,test,usage}"
+  errdie "Usage: $0 {main,nominatim_spec,test,usage}"
 }
 
-[ -z "$1" ] && nominatim_dl || "$@"
+[ -z "$1" ] && main || "$@"

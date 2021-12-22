@@ -1,16 +1,20 @@
 #!/usr/bin/env sh
 
-WIDTH_OR_HEIGHT="$1"
-MULT_FACTOR="$2"
-PANX=0
-PANY=0
+main() {
+  # TODO: -z check DIM/MULT
+  PANX=0
+  PANY=0
 
-if [ "$WIDTH_OR_HEIGHT" = h ]; then
-  PANY="$(echo "$MEPO_WIN_H * $MULT_FACTOR" | bc)"
-fi
+  if [ "$DIM" = h ]; then
+    PANY="$(echo "$MEPO_WIN_H * $MULT" | bc)"
+  fi
 
-if [ "$WIDTH_OR_HEIGHT" = w ]; then
-  PANX="$(echo "$MEPO_WIN_W * $MULT_FACTOR" | bc)"
-fi
+  if [ "$DIM" = w ]; then
+    PANX="$(echo "$MEPO_WIN_W * $MULT" | bc)"
+  fi
 
-echo "move_relative $PANX $PANY";
+  echo "move_relative $PANX $PANY";
+}
+
+if [ -n "$1" ]; then "$@"; else main; fi
+

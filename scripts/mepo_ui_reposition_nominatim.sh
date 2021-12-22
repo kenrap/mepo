@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
+DISPLAYNAME="Relocate map via search"
 
-searchworldpickandgo() {
+main() {
   OPTIONS='
     Amsterdam
     Paris
@@ -15,14 +16,14 @@ searchworldpickandgo() {
     echo "$OPTIONS" |
       awk '{$1=$1};1' | 
       grep . | 
-      mepo_ui_helper_menu.sh "Nominatim world search" |
+      PROMPT="Nominatim world search" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
 
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
       jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
-      mepo_ui_helper_menu.sh "Pick result"
+      PROMPT="Pick result" mepo_ui_helper_menu.sh 
   )"
 
   COORDS="$(
@@ -40,4 +41,5 @@ searchworldpickandgo() {
   echo "center_on_coords $COORDS;"
 }
 
-searchworldpickandgo
+if [ -n "$1" ]; then "$@"; else main; fi
+

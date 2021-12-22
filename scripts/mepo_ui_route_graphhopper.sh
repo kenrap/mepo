@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
+DISPLAYNAME="Route via GraphHopper"
 
 nominatimquerytargetmenu() {
   QUERY="$(
       echo "Enter nominatim query" |
-      mepo_ui_helper_menu.sh "Nominatim search to route to" |
+      PROMPT="Nominatim search to route to" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
 
@@ -11,7 +12,7 @@ nominatimquerytargetmenu() {
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
       jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
-      mepo_ui_helper_menu.sh "Pick result"
+      PROMPT="Pick result" mepo_ui_helper_menu.sh
   )"
 
   COORDS="$(
@@ -109,5 +110,4 @@ main() {
   )"
 }
 
-main
-
+if [ -n "$1" ]; then "$@"; else main; fi
