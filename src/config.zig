@@ -34,6 +34,7 @@ pub const DefaultBaseConfig =
     \\ bind_key cs q [cache_queueclear];
     \\ bind_key c c [quit];
     \\ # Scripts hotkeys;
+    \\ bind_key _ c [shellpipe mepo_ui_central_menu.sh];
     \\ bind_key _ g [shellpipe mepo_ui_reposition_nominatim.sh];
     \\ bind_key s g [shellpipe mepo_ui_search_nominatim.sh];
     \\ bind_key _ b [shellpipe mepo_ui_search_overpass.sh];
@@ -63,7 +64,7 @@ pub const DefaultBaseConfig =
     \\ bind_key _ e [preftoggle debug_vars];
     \\ bind_key _ s [preftoggle download_bar];
     \\ bind_key _ m [preftoggle tile_cache_network];
-    \\ bind_key _ c [center_on_mouse];
+    \\ bind_key s c [center_on_mouse];
     \\
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
