@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Queue downloading"
+DISPLAYNAME="Download current bounding-box (non-interactive)"
 BOUND_LOWER=1
 BOUND_UPPER=19
 

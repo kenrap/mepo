@@ -6,7 +6,7 @@ menuoptions() {
     . "$SCRIPT" nonexistentfn 2> /dev/null
     [ -z "$DISPLAYNAME" ] && continue
     echo "$DISPLAYNAME ^ $SCRIPT"
-  done
+  done | uniq | sort
 }
 
 main() {
