@@ -521,7 +521,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
     const key = .{
         .button = e.button.button,
-        .clicks = e.button.clicks,
+        .clicks = @intCast(i8, e.button.clicks),
     };
     if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
@@ -621,11 +621,17 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 fn click_hold_check_dispatch(mepo: *@This()) void {
     if (mepo.drag == null) return;
 
-    const threshold_hit_hold_ms = sdl.SDL_GetTicks() > mepo.drag.?.begin_ticks + config.DragThresholdTicks;
-    const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y < config.DragThresholdDelta;
+    const threshold_hit_hold_ms = sdl.SDL_GetTicks() >= mepo.drag.?.begin_ticks + config.DragThresholdTicks;
+    const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y <= config.DragThresholdDelta;
 
     if (threshold_hit_hold_ms and threshold_hit_distance) {
         mepo.drag = null;
+        // TODO: hold support for right click as well?
+        if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1})) |run_expression| {
+            utildbg.log("Got hold table function {s} after dispatch time\n", .{ run_expression });
+            mepo.mepolang_execute(run_expression) catch unreachable;
+            utilsdl.sdl_push_resize_event();
+        }
     }
 }
 
