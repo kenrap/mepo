@@ -23,7 +23,7 @@ debug_vars: bool = false,
 distance_unit_tf_km_mi: bool = false,
 download_bar: bool = false,
 drag: ?struct {
-    begin_time : u32,
+    begin_ticks: u32,
     delta_x: i32 = 0,
     delta_y: i32 = 0,
 } = null,
@@ -362,9 +362,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         null,
         \\{d} of {d}
         \\Group {d}
-        ,
+    ,
         .{
-            mepo.pin_group_active_item.? + 1, 
+            mepo.pin_group_active_item.? + 1,
             mepo.pin_groups[mepo.pin_group_active].pins.items.len,
             mepo.pin_group_active + 1,
         },
@@ -506,7 +506,7 @@ fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.drag = null;
         return .None;
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-        mepo.drag = .{ .begin_time = sdl.SDL_GetTicks() };
+        mepo.drag = .{ .begin_ticks = sdl.SDL_GetTicks() };
     }
     return .None;
 }
@@ -532,8 +532,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.drag != null and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
-        mepo.drag.?.delta_x += e.motion.xrel;
-        mepo.drag.?.delta_y += e.motion.yrel;
+        mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
+        mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
         mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.drag_scale));
         mepo.set_y(mepo.get_y() - (e.motion.yrel * mepo.drag_scale));
         return .Drag;
@@ -618,6 +618,17 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     }
 }
 
+fn click_hold_check_dispatch(mepo: *@This()) void {
+    if (mepo.drag == null) return;
+
+    const threshold_hit_hold_ms = sdl.SDL_GetTicks() > mepo.drag.?.begin_ticks + config.DragThresholdTicks;
+    const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y < config.DragThresholdDelta;
+
+    if (threshold_hit_hold_ms and threshold_hit_distance) {
+        mepo.drag = null;
+    }
+}
+
 pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
@@ -629,8 +640,10 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             try blit(mepo);
         }
 
+        mepo.click_hold_check_dispatch();
+
         // Process SDL events
-        if (sdl.SDL_WaitEventTimeout(&e, config.ClickTimeoutMs) > 0) {
+        if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_KEYDOWN => event_keydown,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
