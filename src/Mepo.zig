@@ -22,7 +22,11 @@ debug_tiles: bool = false,
 debug_vars: bool = false,
 distance_unit_tf_km_mi: bool = false,
 download_bar: bool = false,
-drag: bool = false,
+drag: ?struct {
+    begin_time : u32,
+    delta_x: i32 = 0,
+    delta_y: i32 = 0,
+} = null,
 drag_scale: u8 = 1,
 fonts: [50]*sdl.TTF_Font,
 help: bool = false,
@@ -499,21 +503,21 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
-        mepo.drag = false;
+        mepo.drag = null;
         return .None;
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-        mepo.drag = true;
+        mepo.drag = .{ .begin_time = sdl.SDL_GetTicks() };
     }
     return .None;
 }
 
 fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
-        mepo.drag = false;
+        mepo.drag = null;
         return .None;
     }
 
-    mepo.drag = false;
+    mepo.drag = null;
 
     const key = .{
         .button = e.button.button,
@@ -527,12 +531,14 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (mepo.drag and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
+    if (mepo.drag != null and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
+        mepo.drag.?.delta_x += e.motion.xrel;
+        mepo.drag.?.delta_y += e.motion.yrel;
         mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.drag_scale));
         mepo.set_y(mepo.get_y() - (e.motion.yrel * mepo.drag_scale));
         return .Drag;
     } else {
-        mepo.drag = false;
+        mepo.drag = null;
     }
     return .None;
 }
