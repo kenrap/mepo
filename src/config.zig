@@ -41,10 +41,10 @@ pub const DefaultBaseConfig =
     \\ bind_key _ r [shellpipe mepo_ui_route_graphhopper.sh];
     \\ bind_key _ z [shellpipe mepo_ui_pref_zoom.sh];
     \\ bind_key _ u [shellpipe mepo_ui_pref_url.sh];
-    \\ bind_key c f [shellpipe [mepo_pref_pan.sh h 1]];
-    \\ bind_key c b [shellpipe [mepo_pref_pan.sh h -1]];
-    \\ bind_key cs f [shellpipe [mepo_pref_pan.sh w 1]];
-    \\ bind_key cs b [shellpipe [mepo_pref_pan.sh w -1]];
+    \\ bind_key c f [shellpipe [mepo_ui_pref_pan.sh h 1]];
+    \\ bind_key c b [shellpipe [mepo_ui_pref_pan.sh h -1]];
+    \\ bind_key cs f [shellpipe [mepo_ui_pref_pan.sh w 1]];
+    \\ bind_key cs b [shellpipe [mepo_ui_pref_pan.sh w -1]];
     \\ bind_key _ q [shellpipe [mepo_ui_dbg_queuedownload.sh interactive]];
     \\ bind_key s q [shellpipe [mepo_ui_dbg_queuedownload.sh noninteractive]];
     \\ bind_key _ a [shellpipe mepo_ui_dbg_api.sh];
