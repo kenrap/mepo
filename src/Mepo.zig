@@ -599,7 +599,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    for (try utilstrings.statementize(&arena.allocator, mepolang_text)) |statement| {
+    for (try utilstrings.statementize(&arena.allocator, try utilstrings.tokenize(&arena.allocator, mepolang_text))) |statement| {
         utildbg.log("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
@@ -627,8 +627,8 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     if (threshold_hit_hold_ms and threshold_hit_distance) {
         mepo.drag = null;
         // TODO: hold support for right click as well?
-        if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1})) |run_expression| {
-            utildbg.log("Got hold table function {s} after dispatch time\n", .{ run_expression });
+        if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1 })) |run_expression| {
+            utildbg.log("Got hold table function {s} after dispatch time\n", .{run_expression});
             mepo.mepolang_execute(run_expression) catch unreachable;
             utilsdl.sdl_push_resize_event();
         }

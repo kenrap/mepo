@@ -8,7 +8,7 @@ pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_cycle(mepo: *Mepo, delta: i32) !void {
-    const add : i32 = if (delta > 0) 1 else -1;
+    const add: i32 = if (delta > 0) 1 else -1;
 
     var delta_current = delta;
     while (delta_current != 0) : (delta_current -= add) {

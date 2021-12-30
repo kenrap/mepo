@@ -1,58 +1,42 @@
 const std = @import("std");
 
-/// Tokenizes based on whitespace / NLs, and [] brackets, ensuring that
-/// [foo] is always tokenized as 3 tokens (e.g. [,foo,])
-///
-/// Caller responsible for freeing returned ptr memory
 pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 {
-    var token_it = std.mem.tokenize(input, " \n");
-    const tokens: [][]const u8 = try allocator.alloc([]const u8, 10000);
-    var tokens_size: u32 = 0;
+    var tokens = std.ArrayList([]const u8).init(allocator);
+    var current_token = std.ArrayList(u8).init(allocator);
 
-    while (true) {
-        var item = token_it.next();
-        if (item == null) break;
-        var trimmed = std.mem.trim(u8, item.?, " \n");
-        if (trimmed.len < 1) continue;
-        tokens[tokens_size] = trimmed;
-        tokens_size += 1;
-
-        // Starting delims
-        while (tokens[tokens_size - 1][0] == '[') {
-            if (tokens[tokens_size - 1].len == 1) break;
-            tokens[tokens_size] = tokens[tokens_size - 1][1..];
-            tokens[tokens_size - 1] = tokens[tokens_size - 1][0..1];
-            tokens_size += 1;
+    for (input) |char| {
+        if (char == '[' or char == ']' or char == ';' or char == '\n' or char == ' ') {
+            if (current_token.items.len > 0) {
+                try tokens.append(current_token.items);
+                current_token = std.ArrayList(u8).init(allocator);
+            }
+            if (char == '[' or char == ']' or char == ';') {
+                const char_str: []const u8 = try std.fmt.allocPrint(allocator, "{c}", .{char});
+                try tokens.append(char_str);
+            }
+        } else {
+            try current_token.append(char);
         }
-
-        // Ending delims
-        var origpos = tokens_size - 1;
-        while (tokens[origpos].len > 1 and tokens[origpos][tokens[origpos].len - 1] == ']') {
-            tokens[tokens_size] = tokens[origpos][tokens[origpos].len - 1 .. tokens[origpos].len];
-            tokens[origpos] = tokens[origpos][0 .. tokens[origpos].len - 1];
-            tokens_size += 1;
-        }
-        std.mem.reverse([]const u8, tokens[origpos + 1 .. tokens_size]);
     }
-    return tokens[0..tokens_size];
+    return tokens.items;
 }
 
-/// Converts / groups input into a 2d array, top level being "statments"
-/// based on semicolon deliniation and second level being "tokens".
-///
-/// Caller responsible for freeing returned ptr memory
-pub fn statementize(allocator: *std.mem.Allocator, input: []const u8) ![][][]const u8 {
-    var statement_it = std.mem.tokenize(input, ";");
+pub fn statementize(allocator: *std.mem.Allocator, tokens: [][]const u8) ![][][]const u8 {
     var statements = std.ArrayList([][]const u8).init(allocator);
+    var current_statement = std.ArrayList([]const u8).init(allocator);
+    var nest_level: usize = 0;
 
-    while (true) {
-        var item = statement_it.next();
-        if (item == null) break;
-        var toks = try tokenize(allocator, item.?);
-        if (toks.len < 1) continue;
-        try statements.append(toks);
+    for (tokens) |token| {
+        if (token.len == 1 and token[0] == '[') nest_level += 1;
+        if (token.len == 1 and token[0] == ']') nest_level -= 1;
+        if (nest_level == 0 and token.len == 1 and token[0] == ';') {
+            if (current_statement.items.len > 0) try statements.append(current_statement.items);
+            current_statement = std.ArrayList([]const u8).init(allocator);
+        } else {
+            try current_statement.append(token);
+        }
     }
-
+    if (current_statement.items.len > 0) try statements.append(current_statement.items);
     return statements.items;
 }
 
