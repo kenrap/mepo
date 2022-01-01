@@ -1,12 +1,22 @@
 #!/usr/bin/env sh
 DISPLAYNAME="Route via GraphHopper"
 
+errexit() {
+  echo "$1" >&2
+  exit 1
+}
+
 nominatimquerytargetmenu() {
   QUERY="$(
-      echo "Enter nominatim query" |
-      PROMPT="Nominatim search to route to" mepo_ui_helper_menu.sh |
+      echo -e "centerpoint\nOr enter nominatim query location" |
+      PROMPT="$1" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
+
+  if [ "$QUERY" = "centerpoint" ]; then
+    echo "$MEPO_C_LAT $MEPO_C_LON"
+    return
+  fi
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
   RESULT="$(
@@ -103,11 +113,14 @@ printpins() {
 main() {
   MEPO_GRAPHHOPPER_DEFAULT_API_KEY="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
   [ -z "$MEPO_GRAPHHOPPER_API_KEY" ] && MEPO_GRAPHHOPPER_API_KEY="$MEPO_GRAPHHOPPER_DEFAULT_API_KEY"
-  printpins "$(
-    curlgraphhopper \
-      "$MEPO_C_LAT $MEPO_C_LON" \
-      "$(nominatimquerytargetmenu)"
-  )"
+
+  LOCFROM="$(nominatimquerytargetmenu "Route from")"
+  [ -z "$LOCFROM" ] && errexit "Failed to determine coordinates to route to"
+
+  LOCTO="$(nominatimquerytargetmenu "Route to")"
+  [ -z "$LOCTO" ] && errexit "Failed to determine coordinates to route to"
+
+  printpins "$(curlgraphhopper "$LOCFROM" "$LOCTO")"
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
