@@ -21,7 +21,7 @@ pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 
     return tokens.items;
 }
 
-pub fn statementize(allocator: *std.mem.Allocator, tokens: [][]const u8) ![][][]const u8 {
+pub fn statementize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![][][]const u8 {
     var statements = std.ArrayList([][]const u8).init(allocator);
     var current_statement = std.ArrayList([]const u8).init(allocator);
     var nest_level: usize = 0;
