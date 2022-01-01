@@ -68,6 +68,49 @@ pub fn read_args(allocator: *std.mem.Allocator) anyerror![][]const u8 {
     return try tokenize(allocator, try read_args_str(allocator));
 }
 
+test "statementize" {
+    // Single statement & works without trailing ;
+    {
+        const input = &[_][]const u8{ "foo", "bar", "baz" };
+        const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
+        var result = try statementize(std.heap.c_allocator, input[0..]);
+        try std.testing.expectEqual(@intCast(usize, 1), result.len);
+        for (result[0]) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
+        }
+    }
+
+    // Multi-statement
+    {
+        const input = &[_][]const u8{ "foo", "bar", "baz", ";", "bil", "nil", ";"};
+        const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
+        const expect_1 = [_][]const u8{ "bil", "nil" };
+        var result = try statementize(std.heap.c_allocator, input[0..]);
+        try std.testing.expectEqual(@intCast(usize, 2), result.len);
+        for (result[0]) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
+        }
+        for (result[1]) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect_1[idx], result[1][idx]));
+        }
+    }
+
+    // Respects nested []
+    {
+        const input = &[_][]const u8{ "foo", "[", "bar", "[", "gill", "]", "]", "baz", ";", "bil", "nil", ";"};
+        const expect_0 = [_][]const u8{ "foo", "[", "bar", "[", "gill", "]", "]", "baz" };
+        const expect_1 = [_][]const u8{ "bil", "nil" };
+        var result = try statementize(std.heap.c_allocator, input[0..]);
+        try std.testing.expectEqual(@intCast(usize, 2), result.len);
+        for (result[0]) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
+        }
+        for (result[1]) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect_1[idx], result[1][idx]));
+        }
+    }
+}
+
 test "tokenize" {
     // e.g. treats [] brackets as individual tokens irregardless of whitespace
     // foo bar [baz]  => foo bar [ baz ]
