@@ -112,12 +112,20 @@ test "statementize" {
 }
 
 test "tokenize" {
-    // e.g. treats [] brackets as individual tokens irregardless of whitespace
-    // foo bar [baz]  => foo bar [ baz ]
-    // foo bar [ baz] => foo bar [ baz ]
+    {
+        // basic tokenization test based on whitespace
+        const input = "foo bar baz";
+        var expect = [_][]const u8{ "foo", "bar", "baz" };
+        var result = try tokenize(std.heap.c_allocator, input);
+        try std.testing.expectEqual(@intCast(usize, 3), result.len);
+        for (result) |_, idx| {
+            try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
+        }
+    }
 
     {
-        // e.g. treats [] brackets as individual tokens irregardless of whitespace
+        // e.g. treats [] brackets as individual tokens irregardless of whitespace (test [foo])
+        const input = "foo bar [baz]";
         var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
         var result = try tokenize(std.heap.c_allocator, "foo bar [baz]");
         try std.testing.expectEqual(@intCast(usize, 5), result.len);
@@ -127,8 +135,10 @@ test "tokenize" {
     }
 
     {
+        // e.g. treats [] brackets as individual tokens irregardless of whitespace (test [ foo])
+        const input = "foo bar [ baz]";
         var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
-        var result = try tokenize(std.heap.c_allocator, "foo bar [ baz]");
+        var result = try tokenize(std.heap.c_allocator, input);
         try std.testing.expectEqual(@intCast(usize, 5), result.len);
         for (result) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
