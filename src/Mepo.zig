@@ -557,7 +557,7 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
         .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
     })) |run_expression| {
-        utildbg.log("Got keybindings table function {s}\n", .{run_expression});
+        utildbg.log("Got keybindings table function with run expression: <{s}>\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
     }
