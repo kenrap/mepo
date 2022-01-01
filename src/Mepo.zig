@@ -599,13 +599,30 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    for (try utilstrings.statementize(&arena.allocator, try utilstrings.tokenize(&arena.allocator, mepolang_text))) |statement| {
+    // Fairly clean, mepolang parsing/execution works in essentially 3 steps:
+    //
+    // 1. Tokenize: converts raw text input into tokens so "[];" are always
+    //              treated as seperate tokens
+    //
+    // 2. Statementize: Given tokens, group tokens into statements based on
+    //                  semicolons, thus allowing passing compound code.
+    //                  Ignore nested [] so statemnts are always 'top-level'.
+    //
+    // 3. Argize: Given tokens, convert into union values which are actually
+    //            type-specific args (like numbers, strings, etc.)
+    //
+    // Only question remaining re-refactoring is perhaps maybe through a
+    // wrapper fn, argize should be a part of statementize? Might be a bit
+    // cleaner that way, but either way underlying tests / fn boundaries &
+    // API would stay the same..
+
+    for (try utilmepolang.statementize(&arena.allocator, try utilmepolang.tokenize(&arena.allocator, mepolang_text))) |statement| {
         utildbg.log("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (FnTable.get(statement[0])) |func| {
-            const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.mepolang_argize(&arena.allocator, statement[1..statement.len]);
+            const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.argize(&arena.allocator, statement[1..statement.len]);
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
