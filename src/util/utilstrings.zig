@@ -18,6 +18,8 @@ pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 
             try current_token.append(char);
         }
     }
+
+    if (current_token.items.len > 0) try tokens.append(current_token.items);
     return tokens.items;
 }
 
