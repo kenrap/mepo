@@ -36,8 +36,9 @@ nominatimquerytargetmenu() {
 }
 
 curlgraphhopper() {
-  FROM="$1"
-  DEST="$2"
+  MODE="$1"
+  FROM="$2"
+  DEST="$3"
 
   FROMLAT="$(echo $FROM | cut -d " " -f1)"
   FROMLON="$(echo $FROM | cut -d " " -f2)"
@@ -56,7 +57,7 @@ curlgraphhopper() {
           ['$FROMLON','$FROMLAT'],
           ['$DESTLON','$DESTLAT']
         ],
-        "vehicle": "car"
+        "vehicle": "'$MODE'"
       }
     '
 }
@@ -114,13 +115,19 @@ main() {
   MEPO_GRAPHHOPPER_DEFAULT_API_KEY="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
   [ -z "$MEPO_GRAPHHOPPER_API_KEY" ] && MEPO_GRAPHHOPPER_API_KEY="$MEPO_GRAPHHOPPER_DEFAULT_API_KEY"
 
+  MODE="$(
+    echo -e "car\nbike\nfoot" |
+    PROMPT="Route mode" mepo_ui_helper_menu.sh
+  )"
+  echo "$MODE" | grep -qE "^(car|bike|foot)" || errexit "Unsupported route mode"
+
   LOCFROM="$(nominatimquerytargetmenu "Route from")"
   [ -z "$LOCFROM" ] && errexit "Failed to determine coordinates to route to"
 
   LOCTO="$(nominatimquerytargetmenu "Route to")"
   [ -z "$LOCTO" ] && errexit "Failed to determine coordinates to route to"
 
-  printpins "$(curlgraphhopper "$LOCFROM" "$LOCTO")"
+  printpins "$(curlgraphhopper "$MODE" "$LOCFROM" "$LOCTO")"
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
