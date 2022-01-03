@@ -22,7 +22,8 @@ fn pin_cycle(mepo: *Mepo, delta: i32) !void {
 
         while (pin_i > -1 and
             mepo.pin_groups[mepo.pin_group_active].pins.items.len > pin_i and
-            mepo.pin_groups[mepo.pin_group_active].pins.items[@intCast(usize, pin_i)].category == .Structural)
+            (mepo.pin_groups[mepo.pin_group_active].ordered and
+            mepo.pin_groups[mepo.pin_group_active].pins.items[@intCast(usize, pin_i)].category == .Structural))
             pin_i += add;
 
         if (pin_i > -1 and mepo.pin_groups[mepo.pin_group_active].pins.items.len > pin_i)
