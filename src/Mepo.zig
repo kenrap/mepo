@@ -227,7 +227,7 @@ fn blit_debug(mepo: *@This()) !void {
         try mepo.blit_multiline_text(
             0xff0000,
             types.Color{ .value = 0xffffff, .opacity = 200 },
-            .{ .align_x = .Right },
+            .{ .align_x = .Left },
             0,
             5,
             null,
