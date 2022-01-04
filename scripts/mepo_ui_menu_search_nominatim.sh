@@ -25,7 +25,13 @@ main() {
       jq '.[] | "\(.lat) \(.lon) \(.display_name)" '
   )"
 
-  echo "pin_purge"
+  echo "
+    pin_groupprefset 0 ordered 0;
+    pin_groupprefset 0 active 1;
+    pin_purge;
+  "
+
+
   echo "$RESULTS" |
     grep . |
     tr -d \" |

@@ -55,7 +55,12 @@ main() {
   FILENODES="$(mktemp)"
   echo "$NODES" > "$FILENODES"
 
-  echo "pin_purge;"
+  echo "
+    pin_groupprefset 1 ordered 1;
+    pin_groupprefset 1 active 1;
+    pin_purge;
+  "
+
 
   # Sort nodes based on reference ids, delete first item, only show printable chars
   # and pin add each entry

@@ -88,7 +88,12 @@ printpins() {
       tr -d '"'
   )"
 
-  echo "pin_purge;"
+  echo "
+    pin_groupprefset 1 ordered 1;
+    pin_groupprefset 1 active 1;
+    pin_purge;
+  "
+
 
   echo "$INSTRUCTIONS" | while read -r LINE; do
     INSTRUCTIONSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -ISTART echo START + 1 |  bc)"

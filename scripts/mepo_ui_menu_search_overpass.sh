@@ -37,7 +37,11 @@ main() {
     )"
   )"
 
-  echo 'pin_purge;'
+  echo "
+    pin_groupprefset 0 ordered 0;
+    pin_groupprefset 0 active 1;
+    pin_purge;
+  "
 
   echo "$JSON_RESULTS" |
     jq '.elements | .[] | "\(.lat) \(.lon) \(.tags.name)" ' |
