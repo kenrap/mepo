@@ -285,27 +285,6 @@ fn blit_pins(mepo: *@This()) !void {
                     @intCast(c_int, x),
                     @intCast(c_int, y),
                 ));
-
-                const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-                try mepo.blit_multiline_text(
-                    0x000000,
-                    null,
-                    .{},
-                    @divFloor(prev_pin_x + x, 2),
-                    @divFloor(prev_pin_y + y, 2),
-                    null,
-                    "{d:.2}{s}",
-                    .{
-                        utilconversion.distance_haversine(
-                            if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                            prev_pin.?.lat,
-                            prev_pin.?.lon,
-                            item.lat,
-                            item.lon,
-                        ),
-                        d_unit,
-                    },
-                );
             }
         }
     }
