@@ -29,8 +29,8 @@ pub const DefaultBaseConfig =
     \\ bind_key _ - [zoom_relative -1];
     \\ bind_key _ n [pin_cycle 1; center_on_pin;];
     \\ bind_key s n [pin_cycle 1;];
-    \\ bind_key _ p [pin_cycle -1;];
-    \\ bind_key s p [pin_cycle -1; center_on_pin;];
+    \\ bind_key _ p [pin_cycle -1; center_on_pin;];
+    \\ bind_key s p [pin_cycle -1;];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key _ u [pin_purge];
     \\ bind_key cs q [cache_queueclear];
