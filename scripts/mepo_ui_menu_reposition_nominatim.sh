@@ -28,7 +28,7 @@ main() {
 
   COORDS="$(
     echo "$RESULT" |
-    busybox grep -oE '(\-|\d|\.)+' |
+    grep -oE '[-0-9.]+' |
     tail -n2 |
     tr "\n" " "
   )"

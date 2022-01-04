@@ -32,7 +32,7 @@ nominatimquerytargetmenu() {
     COORDS="$(
       echo "$RESULT" | 
       PROMPT="Pick result" mepo_ui_helper_menu.sh |
-      busybox grep -oE '[-0-9.]+' |
+      grep -oE '[-0-9.]+' |
       tail -n2 |
       tr "\n" " "
     )"
