@@ -331,6 +331,7 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             d_unit,
         },
     );
+
     try mepo.blit_multiline_text(
         0x000000,
         null,
@@ -338,8 +339,8 @@ fn blit_pin_active_text(mepo: *@This()) !void {
         0,
         y_pos,
         null,
-        \\{d} of {d}
-        \\Group {d}
+        \\{d} of {d}   
+        \\Group {d}   
     ,
         .{
             mepo.pin_group_active_item.? + 1,
@@ -347,6 +348,13 @@ fn blit_pin_active_text(mepo: *@This()) !void {
             mepo.pin_group_active + 1,
         },
     );
+
+    try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = mepo.pin_groups[mepo.pin_group_active].color, .opacity = 255 }, sdl.SDL_Rect{
+        .x = 0,
+        .y = @intCast(c_int, mepo.win_h) - y_off - overlay_height,
+        .w = @intCast(c_int, mepo.win_w),
+        .h = 2,
+    }, .Fill);
 }
 
 fn blit_download_bar(mepo: *@This()) !void {
