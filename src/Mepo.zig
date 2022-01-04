@@ -245,11 +245,10 @@ fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, Lat
 }
 
 fn blit_pins(mepo: *@This()) !void {
-    var prev_pin: ?*types.Pin = null;
-
     for (mepo.pin_groups) |pin_group| {
         if (!pin_group.visible) continue;
 
+        var prev_pin: ?*types.Pin = null;
         for (pin_group.pins.items) |*item, i| {
             defer prev_pin = item;
 
