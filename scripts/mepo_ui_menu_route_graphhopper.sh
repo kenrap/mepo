@@ -7,30 +7,35 @@ errexit() {
 }
 
 nominatimquerytargetmenu() {
-  QUERY="$(
-      echo -e "centerpoint\nOr enter nominatim query location" |
-      PROMPT="$1" mepo_ui_helper_menu.sh |
-      sed 's/ /%20/g'
-  )"
 
-  if [ "$QUERY" = "centerpoint" ]; then
-    echo "$MEPO_C_LAT $MEPO_C_LON"
-    return
-  fi
+  COORDS=""
 
-  VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
-  RESULT="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
-      jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
-      PROMPT="Pick result" mepo_ui_helper_menu.sh
-  )"
+  while ! echo "$COORDS" | grep -Eq "[0-9.]+ [0-9.]+"; do
+    QUERY="$(
+        echo -e "centerpoint\nOr enter nominatim query location" |
+        PROMPT="$1" mepo_ui_helper_menu.sh |
+        sed 's/ /%20/g'
+    )"
 
-  COORDS="$(
-    echo "$RESULT" |
-    busybox grep -oE '(\-|\d|\.)+' |
-    tail -n2 |
-    tr "\n" " "
-  )"
+    if [ "$QUERY" = "centerpoint" ]; then
+      echo "$MEPO_C_LAT $MEPO_C_LON"
+      return
+    fi
+
+    VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
+    RESULT="$(
+      curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
+        jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
+        PROMPT="Pick result" mepo_ui_helper_menu.sh
+    )"
+
+    COORDS="$(
+      echo "$RESULT" |
+      busybox grep -oE '(\-|\d|\.)+' |
+      tail -n2 |
+      tr "\n" " "
+    )"
+  done
 
   echo "$COORDS"
 }
