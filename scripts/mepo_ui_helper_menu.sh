@@ -15,15 +15,19 @@ main() {
   else
     # Framebuffer enviroment support
     RESULTFILE="$(mktemp)"
-    OPTS="$(cat)"
+    OPTSFILE="$(mktemp)"
+    echo "$(cat)" > "$OPTSFILE"
     OLDVT=1
-    openvt -c 22 -s -w sh -c "
+    openvt -c 11 -s -w sh -c "
       clear;
       echo Mepo terminal VT menu;
-      echo \"$OPTS\" | vis-menu -p \"$PROMPT\" -l 50 > $RESULTFILE
+      [ -p /tmp/fbp.fifo ] && { sleep .2; echo -e \"\a\" > /tmp/fbp.fifo; }
+      cat \"$OPTSFILE\" | vis-menu -p \"$PROMPT\" -l 50 > $RESULTFILE
     " > /dev/null
     cat "$RESULTFILE" | tr -d "\n"
-    chvt "$OLDVT" >/dev/null
+    chvt "$OLDVT" > /dev/null
+    rm "$RESULTFILE" "$OPTSFILE"
+    [ -p /tmp/fbp.fifo ] && { sleep .2; echo -e "\b" > /tmp/fbp.fifo; }
   fi
 }
 
