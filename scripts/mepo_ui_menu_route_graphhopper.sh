@@ -10,28 +10,29 @@ nominatimquerytargetmenu() {
 
   COORDS=""
 
-  while ! echo "$COORDS" | grep -Eq "[0-9.]+ [0-9.]+"; do
+  while ! echo "$COORDS" | grep -Eq "[-0-9.]+[ ]+[-0-9.]+"; do
     QUERY="$(
         echo -e "centerpoint\nOr enter nominatim query location" |
         PROMPT="$1" mepo_ui_helper_menu.sh |
         sed 's/ /%20/g'
     )"
-
-    if [ "$QUERY" = "centerpoint" ]; then
-      echo "$MEPO_C_LAT $MEPO_C_LON"
-      return
-    fi
+    [ "$QUERY" = "centerpoint" ] && COORDS="$MEPO_C_LAT $MEPO_C_LON" && break
 
     VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
     RESULT="$(
       curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
-        jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
-        PROMPT="Pick result" mepo_ui_helper_menu.sh
+        jq '.[] | "\(.display_name) \(.lat) \(.lon)" '
     )"
 
+    if ! echo "$RESULT" | awk NF | grep -Eq .; then
+      echo "No results - press any key!" | PROMPT="No results!" mepo_ui_helper_menu.sh 
+      continue
+    fi
+
     COORDS="$(
-      echo "$RESULT" |
-      busybox grep -oE '(\-|\d|\.)+' |
+      echo "$RESULT" | 
+      PROMPT="Pick result" mepo_ui_helper_menu.sh |
+      busybox grep -oE '[-0-9.]+' |
       tail -n2 |
       tr "\n" " "
     )"
