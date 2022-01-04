@@ -25,7 +25,7 @@ nominatimquerytargetmenu() {
     )"
 
     if ! echo "$RESULT" | awk NF | grep -Eq .; then
-      echo "No results - press any key!" | PROMPT="No results!" mepo_ui_helper_menu.sh 
+      echo "No results - press any key!" | PROMPT="No results!" mepo_ui_helper_menu.sh  > /dev/null
       continue
     fi
 
