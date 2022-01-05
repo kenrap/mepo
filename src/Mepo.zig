@@ -390,7 +390,7 @@ fn blit_download_bar(mepo: *@This()) !void {
         5,
         @intCast(i32, mepo.win_h) - 20 + 3,
         null,
-        "{s} / UI Queued: {d} / Bg Queued: {d} / Downloading: {d} / Memory: {d}",
+        "{s} / Q: {d} / B: {d} / D: {d} / M: {d}",
         .{
             online_offline,
             mepo.tile_cache.queue_lifo_ui.count(),
