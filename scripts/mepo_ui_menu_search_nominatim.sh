@@ -20,9 +20,12 @@ main() {
   )"
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
+  JSONRESULTS="$(
+    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
+  )"
   RESULTS="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
-      jq '.[] | "\(.lat) \(.lon) \(.display_name)" '
+    echo "$JSONRESULTS" |
+    jq '.[] | "\(.lat) \(.lon) \(.display_name)"'
   )"
 
   echo "
