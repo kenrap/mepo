@@ -319,21 +319,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
     const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-    try mepo.blit_multiline_text(
-        0x000000,
-        null,
-        .{ .align_y = .Center, .h = overlay_height },
-        5,
-        y_pos,
-        null,
-        \\Pin: {s}
-        \\Coordinates: {d:.5} lat / {d:.5} lon
-        \\Distance: {d:.2}{s} away
-    ,
-        .{
-            pin.name,
-            pin.lat,
-            pin.lon,
+
+    const coords_str = try std.fmt.allocPrintZ(mepo.allocator, "{d:.5} lat / {d:.5} lon", .{pin.lat, pin.lon});
+    const distance_str = try std.fmt.allocPrintZ(mepo.allocator, "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
                 if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                 mepo.lat,
@@ -342,8 +330,21 @@ fn blit_pin_active_text(mepo: *@This()) !void {
                 pin.lon,
             ),
             d_unit,
-        },
+    });
+
+    try mepo.blit_table(
+        0x000000,
+        0x000000,
+        5,
+        y_pos,
+        500,
+        (&[_][2][:0]const u8{
+            ([_][:0]const u8{ "Pin:", pin.name, })[0..].*,
+            ([_][:0]const u8{ "Coords:", coords_str })[0..].*,
+            ([_][:0]const u8{ "Dist:", distance_str  })[0..].*,
+        })[0..],
     );
+
 
     try mepo.blit_multiline_text(
         0x000000,

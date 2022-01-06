@@ -11,7 +11,7 @@ pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_add(mepo: *Mepo, lat: f64, lon: f64, is_structural: bool, name: []const u8) !void {
-    const name_heap_allocated = try mepo.allocator.dupe(u8, name);
+    const name_heap_allocated = try mepo.allocator.dupeZ(u8, name);
     try mepo.pin_groups[mepo.pin_group_active].pins.append(.{
         .lat = lat,
         .lon = lon,
