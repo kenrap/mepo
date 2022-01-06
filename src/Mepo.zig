@@ -465,6 +465,25 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_crosshair();
     try mepo.blit_download_bar();
     try mepo.blit_help();
+    try mepo.blit_table(
+        0x000000,
+        0x000000,
+        0,
+        0,
+        500,
+        (&[_][][:0]const u8{
+            (&[_][:0]const u8{
+                "foo",
+                "bar",
+                "baz",
+            })[0..],
+            (&[_][:0]const u8{
+                "bill",
+                "dill",
+                "zill",
+            })[0..],
+        })[0..],
+    );
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
@@ -670,6 +689,49 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         if (pending_signal) |sig| {
             pending = mepo.event_signal(sig);
             pending_signal = null;
+        }
+    }
+}
+
+pub fn blit_table(
+    mepo: *@This(),
+    color: u24,
+    border_color: u24,
+    x: i32,
+    y: i32,
+    max_table_width: u32,
+    rows: [][][:0]const u8
+) !void {
+    var n_columns : usize = n_columns: {
+        for (rows) |row| n_columns = std.math.max(n_columns, row.len);
+        break :n_columns n_columns;
+    };
+
+    var offset_x : usize = 0;
+    var column_i : usize = 0;
+    while (column_i < n_columns) : (column_i += 1) {
+        var max_column_width : usize = 0;
+        var offset_y : usize = 0;
+        defer offset_x += max_column_width;
+
+        for (rows) |row| {
+            // TODO: check since slices of rows could have uneven number of cols
+            const str = row[column_i];
+            const text_surf = try utilsdl.errorcheck_ptr(
+                sdl.SDL_Surface,
+                sdl.TTF_RenderText_Blended(mepo.fonts[20], @ptrCast([*c]const u8, str), (types.Color{ .value = color }).sdl()),
+            );
+            defer sdl.SDL_FreeSurface(text_surf);
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+
+            var dest_rect = sdl.SDL_Rect{
+                .x = offset_x,
+                .y = y_off,
+                .w = undefined,
+                .h = undefined,
+            };
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, texture, null, &dest_rect));
+            max_column_width = std.math.max(max_column_width, text_surf.w);
         }
     }
 }
