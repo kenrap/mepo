@@ -8,7 +8,7 @@ pub const XYZ = struct { x: u32, y: u32, z: u8 };
 pub const Pin = struct {
     lat: f64,
     lon: f64,
-    name: []const u8,
+    name: [:0]const u8,
     category: enum { Instructive, Structural } = .Instructive,
     metadata: std.array_hash_map.StringArrayHashMap([]const u8),
 };

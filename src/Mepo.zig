@@ -190,20 +190,17 @@ fn blit_debug(mepo: *@This()) !void {
     if (mepo.debug_vars) {
         const bbox = mepo.bounding_box();
         const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-        try mepo.blit_multiline_text(
-            0x000000,
-            null,
-            .{},
-            5,
-            5,
-            null,
-            "x: {d}\ny: {d}\nz: {d}\nlat: {d:.5}\nlon: {d:.5}\nbbox: {d:.3}x{d:.3}{s}",
+
+        var arena = std.heap.ArenaAllocator.init(mepo.allocator);
+        defer arena.deinit();
+        const str_x = try std.fmt.allocPrintZ(&arena.allocator, "{d}", .{mepo.get_x()});
+        const str_y = try std.fmt.allocPrintZ(&arena.allocator, "{d}", .{mepo.get_y()});
+        const str_lat = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5}", .{mepo.lat});
+        const str_lon = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5}", .{mepo.lon});
+        const str_bbox = try std.fmt.allocPrintZ(
+            &arena.allocator, 
+            "{d:.3}x{d:.3}{s}",
             .{
-                mepo.get_x(),
-                mepo.get_y(),
-                mepo.zoom,
-                mepo.lat,
-                mepo.lon,
                 utilconversion.distance_haversine(
                     if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                     mepo.lat,
@@ -221,6 +218,22 @@ fn blit_debug(mepo: *@This()) !void {
                 d_unit,
             },
         );
+
+        try mepo.blit_table(
+            0x000000,
+            0x000000,
+            5,
+            5,
+            500,
+            (&[_][2][:0]const u8{
+                ([_][:0]const u8{ "x:", str_x })[0..].*,
+                ([_][:0]const u8{ "y:", str_y })[0..].*,
+                ([_][:0]const u8{ "lat:", str_lat })[0..].*,
+                ([_][:0]const u8{ "lon:", str_lon })[0..].*,
+                ([_][:0]const u8{ "bbox:", str_bbox })[0..].*,
+            })[0..],
+        );
+
     }
 
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
@@ -306,21 +319,9 @@ fn blit_pin_active_text(mepo: *@This()) !void {
 
     const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
     const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
-    try mepo.blit_multiline_text(
-        0x000000,
-        null,
-        .{ .align_y = .Center, .h = overlay_height },
-        5,
-        y_pos,
-        null,
-        \\Pin: {s}
-        \\Coordinates: {d:.5} lat / {d:.5} lon
-        \\Distance: {d:.2}{s} away
-    ,
-        .{
-            pin.name,
-            pin.lat,
-            pin.lon,
+
+    const coords_str = try std.fmt.allocPrintZ(mepo.allocator, "{d:.5} lat / {d:.5} lon", .{pin.lat, pin.lon});
+    const distance_str = try std.fmt.allocPrintZ(mepo.allocator, "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
                 if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                 mepo.lat,
@@ -329,8 +330,21 @@ fn blit_pin_active_text(mepo: *@This()) !void {
                 pin.lon,
             ),
             d_unit,
-        },
+    });
+
+    try mepo.blit_table(
+        0x000000,
+        0x000000,
+        5,
+        y_pos,
+        500,
+        (&[_][2][:0]const u8{
+            ([_][:0]const u8{ "Pin:", pin.name, })[0..].*,
+            ([_][:0]const u8{ "Coords:", coords_str })[0..].*,
+            ([_][:0]const u8{ "Dist:", distance_str  })[0..].*,
+        })[0..],
     );
+
 
     try mepo.blit_multiline_text(
         0x000000,
@@ -670,6 +684,51 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         if (pending_signal) |sig| {
             pending = mepo.event_signal(sig);
             pending_signal = null;
+        }
+    }
+}
+
+pub fn blit_table(
+    mepo: *@This(),
+    color: u24,
+    border_color: u24,
+    x: i32,
+    y: i32,
+    max_table_width: u32,
+    rows: []const [2][:0]const u8
+) !void {
+    var n_columns : usize = n_columns: {
+        var c : usize = 0;
+        for (rows) |row| c = std.math.max(c, row.len);
+        break :n_columns c;
+    };
+
+    var offset_x : c_int = x;
+    var column_i : usize = 0;
+    while (column_i < n_columns) : (column_i += 1) {
+        var max_column_width : c_int = 0;
+        var offset_y : c_int = y;
+        defer offset_x += max_column_width;
+
+        for (rows) |row| {
+            // TODO: check since slices of rows could have uneven number of cols
+            const str = row[column_i];
+            const text_surf = try utilsdl.errorcheck_ptr(
+                sdl.SDL_Surface,
+                sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, str), (types.Color{ .value = color }).sdl()),
+            );
+            defer sdl.SDL_FreeSurface(text_surf);
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+
+            var dest_rect = sdl.SDL_Rect{
+                .x = offset_x,
+                .y = offset_y,
+                .w = text_surf.w,
+                .h = text_surf.h,
+            };
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
+            max_column_width = std.math.max(max_column_width, text_surf.w);
+            offset_y += text_surf.h;
         }
     }
 }
