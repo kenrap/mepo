@@ -10,7 +10,19 @@ pub fn f_pin_meta(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 pub fn pin_meta(mepo: *Mepo, handle: []const u8, key: []const u8, value: []const u8) !void {
+    var pin = pin: {
+        for (mepo.pin_groups[mepo.pin_group_active].pins.items) |pin| {
+            if (std.mem.eql(u8, pin.name, handle)) break :pin pin;
+        }
+        return;
+    };
+
+    if (pin.metadata.get(key)) |old_value| mepo.allocator.free(old_value);
+
     if (value.len == 0) {
-        // Delete pin meta logic
+        _ = pin.metadata.swapRemove(key);
+    } else {
+        const heap_str = mepo.allocator.dupeZ(u8, value);
+        try pin.metadata.put(key, value);
     }
 }
