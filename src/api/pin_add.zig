@@ -17,6 +17,6 @@ fn pin_add(mepo: *Mepo, lat: f64, lon: f64, is_structural: bool, name: []const u
         .lon = lon,
         .category = if (is_structural) .Structural else .Instructive,
         .name = name_heap_allocated,
-        .metadata = std.array_hash_map.StringArrayHashMap([]const u8).init(mepo.allocator),
+        .metadata = std.array_hash_map.StringArrayHashMap([:0]const u8).init(mepo.allocator),
     });
 }
