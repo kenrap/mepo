@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Debug API"
+DISPLAYNAME="Debug: API"
 
 main() {
   OPTIONS='
@@ -27,4 +27,3 @@ main() {
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
-

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="POI Search via Nominatim"
+DISPLAYNAME="POI Search: via Nominatim"
 
 nominatimspecialphrasesfromwiki() {
   curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |

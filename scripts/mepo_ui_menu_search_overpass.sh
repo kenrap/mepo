@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="POI Search via Overpass"
+DISPLAYNAME="POI Search: via Overpass"
 
 OPTIONS='
   Pizza         ["amenity"="restaurant"]["cuisine"="italian"]
