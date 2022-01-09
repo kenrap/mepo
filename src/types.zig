@@ -10,6 +10,7 @@ pub const Pin = struct {
     lon: f64,
     name: []const u8,
     category: enum { Instructive, Structural } = .Instructive,
+    metadata: std.array_hash_map.StringArrayHashMap([]const u8),
 };
 pub const PinGroup = struct {
     pins: std.ArrayList(Pin),
