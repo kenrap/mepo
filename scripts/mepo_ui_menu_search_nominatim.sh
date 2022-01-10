@@ -23,6 +23,7 @@ main() {
   JSONRESULTS="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
   )"
+
   RESULTS="$(
     echo "$JSONRESULTS" |
     jq '.[] | "\(.lat) \(.lon) \(.display_name)"'
