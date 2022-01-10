@@ -8,8 +8,8 @@ pub fn f_preftoggle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     for (&[_]struct { prop: []const u8, ptr: *bool }{
         .{ .prop = "help", .ptr = &mepo.help },
-        .{ .prop = "download_bar", .ptr = &mepo.download_bar },
-        .{ .prop = "debug_vars", .ptr = &mepo.debug_vars },
+        .{ .prop = "overlay_debugbar", .ptr = &mepo.overlay_debugbar },
+        .{ .prop = "overlay_pindetails", .ptr = &mepo.overlay_pindetails },
         .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
         .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },
         .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },

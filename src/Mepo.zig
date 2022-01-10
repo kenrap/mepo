@@ -19,9 +19,7 @@ crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
 debug_tiles: bool = false,
-debug_vars: bool = false,
 distance_unit_tf_km_mi: bool = false,
-download_bar: bool = false,
 drag: ?struct {
     begin_ticks: u32,
     delta_x: i32 = 0,
@@ -32,6 +30,8 @@ fonts: [50]*sdl.TTF_Font,
 help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
+overlay_debugbar: bool = true,
+overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]types.PinGroup = undefined,
@@ -186,85 +186,77 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
     }
 }
 
-fn blit_debug(mepo: *@This()) !void {
-    if (mepo.debug_vars) {
-        const bbox = mepo.bounding_box();
-        const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
+fn blit_overlay_pindetails(mepo: *@This()) !void {
+    if (!mepo.overlay_pindetails) return;
 
-        var arena = std.heap.ArenaAllocator.init(mepo.allocator);
-        defer arena.deinit();
-        const str_coords = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5}, {d:.5}", .{ mepo.lat, mepo.lon });
-        const str_bbox = try std.fmt.allocPrintZ(
-            &arena.allocator,
-            "{d:.3}x{d:.3}{s}",
-            .{
-                utilconversion.distance_haversine(
-                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                    mepo.lat,
-                    bbox.topleft_lon,
-                    mepo.lat,
-                    bbox.bottomright_lon,
-                ),
-                utilconversion.distance_haversine(
-                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                    bbox.topleft_lat,
-                    mepo.lon,
-                    bbox.bottomright_lat,
-                    mepo.lon,
-                ),
-                d_unit,
-            },
-        );
+    const bbox = mepo.bounding_box();
+    const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
 
-        var al = std.ArrayList([2][:0]const u8).init(&arena.allocator);
-        defer al.deinit();
+    var arena = std.heap.ArenaAllocator.init(mepo.allocator);
+    defer arena.deinit();
+    const str_coords = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5}, {d:.5}", .{ mepo.lat, mepo.lon });
+    const str_bbox = try std.fmt.allocPrintZ(
+        &arena.allocator,
+        "{d:.3}x{d:.3}{s}",
+        .{
+            utilconversion.distance_haversine(
+                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                mepo.lat,
+                bbox.topleft_lon,
+                mepo.lat,
+                bbox.bottomright_lon,
+            ),
+            utilconversion.distance_haversine(
+                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                bbox.topleft_lat,
+                mepo.lon,
+                bbox.bottomright_lat,
+                mepo.lon,
+            ),
+            d_unit,
+        },
+    );
 
-        if (mepo.pin_group_active_item) |_| {
-            const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+    var al = std.ArrayList([2][:0]const u8).init(&arena.allocator);
+    defer al.deinit();
 
-            const pin_coords_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
-            const distance_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.2}{s} away", .{
-                utilconversion.distance_haversine(
-                    if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                    mepo.lat,
-                    mepo.lon,
-                    pin.lat,
-                    pin.lon,
-                ),
-                d_unit,
-            });
+    if (mepo.pin_group_active_item) |_| {
+        const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+        const pin_coords_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
+        const distance_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.2}{s} away", .{
+            utilconversion.distance_haversine(
+                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                mepo.lat,
+                mepo.lon,
+                pin.lat,
+                pin.lon,
+            ),
+            d_unit,
+        });
 
-            try al.append(([_][:0]const u8{ "Pin:", pin.name })[0..].*);
-            try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
-            try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
-            for (pin.metadata.keys()) |k| {
-                const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
-                try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
-            }
+        try al.append(([_][:0]const u8{ "Pin:", pin.name })[0..].*);
+        try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
+        try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
+        for (pin.metadata.keys()) |k| {
+            const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
+            try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-
-        try mepo.blit_table(
-            0x000000,
-            0x000000,
-            5,
-            5,
-            500,
-            al.items,
-        );
+        try mepo.blit_table(0x000000, 0x000000, 5, 5, 500, al.items);
     }
 
-    if (mepo.debug_message_enabled and mepo.debug_message != null) {
-        try mepo.blit_multiline_text(
-            0xff0000,
-            types.Color{ .value = 0xffffff, .opacity = 200 },
-            .{ .align_x = .Left, .align_y = .Bottom },
-            0,
-            5,
-            null,
-            "DEBUG: {s}",
-            .{mepo.debug_message.?},
-        );
-    }
+    // TODO:
+    //  if (mepo.debug_message_enabled and mepo.debug_message != null) {
+    //      try mepo.blit_multiline_text(
+    //          0xff0000,
+    //          types.Color{ .value = 0xffffff, .opacity = 200 },
+    //          .{ .align_x = .Left, .align_y = .Bottom },
+    //          0,
+    //          5,
+    //          null,
+    //          "DEBUG: {s}",
+    //          .{mepo.debug_message.?},
+    //      );
+    //  }
 }
 
 fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
@@ -320,12 +312,10 @@ fn blit_pins(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin_active_text(mepo: *@This()) !void {}
-
-fn blit_download_bar(mepo: *@This()) !void {
-    if (!mepo.download_bar) return;
-
-    try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff, .opacity = 100 }, sdl.SDL_Rect{
+fn blit_overlay_debugbar(mepo: *@This()) !void {
+    if (!mepo.overlay_debugbar) return;
+    const bg: types.Color = if (mepo.tile_cache.thread_download != null) .{ .value = 0xffffff, .opacity = 100 } else .{ .value = 0xffdfd1, .opacity = 255 };
+    try utilsdl.sdl_renderer_rect(mepo.renderer, bg, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.win_h) - 20,
         .w = @intCast(i32, mepo.win_w),
@@ -425,11 +415,10 @@ pub fn blit(mepo: *@This()) !void {
         },
         mepo.zoom,
     );
-    try mepo.blit_debug();
     try mepo.blit_pins();
-    try mepo.blit_pin_active_text();
     try mepo.blit_crosshair();
-    try mepo.blit_download_bar();
+    try mepo.blit_overlay_pindetails();
+    try mepo.blit_overlay_debugbar();
     try mepo.blit_help();
 
     sdl.SDL_RenderPresent(mepo.renderer);
