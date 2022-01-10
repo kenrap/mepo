@@ -51,6 +51,18 @@ main() {
     awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
     sed 's/[^[:print:]]//g' |
     xargs -ID echo 'pin_add 0 D;'
+
+  # Add pin metadata
+  echo "$JSON_RESULTS" | jq '
+    [.elements | .[] | .tags | select(. != null and .name != null)] | 
+    map(
+      .name as $handle | 
+      to_entries |  
+      map("pin_meta [" + $handle + "] [" + .key + "] [" + .value + "];")
+    ) | 
+    flatten(3) |
+    .[]
+  ' | tr -d ',"'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
