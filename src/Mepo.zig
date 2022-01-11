@@ -630,39 +630,57 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 }
 
 pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32, max_table_width: u32, rows: []const [2][:0]const u8) !void {
-    var n_columns: usize = n_columns: {
-        var c: usize = 0;
-        for (rows) |row| c = std.math.max(c, row.len);
-        break :n_columns c;
-    };
+    const n_columns: usize = 2;
+    var width_label: c_int = 0;
+    var width_value: c_int = 0;
+    var height_row: c_int = 0;
 
-    var offset_x: c_int = x;
-    var column_i: usize = 0;
-    while (column_i < n_columns) : (column_i += 1) {
-        var max_column_width: c_int = 0;
-        var offset_y: c_int = y;
-        defer offset_x += max_column_width;
+    // Precalculate width/height for each label
+    for (rows) |row| {
+        const surf_lab = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
+        );
+        defer sdl.SDL_FreeSurface(surf_lab);
+        const surf_val = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
+        );
+        defer sdl.SDL_FreeSurface(surf_val);
+        width_label = std.math.max(width_label, surf_lab.w);
+        width_value = std.math.max(width_label, surf_val.w);
+    }
 
-        for (rows) |row| {
-            // TODO: check since slices of rows could have uneven number of cols
-            const str = row[column_i];
-            const text_surf = try utilsdl.errorcheck_ptr(
-                sdl.SDL_Surface,
-                sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, str), (types.Color{ .value = color }).sdl()),
-            );
-            defer sdl.SDL_FreeSurface(text_surf);
-            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
+    for (rows) |row, row_i| {
+        // Label
+        const surf_lab = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
+        );
+        const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
+        defer sdl.SDL_FreeSurface(surf_lab);
+        var dest_rect = sdl.SDL_Rect{
+            .x = x,
+            .y = @intCast(c_int, row_i) * surf_lab.h,
+            .w = surf_lab.w,
+            .h = surf_lab.h,
+        };
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_lab, null, &dest_rect));
 
-            var dest_rect = sdl.SDL_Rect{
-                .x = offset_x,
-                .y = offset_y,
-                .w = text_surf.w,
-                .h = text_surf.h,
-            };
-            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect));
-            max_column_width = std.math.max(max_column_width, text_surf.w);
-            offset_y += text_surf.h;
-        }
+        // Value
+        const surf_value = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
+        );
+        const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
+        defer sdl.SDL_FreeSurface(surf_value);
+        var dest_rect2 = sdl.SDL_Rect{
+            .x = x + width_label,
+            .y = @intCast(c_int, row_i) * surf_value.h,
+            .w = surf_value.w,
+            .h = surf_value.h,
+        };
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_value, null, &dest_rect2));
     }
 }
 
