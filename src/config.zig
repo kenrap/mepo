@@ -63,8 +63,8 @@ pub const DefaultBaseConfig =
     \\ bind_key _ [0] [pin_groupprefset 9 active 1];
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ d [preftoggle debug_tiles];
-    \\ bind_key _ e [preftoggle debug_vars];
-    \\ bind_key _ s [preftoggle download_bar];
+    \\ bind_key _ e [preftoggle overlay_pindetails];
+    \\ bind_key _ s [preftoggle overlay_debugbar];
     \\ bind_key _ m [preftoggle tile_cache_network];
     \\ bind_key s c [center_on_mouse];
     \\
@@ -79,8 +79,8 @@ pub const DefaultBaseConfig =
     \\ prefset debug_message_enabled 1;
     \\ prefset debug_stderr 1;
     \\ prefset debug_tiles 0;
-    \\ prefset debug_vars 1;
-    \\ prefset download_bar 1;
+    \\ prefset overlay_debugbar 1;
+    \\ prefset overlay_pindetails 1;
     \\ prefset zoom 14;
     \\ prefset tile_cache_network 1;
     \\ prefset tile_cache_max_n_transfers 20;

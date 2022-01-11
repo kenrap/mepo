@@ -12,9 +12,9 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
         .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },
         .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },
-        .{ .prop = "debug_vars", .ptr = &mepo.debug_vars },
         .{ .prop = "distance_unit_tf_km_mi", .ptr = &mepo.distance_unit_tf_km_mi },
-        .{ .prop = "download_bar", .ptr = &mepo.download_bar },
+        .{ .prop = "overlay_debugbar", .ptr = &mepo.overlay_debugbar },
+        .{ .prop = "overlay_pindetails", .ptr = &mepo.overlay_pindetails },
         .{ .prop = "help", .ptr = &mepo.help },
     }) |stg| {
         if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = args[1].Number == 1;
