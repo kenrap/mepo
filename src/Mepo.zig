@@ -241,7 +241,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        try mepo.blit_table(0x000000, 0x000000, 5, 5, 500, al.items);
+        try mepo.blit_table(5, 5, 5, al.items);
     }
 
     // TODO:
@@ -629,11 +629,12 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32, max_table_width: u32, rows: []const [2][:0]const u8) !void {
-    const n_columns: usize = 2;
+pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
     var width_label: c_int = 0;
     var width_value: c_int = 0;
     var height_row: c_int = 0;
+
+    const border_color = types.Color{ .value = 0x888888, .opacity = 255 };
 
     // Precalculate width/height for each label
     for (rows) |row| {
@@ -652,20 +653,23 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         height_row = surf_lab.h;
     }
 
+    // Background color & border
     try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, sdl.SDL_Rect{
         .x = x,
         .y = y,
-        .w = width_label + width_value,
+        .w = width_label + width_value + padding * 4,
         .h = height_row * @intCast(c_int, rows.len),
     }, .Fill);
-    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
         .x = x,
         .y = y,
-        .w = width_label + width_value,
+        .w = width_label + width_value + padding * 4,
         .h = height_row * @intCast(c_int, rows.len),
     }, .Draw);
-    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
-        .x = x + width_label,
+
+    // Column divider
+    try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
+        .x = x + width_label + padding * 2,
         .y = y,
         .w = 1,
         .h = height_row * @intCast(c_int, rows.len),
@@ -680,7 +684,7 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
         var dest_rect_lab = sdl.SDL_Rect{
-            .x = x,
+            .x = x + padding,
             .y = @intCast(c_int, row_i) * surf_lab.h,
             .w = surf_lab.w,
             .h = surf_lab.h,
@@ -695,17 +699,18 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
         var dest_rect_val = sdl.SDL_Rect{
-            .x = x + width_label,
+            .x = x + width_label + padding * 3,
             .y = @intCast(c_int, row_i) * surf_value.h,
             .w = surf_value.w,
             .h = surf_value.h,
         };
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_value, null, &dest_rect_val));
 
-        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
+        // Horizontal border between rows
+        try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
             .x = x,
-            .y = @intCast(c_int, row_i) * surf_value.h - 1,
-            .w = width_label + width_value,
+            .y = @intCast(c_int, row_i) * surf_value.h,
+            .w = width_label + width_value + padding * 4,
             .h = 1,
         }, .Fill);
     }
