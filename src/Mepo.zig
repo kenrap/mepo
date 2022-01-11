@@ -299,6 +299,21 @@ fn blit_pins(mepo: *@This()) !void {
                     .h = size,
                 }, .Fill);
 
+            // Draw Pin label for current pin group
+            if (item.category == .Instructive and pin_group_i == mepo.pin_group_active) {
+                const pin_label_bg = .{ .value = 0xffffff, .opacity = 100 };
+                try mepo.blit_multiline_text(
+                    0x000000,
+                    pin_label_bg,
+                    .{},
+                    x,
+                    y,
+                    10,
+                    "{s}",
+                    .{item.name},
+                );
+            }
+
             // Draw connecting line for ordered pin group
             if (pin_group.ordered and prev_pin != null) {
                 try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
