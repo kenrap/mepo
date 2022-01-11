@@ -2,12 +2,15 @@
 DISPLAYNAME="POI Search: via Overpass"
 
 OPTIONS='
+  Bars          ["amenity"="bar"]
+  Restraunt     ["amenity"="restaurant"]
   Pizza         ["amenity"="restaurant"]["cuisine"="italian"]
   Indian        ["amenity"="restaurant"]["cuisine"="indian"]
   Supermarket   ["shop"="supermarket"]
   Coffeshop     ["amenity"="cafe"]
   Supermarket   ["shop"="supermarket"]
   Grocery       ["shop"="grocery"]
+  Bathrooms     ["amenity"="toilets"]
 '
 
 main() {
