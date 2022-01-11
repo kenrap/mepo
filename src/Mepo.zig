@@ -648,8 +648,28 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         );
         defer sdl.SDL_FreeSurface(surf_val);
         width_label = std.math.max(width_label, surf_lab.w);
-        width_value = std.math.max(width_label, surf_val.w);
+        width_value = std.math.max(width_value, surf_val.w);
+        height_row = surf_lab.h;
     }
+
+    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, sdl.SDL_Rect{
+        .x = x,
+        .y = y,
+        .w = width_label + width_value,
+        .h = height_row * @intCast(c_int, rows.len),
+    }, .Fill);
+    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
+        .x = x,
+        .y = y,
+        .w = width_label + width_value,
+        .h = height_row * @intCast(c_int, rows.len),
+    }, .Draw);
+    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
+        .x = x + width_label,
+        .y = y,
+        .w = 1,
+        .h = height_row * @intCast(c_int, rows.len),
+    }, .Fill);
 
     for (rows) |row, row_i| {
         // Label
@@ -659,13 +679,13 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
-        var dest_rect = sdl.SDL_Rect{
+        var dest_rect_lab = sdl.SDL_Rect{
             .x = x,
             .y = @intCast(c_int, row_i) * surf_lab.h,
             .w = surf_lab.w,
             .h = surf_lab.h,
         };
-        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_lab, null, &dest_rect));
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_lab, null, &dest_rect_lab));
 
         // Value
         const surf_value = try utilsdl.errorcheck_ptr(
@@ -674,13 +694,20 @@ pub fn blit_table(mepo: *@This(), color: u24, border_color: u24, x: i32, y: i32,
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
-        var dest_rect2 = sdl.SDL_Rect{
+        var dest_rect_val = sdl.SDL_Rect{
             .x = x + width_label,
             .y = @intCast(c_int, row_i) * surf_value.h,
             .w = surf_value.w,
             .h = surf_value.h,
         };
-        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_value, null, &dest_rect2));
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_value, null, &dest_rect_val));
+
+        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x000000, .opacity = 255 }, sdl.SDL_Rect{
+            .x = x,
+            .y = @intCast(c_int, row_i) * surf_value.h - 1,
+            .w = width_label + width_value,
+            .h = 1,
+        }, .Fill);
     }
 }
 
