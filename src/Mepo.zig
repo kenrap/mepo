@@ -641,7 +641,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
@@ -689,7 +689,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
         defer sdl.SDL_FreeSurface(surf_lab);
         var dest_rect_lab = sdl.SDL_Rect{
             .x = x + padding,
-            .y = @intCast(c_int, row_i) * surf_lab.h,
+            .y = y + @intCast(c_int, row_i) * surf_lab.h,
             .w = surf_lab.w,
             .h = surf_lab.h,
         };
@@ -705,7 +705,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
         defer sdl.SDL_FreeSurface(surf_value);
         var dest_rect_val = sdl.SDL_Rect{
             .x = x + width_label + padding * 3,
-            .y = @intCast(c_int, row_i) * surf_value.h,
+            .y = y + @intCast(c_int, row_i) * surf_value.h,
             .w = surf_value.w,
             .h = surf_value.h,
         };
@@ -714,7 +714,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
         // Horizontal border between rows
         try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
             .x = x,
-            .y = @intCast(c_int, row_i) * surf_value.h,
+            .y = y + @intCast(c_int, row_i) * surf_value.h,
             .w = width_label + width_value + padding * 4,
             .h = 1,
         }, .Fill);
