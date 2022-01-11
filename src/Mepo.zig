@@ -26,7 +26,8 @@ drag: ?struct {
     delta_y: i32 = 0,
 } = null,
 drag_scale: u8 = 1,
-fonts: [50]*sdl.TTF_Font,
+fonts_normal: [50]*sdl.TTF_Font,
+fonts_bold: [50]*sdl.TTF_Font,
 help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
@@ -640,12 +641,12 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
         );
         defer sdl.SDL_FreeSurface(surf_val);
         width_label = std.math.max(width_label, surf_lab.w);
@@ -676,10 +677,13 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
     }, .Fill);
 
     for (rows) |row, row_i| {
+
+
         // Label
+        //sdl.TTF_SetFontStyle(mepo.fonts[config.FontSize], sdl.TTF_STYLE_BOLD);
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
@@ -692,9 +696,10 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_lab, null, &dest_rect_lab));
 
         // Value
+        //sdl.TTF_SetFontStyle(mepo.fonts[config.FontSize], sdl.TTF_STYLE_NORMAL);
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
@@ -732,7 +737,7 @@ pub fn blit_multiline_text(
 
     const font_size = font_size: {
         if (font_size_opt) |font_size| {
-            if (font_size > mepo.fonts.len) return error.FontTooBig else break :font_size font_size;
+            if (font_size > mepo.fonts_normal.len) return error.FontTooBig else break :font_size font_size;
         } else {
             break :font_size config.FontSize;
         }
@@ -755,7 +760,7 @@ pub fn blit_multiline_text(
 
             const text_surf = try utilsdl.errorcheck_ptr(
                 sdl.SDL_Surface,
-                sdl.TTF_RenderText_Blended(mepo.fonts[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).sdl()),
+                sdl.TTF_RenderText_Blended(mepo.fonts_normal[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).sdl()),
             );
             defer sdl.SDL_FreeSurface(text_surf);
 
@@ -879,14 +884,14 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         break :window w;
     };
 
+    // Initialize TTF, load fonts
+    try utilsdl.errorcheck(sdl.TTF_Init());
+    const font_dat = @embedFile("../assets/inconsolata.ttf");
+
     // Create struct
     var instance = @as(@This(), .{
         .allocator = allocator,
-        .fonts = fonts: {
-            // Initialize TTF, load fonts
-            try utilsdl.errorcheck(sdl.TTF_Init());
-
-            const font_dat = @embedFile("../assets/inconsolata.ttf");
+        .fonts_normal = fonts: {
             var fonts: [50]*sdl.TTF_Font = undefined;
             var font_size: usize = 0;
             while (font_size < fonts.len) : (font_size += 1) {
@@ -898,6 +903,22 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
                         @intCast(c_int, font_size),
                     ),
                 );
+            }
+            break :fonts fonts;
+        },
+        .fonts_bold = fonts: {
+            var fonts: [50]*sdl.TTF_Font = undefined;
+            var font_size: usize = 0;
+            while (font_size < fonts.len) : (font_size += 1) {
+                fonts[font_size] = try utilsdl.errorcheck_ptr(
+                    sdl.TTF_Font,
+                    sdl.TTF_OpenFontRW(
+                        sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len),
+                        1,
+                        @intCast(c_int, font_size),
+                    ),
+                );
+                sdl.TTF_SetFontStyle(fonts[font_size], sdl.TTF_STYLE_BOLD);
             }
             break :fonts fonts;
         },
