@@ -512,7 +512,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
                 if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
                     closest_match_pin = .{
                         .pin_group_i = @intCast(u8, pin_group_i),
-                        .pin_i = @intCast(u8, pin_i),
+                        .pin_i = @intCast(u32, pin_i),
                         .delta_dist = delta,
                     };
                 }
