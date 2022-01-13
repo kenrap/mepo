@@ -24,7 +24,7 @@ apk add curl-dev sdl2-dev sdl2_image-dev sdl2_ttf-dev
 Run all files through zig fmt:
 
 ```sh
-ag -g zig | xargs zig fmt
+scriptsdev/mepo_dev_zigfmt.sh
 ```
 
 ## Hacking Guide: Concurrency Model
