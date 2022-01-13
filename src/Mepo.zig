@@ -121,6 +121,7 @@ pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off:
     try mepo.blit_multiline_text(
         0x000000,
         null,
+        null,
         .{},
         @intCast(i32, tile_x * config.Tsize) - x_off,
         @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -159,6 +160,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try mepo.blit_multiline_text(
                 0x000000,
                 null,
+                null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
@@ -175,6 +177,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
             try mepo.blit_multiline_text(
                 0x000000,
+                null,
                 null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
                 @intCast(i32, tile_x * config.Tsize) - x_off,
@@ -302,8 +305,10 @@ fn blit_pins(mepo: *@This()) !void {
             // Draw Pin label for current pin group
             if (item.category == .Instructive and pin_group_i == mepo.pin_group_active) {
                 const pin_label_bg = .{ .value = 0xffffff, .opacity = 100 };
+                const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
                 try mepo.blit_multiline_text(
                     0x000000,
+                    pin_label_border,
                     pin_label_bg,
                     .{},
                     x,
@@ -347,6 +352,7 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
     try mepo.blit_multiline_text(
         0x000000,
         null,
+        null,
         .{ .align_x = .Right },
         0,
         @intCast(i32, mepo.win_h) - 20 + 3,
@@ -356,6 +362,7 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
     );
     try mepo.blit_multiline_text(
         0x000000,
+        null,
         null,
         .{},
         5,
@@ -407,6 +414,7 @@ fn blit_help(mepo: *@This()) !void {
 
     try mepo.blit_multiline_text(
         0x000000,
+        null,
         types.Color{ .value = 0xe8e8e8, .opacity = 120 },
         .{ .align_x = .Center, .align_y = .Center },
         0,
@@ -771,6 +779,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
 pub fn blit_multiline_text(
     mepo: *@This(),
     color: u24,
+    border_opt: ?types.Color,
     background_opt: ?types.Color,
     alignment: types.BoxAlignment,
     x: i32,
@@ -846,6 +855,10 @@ pub fn blit_multiline_text(
         // Render background
         if (background_opt) |background|
             try utilsdl.sdl_renderer_rect(mepo.renderer, background, sdl.SDL_Rect{ .x = x_off, .y = y_off, .w = textures_width, .h = textures_height }, .Fill);
+
+        // Render border
+        if (border_opt) |border|
+            try utilsdl.sdl_renderer_rect(mepo.renderer, border, sdl.SDL_Rect{ .x = x_off, .y = y_off, .w = textures_width, .h = textures_height }, .Draw);
 
         // Reder text
         for (textures) |texture| {
