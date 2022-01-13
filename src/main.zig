@@ -4,7 +4,6 @@ const Mepo = @import("./Mepo.zig");
 const Downloader = @import("./Downloader.zig");
 const TileCache = @import("./TileCache.zig");
 const sdl = @import("./sdlshim.zig");
-const utilstrings = @import("./util/utilstrings.zig");
 const utildbg = @import("./util/utildbg.zig");
 
 pub fn main() !void {

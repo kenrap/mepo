@@ -1,7 +1,8 @@
-const Builder = @import("std").build.Builder;
 const std = @import("std");
+const Builder = std.build.Builder;
+const LibExeObjStep = std.build.LibExeObjStep;
 
-fn setDependencies(b: *Builder, step: *std.build.LibExeObjStep) void {
+fn setDependencies(step: *std.build.LibExeObjStep) void {
     step.linkSystemLibrary("c");
     step.linkSystemLibrary("SDL2");
     step.linkSystemLibrary("SDL2_gfx");
@@ -13,7 +14,7 @@ fn setDependencies(b: *Builder, step: *std.build.LibExeObjStep) void {
 pub fn build(b: *Builder) void {
     b.installDirectory(.{
         .source_dir = "scripts",
-        .install_dir = .{ .Bin = .{} },
+        .install_dir = .{ .bin = .{} },
         .install_subdir = "",
     });
     b.installFile("assets/mepo.desktop", "share/applications/mepo.desktop");
@@ -26,7 +27,7 @@ pub fn build(b: *Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
-    setDependencies(b, exe);
+    setDependencies(exe);
 
     exe.install();
 
@@ -39,6 +40,6 @@ pub fn build(b: *Builder) void {
     // Setup test
     const test_all_step = b.step("test", "Run all tests.");
     const run_tests = b.addTest("./src/test.zig");
-    setDependencies(b, run_tests);
+    setDependencies(run_tests);
     test_all_step.dependOn(&run_tests.step);
 }

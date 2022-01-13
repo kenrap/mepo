@@ -344,6 +344,8 @@ fn curl_callback_tile_xferinfo(
     ul_now: curl.curl_off_t,
 ) callconv(.C) c_uint {
     //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
+    _ = ul_total;
+    _ = ul_now;
     var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
     tile_data.progress_dl_now = dl_now;
     tile_data.progress_dl_total = dl_total;
@@ -419,7 +421,6 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
         curl.CURLE_OK => {
             if (tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
-                const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
                 if (tile_cache.cache_dir) |cache_dir| {
@@ -483,9 +484,7 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
     if (tile_cache.cache_dir) |cache_dir| {
         const png = try png_path(tile_cache.allocator, tile_cache.source_url, coords);
         defer tile_cache.allocator.free(png);
-        const tile_file = cache_dir.openFile(png, .{}) catch |_| {
-            return false;
-        };
+        const tile_file = cache_dir.openFile(png, .{}) catch return false;
         defer tile_file.close();
         if (tile_cache.expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + tile_cache.expiry_seconds) {
             return true;

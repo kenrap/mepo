@@ -2,7 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub fn f_center_on_pin(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+pub fn f_center_on_pin(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     try center_on_pin(mepo);
 }
 

@@ -17,7 +17,6 @@ pub fn f_cache_dlradius(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !vo
 }
 
 fn cache_dlradius(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, zoom_max: i32, km_radius: f64) !void {
-    const step_km = 1;
     var start_lat = center_lat;
     var end_lat = center_lat;
     var start_lon = center_lon;

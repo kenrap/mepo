@@ -146,7 +146,7 @@ test "tokenize" {
         // e.g. treats [] brackets as individual tokens irregardless of whitespace (test [foo])
         const input = "foo bar [baz]";
         var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
-        var result = try tokenize(std.heap.c_allocator, "foo bar [baz]");
+        var result = try tokenize(std.heap.c_allocator, input);
         try std.testing.expectEqual(@intCast(usize, 5), result.len);
         for (result) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));

@@ -5,7 +5,7 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
-pub fn f_cache_queueclear(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+pub fn f_cache_queueclear(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     try cache_queueclear(mepo);
 }
 

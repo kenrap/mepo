@@ -6,7 +6,6 @@ const errors = @import("./errors.zig");
 const TileCache = @import("./TileCache.zig");
 const utilconversion = @import("./util/utilconversion.zig");
 const utilmepolang = @import("util/utilmepolang.zig");
-const utilstrings = @import("util/utilstrings.zig");
 const utilplatform = @import("util/utilplatform.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
@@ -179,7 +178,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .transfer_datum => {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
         },
-        .error_type => |error_type| {
+        .error_type => {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffdfd1 }, rect_intersect, .Fill);
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
             try mepo.blit_multiline_text(
@@ -205,28 +204,6 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
-    const str_coords = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5}, {d:.5}", .{ mepo.lat, mepo.lon });
-    const str_bbox = try std.fmt.allocPrintZ(
-        &arena.allocator,
-        "{d:.3}x{d:.3}{s}",
-        .{
-            utilconversion.distance_haversine(
-                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                mepo.lat,
-                bbox.topleft_lon,
-                mepo.lat,
-                bbox.bottomright_lon,
-            ),
-            utilconversion.distance_haversine(
-                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
-                bbox.topleft_lat,
-                mepo.lon,
-                bbox.bottomright_lat,
-                mepo.lon,
-            ),
-            d_unit,
-        },
-    );
 
     var al = std.ArrayList([2][:0]const u8).init(arena.allocator);
     if (mepo.pin_group_active_item) |_| {
@@ -808,12 +785,12 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_quit(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_quit(_: *@This(), _: sdl.SDL_Event) types.Pending {
     graceful_terminate();
     return .None;
 }
 
-fn event_unhandled(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
     utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
     return .None;
 }
