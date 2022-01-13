@@ -61,7 +61,7 @@ pub fn main() !void {
     }
 }
 
-fn read_stdin(allocator: *std.mem.Allocator) anyerror![]const u8 {
+fn read_stdin(allocator: std.mem.Allocator) anyerror![]const u8 {
     const stream = &std.io.getStdIn().reader();
     const buffer = try allocator.alloc(u8, 1024 * 100);
     _ = try stream.read(buffer);

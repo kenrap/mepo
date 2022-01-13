@@ -7,7 +7,7 @@ const wordexp = @cImport({
 /// expansion.
 ///
 /// Caller responsible for freeing returned ptr memory
-pub fn wordexp_filepath(allocator: *std.mem.Allocator, path: []const u8) ![:0]const u8 {
+pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]const u8 {
     var expansion: wordexp.wordexp_t = undefined;
     defer wordexp.wordfree(&expansion);
 

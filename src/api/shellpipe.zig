@@ -17,12 +17,12 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     defer arena.deinit();
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
+        try std.fmt.allocPrint(arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
     try mepo.blit();
 
     const env_vars = env_vars: {
-        var v = try std.process.getEnvMap(&arena.allocator);
+        var v = try std.process.getEnvMap(arena.allocator);
         const bbox = mepo.bounding_box();
 
         // TODO: maybe this should be in seperate/helper fn?
@@ -33,28 +33,28 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
         const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, mepo.zoom);
 
         // Window and zoom info
-        try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_w}));
-        try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_h}));
-        try v.put("MEPO_ZOOM", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.zoom}));
+        try v.put("MEPO_WIN_W", try std.fmt.allocPrint(arena.allocator, "{d}", .{mepo.win_w}));
+        try v.put("MEPO_WIN_H", try std.fmt.allocPrint(arena.allocator, "{d}", .{mepo.win_h}));
+        try v.put("MEPO_ZOOM", try std.fmt.allocPrint(arena.allocator, "{d}", .{mepo.zoom}));
 
         // Center and bbox
-        try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
-        try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
-        try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lat}));
-        try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lon}));
-        try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lat}));
-        try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lon}));
+        try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(arena.allocator, "{d}", .{mepo.lat}));
+        try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(arena.allocator, "{d}", .{mepo.lon}));
+        try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(arena.allocator, "{d}", .{bbox.topleft_lat}));
+        try v.put("MEPO_TL_LON", try std.fmt.allocPrint(arena.allocator, "{d}", .{bbox.topleft_lon}));
+        try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(arena.allocator, "{d}", .{bbox.bottomright_lat}));
+        try v.put("MEPO_BR_LON", try std.fmt.allocPrint(arena.allocator, "{d}", .{bbox.bottomright_lon}));
 
         // Cursor position
-        try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{cursor_lat}));
-        try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{cursor_lon}));
+        try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(arena.allocator, "{d}", .{cursor_lat}));
+        try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(arena.allocator, "{d}", .{cursor_lon}));
 
         break :env_vars v;
     };
 
     const args = [_][]const u8{ "sh", "-c", cmd };
     const process_result = try std.ChildProcess.exec(.{
-        .allocator = &arena.allocator,
+        .allocator = arena.allocator,
         .argv = args[0..],
         .env_map = &env_vars,
         .max_output_bytes = 10000 * 1024,
@@ -62,7 +62,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     const exitcode = process_result.term.Exited;
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
+        try std.fmt.allocPrint(arena.allocator, "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
     );
     try mepo.blit();
 

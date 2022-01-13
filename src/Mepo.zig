@@ -14,7 +14,7 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 var pending_signal: ?u6 = null;
-allocator: *std.mem.Allocator,
+allocator: std.mem.Allocator,
 crosshair_on: bool = true,
 crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
@@ -228,11 +228,11 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         },
     );
 
-    var al = std.ArrayList([2][:0]const u8).init(&arena.allocator);
+    var al = std.ArrayList([2][:0]const u8).init(arena.allocator);
     if (mepo.pin_group_active_item) |_| {
         const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
-        const pin_coords_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
-        const distance_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.2}{s} away", .{
+        const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
+        const distance_str = try std.fmt.allocPrintZ(arena.allocator, "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
                 if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                 mepo.lat,
@@ -249,11 +249,11 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         }
         try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
         try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
-            &arena.allocator,
+            arena.allocator,
             "Group {d}:",
             .{mepo.pin_group_active + 1},
         ), try std.fmt.allocPrintZ(
-            &arena.allocator,
+            arena.allocator,
             "{d} of {d} ",
             .{
                 mepo.pin_group_active_item.? + 1,
@@ -262,7 +262,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         ) })[0..].*);
         try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
         for (pin.metadata.keys()) |k| {
-            const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
+            const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
         try mepo.blit_table(5, 5, 5, al.items);
@@ -844,13 +844,13 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     // cleaner that way, but either way underlying tests / fn boundaries &
     // API would stay the same..
 
-    for (try utilmepolang.statementize(&arena.allocator, try utilmepolang.tokenize(&arena.allocator, mepolang_text))) |statement| {
+    for (try utilmepolang.statementize(arena.allocator(), try utilmepolang.tokenize(arena.allocator(), mepolang_text))) |statement| {
         utildbg.log("Executing statment: {s}\n", .{statement});
         if (statement.len < 1) continue;
 
         // Lookup and run fn
         if (FnTable.get(statement[0])) |func| {
-            const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.argize(&arena.allocator, statement[1..statement.len]);
+            const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             func(mepo, args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
@@ -1162,7 +1162,7 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
     pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
-pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool, cfg_opt: ?[]const u8) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool, cfg_opt: ?[]const u8) anyerror!@This() {
     // Dump debug info about SDL version compiled/linked
     {
         const version = v: {

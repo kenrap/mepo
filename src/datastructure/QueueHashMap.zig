@@ -82,7 +82,7 @@ pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type 
             self.array_hash_map.clearAndFree();
         }
 
-        pub fn init(allocator: *std.mem.Allocator) @This() {
+        pub fn init(allocator: std.mem.Allocator) @This() {
             return @as(@This(), .{
                 .mutex = std.Thread.Mutex{},
                 .array_hash_map = std.array_hash_map.AutoArrayHashMap(key_type, metadata_type).init(allocator),

@@ -44,7 +44,7 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, si
             self.array_hash_map.clearAndFree();
         }
 
-        pub fn init(allocator: *std.mem.Allocator) @This() {
+        pub fn init(allocator: std.mem.Allocator) @This() {
             return @as(@This(), .{
                 .size = size,
                 .mutex = std.Thread.Mutex{},

@@ -5,7 +5,7 @@ const types = @import("../types.zig");
 /// union types.
 ///
 /// Caller responsible for freeing returned memory
-pub fn argize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![types.MepoFnNargs]types.MepoArg {
+pub fn argize(allocator: std.mem.Allocator, tokens: []const []const u8) ![types.MepoFnNargs]types.MepoArg {
     var args_i: usize = 0;
     var args: [types.MepoFnNargs]types.MepoArg = undefined;
     var i: usize = 0;
@@ -40,7 +40,7 @@ pub fn argize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![types
 /// always be treated as seperate tokens
 ///
 /// Caller responsible for freeing returned memory
-pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 {
+pub fn tokenize(allocator: std.mem.Allocator, input: []const u8) ![][]const u8 {
     var tokens = std.ArrayList([]const u8).init(allocator);
     var current_token = std.ArrayList(u8).init(allocator);
 
@@ -68,7 +68,7 @@ pub fn tokenize(allocator: *std.mem.Allocator, input: []const u8) ![][]const u8 
 /// "foo [bar [ bil; jil ]; ]; bar; barn" that would be treated as 3 statements.
 ///
 /// Caller responsible for freeing returned memory
-pub fn statementize(allocator: *std.mem.Allocator, tokens: []const []const u8) ![][][]const u8 {
+pub fn statementize(allocator: std.mem.Allocator, tokens: []const []const u8) ![][][]const u8 {
     var statements = std.ArrayList([][]const u8).init(allocator);
     var current_statement = std.ArrayList([]const u8).init(allocator);
     var nest_level: usize = 0;
@@ -202,7 +202,7 @@ test "argize" {
     };
 
     for (specs) |s| {
-        const result = try argize(&arena.allocator, s.input[0..]);
+        const result = try argize(arena.allocator(), s.input[0..]);
         for (s.expect) |_, i| {
             try std.testing.expectEqual(@TypeOf(s.expect[i]), @TypeOf(result[i]));
             switch (result[i]) {

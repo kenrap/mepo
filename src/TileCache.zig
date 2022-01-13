@@ -39,7 +39,7 @@ const TileData = union(TileDataTag) {
 const TileDataTag = enum { transfer_datum, texture, queued_position, error_type };
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
-allocator: *std.mem.Allocator,
+allocator: std.mem.Allocator,
 thread_download: ?*sdl.SDL_Thread = null,
 thread_queuebbox: ?*sdl.SDL_Thread = null,
 bbox_queue: ?DownloadBBoxRequest = null,
@@ -467,7 +467,7 @@ fn load_data_to_surface(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*s
     return try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
 }
 
-fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ) ![]u8 {
+fn png_path(allocator: std.mem.Allocator, source: []const u8, coords: types.XYZ) ![]u8 {
     var source_hash: [32:0]u8 = undefined;
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
     return try std.fmt.allocPrint(
@@ -513,8 +513,8 @@ fn threadable_download_loop_sdl(userdata: ?*c_void) callconv(.C) c_int {
     return 0;
 }
 
-pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
-    if (curl.curl_multi_init()) |curl_multi| {
+pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
+    if (curl.curl_multi_init()) |_| {
         return @as(@This(), .{
             .allocator = allocator,
             .curl_multi = curl.curl_multi_init().?,
