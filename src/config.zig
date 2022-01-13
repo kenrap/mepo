@@ -95,6 +95,11 @@ pub const DefaultBaseConfig =
     \\ pin_groupprefset 2 color #7502ab;
     \\ pin_groupprefset 3 color #cf0064;
     \\ pin_groupprefset 4 color #b89600;
+    \\ pin_groupprefset 0 visible 1;
+    \\ pin_groupprefset 1 visible 1;
+    \\ pin_groupprefset 2 visible 1;
+    \\ pin_groupprefset 3 visible 1;
+    \\ pin_groupprefset 4 visible 1;
     \\
     \\ pin_add 0 40.7418 -73.9899 baz;
     \\ pin_meta baz bill barn;
