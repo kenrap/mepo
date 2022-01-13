@@ -385,8 +385,8 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
 
 /// Show progress indicator for the download loop (for non interactive downloading)
 fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: usize) void {
-    std.debug.warn("\x1b[1;1H\x1b[2J", .{});
-    std.debug.warn(
+    std.debug.print("\x1b[1;1H\x1b[2J", .{});
+    std.debug.print(
         \\Mepo - download mode
         \\====================
         \\Progress: {d:.2}% ({}/{} tiles downloaded)

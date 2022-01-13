@@ -3,7 +3,7 @@ const utilconversion = @import("util/utilconversion.zig");
 const TileCache = @import("./TileCache.zig");
 
 pub fn cache_dlbbox(tile_cache: *TileCache, download_request_str: []const u8) !void {
-    std.debug.warn("Downloading based on BBox request: {s}\n", .{download_request_str});
+    std.debug.print("Downloading based on BBox request: {s}\n", .{download_request_str});
 
     try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
     try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
@@ -27,7 +27,7 @@ pub fn cache_dlbbox(tile_cache: *TileCache, download_request_str: []const u8) !v
         dl_req.a_lon,
     );
 
-    std.debug.warn(
+    std.debug.print(
         \\Bbox Distance: {d:.3}km squared ({d:.3}m x {d:.3}m)
         \\Bbox Tiles queued ({} tiles): {} tiles queued; {} tiles already cached
         \\Estimate download: {d:.5} megabytes

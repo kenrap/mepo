@@ -32,7 +32,7 @@ fn cache_dlradius(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, 
     while (km_radius > utilconversion.distance_haversine(.Km, center_lat, end_lon, center_lat, center_lon))
         end_lon += 1;
 
-    std.debug.warn("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{ start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon });
+    std.debug.print("Queueing {} {} to {} {} from {} {} based on {} {}\n", .{ start_lat, end_lat, start_lon, end_lon, zoom_min, zoom_max, center_lat, center_lon });
 
     mepo.tile_cache.set_queue(TileCache.DownloadBBoxRequest{
         .a_lat = start_lat,
