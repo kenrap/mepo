@@ -1303,15 +1303,13 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
 
     // Setup TERM/INT signals
     {
-        const sigs: [2]u6 = .{ std.os.linux.SIGTERM, std.os.linux.SIGINT };
+        const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
         for (sigs) |sig| {
-            if (0 != std.os.linux.sigaction(sig, &.{
+            std.os.sigaction(sig, &.{
                 .handler = .{ .handler = sighandle_terminate },
                 .mask = [_]u32{0} ** 32,
                 .flags = @as(c_uint, 0),
-            }, null)) {
-                return error.FailedToSetupSighandler;
-            }
+            }, null);
         }
     }
 

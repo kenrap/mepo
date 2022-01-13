@@ -16,9 +16,9 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
     // Signal
     var signo: u6 = 0;
     if (std.cstr.cmp(signo_str, "USR1") == 0) {
-        signo = std.os.linux.SIGUSR1;
+        signo = std.os.SIG.USR1;
     } else if (std.cstr.cmp(signo_str, "USR2") == 0) {
-        signo = std.os.linux.SIGUSR2;
+        signo = std.os.SIG.USR2;
     } else {
         return error.InvalidSignalName;
     }
