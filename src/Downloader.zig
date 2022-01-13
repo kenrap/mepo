@@ -58,7 +58,7 @@ fn parse_download_request(download_request_str: []const u8) !TileCache.DownloadB
     var zoom_min: i32 = undefined;
     var zoom_max: i32 = undefined;
 
-    var tokens_it = std.mem.tokenize(download_request_str, ",");
+    var tokens_it = std.mem.tokenize(u8, download_request_str, ",");
     var i: usize = 0;
     while (tokens_it.next()) |token| {
         switch (i) {

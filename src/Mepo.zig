@@ -1036,7 +1036,7 @@ pub fn blit_multiline_text(
         var textures_array: [50]*sdl.SDL_Texture = undefined;
         var textures_array_size: usize = 0;
 
-        var lines_it = std.mem.tokenize(msg, "\n");
+        var lines_it = std.mem.tokenize(u8, msg, "\n");
         while (lines_it.next()) |line| {
             if (textures_array_size + 1 > textures_array.len - 1) break;
 
