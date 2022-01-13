@@ -30,7 +30,12 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     };
 
     const args = [_][]const u8{ "sh", "-c", cmd };
-    const process_result = try std.ChildProcess.exec(.{ .allocator = &arena.allocator, .argv = args[0..], .env_map = &env_vars });
+    const process_result = try std.ChildProcess.exec(.{
+        .allocator = &arena.allocator,
+        .argv = args[0..],
+        .env_map = &env_vars,
+        .max_output_bytes = 10000 * 1024,
+    });
     const exitcode = process_result.term.Exited;
 
     if (exitcode == 0) {
