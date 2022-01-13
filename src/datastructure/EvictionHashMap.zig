@@ -2,31 +2,31 @@ const std = @import("std");
 
 pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, size: usize) type {
     return struct {
-        array_hash_map: std.array_hash_map.AutoArrayHashMap(comptime key_type, comptime metadata_type),
+        array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
         size: usize,
         mutex: std.Thread.Mutex,
 
         pub fn count(self: *@This()) usize {
-            const lock = self.mutex.acquire();
-            defer lock.release();
+            self.mutex.lock();
+            defer self.mutex.unlock();
             return self.array_hash_map.count();
         }
 
         pub fn get(self: *@This(), key: key_type) ?metadata_type {
-            const lock = self.mutex.acquire();
-            defer lock.release();
+            self.mutex.lock();
+            defer self.mutex.unlock();
             return self.array_hash_map.get(key);
         }
 
         pub fn values(self: *@This()) []metadata_type {
-            const lock = self.mutex.acquire();
-            defer lock.release();
+            self.mutex.lock();
+            defer self.mutex.unlock();
             return self.array_hash_map.values();
         }
 
         pub fn put(self: *@This(), k: key_type, v: metadata_type) !?metadata_type {
-            const lock = self.mutex.acquire();
-            defer lock.release();
+            self.mutex.lock();
+            defer self.mutex.unlock();
 
             try self.array_hash_map.put(k, v);
             return if (self.array_hash_map.count() > self.size) return self.shift() else null;
@@ -39,8 +39,8 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, si
         }
 
         pub fn clearAndFree(self: *@This()) void {
-            const lock = self.mutex.acquire();
-            defer lock.release();
+            self.mutex.lock();
+            defer self.mutex.unlock();
             self.array_hash_map.clearAndFree();
         }
 
