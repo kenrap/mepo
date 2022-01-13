@@ -18,13 +18,12 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
     const keymod = m: {
         var modifier = sdl.KMOD_NONE;
         for (mod_str) |character| {
-            if (character == 'c') {
-                modifier = modifier | sdl.KMOD_LCTRL;
-            } else if (character == 's') {
-                modifier = modifier | sdl.KMOD_LSHIFT;
-            } else if (character == 'a') {
-                modifier = modifier | sdl.KMOD_LALT;
-            }
+            modifier |= switch (character) {
+                'c' => sdl.KMOD_LCTRL,
+                's' => sdl.KMOD_LSHIFT,
+                'a' => sdl.KMOD_LALT,
+                else => 0,
+            };
         }
         break :m modifier;
     };
