@@ -24,8 +24,13 @@ main() {
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
   )"
 
-  RESULTS="$(
-    echo "$JSONRESULTS" |
+  echo "
+    pin_groupprefset 0 ordered 0;
+    pin_groupprefset 0 active 1;
+    pin_purge;
+  "
+
+  echo "$JSONRESULTS" |
     jq '
       map(
         .osm_id as $osmid | 
@@ -35,25 +40,9 @@ main() {
             .value = .value 
           end
         )
-      ) | .[] | "\(.lat) \(.lon) \(.display_name)"'
-  )"
-
-  echo "
-    pin_groupprefset 0 ordered 0;
-    pin_groupprefset 0 active 1;
-    pin_purge;
-  "
-
-
-  echo "$RESULTS" |
-    grep . |
-    tr -d \" |
-    grep -vE 'null$' |
-    grep -vE '^null' |
-    awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
-    sed 's/[^[:print:]]//g' |
-    sed "s/'/\\\'/g" |
-    xargs -ID echo 'pin_add 0 D;'
+      ) | .[] | "pin_add 0 \(.lat) \(.lon) [\(.display_name)];"
+    ' |
+    tr -d '"'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
