@@ -2,14 +2,14 @@
 
 ## Downloading tiles & offline usage
 
-It's a common usecase to need to download an entire block / bounding box
+It's a common use case to need to download an entire block / bounding box
 of tiles while online before going offline. For example, say if you want
-to use your phone with mepo but are not sure you'll not have internet
+to use your phone with Mepo but are not sure you'll not have internet
 access at your destination.
 
-To facilitate downloading of tiles, mepo features a non-interactive CLI
+To facilitate downloading of tiles, Mepo features a non-interactive CLI
 accessible through using the `-d` flag. This flag should be suffixed with
-a list of 6 comma seperate parameters (no-whitespaces) in the form of
+a list of 6 comma separate parameters (no whitespaces) in the form of
 `lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max`. Zoom min and max can range
 from 0-16. 
 
@@ -20,9 +20,9 @@ mepo -d40.74946,-74.04673,40.818358,-73.88211,3,16
 ```
 
 This may be a bit more involved then you would like to get, so as an
-alternative you can use the provided `mepo_dl.sh` script which
-provides a prompt-driven dialog which queries [nominatim]() to determine
-the bounding box to download and then feeds this into `mepo -d`.
+alternative you can use the provided `mepo_dl.sh` script which provides
+a prompt-driven dialog which queries [Nominatim](https://nominatim.org)
+to determine the bounding box to download and then feeds this into `mepo -d`.
 
 Run this script as:
 
@@ -34,8 +34,8 @@ See below section for information about offline usage.
 
 ## Offline usage
 
-If you have already used mepo to download tiles, either interactively or
-through the `mepo_dl.sh` script as described above; you may use mepo entirely
+If you have already used Mepo to download tiles, either interactively or
+through the `mepo_dl.sh` script as described above; you may use Mepo entirely
 offline by setting the preference `tile_cache_network` to `0`.
 
 ```sh
@@ -44,16 +44,16 @@ echo "prefset tile_cache_network 0;" | mepo -i
 
 You'll see this noted noted in the download bar as `Offline`.
 
-This mode is helpful if you have bandwidth limitations (e.g. for your dataplan
-or similar) and want to make sure mepo does not make **any** network requests.
+This mode is helpful if you have bandwidth limitations (e.g. for your data plan
+or similar) and want to make sure Mepo does not make **any** network requests.
 
 
 ## Using a custom configuration
 
-Eventually mepo will be able to be continually fed mepolang input as
+Eventually Mepo will be able to be continually fed Mepolang input as
 STDIN. This is not the case currently - and you can only feed in STDIN
 once as configuration upon boot. This can be done to override the default
-configuration. Use the `-i` option to indicate mepo should look for STDIN
+configuration. Use the `-i` option to indicate Mepo should look for STDIN
 configuration upon boot.
 
 For example, to set the default zoom-level upon boot to 10:
@@ -73,15 +73,15 @@ and `mepo_run.sh` wherein `mepo_run.sh` will just be a script that runs
 `cat default_config | mepo`.
 
 Many of Mepo's commands play nice together. A good place to look to
-understand mepolang's utilization is the [default config](../src/config.zig). For
-example `bind_key` actually also takes mepolang text to run as an
-argument. Similarly the result of `shellpipe`, runs mepolang text given
+understand Mepolang's utilization is the [default config](../src/config.zig). For
+example `bind_key` actually also takes Mepolang text to run as an
+argument. Similarly the result of `shellpipe`, runs Mepolang text given
 the STDOUT result of a (user) [shellscript](../scripts).
 
-**Mepolang syntax rules**
+### Mepolang syntax rules
 
 - Each statement is made up of multiple tokens.
-- Each mepolang command should be terminated by a semicolon.
+- Each Mepolang command should be terminated by a semicolon.
 - The first token in a statement is always the command name.
 - Tokens should be separated by whitespace.
 - Each token is either:
@@ -93,7 +93,8 @@ the STDOUT result of a (user) [shellscript](../scripts).
     - A floating point number, either decimal (e.g. `3.77`) or whole (e.g. `3`).
     - Can be negative like `-22.22` or positive like `22.22`
 
-**Mepolang syntax example**
+### Mepolang syntax example
+
 ```sh
 commandname textarg [multi word arg] 2;
 commandname2 arg 8.373 anothertextarg;

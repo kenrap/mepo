@@ -7,21 +7,23 @@
 
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
-Mepo is a fast, simple, and hackable OSM map viewer for desktop linux
-& mobile linux devices (like the Pinephone, Librem 5 etc.) and both
+Mepo is a fast, simple, and hackable OSM map viewer for desktop
+& mobile Linux devices (like the PinePhone, Librem 5 etc.) and both
 environment's various user interfaces (Wayland & X inclusive). Mepo
 works both offline and online, features a minimalist both touch/mouse
 and keyboard compatible interface, and offers a UNIX-philosophy inspired
-underlying design, exposing a powerful command language called [mepolang](doc/userguide.md#Mepolang)
+underlying design, exposing a powerful command language
+called [Mepolang](doc/userguide.md#Mepolang)
 capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
 - [Videos of User Interface](http://media.lrdu.org/mepo_demos)
 - [Hotkeys](https://git.sr.ht/~mil/mepo/tree/master/item/src/config.zig#L12)
 
-## **Goals / overview of Mepo:**
+## Goals
+
 - **Fast & usable in resource-constrained environments**:
-  - Mepo **launches quickly and runs quickly** on the Pinephone and other
+  - Mepo **launches quickly and runs quickly** on the PinePhone and other
     resource-constrained devices. 
   - Mepo renders using SDL which keeps things **fast** and lightweight;
     also as a bonus: portable.
@@ -29,12 +31,12 @@ search scripts, bookmarks, and more.
     memory usage and allocations/deallocations
 - **UNIX-philosophy inspired design - scriptability via [mepolang](doc/userguide.md#Mepolang)**:
   - Mepo's UI is built **to do one thing well**: download & render maps.
-    Extra functionality is enabled via its command language / API (mepolang).
+    Extra functionality is enabled via its command language / API (Mepolang).
   - Reduces overall application logic complexity, handing over to
     shell-scripting integral features like map bounding-box searches,
     location search lookup, bookmarking, dropping pins, routing,
     rebinding keys, and more.
-  - Uses single abstraction (central pin API via mepolang) for indicating
+  - Uses single abstraction (central pin API via Mepolang) for indicating
     and placing user-defined coordinates graphically on the map (e.g. same
     mechanism used generically between POI searches, bookmarks, routing, etc.)
   - Existing OSM tools for search & routing like the [Nominatim](https://nominatim.org/),
@@ -52,17 +54,18 @@ search scripts, bookmarks, and more.
   - Offline usage is a primary usecase and should be treated as such, we 
     can't assume a user is always online.
 - **Supports touch AND keyboard-oriented operation**:
-  - A map application must ofcourse be usable with a mouse / touch, but
-    the keyboard as a tool for map navigation has been underlooked in
+  - A map application must of course be usable with a mouse / touch,
+    but the keyboard as a tool for map navigation has been overlooked in
     in map applications.
   - Provides vi-like (& customizable) keybindings out-of-the-box.
-  - Should be usable in touch-oriented environments like the Pinephone and
+  - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
 
-## **High-level overview of currently implemented features of Mepo:**
+## High-level overview of currently implemented features
+
 - Fast SDL-based rendering of OSM map tiles
 - Downloading of OSM map tiles from user-specified source (default: OSM Maps)
-- Minimal command-language for mepolang in which all core-functionality built out
+- Minimal command-language for Mepolang in which all core-functionality built out
 - Pan via mouse, double tap to zoom, right click or triple left click to zoom out
 - Vi-like keys (though customizable) for panning, zooming, center on mouse, etc.
 - Navigate to regions or addresses via shell-script (Nominatim API based)
@@ -70,32 +73,32 @@ search scripts, bookmarks, and more.
 - Cycle through pins using hotkeys (vim-like n/p, though customizable)
 - Switch tile URL source via shell-script (toggle between OSM, Bike maps, Google)
 - Dynamic tile caching to filesystem / offline-maps once downloaded
-- Run API commands (mepolang) via command prompt (dmenu) or via STDIN (non-continual)
-- Basic pinch-to-zoom via SDL multitouch API on Pinephone / mobile
+- Run API commands (Mepolang) via command prompt (dmenu) or via STDIN (non-continual)
+- Basic pinch-to-zoom via SDL multitouch API on PinePhone / mobile
 - Piping of current state (lat/lon & bbox) to scripts in shellpipe command
-- Basic noninteractive tile downloading based on viewport bounding-box
+- Basic non-interactive tile downloading based on viewport bounding-box
 
+## Roadmap to 1.0 release
 
-## **Roadmap to 1.0 release:**
 - **Milestone 1: Overall Stability** (Complete: 10/31/2021, tag: 0.1)
   - **Done:**
     - Improve current stability of the application and resolve intermittent
       crashes related to tile downloading.
     - Implement tile downloading retry logic and handle case where user is
       offline gracefully
-    - Error check invalid PNG tiledata received from tileservers & loaded 
+    - Error check invalid PNG tile data received from tile servers & loaded
       from filesystem.
-    - Rework consistency of allocator passing (e.g. remove ad-hoc allocators, 
+    - Rework consistency of allocator passing (e.g. remove ad hoc allocators,
       ensure all allocations based on using top-level allocator via arena
       allocation).
-    - Rework blitting logic to be more intelligent about not drawing offscreen
+    - Rework blitting logic to be more intelligent about not drawing off-screen
       entities & pins.
     - Implement LIFO for downloading queue: viewport tiles should always take
-      priority before long-queued offscreen tiles.
-    - Refactor error handling logic & use utility function rather then zig
+      priority before long-queued off-screen tiles.
+    - Refactor error handling logic & use utility function rather than zig
       dbg.
     - Implement togglable text debug message overlay to provide user feedback
-      right in UI when operations like shellpipe fail.
+      right in UI when operations like shell pipe fail.
     - Add togglable help text overlay to show current results of bind_key
       (keybindings table) mapping in UI.
     - Fix bug where negative latitude values fail to round-trip between
@@ -104,11 +107,12 @@ search scripts, bookmarks, and more.
       debugging STDERR messages.
     - Resolve existing memory leaks in the application.
     - Provide an initial tag for package maintainers (0.1).
-- **Milestone 2: Offline Mode & Noninteractive Downloading** (Complete: 12/06/2021, tag: 0.2)
+- **Milestone 2: Offline Mode & Non-Interactive Downloading**
+  (Complete: 12/06/2021, tag: 0.2)
   - **Done:**
-    - Add error handling logic to existing bounding-box based mepolang download
+    - Add error handling logic to existing bounding-box based Mepolang download
       command to ensure valid bounding-box provided by user.
-    - Rework main application / boot logic to enable fully noninteractive mode
+    - Rework main application / boot logic to enable fully non-interactive mode
       (free of SDL/Video context) to allow for CLI-based downloading of tiles.
     - Remove SDL delay from TileCache downloading logic / properly wait on file
       descriptors instead using curl_multi_wait.
@@ -122,7 +126,7 @@ search scripts, bookmarks, and more.
       bandwidth conscience.
     - Rework UI logic to adjust downloading bar to not overlap with pin details
       overlay.
-    - Create mepolang command to selectively clear download cache so
+    - Create Mepolang command to selectively clear download cache so
       tiles can be updated if outdated. (Note: decided to implemented expiry
       seconds preference instead)
     - Add radius-based download command allowing user to download tiles based on
@@ -142,7 +146,7 @@ search scripts, bookmarks, and more.
       informational pins can be used for navigational cues.
     - Add script to add pins based on Nominatim bounding box results in
       addition to the existing Overpass pin script.
-    - Implement bind_click mepolang API command to run arbitrary mepolang
+    - Implement bind_click Mepolang API command to run arbitrary Mepolang
       on clicking specific button (left, right click) 1-n times. Will enable
       more sophisticated scripts (e.g. such as click to define points in
       custom route / ordered pin group) in future.
@@ -160,8 +164,8 @@ search scripts, bookmarks, and more.
 - **Milestone 4: Wayland & Mobile Support**
   - **Todo:**
     - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
-      more reliable and test on Pinephone & mobile devices.
-    - Rework pinch-to-zoom to not be hardcoded but to instead use new mepolang
+      more reliable and test on PinePhone & mobile devices.
+    - Rework pinch-to-zoom to not be hardcoded but to instead use new Mepolang
       command (bind_gesture).
     - Add support for rotate gesture via SDL multitouch gesture API and expose
       as part of bind_gesture command.
@@ -169,13 +173,13 @@ search scripts, bookmarks, and more.
       and similar use dmenu (X-based); integrate wofi, bemenu, or a similar
       tool for Wayland. Dynamically determine which menuing system to use
       in scripts.
-    - Allow binding lefthand/righthand side of pin overlay via new
+    - Allow binding left hand/right hand side of pin overlay via new
       (bind_button) command and set to pin_cycle by default. Thus enabling
       touch-based pin-cycling for navigation.
     - Build out context-menu to be used in mobile-context allowing functionality
       triggered on desktop via keybindings for search etc. to be simply triggered
       on mobile.
-    - Add to default mepolang configuration trigger to open context-menu either
+    - Add to default Mepolang configuration trigger to open context-menu either
       via bind_gesture or bind_click.
     - Perform testing and make fixes as necessary on most common UIs on
       postmarketOS. Primarily test and ensure compatibility with Phosh
@@ -187,9 +191,9 @@ search scripts, bookmarks, and more.
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties**
   - **Todo:**
-    - Rework main application event loop to handle STDIN filedescriptor in
+    - Rework main application event loop to handle STDIN file descriptor in
       parallel to current SDL events processing. So commandline of application
-      can thus be used noninteractively / scripted. Also helpful for debugging.
+      can thus be used non-interactively / scripted. Also helpful for debugging.
     - Gracefully handle switching tile sources (e.g. purge cache & reload).
       Should be able to switch between OSM/bikemaps/stamen etc. without
       glitches.
@@ -206,26 +210,26 @@ search scripts, bookmarks, and more.
     - Refine existing Overpass search script (provide better recommendations
       illustrating OSM tag-based flexibility).
     - Add example bookmarking script based on pin API.
-    - Finalize mepolang 1.0 API and add error checking so things don't crash
+    - Finalize Mepolang 1.0 API and add error checking so things don't crash
       when accessing invalid union tag etc (improve robustness of mepolang
       parser).
-    - Implement save state / restore state mepolang API command that dumps
-      current state to file (as mepolang) / and can restore via loading file.
-    - Make shellpipe non-blocking (e.g. don't freeze UI while waiting for
-      result) or otherwise implement timeout so that runwaway scripts don't
+    - Implement save state / restore state Mepolang API command that dumps
+      current state to file (as Mepolang) / and can restore via loading file.
+    - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
+      result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
-    - Add manpage documenting mepolang commands and basic usage.
+    - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
-      in parity with manpage.
+      in parity with man page.
     - Document existing scripts used for search, routing, etc. and add notes
       about how these scripts could be used offline by running Nominatim,
       Overpass, GraphHopper, etc. locally.
     - Document examples on how to write custom scripts interfacing with
       mepolang.
-    - Modify internals of mepolang to include documentation directly in
-      structs so that mepolang API documentation can be automatically generated
+    - Modify internals of Mepolang to include documentation directly in
+      structs so that Mepolang API documentation can be automatically generated
       as a webpage for end-users.
     - Modify internals of prefset / preferences table to automatically generate
       documentation directly from code / structs.
@@ -233,7 +237,7 @@ search scripts, bookmarks, and more.
     - Package-split current `scripts/` directory to allow separate packages
       for mepo and mepo-scripts. The former only will contain the base
       application (Zig) executable; the latter will contain auxiliary scripts.
-    - Work with maintainers of mobile linux (& Pinephone) UIs to get
+    - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
     - Tag 1.0 release.
 
