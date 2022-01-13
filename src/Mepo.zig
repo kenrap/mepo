@@ -1247,7 +1247,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
                 fonts[font_size] = try utilsdl.errorcheck_ptr(
                     sdl.TTF_Font,
                     sdl.TTF_OpenFontRW(
-                        sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len),
+                        sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
                         1,
                         @intCast(c_int, font_size),
                     ),
@@ -1262,7 +1262,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
                 fonts[font_size] = try utilsdl.errorcheck_ptr(
                     sdl.TTF_Font,
                     sdl.TTF_OpenFontRW(
-                        sdl.SDL_RWFromConstMem(@ptrCast(*const c_void, &font_dat[0]), font_dat.len),
+                        sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
                         1,
                         @intCast(c_int, font_size),
                     ),

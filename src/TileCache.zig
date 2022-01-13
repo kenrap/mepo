@@ -324,7 +324,7 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
     try curl_setopt(transfer_datum.client, curl.CURLOPT_NOSIGNAL, @intCast(c_long, 1));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_CONNECTTIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_TIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*c_void, tile_url));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*anyopaque, tile_url));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.DownloadUseragent);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
@@ -337,7 +337,7 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
 }
 
 fn curl_callback_tile_xferinfo(
-    user_data: *c_void,
+    user_data: *anyopaque,
     dl_total: curl.curl_off_t,
     dl_now: curl.curl_off_t,
     ul_total: curl.curl_off_t,
@@ -351,10 +351,10 @@ fn curl_callback_tile_xferinfo(
 }
 
 fn curl_callback_tile_write(
-    data: *c_void,
+    data: *anyopaque,
     size: c_uint,
     nmemb: c_uint,
-    user_data: *c_void,
+    user_data: *anyopaque,
 ) callconv(.C) c_uint {
     //utildbg.log("Write!!: \n", .{});
     var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
@@ -463,7 +463,7 @@ fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !vo
 fn load_data_to_surface(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
-    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)));
+    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &data[0]), @intCast(c_int, data.len)));
     return try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
 }
 
@@ -494,7 +494,7 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
     return false;
 }
 
-fn threadable_tile_bg_bbox_queue(userdata: ?*c_void) callconv(.C) c_int {
+fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
     if (tile_cache.tile_bg_bbox_queue(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
@@ -505,7 +505,7 @@ fn threadable_tile_bg_bbox_queue(userdata: ?*c_void) callconv(.C) c_int {
     return 0;
 }
 
-fn threadable_download_loop_sdl(userdata: ?*c_void) callconv(.C) c_int {
+fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.C) c_int {
     var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
     tile_cache.download_loop(true) catch |e| {
         utildbg.log("Error running download loop: {}\n", .{e});
