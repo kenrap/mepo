@@ -10,6 +10,12 @@ fn setDependencies(b: *Builder, step: *std.build.LibExeObjStep) void {
 }
 
 pub fn build(b: *Builder) void {
+    b.installDirectory(.{
+        .source_dir = "scripts",
+        .install_dir = .{ .Bin = .{} },
+        .install_subdir = "",
+    });
+
     const exe = b.addExecutable("mepo", "src/main.zig");
 
     const target = b.standardTargetOptions(.{});
