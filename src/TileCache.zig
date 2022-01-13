@@ -71,7 +71,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
         curl_processing_loop: while (tile_cache.download_loop_should_continue(graphical_mode)) {
             try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
             if (curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs)) |msg| {
-                if (msg.?.*.msg == ._DONE) {
+                if (msg.*.msg == curl.CURLMSG_DONE) {
                     tile_cache.download_loop_transfer_complete(msg) catch |err| {
                         utildbg.log("Failed to successfully complete transfer: {}!\n", .{err});
                     };
@@ -364,7 +364,7 @@ fn curl_callback_tile_write(
 }
 
 fn curl_errorcheck(response: curl.CURLMcode) !void {
-    if (response == @intToEnum(curl.CURLMcode, curl.CURLM_OK)) return;
+    if (response == curl.CURLM_OK) return;
     return error.CurlMultiFail;
 }
 
@@ -379,7 +379,7 @@ fn curl_client_to_coords(tile_cache: *@This(), client: ?*curl.CURL) ?types.XYZ {
 }
 
 fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
-    if (@intToEnum(curl.CURLcode, curl.CURLE_OK) != curl.curl_easy_setopt(client, @intToEnum(curl.CURLoption, opt), value))
+    if (curl.curl_easy_setopt(client, @intCast(c_uint, opt), value) != curl.CURLE_OK)
         return error.CurlEasySetOptFail;
 }
 
@@ -413,10 +413,10 @@ fn download_loop_should_continue(tile_cache: *@This(), graphical_mode: bool) boo
 
 fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
     switch (msg.data.result) {
-        .CURLE_OPERATION_TIMEDOUT => {
+        curl.CURLE_OPERATION_TIMEDOUT => {
             utildbg.log("Curl timed out for msg: {}\n", .{msg});
         },
-        .CURLE_OK => {
+        curl.CURLE_OK => {
             if (tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
                 const datum_array = transfer_datum.data_arraylist.items;

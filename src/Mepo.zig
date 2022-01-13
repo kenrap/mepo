@@ -148,7 +148,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 
     var rect_intersect: sdl.SDL_Rect = undefined;
 
-    if (@intToEnum(sdl.SDL_bool, sdl.SDL_FALSE) == sdl.SDL_IntersectRect(&rect_dest, &bbox, &rect_intersect)) return;
+    if (sdl.SDL_IntersectRect(&rect_dest, &bbox, &rect_intersect) == sdl.SDL_FALSE) return;
 
     const rect_src = sdl.SDL_Rect{
         .x = if (rect_intersect.x > rect_dest.x) rect_dest.w - rect_intersect.w else 0,
@@ -447,20 +447,15 @@ fn blit_help(mepo: *@This()) !void {
         var it = mepo.table_keybindings.iterator();
 
         while (it.next()) |kv| {
-            const keymod = k: {
-                if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LCTRL) {
-                    break :k " C";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_SHIFT) {
-                    break :k " S";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_SHIFT | sdl.KMOD_CTRL) {
-                    break :k "CS";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_ALT) {
-                    break :k " A";
-                }
-                break :k "  ";
+           const keymod = switch (kv.key_ptr.keymod) {
+                sdl.KMOD_LCTRL => " C",
+                sdl.KMOD_LSHIFT => " S",
+                sdl.KMOD_LSHIFT | sdl.KMOD_LCTRL => "CS",
+                sdl.KMOD_LALT => " A",
+                else => "  ",
             };
 
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {s} = {s}", .{ keymod, sdl.SDL_GetKeyName(@intCast(i32, kv.key_ptr.keycode)), kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
