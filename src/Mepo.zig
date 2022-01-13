@@ -487,18 +487,33 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         sdl.SDL_GetTicks() - mepo.drag.?.begin_ticks != 500)
     {
         // Click pin to activate
+        var closest_match_pin: ?struct {
+            pin_group_i: u8,
+            pin_i: u32,
+            delta_dist: i32,
+        } = null;
+
         for (mepo.pin_groups) |pin_group, pin_group_i| {
             if (!pin_group.visible) continue;
             for (pin_group.pins.items) |*item, pin_i| {
                 if (item.category == .Structural) continue;
+
                 const pin_x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
-                if ((std.math.absInt(pin_x - e.button.x) catch 999) < 10 and (std.math.absInt(pin_y - e.button.y) catch 999) < 10) {
-                    mepo.pin_group_active = @intCast(u8, pin_group_i);
-                    mepo.pin_group_active_item = @intCast(u32, pin_i);
-                    break;
+                const delta = (std.math.absInt(pin_x - e.button.x) catch config.ClickPinMaxDelta + 1) + (std.math.absInt(pin_y - e.button.y) catch config.ClickPinMaxDelta + 1);
+                if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
+                    closest_match_pin = .{
+                        .pin_group_i = @intCast(u8, pin_group_i),
+                        .pin_i = @intCast(u8, pin_i),
+                        .delta_dist = delta,
+                    };
                 }
             }
+        }
+
+        if (closest_match_pin) |match| {
+            mepo.pin_group_active = match.pin_group_i;
+            mepo.pin_group_active_item = match.pin_i;
         }
     } else if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });

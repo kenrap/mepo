@@ -9,6 +9,7 @@ pub const InitWindowY = 0;
 pub const Tsize = 256;
 pub const DragThresholdTicks = 1000;
 pub const DragThresholdDelta = 10;
+pub const ClickPinMaxDelta = 40;
 
 pub const DefaultBaseConfig =
     \\ # Clickbindings;
