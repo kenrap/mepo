@@ -10,6 +10,10 @@ pub const Tsize = 256;
 pub const DragThresholdTicks = 1000;
 pub const DragThresholdDelta = 10;
 pub const ClickPinMaxDelta = 40;
+pub const ZoomLevelToPinFontSize = [20]u8{
+  9,9,9,9,9,9,9,9,9,9, 9, 9,
+  10,11,12,13,14,15,16,16,
+};
 
 pub const DefaultBaseConfig =
     \\ # Clickbindings;

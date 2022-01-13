@@ -308,7 +308,7 @@ fn blit_pins(mepo: *@This()) !void {
                     .{},
                     x,
                     y,
-                    10,
+                    config.ZoomLevelToPinFontSize[mepo.zoom],
                     "{s}",
                     .{item.name},
                 );
