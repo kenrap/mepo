@@ -16,6 +16,7 @@ main() {
     echo "$PRETTYNAMES" | 
     PROMPT="Run Script" mepo_ui_helper_menu.sh
   )"
+  [ -z "$PICKED" ] && return
   RUNSCRIPT="$(echo "$OPTIONS" | grep "$PICKED" | cut -d^ -f2)"
   eval "$RUNSCRIPT"
 }
