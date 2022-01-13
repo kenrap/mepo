@@ -693,9 +693,7 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
 
     for (rows) |row, row_i| {
 
-
         // Label
-        //sdl.TTF_SetFontStyle(mepo.fonts[config.FontSize], sdl.TTF_STYLE_BOLD);
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
             sdl.TTF_RenderText_Blended(mepo.fonts_bold[config.FontSize], @ptrCast([*c]const u8, row[0]), undefined),
@@ -711,7 +709,6 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text_lab, null, &dest_rect_lab));
 
         // Value
-        //sdl.TTF_SetFontStyle(mepo.fonts[config.FontSize], sdl.TTF_STYLE_NORMAL);
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
             sdl.TTF_RenderText_Blended(mepo.fonts_normal[config.FontSize], @ptrCast([*c]const u8, row[1]), undefined),
