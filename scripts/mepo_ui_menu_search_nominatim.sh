@@ -26,7 +26,16 @@ main() {
 
   RESULTS="$(
     echo "$JSONRESULTS" |
-    jq '.[] | "\(.lat) \(.lon) \(.display_name)"'
+    jq '
+      map(
+        .osm_id as $osmid | 
+        with_entries(
+          if .key=="display_name" then 
+            .value = (.value | split(",")[0]) + " (\($osmid))" else 
+            .value = .value 
+          end
+        )
+      ) | .[] | "\(.lat) \(.lon) \(.display_name)"'
   )"
 
   echo "
