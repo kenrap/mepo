@@ -475,13 +475,31 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         return .None;
     }
 
-    mepo.drag = null;
+    defer mepo.drag = null;
 
     const key = .{
         .button = e.button.button,
         .clicks = @intCast(i8, e.button.clicks),
     };
-    if (mepo.table_clicks.get(key)) |run_expression| {
+    if (e.button.clicks == 1 and
+        mepo.drag != null and
+        mepo.drag.?.delta_x + mepo.drag.?.delta_y < 10 and
+        sdl.SDL_GetTicks() - mepo.drag.?.begin_ticks != 500)
+    {
+        // Click pin to activate
+        for (mepo.pin_groups) |pin_group, pin_group_i| {
+            if (!pin_group.visible) continue;
+            for (pin_group.pins.items) |*item, pin_i| {
+                const pin_x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
+                const pin_y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
+                if ((std.math.absInt(pin_x - e.button.x) catch 999) < 10 and (std.math.absInt(pin_y - e.button.y) catch 999) < 10) {
+                    mepo.pin_group_active = @intCast(u8, pin_group_i);
+                    mepo.pin_group_active_item = @intCast(u32, pin_i);
+                    break;
+                }
+            }
+        }
+    } else if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
         mepo.mepolang_execute(run_expression) catch unreachable;
     }
