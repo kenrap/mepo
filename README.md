@@ -131,17 +131,10 @@ search scripts, bookmarks, and more.
       with unit tests) and to later be used for measuring distance between
       pins in ordered groups.
 - **Milestone 3: Powerful, Robust Pin API** (In-progress)
-  - **Todo:**
+  - **Done:**
     - Correct pin-selection mode cycling to properly respect delta values.
-    - Add ability to cycle through pins based on both: viewport visible pins
-      and all pins.
-    - Add support for click pin to activate.
-    - Implement command for removing specific pins based on handle.
     - Allow ability to associate metadata with pins.
     - Fix existing pin bugs (e.g. title not showing properly & brittleness).
-    - Add pin groups and extend API as such so user can visually distinguish
-      groups; for example one pin group may be bookmarks, another for a search,
-      another for current location.
     - Allow pin groups to be either ordered or unordered, ordered pin groups
       show in UI with connecting lines (thus enabling lightweight navigation).
     - Implement distinction between structural pins and informational pins for
@@ -153,6 +146,14 @@ search scripts, bookmarks, and more.
       on clicking specific button (left, right click) 1-n times. Will enable
       more sophisticated scripts (e.g. such as click to define points in
       custom route / ordered pin group) in future.
+  - **Todo:**
+    - Add ability to cycle through pins based on both: viewport visible pins
+      and all pins.
+    - Add support for click pin to activate.
+    - Implement command for removing specific pins based on handle.
+    - Add pin groups and extend API as such so user can visually distinguish
+      groups; for example one pin group may be bookmarks, another for a search,
+      another for current location.
     - Add script to convert XML Relation & Way from OSM API into ordered
       pin group(s) for testing purposes. Also should help for transit-specific
       and other overlays etc.
