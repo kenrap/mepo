@@ -8,9 +8,9 @@ const utildbg = @import("./util/utildbg.zig");
 
 pub fn main() !void {
     comptime {
-        if (std.SemanticVersion.order(builtin.zig_version, try std.SemanticVersion.parse("0.8.1")) != .eq) {
-            @panic("Must be built against Zig 0.8.1");
-        }
+        const v = builtin.zig_version;
+        if (v.major != 0 or v.minor != 9)
+            @panic("Must be built against Zig 0.9");
     }
 
     const allocator = std.heap.c_allocator;
