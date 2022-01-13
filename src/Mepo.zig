@@ -316,12 +316,13 @@ fn blit_pins(mepo: *@This()) !void {
 
             // Draw connecting line for ordered pin group
             if (pin_group.ordered and prev_pin != null) {
-                try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
+                try utilsdl.errorcheck(sdl.aalineColor(
                     mepo.renderer,
-                    @intCast(c_int, prev_pin_x),
-                    @intCast(c_int, prev_pin_y),
-                    @intCast(c_int, x),
-                    @intCast(c_int, y),
+                    @intCast(i16, prev_pin_x),
+                    @intCast(i16, prev_pin_y),
+                    @intCast(i16, x),
+                    @intCast(i16, y),
+                    0xff0000ff,
                 ));
             }
         }

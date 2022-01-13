@@ -4,6 +4,7 @@ const std = @import("std");
 fn setDependencies(b: *Builder, step: *std.build.LibExeObjStep) void {
     step.linkSystemLibrary("c");
     step.linkSystemLibrary("SDL2");
+    step.linkSystemLibrary("SDL2_gfx");
     step.linkSystemLibrary("SDL2_image");
     step.linkSystemLibrary("SDL2_ttf");
     step.linkSystemLibrary("curl");
