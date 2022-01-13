@@ -490,6 +490,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         for (mepo.pin_groups) |pin_group, pin_group_i| {
             if (!pin_group.visible) continue;
             for (pin_group.pins.items) |*item, pin_i| {
+                if (item.category == .Structural) continue;
                 const pin_x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
                 if ((std.math.absInt(pin_x - e.button.x) catch 999) < 10 and (std.math.absInt(pin_y - e.button.y) catch 999) < 10) {
