@@ -30,6 +30,7 @@ main() {
     pin_purge;
   "
 
+  # Add pin
   echo "$JSONRESULTS" |
     jq '
       map(
@@ -43,6 +44,24 @@ main() {
       ) | .[] | "pin_add 0 \(.lat) \(.lon) [\(.display_name)];"
     ' |
     tr -d '"'
+
+  # Add pin metadata
+  echo "$JSONRESULTS" | jq '
+    [
+      map(
+      .osm_id as $osmid | 
+      with_entries(
+        if .key=="display_name" then 
+          .value = (.value | split(",")[0]) + " (\($osmid))" else 
+          .value = .value 
+        end
+      ) |
+      .display_name as $displayname |
+      .extratags | with_entries(.value="pin_meta [\($displayname)] [\(.key)] [\(.value)];") | map(.)
+    ) | .[] ]  | flatten(3) | .[]
+  ' |
+  tr -d '",'
+
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
