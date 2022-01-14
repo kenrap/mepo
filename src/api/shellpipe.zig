@@ -14,7 +14,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     defer arena.deinit();
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress!", .{cmd}),
+        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
     try mepo.blit();
 
@@ -42,6 +42,11 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
         .max_output_bytes = 10000 * 1024,
     });
     const exitcode = process_result.term.Exited;
+
+    try mepo.update_debug_message(
+        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) completed - execute, {d}!", .{cmd, process_result.stdout.len}),
+    );
+    try mepo.blit();
 
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
