@@ -240,6 +240,18 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 
         try al.append(([_][:0]const u8{ "Pin:", pin.name })[0..].*);
         try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
+        try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
+            &arena.allocator,
+            "Group {d}:",
+            .{mepo.pin_group_active + 1},
+        ), try std.fmt.allocPrintZ(
+            &arena.allocator,
+            "{d} of {d} ",
+            .{
+                mepo.pin_group_active_item.? + 1,
+                mepo.pin_groups[mepo.pin_group_active].pins.items.len,
+            },
+        ) })[0..].*);
         try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
         for (pin.metadata.keys()) |k| {
             const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
@@ -251,7 +263,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 
 fn blit_debugmessage(mepo: *@This()) !void {
     if (mepo.debug_message_enabled and mepo.debug_message != null) {
-        const bottom_off : u32 = if (mepo.overlay_debugbar) 25 else 5;
+        const bottom_off: u32 = if (mepo.overlay_debugbar) 25 else 5;
         try mepo.blit_multiline_text(
             0xff0000,
             null,
@@ -263,7 +275,7 @@ fn blit_debugmessage(mepo: *@This()) !void {
             "DEBUG: {s}",
             .{mepo.debug_message.?},
         );
-   }
+    }
 }
 
 fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
