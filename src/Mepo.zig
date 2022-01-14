@@ -247,20 +247,23 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         }
         try mepo.blit_table(5, 5, 5, al.items);
     }
+}
 
-    // TODO:
-    //  if (mepo.debug_message_enabled and mepo.debug_message != null) {
-    //      try mepo.blit_multiline_text(
-    //          0xff0000,
-    //          types.Color{ .value = 0xffffff, .opacity = 200 },
-    //          .{ .align_x = .Left, .align_y = .Bottom },
-    //          0,
-    //          5,
-    //          null,
-    //          "DEBUG: {s}",
-    //          .{mepo.debug_message.?},
-    //      );
-    //  }
+fn blit_debugmessage(mepo: *@This()) !void {
+    if (mepo.debug_message_enabled and mepo.debug_message != null) {
+        const bottom_off : u32 = if (mepo.overlay_debugbar) 25 else 5;
+        try mepo.blit_multiline_text(
+            0xff0000,
+            null,
+            types.Color{ .value = 0xffffff, .opacity = 200 },
+            .{ .h = mepo.win_h - bottom_off, .align_x = .Left, .align_y = .Bottom },
+            0,
+            5,
+            null,
+            "DEBUG: {s}",
+            .{mepo.debug_message.?},
+        );
+   }
 }
 
 fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
@@ -445,6 +448,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_overlay_pindetails();
     try mepo.blit_overlay_debugbar();
     try mepo.blit_help();
+    try mepo.blit_debugmessage();
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
