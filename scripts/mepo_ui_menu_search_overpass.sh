@@ -47,14 +47,12 @@ main() {
     pin_purge;
   "
 
-  echo "$JSON_RESULTS" |
-    jq '.elements | .[] | "\(.lat) \(.lon) \(.tags.name)" ' |
-    tr -d \" |
-    grep -vE 'null$' |
-    grep -vE '^null' |
-    awk -F' ' '{lat=$1; lon=$2; $1=""; $2=""; gsub(/^[ \t]+/,"",$0); print lat " " lon " [" $0 "]"}' |
-    sed 's/[^[:print:]]//g' |
-    xargs -ID echo 'pin_add 0 D;'
+  echo "$JSON_RESULTS" | jq '
+    .elements |
+    .[] |
+    select(.lat != null and .lon != null and .tags.name != null) |
+    "pin_add 0 \(.lat) \(.lon) [\(.tags.name)];"
+  ' | tr -d ',"'
 
   # Add pin metadata
   echo "$JSON_RESULTS" | jq '
