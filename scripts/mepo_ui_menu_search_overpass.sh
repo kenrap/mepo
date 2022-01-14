@@ -2,24 +2,25 @@
 DISPLAYNAME="POI Search: via Overpass"
 
 OPTIONS='
-  Bars          ["amenity"="bar"]
-  Restraunt     ["amenity"="restaurant"]
-  Pizza         ["amenity"="restaurant"]["cuisine"="italian"]
-  Indian        ["amenity"="restaurant"]["cuisine"="indian"]
-  Supermarket   ["shop"="supermarket"]
-  Coffeshop     ["amenity"="cafe"]
-  Supermarket   ["shop"="supermarket"]
-  Grocery       ["shop"="grocery"]
-  Bathrooms     ["amenity"="toilets"]
+  Bars:          amenity=bar
+  Restraunt:     amenity=restaurant
+  Pizza:         amenity=restaurant cuisine=italian
+  Indian:        amenity=restaurant cuisine=indian
+  Supermarket:   shop=supermarket
+  Coffeshop:     amenity=cafe
+  Grocery:       shop=grocery
+  Bathrooms:     amenity=toilets
 '
 
 main() {
   SCOPE="$(
     echo "$OPTIONS" |
-      awk '{$1=$1};1' | 
+      sed 's/^ *//' |
+      sed 's/ *$//' |
       grep . | 
       PROMPT="Bbox POI Search" mepo_ui_helper_menu.sh |
-      cut -d ' ' -f2-
+      grep -oE '[-_a-z0-9]+[=~][-_a-z0-9]+' |
+      tr '\n' ' '
   )"
   [ -z "$SCOPE" ] && exit 0
 
@@ -29,9 +30,9 @@ main() {
       echo '
         [out:json][timeout:25];
         (
-          nodeSCOPE(BBOX);
-          waySCOPE(BBOX);
-          relationSCOPE(BBOX);
+          node[SCOPE](BBOX);
+          way[SCOPE](BBOX);
+          relation[SCOPE](BBOX);
         );
         out+body;
         >;
