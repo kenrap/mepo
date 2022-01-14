@@ -13,6 +13,11 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
+    try mepo.update_debug_message(
+        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress!", .{cmd}),
+    );
+    try mepo.blit();
+
     const env_vars = env_vars: {
         var v = try std.process.getEnvMap(&arena.allocator);
         const bbox = mepo.bounding_box();
