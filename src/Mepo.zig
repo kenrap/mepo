@@ -344,6 +344,15 @@ fn blit_pins(mepo: *@This()) !void {
             try mepo.blit_pin(pin.*, if (prev_pin != null) prev_pin.?.* else null, @intCast(u8, pin_group_i), if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?) 0xff0000 else pin_group.color);
         }
     }
+
+    if (mepo.pin_group_active_item) |active_pin_i| {
+        try mepo.blit_pin(
+            mepo.pin_groups[mepo.pin_group_active].pins.items[active_pin_i],
+            null,
+            mepo.pin_group_active,
+            0xff0000,
+        );
+    }
 }
 
 fn blit_overlay_debugbar(mepo: *@This()) !void {
