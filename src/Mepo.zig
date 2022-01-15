@@ -285,66 +285,63 @@ fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, Lat
     };
 }
 
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: u24) !void {
+    const size: i32 = 10;
+    const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, pin.lon);
+    const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, pin.lat);
+    const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
+    const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+
+    // Optimization to never drawoff-screen pins
+    if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
+        (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) return;
+
+    // Draw Pin
+    if (pin.category == .Instructive)
+        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = pin_color }, sdl.SDL_Rect{
+            .x = x - @divTrunc(size, 2),
+            .y = y - @divTrunc(size, 2),
+            .w = size,
+            .h = size,
+        }, .Fill);
+
+    // Draw Pin label for current pin group
+    if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
+        const pin_label_bg = .{ .value = 0xffffff, .opacity = 100 };
+        const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
+        try mepo.blit_multiline_text(
+            0x000000,
+            pin_label_border,
+            pin_label_bg,
+            .{},
+            x,
+            y,
+            config.ZoomLevelToPinFontSize[mepo.zoom],
+            "{s}",
+            .{pin.name},
+        );
+    }
+
+    // Draw connecting line for ordered pin group
+    if (mepo.pin_groups[pin_group].ordered and prev_pin != null) {
+        try utilsdl.errorcheck(sdl.aalineColor(
+            mepo.renderer,
+            @intCast(i16, prev_pin_x),
+            @intCast(i16, prev_pin_y),
+            @intCast(i16, x),
+            @intCast(i16, y),
+            0xff0000ff,
+        ));
+    }
+}
+
 fn blit_pins(mepo: *@This()) !void {
     for (mepo.pin_groups) |pin_group, pin_group_i| {
         if (!pin_group.visible) continue;
-
         var prev_pin: ?*types.Pin = null;
-        for (pin_group.pins.items) |*item, i| {
-            defer prev_pin = item;
-
-            const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
-            const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
-            const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
-            const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
-
-            const size: i32 = 10;
-            const color_value: u24 = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?)
-                0xff0000
-            else
-                pin_group.color;
-
-            // Optimization to never drawoff-screen pins
-            if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
-                (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) continue;
-
-            // Draw Pin
-            if (item.category == .Instructive)
-                try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color_value }, sdl.SDL_Rect{
-                    .x = x - @divTrunc(size, 2),
-                    .y = y - @divTrunc(size, 2),
-                    .w = size,
-                    .h = size,
-                }, .Fill);
-
-            // Draw Pin label for current pin group
-            if (item.category == .Instructive and pin_group_i == mepo.pin_group_active) {
-                const pin_label_bg = .{ .value = 0xffffff, .opacity = 100 };
-                const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
-                try mepo.blit_multiline_text(
-                    0x000000,
-                    pin_label_border,
-                    pin_label_bg,
-                    .{},
-                    x,
-                    y,
-                    config.ZoomLevelToPinFontSize[mepo.zoom],
-                    "{s}",
-                    .{item.name},
-                );
-            }
-
-            // Draw connecting line for ordered pin group
-            if (pin_group.ordered and prev_pin != null) {
-                try utilsdl.errorcheck(sdl.aalineColor(
-                    mepo.renderer,
-                    @intCast(i16, prev_pin_x),
-                    @intCast(i16, prev_pin_y),
-                    @intCast(i16, x),
-                    @intCast(i16, y),
-                    0xff0000ff,
-                ));
-            }
+        for (pin_group.pins.items) |*pin, i| {
+            defer prev_pin = pin;
+            try mepo.blit_pin(pin.*, if (prev_pin != null) prev_pin.?.* else null, @intCast(u8, pin_group_i), if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?) 0xff0000 else pin_group.color);
         }
     }
 }

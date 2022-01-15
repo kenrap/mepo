@@ -44,7 +44,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     const exitcode = process_result.term.Exited;
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) completed - execute, {d}!", .{cmd, process_result.stdout.len}),
+        try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
     );
     try mepo.blit();
 
