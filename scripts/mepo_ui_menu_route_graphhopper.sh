@@ -12,11 +12,13 @@ nominatimquerytargetmenu() {
 
   while ! echo "$COORDS" | grep -Eq "[-0-9.]+[ ]+[-0-9.]+"; do
     QUERY="$(
-        echo -e "centerpoint\nOr enter nominatim query location" |
+        echo -e "centerpoint\ncursor\nOr enter nominatim query location" |
         PROMPT="$1" mepo_ui_helper_menu.sh |
         sed 's/ /%20/g'
     )"
-    [ "$QUERY" = "centerpoint" ] && COORDS="$MEPO_C_LAT $MEPO_C_LON" && break
+    [ "$QUERY" = "centerpoint" ] && COORDS="$MEPO_CENTER_LAT $MEPO_CENTER_LON" && break
+    [ "$QUERY" = "cursor" ] && COORDS="$MEPO_CURSOR_LAT $MEPO_CURSOR_LON" && break
+
 
     VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
     RESULT="$(
