@@ -222,8 +222,6 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
     );
 
     var al = std.ArrayList([2][:0]const u8).init(&arena.allocator);
-    defer al.deinit();
-
     if (mepo.pin_group_active_item) |_| {
         const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
         const pin_coords_str = try std.fmt.allocPrintZ(&arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
