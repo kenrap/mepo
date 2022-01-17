@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
+const sdl = @import("../sdlshim.zig");
 
 pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const cmd = args[0].Text;
@@ -22,15 +23,30 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
         var v = try std.process.getEnvMap(&arena.allocator);
         const bbox = mepo.bounding_box();
 
+        // TODO: maybe this should be in seperate/helper fn?
+        var cursor_x: c_int = undefined;
+        var cursor_y: c_int = undefined;
+        _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
+        const cursor_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, mepo.zoom);
+        const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, mepo.zoom);
+
+        // Window and zoom info
         try v.put("MEPO_WIN_W", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_w}));
         try v.put("MEPO_WIN_H", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.win_h}));
         try v.put("MEPO_ZOOM", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.zoom}));
-        try v.put("MEPO_C_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
-        try v.put("MEPO_C_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
+
+        // Center and bbox
+        try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lat}));
+        try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{mepo.lon}));
         try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lat}));
         try v.put("MEPO_TL_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.topleft_lon}));
         try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lat}));
         try v.put("MEPO_BR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{bbox.bottomright_lon}));
+
+        // Cursor position
+        try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(&arena.allocator, "{d}", .{cursor_lat}));
+        try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(&arena.allocator, "{d}", .{cursor_lon}));
+
         break :env_vars v;
     };
 
