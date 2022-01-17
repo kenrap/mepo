@@ -146,14 +146,14 @@ search scripts, bookmarks, and more.
       on clicking specific button (left, right click) 1-n times. Will enable
       more sophisticated scripts (e.g. such as click to define points in
       custom route / ordered pin group) in future.
-  - **Todo:**
-    - Add ability to cycle through pins based on both: viewport visible pins
-      and all pins.
     - Add support for click pin to activate.
-    - Implement command for removing specific pins based on handle.
     - Add pin groups and extend API as such so user can visually distinguish
       groups; for example one pin group may be bookmarks, another for a search,
       another for current location.
+  - **Todo:**
+    - Add ability to cycle through pins based on both: viewport visible pins
+      and all pins.
+    - Implement command for removing specific pins based on handle.
     - Add script to convert XML Relation & Way from OSM API into ordered
       pin group(s) for testing purposes. Also should help for transit-specific
       and other overlays etc.
