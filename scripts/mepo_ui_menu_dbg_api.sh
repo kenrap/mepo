@@ -20,7 +20,7 @@ main() {
     echo "$OPTIONS" |
       awk '{$1=$1};1' | 
       grep . | 
-      mepo_ui_helper_menu.sh "Command"
+      PROMPT="Command" mepo_ui_helper_menu.sh
   )"
 
   echo "$CMD;"
