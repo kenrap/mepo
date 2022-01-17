@@ -46,8 +46,8 @@ main() {
     # Radius-based downloading
     echo "
       cache_dlradius
-        $MEPO_C_LAT
-        $MEPO_C_LON
+        $MEPO_CENTER_LAT
+        $MEPO_CENTER_LON
         $ZOOM_MIN
         $ZOOM_MAX 
         $(echo "$TARGET" | tr -dc '[0-9.]')
