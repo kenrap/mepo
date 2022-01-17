@@ -285,7 +285,7 @@ fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, Lat
     };
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: u24) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color) !void {
     const size: i32 = 10;
     const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, pin.lat);
@@ -298,7 +298,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 
     // Draw Pin
     if (pin.category == .Instructive)
-        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = pin_color }, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_rect(mepo.renderer, pin_color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -330,7 +330,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
             @intCast(i16, prev_pin_y),
             @intCast(i16, x),
             @intCast(i16, y),
-            0xff0000ff,
+            pin_color.to_u32(),
         ));
     }
 }
@@ -341,7 +341,14 @@ fn blit_pins(mepo: *@This()) !void {
         var prev_pin: ?*types.Pin = null;
         for (pin_group.pins.items) |*pin, i| {
             defer prev_pin = pin;
-            try mepo.blit_pin(pin.*, if (prev_pin != null) prev_pin.?.* else null, @intCast(u8, pin_group_i), if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?) 0xff0000 else pin_group.color);
+            try mepo.blit_pin(
+                pin.*,
+                if (prev_pin != null) prev_pin.?.* else null,
+                @intCast(u8, pin_group_i),
+                .{
+                    .value = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?) 0xff0000 else pin_group.color,
+                },
+            );
         }
     }
 
@@ -350,7 +357,7 @@ fn blit_pins(mepo: *@This()) !void {
             mepo.pin_groups[mepo.pin_group_active].pins.items[active_pin_i],
             null,
             mepo.pin_group_active,
-            0xff0000,
+            .{ .value = 0xff0000 },
         );
     }
 }

@@ -35,13 +35,24 @@ pub const Color = struct {
     value: u24 = 0x000000,
     opacity: u8 = 255,
 
-    pub fn sdl(self: @This()) sdl.SDL_Color {
+    const RGBA = packed struct { r: u8, g: u8, b: u8, a: u8 };
+
+    fn to_rgba(self: @This()) RGBA {
         return .{
             .r = @intCast(u8, self.value >> 16),
             .g = @intCast(u8, self.value >> 8 & 0xff),
             .b = @intCast(u8, self.value & 0xff),
             .a = self.opacity,
         };
+    }
+
+    pub fn sdl(self: @This()) sdl.SDL_Color {
+        const rgba = self.to_rgba();
+        return .{ .r = rgba.r, .g = rgba.g, .b = rgba.b, .a = rgba.a };
+    }
+
+    pub fn to_u32(self: @This()) u32 {
+        return @bitCast(u32, self.to_rgba());
     }
 };
 
