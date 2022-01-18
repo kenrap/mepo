@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 
 menuoptions() {
-  for SCRIPT in $(echo "$PATH" | tr : '\n' | xargs ls -1 2>/dev/null | grep -E ^mepo_); do
+  echo "$PATH" | tr : '\n' | xargs ls -1 2>/dev/null | grep mepo_ | while read -r SCRIPT; do
     unset DISPLAYNAME
-    . "$SCRIPT" nonexistentfn 2> /dev/null
+    eval "$(cat "$(which "$SCRIPT")" | grep -E '^DISPLAYNAME=' )"
     [ -z "$DISPLAYNAME" ] && continue
     echo "$DISPLAYNAME ^ $SCRIPT"
   done | uniq | sort

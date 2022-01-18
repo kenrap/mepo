@@ -42,4 +42,3 @@ main() {
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
-

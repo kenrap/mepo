@@ -87,4 +87,4 @@ usage() {
   errdie "Usage: $0 {main,nominatim_spec,test,usage}"
 }
 
-[ -z "$1" ] && main || "$@"
+if [ -n "$1" ]; then "$@"; else main; fi
