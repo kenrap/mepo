@@ -12,7 +12,7 @@ pub fn f_pin_meta(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 pub fn pin_meta(mepo: *Mepo, handle: [:0]const u8, key: [:0]const u8, value: [:0]const u8) !void {
     var pin: *types.Pin = pin: {
         for (mepo.pin_groups[mepo.pin_group_active].pins.items) |*pin| {
-            if (std.mem.eql(u8, pin.name, handle)) {
+            if (pin.handle != null and std.mem.eql(u8, pin.handle.?, handle)) {
                 break :pin pin;
             }
         }

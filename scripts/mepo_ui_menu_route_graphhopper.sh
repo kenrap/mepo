@@ -106,7 +106,7 @@ printpins() {
     echo $(
       printf "pin_add 0 "
       echo "$COORDS" | sed -n ${INSTRUCTIONSTART}p;
-      printf "[";
+      printf "[] [";
       echo "$LINE" | cut -d ' ' -f3-;
       printf "];"
     )
@@ -117,7 +117,7 @@ printpins() {
       echo $(
         printf "pin_add 1 "
         echo "$COORDS" | sed -n ${I}p;
-        printf " [structural - TODO];"
+        printf "[] [];"
       )
       I="$(echo $I + 1 | bc)"
     done

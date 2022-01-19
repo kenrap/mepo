@@ -237,6 +237,9 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         });
 
         try al.append(([_][:0]const u8{ "Pin:", pin.name })[0..].*);
+        if (pin.handle != null) {
+            try al.append(([_][:0]const u8{ "Handle:", pin.handle.? })[0..].*);
+        }
         try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
         try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
             &arena.allocator,
