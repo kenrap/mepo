@@ -20,7 +20,7 @@ search scripts, bookmarks, and more.
 - [Videos of User Interface](http://media.lrdu.org/mepo_demos)
 - [Hotkeys](https://git.sr.ht/~mil/mepo/tree/master/item/src/config.zig#L12)
 
-## Goals
+## **Goals**
 
 - **Fast & usable in resource-constrained environments**:
   - Mepo **launches quickly and runs quickly** on the PinePhone and other
@@ -61,7 +61,7 @@ search scripts, bookmarks, and more.
   - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
 
-## High-level overview of currently implemented features
+## **High-level overview of currently implemented features**
 
 - Fast SDL-based rendering of OSM map tiles
 - Downloading of OSM map tiles from user-specified source (default: OSM Maps)
@@ -78,7 +78,7 @@ search scripts, bookmarks, and more.
 - Piping of current state (lat/lon & bbox) to scripts in shellpipe command
 - Basic non-interactive tile downloading based on viewport bounding-box
 
-## Roadmap to 1.0 release
+## **Roadmap to 1.0 release**
 
 - **Milestone 1: Overall Stability** (Complete: 10/31/2021, tag: 0.1)
   - **Done:**
