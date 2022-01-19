@@ -33,15 +33,16 @@ main() {
   # Add pin
   echo "$JSONRESULTS" |
     jq '
-      map(
-        .osm_id as $osmid | 
-        with_entries(
-          if .key=="display_name" then 
-            .value = (.value | split(",")[0]) else 
-            .value = .value 
-          end
-        )
-      ) | .[] | "pin_add 0 \(.lat) \(.lon) [\($osmid)] [\(.display_name)];"
+       map(
+         .osm_id as $osmid |
+         with_entries(
+           if .key=="display_name" then
+             .value = (.value | split(",")[0]) else
+             .value = .value
+           end
+         ) | 
+         "pin_add 0 \(.lat) \(.lon) [\($osmid)] [\(.display_name)];"
+       )  | .[]
     ' |
     tr -d '"'
 
