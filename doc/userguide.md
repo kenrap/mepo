@@ -1,5 +1,7 @@
 # Mepo: **User Guide**
 
+> **Disclaimer**: This guide is a work-in-progress and not complete!
+
 ## **Table of contents:**
 - [Basic Interface Overview](#basic-interface-overview)
 - [The Central Menu](#the-central-menu)
@@ -16,15 +18,13 @@ Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5 etc.) and both environment's
 various user interfaces (Wayland & X inclusive). It's interface presents
 an SDL interactive application and auxillary features are built out in
-scripts.
-
-The basic interface is essentially a OSM map that can be panned, zoomed,
-mainuplated, and overlayed via 'pins' which are arbitrary points on the
-map which can be added by the user to mark locations. Being a good unix
-citizen, the core application does one thing well, **only** focusing on
-displaying the map and visual overlays, and has no extra functionality;
-however the Mepo plays well with other applications and is **scriptable**
-and very customizable through [Mepolang](#mepolang).
+scripts. The basic interface is essentially a OSM map that can be panned,
+zoomed, mainuplated, and overlayed via 'pins' which are arbitrary points
+on the map which can be added by the user to mark locations. Being a
+good unix citizen, the core application does one thing well, **only**
+focusing on displaying the map and visual overlays, and has no extra
+functionality; however Mepo plays well with other applications and is
+**scriptable** and very customizable through [Mepolang](#mepolang).
 
 For end-users not intersted in customizing the behvaior of Mepo, the
 application is bundled with **sensible defaults** including a default set
@@ -35,8 +35,6 @@ be assumed the user is making use of the default configuration and has
 done no customization; but its important to realize there is a hard
 disticntion between the core SDL application, Mepo, and its default
 configuration and scripts which are bundled by default.
-
-So onto whats setup and how to navigate the UI in Mepo's default configuration:
 
 ## **Touch & Mobile support:**
 
@@ -66,6 +64,51 @@ Since most auxillary features such as routing, POI searches, etc. are built
 out in scripts (which utilize dmenu, rofi etc.); the central menu provides
 a central way to launch different scripts [on mobile]() via touch or [on the
 desktop]() without having to rember numerous hotkeys.
+
+Here's an explation of the options are available in the central menu:
+
+- **Debug: API**
+  - Allow you to enter custom [Mepolang]() commands to execute.
+- **Download: clear download queue**
+  - If you had previously started a region for download queueing, this will
+    cancel that operation.
+- **Download: current bounding-box (non-interactive)**
+  - Automatically queue whatever you're viewing currently on the map to
+    download all tiles.
+  - All zoom levels higher then whatever the current viewport is showing
+    will be downloaded.
+- **Download: custom region (interactive)**
+  - Search nominatim for a custom region to download and allows the user
+    specify zoom levels as well.
+- **POI Search: via Nominatim**
+  - Search for POIs via a nominatim search query and drop pins on the
+    map. Pins will be fed into pin group 1 (thus showing as blue dots
+    on the map).
+  - See [POI Searches]() for more info.
+- **POI Search: via Overpass**
+  - Search for POIs via an [overpass query]() and drop pins on the
+    map. Pins will be fed into pin group 1 (thus showing as blue dots
+    on the map).
+  - See [POI Searches]() for more info.
+- **Relocate map: via search**
+  - Update the map's location by searching for a [nominatim]() query.
+- **Route: via GraphHopper**
+  - Route via graphopper. Pins will be fed into pin group 2 (thus showing as
+    green dots on the map).
+  - See [routing](#routing) for more info.
+- **Route: via Public Transit**
+  - Route via public transit / a specific OSM relation id.
+  - See [routing](#routing) for more info.
+- **Update: Online/Offline toggle**
+  - If you're offline, switch to being online and visa-versa.
+  - If offline bottom bar will be red; if online bottom bar will be white.
+- **Route: via Public Transit**
+  - Route via public transit / a specific OSM relation id.
+  - See [routing](#routing) for more info.
+- **Update: Tilesource**
+  - Change the tilesource for the OSM tiles to download.
+- **Update: Zoom**
+  - Change the zoom level by specifying the number manually.
 
 
 ## **POI Searches**
