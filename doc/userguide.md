@@ -1,6 +1,43 @@
 # Mepo: **User Guide**
 
-## Downloading tiles & offline usage
+**Table of contents:**
+- [Basic Interface Overview]()
+- [POI Searches]()
+- [Routing](#routing)
+- [Offline Usage]()
+- [Mepolang]()
+
+## Basic Interface Overview
+
+Interface overview here.
+
+## POI Searches
+
+POI searches placeholder.
+
+## Routing
+
+Routing placeholder.
+
+## Offline Usage
+
+## Using the `tile_cache_network` parameter
+
+If you have already used Mepo to download tiles, either interactively or
+through the `mepo_dl.sh` script as described above; you may use Mepo entirely
+offline by setting the preference `tile_cache_network` to `0`.
+
+```sh
+echo "prefset tile_cache_network 0;" | mepo -i
+```
+
+You'll see this noted noted in the download bar as `Offline`.
+
+This mode is helpful if you have bandwidth limitations (e.g. for your data plan
+or similar) and want to make sure Mepo does not make **any** network requests.
+
+
+### Downloading tiles
 
 It's a common use case to need to download an entire block / bounding box
 of tiles while online before going offline. For example, say if you want
@@ -32,35 +69,6 @@ mepo_dl.sh
 
 See below section for information about offline usage.
 
-## Offline usage
-
-If you have already used Mepo to download tiles, either interactively or
-through the `mepo_dl.sh` script as described above; you may use Mepo entirely
-offline by setting the preference `tile_cache_network` to `0`.
-
-```sh
-echo "prefset tile_cache_network 0;" | mepo -i
-```
-
-You'll see this noted noted in the download bar as `Offline`.
-
-This mode is helpful if you have bandwidth limitations (e.g. for your data plan
-or similar) and want to make sure Mepo does not make **any** network requests.
-
-
-## Using a custom configuration
-
-Eventually Mepo will be able to be continually fed Mepolang input as
-STDIN. This is not the case currently - and you can only feed in STDIN
-once as configuration upon boot. This can be done to override the default
-configuration. Use the `-i` option to indicate Mepo should look for STDIN
-configuration upon boot.
-
-For example, to set the default zoom-level upon boot to 10:
-
-```sh
-echo "prefset zoom 10;" | mepo -i
-```
 
 ## Mepolang
 
@@ -98,4 +106,18 @@ the STDOUT result of a (user) [shellscript](../scripts).
 ```sh
 commandname textarg [multi word arg] 2;
 commandname2 arg 8.373 anothertextarg;
+```
+
+### Using a custom Mepolang configuration
+
+Eventually Mepo will be able to be continually fed Mepolang input as
+STDIN. This is not the case currently - and you can only feed in STDIN
+once as configuration upon boot. This can be done to override the default
+configuration. Use the `-i` option to indicate Mepo should look for STDIN
+configuration upon boot.
+
+For example, to set the default zoom-level upon boot to 10:
+
+```sh
+echo "prefset zoom 10;" | mepo -i
 ```
