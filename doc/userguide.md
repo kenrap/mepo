@@ -1,25 +1,80 @@
 # Mepo: **User Guide**
 
 **Table of contents:**
-- [Basic Interface Overview]()
-- [POI Searches]()
+- [Basic Interface Overview](#basic-interface-overview)
+- [The Central Menu](#the-central-menu)
+- [POI Searches](#poi-searches)
 - [Routing](#routing)
-- [Repositioning the map]()
-- [Autoloading preferences]()
-- [Offline Usage]()
-- [Mepolang]()
+- [Repositioning the map](#repositioning-the-map)
+- [Autoloading preferences](#autoloading-preferences)
+- [Offline Usage](#offline-usage)
+- [Mepolang](#mepolang)
 
 ## Basic Interface Overview
 
-Interface overview here. Link to [hotkeys](../src/config.zig#L18).
+Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
+Linux devices (like the PinePhone, Librem 5 etc.) and both environment's
+various user interfaces (Wayland & X inclusive). It's interface presents
+an SDL interactive application and auxillary features are built out in
+scripts.
+
+The basic interface is essentially a OSM map that can be panned, zoomed,
+mainuplated, and overlayed via 'pins' which are arbitrary points on the
+map which can be added by the user to mark locations. Being a good unix
+citizen, the core application does one thing well, **only** focusing on
+displaying the map and visual overlays, and has no extra functionality;
+however the Mepo plays well with other applications and is **scriptable**
+and very customizable through [Mepolang](#mepolang).
+
+For end-users not intersted in customizing the behvaior of Mepo, the
+application is bundled with **sensible defaults** including a default set
+of keybindings, touch-compatible configuration, and scripts written in
+plain shell which enable features such as [POI searches](#poi-searches),
+[routing](#routing), and more. Throughout the rest of this guide it will
+be assumed the user is making use of the default configuration and has
+done no customization; but its important to realize there is a hard
+disticntion between the core SDL application, Mepo, and its default
+configuration and scripts which are bundled by default.
+
+So onto whats setup and how to navigate the UI in Mepo's default configuration:
+
+**Touch & Mobile support:**
+
+Using Mepo on mobile linux devices such as the Pinephone, Librem 5, and postmarketOS
+devices and similar is a primary usecase. Take note of the following shortcuts:
+
+- **One finger drag:** Pan the map
+- **One finger double tap:** Zoom in
+- **One finger triple tap:** Zoom out
+- **Pan gesture in**: Zoom in
+- **Pan gesture out**: Zoom out
+- **One finger hold:** Launch the [central menu](#the-central-menu)
+
+
+**Keyboard & Desktop support:**
+
+Ordinary desktop usage is supported. Ordinary one finger hotkeys reference in
+the mobile section also apply on the desktop; and in addition numerous hotkeys
+exist such as panning with vim-style keys and direct hotkeys to launch
+various scripts. You can reference the default [hotkeys](../src/config.zig#L18) 
+by studying the default configuration.
+
+
+## The Central Menu
+
+Since most auxillary features such as routing, POI searches, etc. are built
+out in scripts (which utilize dmenu, rofi etc.); the central menu provides
+a central way to launch different scripts [on mobile]() via touch or [on the
+desktop]() without having to rember numerous hotkeys.
+
 
 ## POI Searches
 
-POI searches placeholder.
+POI searches placeholder. Explain both nomininatim & overpass scripts here.
 
 ## Routing
 
-Routing placeholder.
+Routing placeholder. Explain graphhopper & OSM relation scripts here.
 
 ## Autoloading preferences
 
