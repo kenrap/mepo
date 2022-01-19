@@ -1,6 +1,6 @@
 # Mepo: **User Guide**
 
-**Table of contents:**
+## **Table of contents:**
 - [Basic Interface Overview](#basic-interface-overview)
 - [The Central Menu](#the-central-menu)
 - [POI Searches](#poi-searches)
@@ -10,7 +10,7 @@
 - [Offline Usage](#offline-usage)
 - [Mepolang](#mepolang)
 
-## Basic Interface Overview
+## **Basic Interface Overview**
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5 etc.) and both environment's
@@ -38,7 +38,7 @@ configuration and scripts which are bundled by default.
 
 So onto whats setup and how to navigate the UI in Mepo's default configuration:
 
-**Touch & Mobile support:**
+## **Touch & Mobile support:**
 
 Using Mepo on mobile linux devices such as the Pinephone, Librem 5, and postmarketOS
 devices and similar is a primary usecase. Take note of the following shortcuts:
@@ -51,7 +51,7 @@ devices and similar is a primary usecase. Take note of the following shortcuts:
 - **One finger hold:** Launch the [central menu](#the-central-menu)
 
 
-**Keyboard & Desktop support:**
+## **Keyboard & Desktop support:**
 
 Ordinary desktop usage is supported. Ordinary one finger hotkeys reference in
 the mobile section also apply on the desktop; and in addition numerous hotkeys
@@ -60,7 +60,7 @@ various scripts. You can reference the default [hotkeys](../src/config.zig#L18)
 by studying the default configuration.
 
 
-## The Central Menu
+## **The Central Menu**
 
 Since most auxillary features such as routing, POI searches, etc. are built
 out in scripts (which utilize dmenu, rofi etc.); the central menu provides
@@ -68,19 +68,19 @@ a central way to launch different scripts [on mobile]() via touch or [on the
 desktop]() without having to rember numerous hotkeys.
 
 
-## POI Searches
+## **POI Searches**
 
 POI searches placeholder. Explain both nomininatim & overpass scripts here.
 
-## Routing
+## **Routing**
 
 Routing placeholder. Explain graphhopper & OSM relation scripts here.
 
-## Autoloading preferences
+## **Autoloading preferences**
 
 Autoloading preference placeholder.
 
-## Offline Usage
+## **Offline Usage**
 
 ## Using the `tile_cache_network` parameter
 
@@ -131,7 +131,7 @@ mepo_dl.sh
 See below section for information about offline usage.
 
 
-## Mepolang
+## **Mepolang**
 
 Mepolang is Mepo's command language API for IPC that can be sent to its
 process via STDIN continually. Through this mechanism you can control
