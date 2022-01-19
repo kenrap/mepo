@@ -18,7 +18,8 @@ capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
 - [Videos of User Interface](http://media.lrdu.org/mepo_demos)
-- [Hotkeys](https://git.sr.ht/~mil/mepo/tree/master/item/src/config.zig#L12)
+- [User Guide](doc/userguide.md)
+- [Development Guide](doc/developguide.md)
 
 ## **Goals**
 

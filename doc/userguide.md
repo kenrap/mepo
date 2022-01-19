@@ -4,12 +4,14 @@
 - [Basic Interface Overview]()
 - [POI Searches]()
 - [Routing](#routing)
+- [Repositioning the map]()
+- [Autoloading preferences]()
 - [Offline Usage]()
 - [Mepolang]()
 
 ## Basic Interface Overview
 
-Interface overview here.
+Interface overview here. Link to [hotkeys](../src/config.zig#L18).
 
 ## POI Searches
 
@@ -18,6 +20,10 @@ POI searches placeholder.
 ## Routing
 
 Routing placeholder.
+
+## Autoloading preferences
+
+Autoloading preference placeholder.
 
 ## Offline Usage
 
