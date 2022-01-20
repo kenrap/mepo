@@ -155,10 +155,10 @@ search scripts, bookmarks, and more.
     - Add pin groups and extend API as such so user can visually distinguish
       groups; for example one pin group may be bookmarks, another for a search,
       another for current location.
+    - Implement command for removing specific pins based on handle.
   - **Todo:**
     - Add ability to cycle through pins based on both: viewport visible pins
       and all pins.
-    - Implement command for removing specific pins based on handle.
     - Add script to convert XML Relation & Way from OSM API into ordered
       pin group(s) for testing purposes. Also should help for transit-specific
       and other overlays etc.
