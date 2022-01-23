@@ -73,55 +73,26 @@ curlgraphhopper() {
 printpins() {
   RESPONSE="$1"
 
-  COORDS="$(
-    echo "$RESPONSE" | 
-      jq '.paths[0].points.coordinates | .[] | join(" ")' | 
-      tr -d '"' |
-      awk '{ print $2, $1 }'
-  )"
-
-  INSTRUCTIONS="$(
-    echo "$RESPONSE" | 
-      jq '
-        .paths[0].instructions | 
-        .[] | 
-        "\(.interval[0]) \(.interval[1]) \(.text) (for \(.time)ms and \(.distance) meters)"
-      ' |
-      tr -d '"'
-  )"
-
   echo "
     pin_groupprefset 1 ordered 1;
     pin_groupprefset 1 active 1;
     pin_purge;
   "
 
-
-  echo "$INSTRUCTIONS" | while read -r LINE; do
-    INSTRUCTIONSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -ISTART echo START + 1 |  bc)"
-    STRUCTURALSTART="$(echo "$LINE" | cut -d " " -f1 | xargs -IEND echo END + 1 |  bc)"
-    STRUCTURALEND="$(echo "$LINE" | cut -d " " -f2)"
-
-    # Instructive pin
-    echo $(
-      printf "pin_add 0 "
-      echo "$COORDS" | sed -n ${INSTRUCTIONSTART}p;
-      printf "[] [";
-      echo "$LINE" | cut -d ' ' -f3-;
-      printf "];"
-    )
-
-    # Structural pins
-    I="$STRUCTURALSTART"
-    while [ "$I" -lt "$STRUCTURALEND" ]; do
-      echo $(
-        printf "pin_add 1 "
-        echo "$COORDS" | sed -n ${I}p;
-        printf "[] [];"
-      )
-      I="$(echo $I + 1 | bc)"
-    done
-  done
+  echo "$RESPONSE" |
+    jq '
+      . as $root | 
+      [.paths[0].instructions | .[] | {"\(.interval[0])" : . }] | add as $instructions | 
+      $root.paths[0].points.coordinates |
+      to_entries |
+      map({coords:.value, instruction:$instructions["\(.key)"]}) | 
+      .[] | 
+      if(.instruction != null) then 
+        "pin_add 0 \(.coords[1]) \(.coords[0]) [] [\(.instruction.text)];"
+        else
+        "pin_add 1 \(.coords[1]) \(.coords[0]) [] [];"
+      end
+    ' | tr -d '"'
 }
 
 main() {
