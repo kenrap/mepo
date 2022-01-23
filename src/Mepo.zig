@@ -338,17 +338,29 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 
 fn blit_pins(mepo: *@This()) !void {
     for (mepo.pin_groups) |pin_group, pin_group_i| {
+        var ordered_group_active_path = false;
         if (!pin_group.visible) continue;
         var prev_pin: ?*types.Pin = null;
-        for (pin_group.pins.items) |*pin, i| {
+        for (pin_group.pins.items) |*pin, pin_i| {
             defer prev_pin = pin;
+
+            const color = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+                ((mepo.pin_groups[pin_group_i].ordered and ordered_group_active_path) or
+                (!mepo.pin_groups[pin_group_i].ordered and mepo.pin_group_active_item.? == pin_i))) 0xff0000 else pin_group.color;
+
+            // E.g. ordered_group_active_path just tracks every time
+            // an instructive pin is hit so subsequent structural pins
+            // highlighted in "active"/red color until next structural pin
+            // hit and full "path" of the active segment of an ordered pin
+            // group shows continuously as the active color
+            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].pins.items[pin_i].category == .Instructive)
+                ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
+
             try mepo.blit_pin(
                 pin.*,
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
-                .{
-                    .value = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and i == mepo.pin_group_active_item.?) 0xff0000 else pin_group.color,
-                },
+                .{ .value = color },
             );
         }
     }
