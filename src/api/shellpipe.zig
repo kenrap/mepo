@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
+const utilsdl = @import("../util/utilsdl.zig");
 const sdl = @import("../sdlshim.zig");
 
 pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
@@ -13,6 +14,17 @@ pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
+
+    defer {
+        // Fix for: https://todo.sr.ht/~mil/mepo-tickets/13
+        // Currently there's a wayland-specific (tested on sway) bug wherein
+        // if shellpipe is triggered from a keydown event for some reason
+        // it buffers keyrepeat events; so this is a temporary fix for the
+        // time being to simply clear out all keydown events on shellpipe
+        sdl.SDL_PumpEvents();
+        sdl.SDL_FlushEvents(@enumToInt(sdl.SDL_EventType.SDL_KEYDOWN), @enumToInt(sdl.SDL_EventType.SDL_KEYDOWN));
+        utilsdl.sdl_push_resize_event();
+    }
 
     try mepo.update_debug_message(
         try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
