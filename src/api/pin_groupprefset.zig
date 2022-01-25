@@ -18,6 +18,6 @@ pub fn f_pin_groupprefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !
     } else if (std.mem.eql(u8, prefname, "active") and args[2].Number == 1) {
         mepo.pin_group_active_item = null;
         mepo.pin_group_active = @intCast(u8, group_number);
-        try pin_cycle(mepo, 1);
+        try pin_cycle(mepo, false, 1);
     }
 }
