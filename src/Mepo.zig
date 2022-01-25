@@ -279,19 +279,12 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pins_convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
-    return switch (lat_or_lon) {
-        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, mepo.zoom)),
-        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, mepo.zoom)),
-    };
-}
-
 fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color) !void {
     const size: i32 = 10;
-    const x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, pin.lon);
-    const y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, pin.lat);
-    const prev_pin_x = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
-    const prev_pin_y = if (prev_pin != null) mepo.blit_pins_convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+    const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
+    const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
+    const prev_pin_x = if (prev_pin != null) mepo.convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
+    const prev_pin_y = if (prev_pin != null) mepo.convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
 
     // Optimization to never drawoff-screen pins
     if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
@@ -496,6 +489,14 @@ pub fn blit(mepo: *@This()) !void {
     _ = sdl.SDL_SetWindowTitle(mepo.window, title);
 }
 
+pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
+    return switch (lat_or_lon) {
+        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, mepo.zoom)),
+        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, mepo.zoom)),
+    };
+}
+
+
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold = 0.005;
     if (e.mgesture.dDist > threshold) {
@@ -548,8 +549,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             for (pin_group.pins.items) |*item, pin_i| {
                 if (item.category == .Structural) continue;
 
-                const pin_x = mepo.blit_pins_convert_latlon_to_xy(.LonToX, item.lon);
-                const pin_y = mepo.blit_pins_convert_latlon_to_xy(.LatToY, item.lat);
+                const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
+                const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
                 const delta = (std.math.absInt(pin_x - e.button.x) catch continue) + (std.math.absInt(pin_y - e.button.y) catch continue);
                 if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
                     closest_match_pin = .{
