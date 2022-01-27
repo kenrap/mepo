@@ -158,10 +158,11 @@ search scripts, bookmarks, and more.
     - Implement command for removing specific pins based on handle.
     - Add ability to cycle through pins based on both: viewport visible pins
       and all pins.
-  - **Todo:**
     - Add script to convert XML Relation & Way from OSM API into ordered
       pin group(s) for testing purposes. Also should help for transit-specific
-      and other overlays etc.
+      and other overlays etc. (Implemented as overpass relation lookup instead
+      as XML response doesn't have coordinates for each node entry - effect is
+      same)
 - **Milestone 4: Wayland & Mobile Support**
   - **Todo:**
     - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
