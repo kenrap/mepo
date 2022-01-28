@@ -44,8 +44,8 @@ devices and similar is a primary usecase. Take note of the following shortcuts:
 - **One finger drag:** Pan the map
 - **One finger double tap:** Zoom in
 - **One finger triple tap:** Zoom out
-- **Pan gesture in**: Zoom in
-- **Pan gesture out**: Zoom out
+- **Pan gesture in**: Zoom in (in testing)
+- **Pan gesture out**: Zoom out (in testing)
 - **One finger hold:** Launch the [central menu](#the-central-menu)
 
 
@@ -60,10 +60,10 @@ by studying the default configuration.
 
 ## **The Central Menu**
 
-Since most auxillary features such as routing, POI searches, etc. are built
-out in scripts (which utilize dmenu, rofi etc.); the central menu provides
-a central way to launch different scripts [on mobile]() via touch or [on the
-desktop]() without having to rember numerous hotkeys.
+Since most auxillary features such as routing, POI searches, etc. are
+built out in shellscripts (which utilize dmenu, rofi etc.); the central
+menu provides a central way to launch different scripts [on mobile]()
+via touch or [on the desktop]() without having to rember numerous hotkeys.
 
 Here's an explation of the options are available in the central menu:
 
