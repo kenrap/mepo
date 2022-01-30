@@ -3,14 +3,16 @@
 > **Disclaimer**: This guide is a work-in-progress and not complete!
 
 ## **Table of contents:**
-- [Basic Interface Overview](#basic-interface-overview)
-- [The Central Menu](#the-central-menu)
-- [POI Searches](#poi-searches)
-- [Routing](#routing)
-- [Repositioning the map](#repositioning-the-map)
-- [Autoloading preferences](#autoloading-preferences)
-- [Offline Usage](#offline-usage)
-- [Mepolang](#mepolang)
+- [Basic Interface Overview](#strongbasic-interface-overviewstrong)
+- [Touch & Mobile Support](#strongtouch-amp-mobile-supportstrong)
+- [Keyboard & Desktop Support](#strongkeyboard-amp-desktop-supportstrong)
+- [The Central Menu](##strongthe-central-menustrong)
+- [POI Searches](#strongpoi-searchesstrong)
+- [Routing](#strongroutingstrong)
+- [Repositioning the map](#strongrepositioning-the-mapstrong)
+- [Autoloading preferences](#strongautoloading-preferencesstrong)
+- [Offline Usage](#strongoffline-usagestrong)
+- [Mepolang](#strongmepolangstrong)
 
 ## **Basic Interface Overview**
 
@@ -61,14 +63,16 @@ by studying the default configuration.
 ## **The Central Menu**
 
 Since most auxillary features such as routing, POI searches, etc. are
-built out in shellscripts (which utilize dmenu, rofi etc.); the central
-menu provides a central way to launch different scripts [on mobile]()
-via touch or [on the desktop]() without having to rember numerous hotkeys.
+built out in shellscripts (which utilize dmenu, rofi etc.); the
+central menu provides a central way to launch different scripts [on
+mobile](#strongtouch-amp-mobile-supportstrong) via touch or [on the
+desktop](#strongkeyboard-amp-desktop-supportstrong) without having to
+rember numerous hotkeys.
 
 Here's an explation of the options are available in the central menu:
 
 - **Debug: API**
-  - Allow you to enter custom [Mepolang]() commands to execute.
+  - Allow you to enter custom [Mepolang](#strongmepolangstrong) commands to execute.
 - **Download: clear download queue**
   - If you had previously started a region for download queueing, this will
     cancel that operation.
@@ -84,14 +88,14 @@ Here's an explation of the options are available in the central menu:
   - Search for POIs via a nominatim search query and drop pins on the
     map. Pins will be fed into pin group 1 (thus showing as blue dots
     on the map).
-  - See [POI Searches]() for more info.
+  - See [POI Searches](#strongpoi-searchesstrong) for more info.
 - **POI Search: via Overpass**
   - Search for POIs via an [overpass query]() and drop pins on the
     map. Pins will be fed into pin group 1 (thus showing as blue dots
     on the map).
-  - See [POI Searches]() for more info.
+  - See [POI Searches](#strongpoi-searchesstrong) for more info.
 - **Relocate map: via search**
-  - Update the map's location by searching for a [nominatim]() query.
+  - Update the map's location by searching for a [Nominatim](https://nominatim.org/) query.
 - **Route: via GraphHopper**
   - Route via graphopper. Pins will be fed into pin group 2 (thus showing as
     green dots on the map).
@@ -113,14 +117,19 @@ Here's an explation of the options are available in the central menu:
 
 ## **POI Searches**
 
-POI searches placeholder. Explain both nomininatim & overpass scripts here.
+**TODO**
+POI searches placeholder.
+Explain both nomininatim & overpass scripts here.
 
 ## **Routing**
 
-Routing placeholder. Explain graphhopper & OSM relation scripts here.
+**TODO**
+Routing placeholder.
+Explain graphhopper & OSM relation scripts here.
 
 ## **Autoloading preferences**
 
+**TODO**
 Autoloading preference placeholder.
 
 ## **Offline Usage**
