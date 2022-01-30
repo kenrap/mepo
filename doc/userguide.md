@@ -36,7 +36,7 @@ done no customization; but its important to realize there is a hard
 disticntion between the core SDL application, Mepo, and its default
 configuration and scripts which are bundled by default.
 
-## **Touch & Mobile support:**
+## **Touch & Mobile support**
 
 Using Mepo on mobile linux devices such as the Pinephone, Librem 5, and postmarketOS
 devices and similar is a primary usecase. Take note of the following shortcuts:
@@ -49,7 +49,7 @@ devices and similar is a primary usecase. Take note of the following shortcuts:
 - **One finger hold:** Launch the [central menu](#the-central-menu)
 
 
-## **Keyboard & Desktop support:**
+## **Keyboard & Desktop support**
 
 Ordinary desktop usage is supported. Ordinary one finger hotkeys reference in
 the mobile section also apply on the desktop; and in addition numerous hotkeys
