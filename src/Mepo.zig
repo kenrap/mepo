@@ -279,7 +279,7 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, pin_label_bg: types.Color) !void {
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
@@ -301,7 +301,6 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
-        const pin_label_bg = .{ .value = 0xffffff, .opacity = 100 };
         const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
         try mepo.blit_multiline_text(
             0x000000,
@@ -354,6 +353,7 @@ fn blit_pins(mepo: *@This()) !void {
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
                 .{ .value = color },
+                .{ .value = 0xffffff, .opacity = 100 },
             );
         }
     }
@@ -364,6 +364,7 @@ fn blit_pins(mepo: *@This()) !void {
             null,
             mepo.pin_group_active,
             .{ .value = 0xff0000 },
+            .{ .value = 0xffffff, .opacity = 255 },
         );
     }
 }
