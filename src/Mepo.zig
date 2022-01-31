@@ -455,7 +455,7 @@ fn blit_help(mepo: *@This()) !void {
         0,
         0,
         null,
-        \\mepo - Development version (0.2)
+        \\mepo - Development version (0.3)
         \\ 
         \\Keybindings:
         \\{s}

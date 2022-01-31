@@ -135,7 +135,7 @@ search scripts, bookmarks, and more.
     - Add distance to lat-lon conversion functions to assist in above (along
       with unit tests) and to later be used for measuring distance between
       pins in ordered groups.
-- **Milestone 3: Powerful, Robust Pin API** (In-progress)
+- **Milestone 3: Powerful, Robust Pin API** (Complete: 01/30/2022, tag: 0.3)
   - **Done:**
     - Correct pin-selection mode cycling to properly respect delta values.
     - Allow ability to associate metadata with pins.
@@ -163,7 +163,7 @@ search scripts, bookmarks, and more.
       and other overlays etc. (Implemented as overpass relation lookup instead
       as XML response doesn't have coordinates for each node entry - effect is
       same)
-- **Milestone 4: Wayland & Mobile Support**
+- **Milestone 4: Wayland & Mobile Support** (In-progress)
   - **Todo:**
     - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
       more reliable and test on PinePhone & mobile devices.

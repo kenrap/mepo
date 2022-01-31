@@ -106,9 +106,6 @@ pub const DefaultBaseConfig =
     \\ pin_groupprefset 3 visible 1;
     \\ pin_groupprefset 4 visible 1;
     \\
-    \\ pin_add 0 40.7418 -73.9899 baz bazfoo;
-    \\ pin_meta baz bill barn;
-    \\
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload ~/.mepo/bookmarks;
 ;
