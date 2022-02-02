@@ -499,7 +499,7 @@ pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY },
 
 
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    const threshold = 0.005;
+    const threshold = 0.002;
     if (e.mgesture.dDist > threshold) {
         zoom_relative(mepo, 1);
         return .Redraw;
