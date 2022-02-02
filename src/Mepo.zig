@@ -25,6 +25,7 @@ drag: ?struct {
     delta_x: i32 = 0,
     delta_y: i32 = 0,
 } = null,
+fingers: std.ArrayList(sdl.SDL_FingerID),
 drag_scale: u8 = 1,
 fonts_normal: [50]*sdl.TTF_Font,
 fonts_bold: [50]*sdl.TTF_Font,
@@ -497,6 +498,22 @@ pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY },
     };
 }
 
+fn event_fingerdown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    for (mepo.fingers.items) |f| if (e.tfinger.fingerId == f) return .None;
+    mepo.fingers.append(e.tfinger.fingerId) catch unreachable;
+    return .None;
+}
+
+fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    for (mepo.fingers.items) |f, i| {
+        if (e.tfinger.fingerId == f) {
+            _ = mepo.fingers.orderedRemove(i);
+            break;
+        }
+    }
+
+    return .None;
+}
 
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold = 0.002;
@@ -512,6 +529,8 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    if (mepo.fingers.items.len > 1) return .None;
+
     if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
         mepo.drag = null;
         return .None;
@@ -522,6 +541,8 @@ fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    if (mepo.fingers.items.len > 1) return .None;
+
     if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
         mepo.drag = null;
         return .None;
@@ -575,6 +596,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    if (mepo.fingers.items.len > 1) return .None;
+
     if (mepo.drag != null and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
         mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
         mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
@@ -680,7 +703,10 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 }
 
 fn click_hold_check_dispatch(mepo: *@This()) void {
-    if (mepo.drag == null) return;
+    if (mepo.drag == null or mepo.fingers.items.len > 1) {
+        mepo.drag = null;
+        return;
+    }
 
     const threshold_hit_hold_ms = sdl.SDL_GetTicks() >= mepo.drag.?.begin_ticks + config.DragThresholdTicks;
     const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y <= config.DragThresholdDelta;
@@ -712,10 +738,12 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
+                .SDL_FINGERDOWN => event_fingerdown,
+                .SDL_FINGERUP => event_fingerup,
                 .SDL_KEYDOWN => event_keydown,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
-                .SDL_MOUSEMOTION => event_mousemotion,
                 .SDL_MOUSEBUTTONUP => event_mousebuttonup,
+                .SDL_MOUSEMOTION => event_mousemotion,
                 .SDL_MOUSEWHEEL => event_mousewheel,
                 .SDL_MULTIGESTURE => event_multigesture,
                 .SDL_QUIT => event_quit,
@@ -1025,6 +1053,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             }
             break :fonts fonts;
         },
+        .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_SOFTWARE)),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
