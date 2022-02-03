@@ -466,6 +466,7 @@ fn blit_help(mepo: *@This()) !void {
 }
 
 pub fn blit(mepo: *@This()) !void {
+    try utilsdl.errorcheck(sdl.SDL_RenderClear(mepo.renderer));
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
     try mepo.blit_tiles_all(
         .{
