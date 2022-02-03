@@ -13,10 +13,11 @@ main() {
   OPTIONS="$(menuoptions)"
   PRETTYNAMES="$(echo "$OPTIONS" | cut -d^ -f1)"
   PICKED="$(
-    echo "$PRETTYNAMES" | 
+    echo -e "$PRETTYNAMES\nClose Menu" |
     PROMPT="Run Script" mepo_ui_helper_menu.sh
   )"
   [ -z "$PICKED" ] && return
+  [ "$PICKED" = "Close Menu" ] && return
   RUNSCRIPT="$(echo "$OPTIONS" | grep "$PICKED" | cut -d^ -f2)"
   eval "$RUNSCRIPT"
 }
