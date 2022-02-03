@@ -1004,6 +1004,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     // Initialize video, create window
     const window = window: {
         try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
+        utildbg.log("Initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
         const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
             "mepo",
             config.InitWindowX,
