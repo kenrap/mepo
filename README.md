@@ -13,7 +13,7 @@ environment's various user interfaces (Wayland & X inclusive). Mepo
 works both offline and online, features a minimalist both touch/mouse
 and keyboard compatible interface, and offers a UNIX-philosophy inspired
 underlying design, exposing a powerful command language
-called [Mepolang](doc/userguide.md#Mepolang)
+called [Mepolang](doc/userguide.md#strongmepolangstrong)
 capable of being scripted to provide things like custom bounding-box
 search scripts, bookmarks, and more.
 
@@ -30,7 +30,7 @@ search scripts, bookmarks, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/userguide.md#Mepolang)**:
+- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/userguide.md#strongmepolangstrong)**:
   - Mepo's UI is built **to do one thing well**: download & render maps.
     Extra functionality is enabled via its command language / API (Mepolang).
   - Reduces overall application logic complexity, handing over to
