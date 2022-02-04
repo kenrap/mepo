@@ -19,9 +19,9 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         var modifier = sdl.KMOD_NONE;
         for (mod_str) |character| {
             modifier |= switch (character) {
-                'c' => sdl.KMOD_LCTRL,
-                's' => sdl.KMOD_LSHIFT,
-                'a' => sdl.KMOD_LALT,
+                'c' => sdl.KMOD_CTRL,
+                's' => sdl.KMOD_SHIFT,
+                'a' => sdl.KMOD_ALT,
                 else => 0,
             };
         }

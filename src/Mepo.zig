@@ -431,11 +431,11 @@ fn blit_help(mepo: *@This()) !void {
             const keymod = k: {
                 if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LCTRL) {
                     break :k " C";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LSHIFT) {
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_SHIFT) {
                     break :k " S";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LSHIFT | sdl.KMOD_LCTRL) {
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_SHIFT | sdl.KMOD_CTRL) {
                     break :k "CS";
-                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_LALT) {
+                } else if (@enumToInt(kv.key_ptr.keymod) == sdl.KMOD_ALT) {
                     break :k " A";
                 }
                 break :k "  ";
@@ -623,7 +623,22 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.table_keybindings.get(.{
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
-        .keymod = @intToEnum(sdl.SDL_Keymod, @intCast(c_int, e.key.keysym.mod)),
+        .keymod = keymod: {
+            // E.g. within bind_key we store modifiers as KMOD_SHIFT rather then both KMOD_{L,R}SHIFT
+            // KMOD_SHIFT is actually (KMOD_LSHIFT | KMOD_RSHIFT)
+            // So here we just expand the bitset so the right/left inverse variant is set
+            // as such right / left {shift,ctrl,alt} mods always act the same regardless
+            var bitset = e.key.keysym.mod;
+            for (&[_][2]u16{
+                [2]u16{sdl.KMOD_LSHIFT, sdl.KMOD_RSHIFT},
+                [2]u16{sdl.KMOD_LCTRL, sdl.KMOD_RCTRL},
+                [2]u16{sdl.KMOD_LALT, sdl.KMOD_RALT},
+            }) |lr_set| {
+                if (bitset & lr_set[0] == lr_set[0]) bitset |= lr_set[1];
+                if (bitset & lr_set[1] == lr_set[1]) bitset |= lr_set[0];
+            }
+            break :keymod @intToEnum(sdl.SDL_Keymod, @intCast(c_int, bitset));
+        }
     })) |run_expression| {
         utildbg.log("Got keybindings table function with run expression: <{s}>\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
