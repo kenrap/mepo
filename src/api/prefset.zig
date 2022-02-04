@@ -22,6 +22,7 @@ pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     // U8 Ints
     for (&[_]struct { prop: []const u8, ptr: *u8 }{
+        .{ .prop = "fontsize_ui", .ptr = &mepo.fontsize_ui },
         .{ .prop = "drag_scale", .ptr = &mepo.drag_scale },
         .{ .prop = "zoom", .ptr = &mepo.zoom },
         .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },

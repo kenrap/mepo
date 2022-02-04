@@ -1,7 +1,6 @@
 pub const DownloadTimeoutSeconds = 5;
 pub const DownloadUseragent = "mepo";
 pub const DownloaderPollMs = 50;
-pub const FontSize = 14;
 pub const InitWindowH = 950;
 pub const InitWindowW = 720;
 pub const InitWindowX = 0;
@@ -78,6 +77,8 @@ pub const DefaultBaseConfig =
     \\ bind_signal USR2 [zoom_relative -1];
     \\ # Prefs;
     \\ center_on_coords 40.78392 -73.96442;
+    \\
+    \\ prefset fontsize_ui 14;
     \\ prefset distance_unit_tf_km_mi 0;
     \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;
