@@ -37,7 +37,7 @@ pub const DefaultBaseConfig =
     \\ bind_key _ p [pin_cycle 1 -1;];
     \\ bind_key s p [pin_cycle 0 -1; center_on_pin;];
     \\ bind_key _ o [pin_deactivate];
-    \\ bind_key _ u [pin_purge];
+    \\ bind_key s o [pin_purge];
     \\ bind_key cs q [cache_queueclear];
     \\ bind_key c c [quit];
     \\ # Scripts hotkeys;
