@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 DISPLAYNAME="Relocate map: via search"
 
+err() {
+  echo "$@" >&2
+  exit 1
+}
+
 main() {
   OPTIONS='
     Amsterdam
@@ -19,6 +24,8 @@ main() {
       PROMPT="Nominatim world search" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
+
+  echo "$QUERY" | grep . || err "Blank search query"
 
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
