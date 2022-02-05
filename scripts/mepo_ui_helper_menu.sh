@@ -8,7 +8,7 @@ main() {
     "$MEPO_MENU" "$PROMPT"
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Wayland enviroment support
-    bemenu --scrollbar autohide -s -n -c -l 10 -p "$PROMPT"
+    bemenu --scrollbar autohide -s -n -c -l 10 -i -p "$PROMPT"
   elif [ -n "$DISPLAY" ]; then
     # X enviroment support
     dmenu -i -l 10 -w $(xdotool getactivewindow) -p "$PROMPT"
