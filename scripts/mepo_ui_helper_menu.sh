@@ -6,6 +6,11 @@ main() {
   if [ ! -z "$MEPO_MENU" ]; then
     # Custom menu support
     "$MEPO_MENU" "$PROMPT"
+  elif pidof squeekboard >/dev/null; then
+    # Phosh support
+    busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
+    bemenu --scrollbar autohide -s -n -c -l 10 -i -p "$PROMPT"
+    busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Wayland enviroment support
     bemenu --scrollbar autohide -s -n -c -l 10 -i -p "$PROMPT"
