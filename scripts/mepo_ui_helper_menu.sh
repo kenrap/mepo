@@ -11,11 +11,14 @@ main() {
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
     bemenu --scrollbar autohide -s -n -c -l 10 -i -p "$PROMPT"
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
+  elif command -v sxmo_dmenu_with_kb.sh; then
+    # Sxmo support
+    sxmo_dmenu_with_kb.sh
   elif [ -n "$WAYLAND_DISPLAY" ]; then
-    # Wayland enviroment support
+    # Generic Wayland enviroment support
     bemenu --scrollbar autohide -s -n -c -l 10 -i -p "$PROMPT"
   elif [ -n "$DISPLAY" ]; then
-    # X enviroment support
+    # Generic X enviroment support
     dmenu -i -l 10 -w $(xdotool getactivewindow) -p "$PROMPT"
   else
     # Framebuffer enviroment support
