@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 N_LINES=15
+FONT="Inconsolata"
 
 main() {
   [ -z "$PROMPT" ] && PROMPT="Mepo menu"
@@ -10,17 +11,17 @@ main() {
   elif pidof squeekboard >/dev/null; then
     # Phosh support
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
-    bemenu --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
+    bemenu --fn "$FONT" --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
   elif command -v sxmo_dmenu_with_kb.sh; then
     # Sxmo support
     sxmo_dmenu_with_kb.sh
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Generic Wayland enviroment support
-    bemenu --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
+    bemenu --fn "$FONT" --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
   elif [ -n "$DISPLAY" ]; then
     # Generic X enviroment support
-    dmenu -i -l $N_LINES -w $(xdotool getactivewindow) -p "$PROMPT"
+    dmenu -fn "$FONT" -i -l $N_LINES -w $(xdotool getactivewindow) -p "$PROMPT"
   else
     # Framebuffer enviroment support
     RESULTFILE="$(mktemp)"
