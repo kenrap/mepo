@@ -13,10 +13,16 @@ with SDL2, SDL2_ttf, SDL2_image, libcurl. Then, to build & run locally run:
 
 ## Setup on Alpine Linux
 
-Alpine Linux dependencies:
+Alpine Linux build dependencies:
 
 ```sh
 apk add curl-dev sdl2-dev sdl2_image-dev sdl2_ttf-dev sdl2_gfx-dev
+```
+
+Alpine Linux runtime dependencies:
+
+```sh
+apk add dmenu jq xdotool curl ncurses
 ```
 
 ## Code Style
