@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Update: Tilesource"
+DISPLAYNAME="漣 Update: Tilesource"
 
 main() {
   # Note X, Y, Z provided as %1$d, %2$d, %3$d respectively

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Update: Online/Offline toggle"
+DISPLAYNAME="痢 Update: Online/Offline toggle"
 
 main() {
   echo "preftoggle tile_cache_network;"

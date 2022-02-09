@@ -22,7 +22,7 @@ apk add curl-dev sdl2-dev sdl2_image-dev sdl2_ttf-dev sdl2_gfx-dev
 Alpine Linux runtime dependencies:
 
 ```sh
-apk add dmenu jq xdotool curl ncurses
+apk add dmenu jq xdotool curl ncurses font-inconsolata-nerd
 ```
 
 ## Code Style

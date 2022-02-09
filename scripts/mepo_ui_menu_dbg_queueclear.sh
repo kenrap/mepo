@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Download: clear download queue"
+DISPLAYNAME="ﰸ Download: clear download queue"
 
 main() {
   echo "cache_queueclear;"

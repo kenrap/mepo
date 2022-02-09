@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Download: custom region (interactive)"
+DISPLAYNAME=" Download: custom region (interactive)"
 BOUND_LOWER=1
 BOUND_UPPER=19
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Update: Zoom"
+DISPLAYNAME="漣 Update: Zoom"
 
 main() {
   echo prefset zoom "$(

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Relocate map: via search"
+DISPLAYNAME=" Relocate map: via search"
 
 err() {
   echo "$@" >&2

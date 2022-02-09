@@ -6,14 +6,14 @@ menuoptions() {
     eval "$(cat "$(which "$SCRIPT")" | grep -E '^DISPLAYNAME=' )"
     [ -z "$DISPLAYNAME" ] && continue
     echo "$DISPLAYNAME ^ $SCRIPT"
-  done | uniq | sort
+  done | uniq | sort -d
 }
 
 main() {
   OPTIONS="$(menuoptions)"
   PRETTYNAMES="$(echo "$OPTIONS" | cut -d^ -f1)"
   PICKED="$(
-    echo -e "$PRETTYNAMES\nClose Menu" |
+    echo -e "$PRETTYNAMES\n Close Menu" |
     PROMPT="Run Script" mepo_ui_helper_menu.sh
   )"
   [ -z "$PICKED" ] && return

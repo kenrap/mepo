@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Route: via GraphHopper"
+DISPLAYNAME=" Route: via GraphHopper"
 
 errexit() {
   echo "$1" >&2

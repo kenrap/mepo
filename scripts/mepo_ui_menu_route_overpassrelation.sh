@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="Route: via OSM Relation / Public Transit"
+DISPLAYNAME=" Route: via OSM Relation / Public Transit"
 
 RELATIONS="
   NYC Subway A: 9727210
