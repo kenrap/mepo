@@ -52,6 +52,7 @@ queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
 source_url: [:0]const u8 = undefned,
+surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
 texture_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 
@@ -126,9 +127,11 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     }
     defer utilsdl.sdl_push_resize_event();
 
-    // Empty Texture map & queue
+    // Empty texture map, surface map, & queues
     for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
+    for (tile_cache.surface_map.values()) |s| sdl.SDL_FreeSurface(s);
     tile_cache.texture_map.clearAndFree();
+    tile_cache.surface_map.clearAndFree();
     tile_cache.queue_lifo_ui.clearAndFree();
     tile_cache.queue_lifo_bg.clearAndFree();
 
@@ -236,31 +239,43 @@ pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, can
 
 /// Retreives a tile from cache
 /// If tile is not present & will queue tile to be downloaded if downloading
-/// thread is present
+/// thread is present. This function is only ever called from Mepo's primary
+/// thread and thus is safe to use renderer functions within (e.g. we transfer
+/// the SDL surface into a texture here)
+/// TODO: maybe just move this fn/code wholesale into Mepo.zig?
 pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
-    if (tile_cache.texture_map.get(coords)) |tile| {
-        return TileData{ .texture = tile };
+    if (tile_cache.texture_map.get(coords)) |texture| {
+        return TileData{ .texture = texture };
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         // Check tile exists
         if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
 
-        // Load tile
+        // Load tile to surface
         {
             const png = try png_path(tile_cache.allocator, tile_cache.source_url, coords);
             defer tile_cache.allocator.free(png);
             file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
             if (file_cached_png_opt) |file_cached_png| {
                 defer tile_cache.allocator.free(file_cached_png);
-                const text = tile_cache.load_data_to_texture(coords, file_cached_png) catch {
+                const surface = tile_cache.load_data_to_surface(coords, file_cached_png) catch {
                     break :load_from_fs;
                 };
-                return TileData{ .texture = text };
+                try tile_cache.surface_map.put(coords, surface);
             }
         }
+    }
+
+    // E.g. we found the tile cached in surface map, transfer to texture & return
+    if (tile_cache.surface_map.get(coords)) |surface| {
+        defer sdl.SDL_FreeSurface(surface);
+        const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
+        _ = tile_cache.surface_map.swapRemove(coords);
+        try tile_cache.texture_map.put(coords, texture);
+        return TileData{ .texture = texture };
     }
 
     if (tile_cache.thread_download == null) {
@@ -413,7 +428,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                 }
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
                     // Load to surface
-                    _ = try tile_cache.load_data_to_texture(coords, datum_array);
+                    _ = try tile_cache.load_data_to_surface(coords, datum_array);
                     utilsdl.sdl_push_resize_event();
                 }
             } else {
@@ -444,18 +459,11 @@ fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !vo
     }
 }
 
-fn load_data_to_texture(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*sdl.SDL_Texture {
+fn load_data_to_surface(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
     const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*c_void, &data[0]), @intCast(c_int, data.len)));
-    const surface = try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
-    defer sdl.SDL_FreeSurface(surface);
-    const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
-    // TODO: should there be some limit on size of texture map cache?
-    //       currently memory will just accumulate there ad-infinitum
-    //defer sdl.SDL_DestroyTexture(texture);
-    try tile_cache.texture_map.put(coords, texture);
-    return tile_cache.texture_map.get(coords).?;
+    return try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
 }
 
 fn png_path(allocator: *std.mem.Allocator, source: []const u8, coords: types.XYZ) ![]u8 {
@@ -512,6 +520,7 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .source_url = try allocator.dupeZ(u8, ""),
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
+            .surface_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface).init(allocator),
             .texture_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
