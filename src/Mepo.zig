@@ -662,9 +662,11 @@ fn event_signal(mepo: *@This(), signal: u6) types.Pending {
 fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
         .SDL_WINDOWEVENT_RESIZED => {
-            mepo.win_w = @intCast(u32, e.window.data1);
-            mepo.win_h = @intCast(u32, e.window.data2);
-            //mepo.center_on_coords(old_lat, old_lon);
+            var gl_width: c_int = undefined;
+            var gl_height: c_int = undefined;
+            sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_width, &gl_height);
+            mepo.win_w = @intCast(u32, gl_width);
+            mepo.win_h = @intCast(u32, gl_height);
         },
         else => {},
     }
