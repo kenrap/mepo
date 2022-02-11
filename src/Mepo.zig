@@ -1025,13 +1025,13 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
     const window = window: {
         try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
         const version = v: {
-            var v : sdl.SDL_version = undefined;
+            var v: sdl.SDL_version = undefined;
             sdl.SDL_GetVersion(&v);
             break :v v;
         };
         utildbg.log(
             "Compiled against SDL {s}; linked against SDL {s} (version={d}.{d}.{d})\n",
-            .{sdl.SDL_REVISION, sdl.SDL_GetRevision(), version.major, version.minor, version.patch},
+            .{ sdl.SDL_REVISION, sdl.SDL_GetRevision(), version.major, version.minor, version.patch },
         );
         utildbg.log("Initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
 
