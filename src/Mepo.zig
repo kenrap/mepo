@@ -1041,7 +1041,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             config.InitWindowY,
             config.InitWindowW,
             config.InitWindowH,
-            sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE,
+            sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         ));
         sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
         break :window w;
