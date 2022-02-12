@@ -1021,9 +1021,8 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
 }
 
 pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
-    // Initialize video, create window
-    const window = window: {
-        try utilsdl.errorcheck(sdl.SDL_Init(sdl.SDL_INIT_VIDEO));
+    // Dump debug info about SDL version compiled/linked
+    {
         const version = v: {
             var v: sdl.SDL_version = undefined;
             sdl.SDL_GetVersion(&v);
@@ -1033,8 +1032,41 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             "Compiled against SDL {s}; linked against SDL {s} (version={d}.{d}.{d})\n",
             .{ sdl.SDL_REVISION, sdl.SDL_GetRevision(), version.major, version.minor, version.patch },
         );
-        utildbg.log("Initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
+    }
 
+    // Initialize SDL video
+    video_init: {
+        // Attempt to initialize with whatever is set in SDL_VIDEODRIVER
+        const env_videodriver_opt = std.process.getEnvVarOwned(allocator, "SDL_VIDEODRIVER") catch null;
+        if (env_videodriver_opt) |env_videodriver| env_videoinit: {
+            defer allocator.free(env_videodriver);
+            const env_videodriver_z = try allocator.dupeZ(u8, env_videodriver);
+            defer allocator.free(env_videodriver_z);
+            utildbg.log("SDL_VIDEODRIVER env var set to {s}, attempting initialize\n", .{env_videodriver});
+            utilsdl.errorcheck(sdl.SDL_VideoInit(env_videodriver_z)) catch |e| {
+                utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ env_videodriver, e });
+                break :env_videoinit;
+            };
+            break :video_init;
+        }
+
+        // Use specified order of video drivers to initialize otherwise
+        const prefered_sdl_videodrivers_order = &[_][:0]const u8{ "wayland", "x11", "directfb", "kmsdrm" };
+        for (prefered_sdl_videodrivers_order) |driver| {
+            utildbg.log("SDL Videodriver {s} attempting to initialize\n", .{driver});
+            utilsdl.errorcheck(sdl.SDL_VideoInit(driver)) catch |e| {
+                utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ driver, e });
+                continue;
+            };
+            break :video_init;
+        }
+        utildbg.log("Prefered videodriver failed to initialize; attempting to initializing with default video driver\n", .{});
+        try utilsdl.errorcheck(sdl.SDL_VideoInit(null));
+    }
+    utildbg.log("Successfully initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
+
+    // Initialize window
+    const window = window: {
         const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
             "mepo",
             config.InitWindowX,
