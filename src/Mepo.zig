@@ -679,7 +679,7 @@ fn event_quit(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_unhandled(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    utildbg.log("Unhandled SDL Event: {}\n", .{e.type});
+    utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
     return .None;
 }
 
