@@ -16,6 +16,7 @@ pub fn build(b: *Builder) void {
         .install_dir = .{ .Bin = .{} },
         .install_subdir = "",
     });
+    b.installFile("assets/com.milesalan.Mepo.desktop", "share/applications/com.milesalan.Mepo.desktop");
 
     const exe = b.addExecutable("mepo", "src/main.zig");
 

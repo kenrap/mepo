@@ -7,6 +7,6 @@ ssh -t $CONN 'sudo sh -c "
   set -e
   cd /home/'$USER'/mepo
   zig build
-  cp zig-out/bin/mepo /usr/bin/
-  cp scripts/* /usr/bin/
+  cp zig-out/bin/* /usr/bin/
+  cp zig-out/share/applications/* /usr/share/applications/
 "'

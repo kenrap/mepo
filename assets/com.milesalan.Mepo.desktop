@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Mepo
+Exec=mepo
+Terminal=false
+Type=Application
+X-Purism-FormFactor=Workstation;Mobile;
