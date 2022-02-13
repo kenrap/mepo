@@ -25,7 +25,7 @@ main() {
       sed 's/ /%20/g'
   )"
 
-  echo "$QUERY" | grep . || err "Blank search query"
+  echo "$QUERY" | grep -q . || err "Blank search query"
 
   RESULT="$(
     curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
