@@ -43,6 +43,7 @@ table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
+uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window,
@@ -468,6 +469,22 @@ fn blit_help(mepo: *@This()) !void {
     );
 }
 
+fn blit_uibuttons(mepo: *@This()) !void {
+    for (mepo.uibuttons.items) |btn| {
+        try mepo.blit_multiline_text(
+            0x000000,
+            null,
+            null,
+            .{ .align_x = .Left },
+            0,
+            0,
+            null,
+            "{s}",
+            .{btn.text},
+        );
+    }
+}
+
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.errorcheck(sdl.SDL_RenderClear(mepo.renderer));
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
@@ -486,6 +503,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_overlay_debugbar();
     try mepo.blit_help();
     try mepo.blit_debugmessage();
+    try mepo.blit_uibuttons();
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
@@ -1124,6 +1142,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
+        .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .window = window,
     });
 
