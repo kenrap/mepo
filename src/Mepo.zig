@@ -261,7 +261,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        try mepo.blit_table(5, 5, 5, al.items);
+        _ = try mepo.blit_table(5, 25, 5, al.items);
     }
 }
 
@@ -470,13 +470,18 @@ fn blit_help(mepo: *@This()) !void {
 }
 
 fn blit_uibuttons(mepo: *@This()) !void {
-    for (mepo.uibuttons.items) |btn| {
+    const width = 200;
+    for (mepo.uibuttons.items) |btn, btn_i| {
         try mepo.blit_multiline_text(
             0x000000,
+            types.Color{ .value = 0xffffff },
             null,
-            null,
-            .{ .align_x = .Left },
-            0,
+            .{
+                .w = @divFloor(width, mepo.uibuttons.items.len),
+                .h = 20,
+                .align_x = .Center,
+            },
+            @intCast(i32, @divFloor(width, mepo.uibuttons.items.len) * btn_i),
             0,
             null,
             "{s}",
@@ -800,7 +805,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
+fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !types.WH {
     var width_label: c_int = 0;
     var width_value: c_int = 0;
     var height_row: c_int = 0;
@@ -885,6 +890,10 @@ pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const 
             .h = 1,
         }, .Fill);
     }
+    return types.WH{
+        .w = @intCast(u32, width_label + width_value),
+        .h = @intCast(u32, rows.len * @intCast(u32, height_row)),
+    };
 }
 
 pub fn blit_multiline_text(
