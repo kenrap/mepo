@@ -1048,7 +1048,7 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
     pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
-pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]const u8) anyerror!@This() {
+pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, cfg_opt: ?[]const u8) anyerror!@This() {
     // Dump debug info about SDL version compiled/linked
     {
         const version = v: {
@@ -1146,7 +1146,11 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, cfg_opt: ?[]c
             break :fonts fonts;
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
-        .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(window, -1, sdl.SDL_RENDERER_ACCELERATED)),
+        .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
+            window,
+            -1,
+            if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
+        )),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
