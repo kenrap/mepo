@@ -470,22 +470,18 @@ fn blit_help(mepo: *@This()) !void {
 }
 
 fn blit_uibuttons(mepo: *@This()) !void {
-    const width = 200;
-    for (mepo.uibuttons.items) |btn, btn_i| {
+    var btn_i = mepo.uibuttons.items.len - 1;
+    while (btn_i > 0) : (btn_i -= 1) {
         try mepo.blit_multiline_text(
             0x000000,
             types.Color{ .value = 0xffffff },
             null,
-            .{
-                .w = @divFloor(width, mepo.uibuttons.items.len),
-                .h = 20,
-                .align_x = .Center,
-            },
-            @intCast(i32, @divFloor(width, mepo.uibuttons.items.len) * btn_i),
+            .{ .h = mepo.win_h - 20, .align_x = .Right, .align_y = .Bottom },
+            0,
             0,
             null,
             "{s}",
-            .{btn.text},
+            .{mepo.uibuttons.items[btn_i].text},
         );
     }
 }
