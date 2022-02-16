@@ -43,6 +43,7 @@ table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
+uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window,
@@ -468,6 +469,54 @@ fn blit_help(mepo: *@This()) !void {
     );
 }
 
+fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEvent) !?types.UIButton {
+    var btn_i = mepo.uibuttons.items.len;
+    const pad: c_int = 5;
+    var right_pad: c_int = 10;
+    const pad_bottom: c_int = mepo.fontsize_ui + 10;
+
+    while (btn_i > 0) {
+        btn_i -= 1;
+        const surf = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), undefined),
+        );
+        defer sdl.SDL_FreeSurface(surf);
+
+        const bg_w = surf.w + pad * 2;
+        const bg_h = surf.h + pad * 2;
+        defer right_pad += bg_w;
+
+        const target = sdl.SDL_Rect{
+            .x = @intCast(c_int, mepo.win_w) - right_pad - bg_w,
+            .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
+            .w = bg_w + 1,
+            .h = bg_h + 1,
+        };
+
+        if (determine_click_target) |want_target| {
+            // Determine if click fell within btn
+            if (want_target.x >= target.x and want_target.y >= target.y and want_target.x <= target.x + target.w and want_target.y <= target.y + target.h)
+                return mepo.uibuttons.items[btn_i];
+        } else {
+            // Rendering
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
+            defer sdl.SDL_DestroyTexture(text);
+            var dest_rect_lab = sdl.SDL_Rect{
+                .x = target.x + pad,
+                .y = target.y + pad,
+                .w = surf.w,
+                .h = surf.h,
+            };
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
+        }
+    }
+
+    return null;
+}
+
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.errorcheck(sdl.SDL_RenderClear(mepo.renderer));
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
@@ -486,6 +535,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_overlay_debugbar();
     try mepo.blit_help();
     try mepo.blit_debugmessage();
+    _ = try mepo.blit_uibuttons(null);
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
@@ -563,6 +613,12 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.drag.?.delta_x + mepo.drag.?.delta_y < 10 and
         sdl.SDL_GetTicks() - mepo.drag.?.begin_ticks != 500)
     {
+        if (mepo.blit_uibuttons(e.button) catch null) |clicked_btn| {
+            std.debug.warn("Clicked on button: {}\n", .{clicked_btn});
+            mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
+            return .Redraw;
+        }
+
         // Click pin to activate
         var closest_match_pin: ?struct {
             pin_group_i: u8,
@@ -782,7 +838,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
+fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
     var width_label: c_int = 0;
     var width_value: c_int = 0;
     var height_row: c_int = 0;
@@ -1128,6 +1184,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
+        .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .window = window,
     });
 

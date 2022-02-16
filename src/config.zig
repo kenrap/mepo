@@ -15,11 +15,20 @@ pub const ZoomLevelToPinFontSize = [20]u8{
 };
 
 pub const DefaultBaseConfig =
+    \\ # UI Buttons;
+    \\ bind_button [<] [pin_cycle 1 -1];
+    \\ bind_button [Menu] [shellpipe mepo_ui_central_menu.sh];
+    \\ bind_button [Search] [shellpipe mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button [POIs] [shellpipe mepo_ui_menu_search_overpass.sh];
+    \\ bind_button [Route] [shellpipe mepo_ui_menu_route_graphhopper.sh];
+    \\ bind_button [>] [pin_cycle 1 -1];
+    \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
     \\ bind_click 1 2  [zoom_relative 1];
     \\ bind_click 1 3  [zoom_relative -2];
     \\ bind_click 2 1  [zoom_relative -1];
+    \\
     \\ # Keybindings;
     \\ bind_key _ j [move_relative 0 10];
     \\ bind_key s j [move_relative 0 100];
@@ -39,6 +48,7 @@ pub const DefaultBaseConfig =
     \\ bind_key s o [pin_purge];
     \\ bind_key cs q [cache_queueclear];
     \\ bind_key c c [quit];
+    \\
     \\ # Scripts hotkeys;
     \\ bind_key _ c [shellpipe mepo_ui_central_menu.sh];
     \\ bind_key _ g [shellpipe mepo_ui_menu_reposition_nominatim.sh];
@@ -75,9 +85,9 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
+    \\
     \\ # Prefs;
     \\ center_on_coords 40.78392 -73.96442;
-    \\
     \\ prefset fontsize_ui 16;
     \\ prefset distance_unit_tf_km_mi 0;
     \\ prefset crosshair_on 1;
