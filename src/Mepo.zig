@@ -261,7 +261,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        _ = try mepo.blit_table(5, 25, 5, al.items);
+        try mepo.blit_table(5, 25, 5, al.items);
     }
 }
 
@@ -823,7 +823,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !types.WH {
+fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
     var width_label: c_int = 0;
     var width_value: c_int = 0;
     var height_row: c_int = 0;
@@ -908,10 +908,6 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
             .h = 1,
         }, .Fill);
     }
-    return types.WH{
-        .w = @intCast(u32, width_label + width_value),
-        .h = @intCast(u32, rows.len * @intCast(u32, height_row)),
-    };
 }
 
 pub fn blit_multiline_text(
