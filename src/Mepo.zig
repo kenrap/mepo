@@ -469,7 +469,7 @@ fn blit_help(mepo: *@This()) !void {
     );
 }
 
-fn blit_uibuttons(mepo: *@This()) !void {
+fn blit_uibuttons(mepo: *@This(), determine_click_target: ?struct{ x: u32, y: u32}) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
     var right_pad: c_int = 10;
@@ -494,6 +494,11 @@ fn blit_uibuttons(mepo: *@This()) !void {
             .h = bg_h + 1,
         };
 
+        if (determine_click_target) |want_target| {
+            if (want_target.x >= target.x and want_target.y >= target.y and want_target.x <= target.x + target.w and want_target.y <= target.y + target.h)
+                return mepo.uibuttons.items[btn_i];
+        }
+
         try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
         try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
 
@@ -507,6 +512,8 @@ fn blit_uibuttons(mepo: *@This()) !void {
         };
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
     }
+
+    return null;
 }
 
 pub fn blit(mepo: *@This()) !void {
@@ -527,7 +534,7 @@ pub fn blit(mepo: *@This()) !void {
     try mepo.blit_overlay_debugbar();
     try mepo.blit_help();
     try mepo.blit_debugmessage();
-    try mepo.blit_uibuttons();
+    _ = try mepo.blit_uibuttons(null);
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
