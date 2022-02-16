@@ -498,6 +498,7 @@ fn blit_uibuttons(mepo: *@This()) !void {
         try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
 
         const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
+        defer sdl.SDL_DestroyTexture(text);
         var dest_rect_lab = sdl.SDL_Rect{
             .x = target.x + pad,
             .y = target.y + pad,
