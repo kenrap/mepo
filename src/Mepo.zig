@@ -261,7 +261,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(&arena.allocator, "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        try mepo.blit_table(5, 25, 5, al.items);
+        try mepo.blit_table(5, 5, 5, al.items);
     }
 }
 
