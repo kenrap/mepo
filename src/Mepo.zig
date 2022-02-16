@@ -469,7 +469,7 @@ fn blit_help(mepo: *@This()) !void {
     );
 }
 
-fn blit_uibuttons(mepo: *@This(), determine_click_target: ?struct{ x: u32, y: u32}) !?types.UIButton {
+fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEvent) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
     var right_pad: c_int = 10;
@@ -495,22 +495,23 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?struct{ x: u32, y: u3
         };
 
         if (determine_click_target) |want_target| {
+            // Determine if click fell within btn
             if (want_target.x >= target.x and want_target.y >= target.y and want_target.x <= target.x + target.w and want_target.y <= target.y + target.h)
                 return mepo.uibuttons.items[btn_i];
+        } else {
+            // Rendering
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
+            defer sdl.SDL_DestroyTexture(text);
+            var dest_rect_lab = sdl.SDL_Rect{
+                .x = target.x + pad,
+                .y = target.y + pad,
+                .w = surf.w,
+                .h = surf.h,
+            };
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
         }
-
-        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
-        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
-
-        const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
-        defer sdl.SDL_DestroyTexture(text);
-        var dest_rect_lab = sdl.SDL_Rect{
-            .x = target.x + pad,
-            .y = target.y + pad,
-            .w = surf.w,
-            .h = surf.h,
-        };
-        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
     }
 
     return null;
@@ -612,6 +613,12 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.drag.?.delta_x + mepo.drag.?.delta_y < 10 and
         sdl.SDL_GetTicks() - mepo.drag.?.begin_ticks != 500)
     {
+        if (mepo.blit_uibuttons(e.button) catch null) |clicked_btn| {
+            std.debug.warn("Clicked on button: {}\n", .{clicked_btn});
+            mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
+            return .Redraw;
+        }
+
         // Click pin to activate
         var closest_match_pin: ?struct {
             pin_group_i: u8,
