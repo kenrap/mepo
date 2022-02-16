@@ -470,19 +470,41 @@ fn blit_help(mepo: *@This()) !void {
 }
 
 fn blit_uibuttons(mepo: *@This()) !void {
-    var btn_i = mepo.uibuttons.items.len - 1;
-    while (btn_i > 0) : (btn_i -= 1) {
-        try mepo.blit_multiline_text(
-            0x000000,
-            types.Color{ .value = 0xffffff },
-            null,
-            .{ .h = mepo.win_h - 20, .align_x = .Right, .align_y = .Bottom },
-            0,
-            0,
-            null,
-            "{s}",
-            .{mepo.uibuttons.items[btn_i].text},
+    var btn_i = mepo.uibuttons.items.len;
+    const pad: c_int = 5;
+    var right_pad: c_int = 10;
+    const pad_bottom: c_int = mepo.fontsize_ui + 10;
+
+    while (btn_i > 0) {
+        btn_i -= 1;
+        const surf = try utilsdl.errorcheck_ptr(
+            sdl.SDL_Surface,
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), undefined),
         );
+        defer sdl.SDL_FreeSurface(surf);
+
+        const bg_w = surf.w + pad * 2;
+        const bg_h = surf.h + pad * 2;
+        defer right_pad += bg_w;
+
+        const target = sdl.SDL_Rect{
+            .x = @intCast(c_int, mepo.win_w) - right_pad - bg_w,
+            .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
+            .w = bg_w + 1,
+            .h = bg_h + 1,
+        };
+
+        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
+        try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+
+        const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
+        var dest_rect_lab = sdl.SDL_Rect{
+            .x = target.x + pad,
+            .y = target.y + pad,
+            .w = surf.w,
+            .h = surf.h,
+        };
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
     }
 }
 
