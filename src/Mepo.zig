@@ -612,47 +612,47 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         if (is_outside_touch_bounds or is_dragging) return .None;
     }
 
-    // 2. Single button click on UI elements (pins or uibtns)
+    // 2. UI on elements clcking overrides (uibtns)
     //    these actions take preference *over* bind_click actions
-    if (e.button.clicks == 1) {
+    if (mepo.blit_uibuttons(e.button) catch null) |clicked_btn| {
         // Click on UI button check
-        if (mepo.blit_uibuttons(e.button) catch null) |clicked_btn| {
-            std.debug.warn("Clicked on button: {}\n", .{clicked_btn});
-            mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
-            return .Redraw;
-        } else {
-            // Click pin to activate check
-            var closest_match_pin: ?struct {
-                pin_group_i: u8,
-                pin_i: u32,
-                delta_dist: i32,
-            } = null;
-            for (mepo.pin_groups) |pin_group, pin_group_i| {
-                if (!pin_group.visible) continue;
-                for (pin_group.pins.items) |*item, pin_i| {
-                    if (item.category == .Structural) continue;
+        utildbg.log("Clicked on button: {}\n", .{clicked_btn});
+        mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
+        return .Redraw;
+    }
 
-                    const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
-                    const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
-                    const delta = (std.math.absInt(pin_x - e.button.x) catch continue) + (std.math.absInt(pin_y - e.button.y) catch continue);
-                    if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
-                        closest_match_pin = .{
-                            .pin_group_i = @intCast(u8, pin_group_i),
-                            .pin_i = @intCast(u32, pin_i),
-                            .delta_dist = delta,
-                        };
-                    }
+    // 3. Click pin to activate for a single click
+    if (e.button.clicks == 1) {
+        // Click pin to activate check
+        var closest_match_pin: ?struct {
+            pin_group_i: u8,
+            pin_i: u32,
+            delta_dist: i32,
+        } = null;
+        for (mepo.pin_groups) |pin_group, pin_group_i| {
+            if (!pin_group.visible) continue;
+            for (pin_group.pins.items) |*item, pin_i| {
+                if (item.category == .Structural) continue;
+                const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
+                const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
+                const delta = (std.math.absInt(pin_x - e.button.x) catch continue) + (std.math.absInt(pin_y - e.button.y) catch continue);
+                if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
+                    closest_match_pin = .{
+                        .pin_group_i = @intCast(u8, pin_group_i),
+                        .pin_i = @intCast(u32, pin_i),
+                        .delta_dist = delta,
+                    };
                 }
             }
-            if (closest_match_pin) |match| {
-                mepo.pin_group_active = match.pin_group_i;
-                mepo.pin_group_active_item = match.pin_i;
-                return .Redraw;
-            }
+        }
+        if (closest_match_pin) |match| {
+            mepo.pin_group_active = match.pin_group_i;
+            mepo.pin_group_active_item = match.pin_i;
+            return .Redraw;
         }
     }
 
-    // 3. Default back to whatever was bound on bind_click by user
+    // 4. Default back to whatever was bound on bind_click by user
     const key = .{ .button = e.button.button, .clicks = @intCast(i8, e.button.clicks) };
     if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
@@ -1227,4 +1227,3 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
 
     return instance;
 }
-
