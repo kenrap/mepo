@@ -117,9 +117,29 @@ Here's an explation of the options are available in the central menu:
 
 ## **POI Searches**
 
-**TODO**
-POI searches placeholder.
-Explain both nomininatim & overpass scripts here.
+Points of intrest within the current viewport (bounding-box) can
+be searched both via [Nominatim](https://nominatim.org/) or via
+[Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API) using the
+default included scripts. Each of these methods has its advantages
+and disadvantages. Generally speaking, for specific **name-based**
+searches within a region, you should use Nominatim; while for **flexible
+OSM-tag-based** searches you should use Overpass.
+
+As described above, **Nominatim** excels at **name based searches**. For
+example if you wanted to find a restraunt called "Joe's Pizza" you could
+type this directly into the Nominatim POI search script prompt. Or
+similarly to find a starbucks, you could just type in "starbucks" in
+the Nominatim prompt.
+
+Meanwhile, **Overpass** is more powerful and suited then Nominatim for
+POI searches **based on OSM tags**; for example if you wanted to find
+all coffeshops, (rather then just a specific name of a coffeshop such as
+"starbucks" in the previous example) you could search for the general
+OSM tag `[amenity=cafe]`. This will find all OSM relations matching this
+tag within the current bounding box. A number of prepopulated OSM tags
+are available within the provided Overpass script; however if you want
+to search any custom OSM tag, simply enter it and this will work just
+the same.
 
 ## **Routing**
 
