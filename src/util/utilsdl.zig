@@ -23,19 +23,12 @@ pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, color: types.Col
     try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, color.opacity));
 }
 
-pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: types.Color, rect: ?sdl.SDL_Rect, rect_opt: RectOpt) errors.SDLError!void {
-    const rect_ptr: ?*const sdl.SDL_Rect = rect_ptr: {
-        if (rect != null) {
-            break :rect_ptr &rect.?;
-        } else {
-            break :rect_ptr null;
-        }
-    };
+pub fn sdl_renderer_rect(renderer: *sdl.SDL_Renderer, color: types.Color, rect: sdl.SDL_Rect, rect_opt: RectOpt) errors.SDLError!void {
     try sdl_renderer_set_draw_color(renderer, color);
     if (rect_opt == .Draw) {
-        try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
+        try errorcheck(sdl.SDL_RenderDrawRect(renderer, &rect));
     } else {
-        try errorcheck(sdl.SDL_RenderFillRect(renderer, rect_ptr));
+        try errorcheck(sdl.SDL_RenderFillRect(renderer, &rect));
     }
 }
 

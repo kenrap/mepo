@@ -519,7 +519,12 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
 
 pub fn blit(mepo: *@This()) !void {
     try utilsdl.errorcheck(sdl.SDL_RenderClear(mepo.renderer));
-    try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, null, .Fill);
+    try utilsdl.sdl_renderer_rect(
+        mepo.renderer,
+        .{ .value = 0xffffff },
+        .{ .x = 0, .y = 0, .w = @intCast(c_int, mepo.win_w), .h = @intCast(c_int, mepo.win_h) },
+        .Fill,
+    );
     try mepo.blit_tiles_all(
         .{
             .x = 0,
@@ -1222,3 +1227,4 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
 
     return instance;
 }
+
