@@ -16,6 +16,7 @@ pub const ZoomLevelToPinFontSize = [20]u8{
 
 pub const DefaultBaseConfig =
     \\ # UI Buttons;
+    \\ bind_button 1 [Purge] [pin_purge];
     \\ bind_button 1 [<] [pin_cycle 1 -1];
     \\ bind_button 1 [>] [pin_cycle 1 1];
     \\ bind_button 0 [Menu] [shellpipe mepo_ui_central_menu.sh];
