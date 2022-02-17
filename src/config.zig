@@ -16,13 +16,13 @@ pub const ZoomLevelToPinFontSize = [20]u8{
 
 pub const DefaultBaseConfig =
     \\ # UI Buttons;
-    \\ bind_button [<] [pin_cycle 1 -1];
-    \\ bind_button [Menu] [shellpipe mepo_ui_central_menu.sh];
-    \\ bind_button [Reloc] [shellpipe mepo_ui_menu_reposition_nominatim.sh];
-    \\ bind_button [Nom] [shellpipe mepo_ui_menu_search_nominatim.sh];
-    \\ bind_button [OP] [shellpipe mepo_ui_menu_search_overpass.sh];
-    \\ bind_button [GH] [shellpipe mepo_ui_menu_route_graphhopper.sh];
-    \\ bind_button [>] [pin_cycle 1 1];
+    \\ bind_button 1 [<] [pin_cycle 1 -1];
+    \\ bind_button 1 [>] [pin_cycle 1 1];
+    \\ bind_button 0 [Menu] [shellpipe mepo_ui_central_menu.sh];
+    \\ bind_button 0 [Reloc] [shellpipe mepo_ui_menu_reposition_nominatim.sh];
+    \\ bind_button 0 [Nom] [shellpipe mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button 0 [OP] [shellpipe mepo_ui_menu_search_overpass.sh];
+    \\ bind_button 0 [GH] [shellpipe mepo_ui_menu_route_graphhopper.sh];
     \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
