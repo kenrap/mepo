@@ -18,10 +18,11 @@ pub const DefaultBaseConfig =
     \\ # UI Buttons;
     \\ bind_button [<] [pin_cycle 1 -1];
     \\ bind_button [Menu] [shellpipe mepo_ui_central_menu.sh];
-    \\ bind_button [Search] [shellpipe mepo_ui_menu_search_nominatim.sh];
-    \\ bind_button [POIs] [shellpipe mepo_ui_menu_search_overpass.sh];
-    \\ bind_button [Route] [shellpipe mepo_ui_menu_route_graphhopper.sh];
-    \\ bind_button [>] [pin_cycle 1 -1];
+    \\ bind_button [Reloc] [shellpipe mepo_ui_menu_reposition_nominatim.sh];
+    \\ bind_button [Nom] [shellpipe mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button [OP] [shellpipe mepo_ui_menu_search_overpass.sh];
+    \\ bind_button [GH] [shellpipe mepo_ui_menu_route_graphhopper.sh];
+    \\ bind_button [>] [pin_cycle 1 1];
     \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
