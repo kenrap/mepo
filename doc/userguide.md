@@ -147,6 +147,19 @@ the same.
 Routing placeholder.
 Explain graphhopper & OSM relation scripts here.
 
+## **Repositioning the map**
+
+The map view will start wherever is set in the default configuration or
+optionally you can overload this default location (see the next section
+for autoloading preferences).
+
+To reposition the map while mepo is already running you can use the
+provided menu entry `Relocate map: via Nominatim` entry to search
+nominatim to determine a new location to set for the map. Using this
+script simply enter the name of a region (city, state, country, etc.) and
+Nominatim will be queried for matching targets. Select a target to
+reposition the map accordingly.
+
 ## **Autoloading preferences**
 
 Within the default config, the file located at `~/.mepo/bookmarks` is loaded
