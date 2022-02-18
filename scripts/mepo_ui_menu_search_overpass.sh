@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" POI Search: via Overpass"
+HOTKEY=b
 
 OPTIONS='
   Bars:          [amenity=bar]

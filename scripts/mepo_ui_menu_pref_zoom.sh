@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="漣 Update: Zoom"
+HOTKEY=z
 
 main() {
   echo prefset zoom "$(

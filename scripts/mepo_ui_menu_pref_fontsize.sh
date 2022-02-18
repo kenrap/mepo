@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="漣 Update: Fontsize"
+HOTKEY=Z
 
 main() {
   echo prefset fontsize_ui "$(

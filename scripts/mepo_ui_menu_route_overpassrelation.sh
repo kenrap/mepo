@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Route: via OSM Relation / Public Transit"
+HOTKEY=R
 
 RELATIONS="
   NYC Subway A: 9727210

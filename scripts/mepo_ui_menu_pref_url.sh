@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="漣 Update: Tilesource"
+HOTKEY=u
 
 main() {
   # Note X, Y, Z provided as %1$d, %2$d, %3$d respectively

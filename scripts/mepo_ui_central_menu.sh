@@ -3,9 +3,9 @@
 menuoptions() {
   echo "$PATH" | tr : '\n' | xargs ls -1 2>/dev/null | grep mepo_ | while read -r SCRIPT; do
     unset DISPLAYNAME
-    eval "$(cat "$(which "$SCRIPT")" | grep -E '^DISPLAYNAME=' )"
+    eval "$(cat "$(which "$SCRIPT")" | grep -E '^(DISPLAYNAME|HOTKEY)=' )"
     [ -z "$DISPLAYNAME" ] && continue
-    echo "$DISPLAYNAME ^ $SCRIPT"
+    echo "$DISPLAYNAME ^ $SCRIPT ^ $HOTKEY"
   done | uniq | sort -d
 }
 

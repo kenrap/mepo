@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Relocate map: via search"
+HOTKEY=g
 
 err() {
   echo "$@" >&2

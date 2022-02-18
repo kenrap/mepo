@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Debug: API"
+HOTKEY=a
 
 main() {
   OPTIONS='

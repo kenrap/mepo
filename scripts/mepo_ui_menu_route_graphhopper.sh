@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Route: via GraphHopper"
+HOTKEY=r
 
 errexit() {
   echo "$1" >&2

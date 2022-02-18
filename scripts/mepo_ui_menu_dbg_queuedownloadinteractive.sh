@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Download: custom region (interactive)"
+HOTKEY=q
 BOUND_LOWER=1
 BOUND_UPPER=19
 

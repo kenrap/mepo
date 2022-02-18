@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" POI Search: via Nominatim"
+HOTKEY=G
 
 nominatimspecialphrasesfromwiki() {
   curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |
