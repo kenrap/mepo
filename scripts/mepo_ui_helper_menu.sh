@@ -13,9 +13,9 @@ main() {
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
     bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
-  elif command -v sxmo_dmenu_with_kb.sh; then
+  elif command -v sxmo_dmenu_with_kb.sh > /dev/null; then
     # Sxmo support
-    sxmo_dmenu_with_kb.sh
+    sxmo_dmenu_with_kb.sh -p "$PROMPT"
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Generic Wayland enviroment support
     bemenu --fn "$FONT" --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
