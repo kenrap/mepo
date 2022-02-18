@@ -48,7 +48,7 @@ pub const DefaultBaseConfig =
     \\ bind_key s p [pin_cycle 0 -1; center_on_pin;];
     \\ bind_key _ o [pin_deactivate];
     \\ bind_key s o [pin_purge];
-    \\ bind_key cs q [cache_queueclear];
+    \\ bind_key _ w [cache_queueclear];
     \\ bind_key c c [quit];
     \\
     \\ # Scripts hotkeys;
@@ -58,6 +58,7 @@ pub const DefaultBaseConfig =
     \\ bind_key _ b [shellpipe mepo_ui_menu_search_overpass.sh];
     \\ bind_key s r [shellpipe mepo_ui_menu_route_overpassrelation.sh];
     \\ bind_key _ r [shellpipe mepo_ui_menu_route_graphhopper.sh];
+    \\ bind_key s z [shellpipe mepo_ui_menu_pref_fontsize.sh];
     \\ bind_key _ z [shellpipe mepo_ui_menu_pref_zoom.sh];
     \\ bind_key _ u [shellpipe mepo_ui_menu_pref_url.sh];
     \\ bind_key c f [shellpipe  [DIM=h MULT=1  mepo_ui_helper_pref_pan.sh]];
