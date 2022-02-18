@@ -6,6 +6,8 @@
 - [Basic Interface Overview](#strongbasic-interface-overviewstrong)
 - [Touch & Mobile Support](#strongtouch-amp-mobile-supportstrong)
 - [Keyboard & Desktop Support](#strongkeyboard-amp-desktop-supportstrong)
+- [Visual UI Overview](##visual-ui-overview)
+- [The UI Buttonbar](##the-ui-button-bar)
 - [The Central Menu](##strongthe-central-menustrong)
 - [POI Searches](#strongpoi-searchesstrong)
 - [Routing](#strongroutingstrong)
@@ -59,6 +61,26 @@ exist such as panning with vim-style keys and direct hotkeys to launch
 various scripts. You can reference the default [hotkeys](../src/config.zig#L18) 
 by studying the default configuration.
 
+## **Visual UI Overview**
+
+**TODO** Add visual diagram explaining difference components of UI
+(buttonbar, bottom bar, pin overlay, pins, etc.)
+
+## **The UI Button Bar**
+
+The UI feature a bar of buttons in the default configuration indicated
+as text aligned in a bar on the bottom of the screen. Under the hood this is
+actually built out using the `bind_button` mepolang command; so if you want
+to add your own custom buttons (tied to userscripts, etc.) this is doable.
+
+Here's an explanation of the provided script accessible in the button
+bar in the default config:
+
+- **Reloc**: Relocate map via nominatim
+- **Nom**: Nominatim POI Search script
+- **OP**: Overpass POI Search script
+- **GH**: Graphhopper routing script
+- **Menu**: Launch the [central menu]() for additional actions
 
 ## **The Central Menu**
 
