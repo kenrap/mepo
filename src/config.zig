@@ -53,6 +53,7 @@ pub const DefaultBaseConfig =
     \\
     \\ # Scripts hotkeys;
     \\ bind_key _ c [shellpipe mepo_ui_central_menu.sh];
+    \\ bind_key _ f [shellpipe mepo_ui_menu_bookmarks_droppin.sh];
     \\ bind_key _ g [shellpipe mepo_ui_menu_reposition_nominatim.sh];
     \\ bind_key s g [shellpipe mepo_ui_menu_search_nominatim.sh];
     \\ bind_key _ b [shellpipe mepo_ui_menu_search_overpass.sh];
