@@ -64,7 +64,7 @@ main() {
     map(
       .name as $handle | 
       to_entries |  
-      map("pin_meta [" + $handle + "] [" + .key + "] [" + .value + "];")
+      map("pin_meta -1 [" + $handle + "] [" + .key + "] [" + .value + "];")
     ) | 
     flatten(3) |
     .[]

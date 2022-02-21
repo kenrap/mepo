@@ -3,13 +3,16 @@ const types = @import("../types.zig");
 const std = @import("std");
 
 pub fn f_pin_meta(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const handle = args[0].Text;
-    const key = args[1].Text;
-    const value = args[2].Text;
-    try pin_meta(mepo, handle, key, value);
+    const group = @floatToInt(i32, args[0].Number);
+    const handle = args[1].Text;
+    const key = args[2].Text;
+    const value = args[3].Text;
+    try pin_meta(mepo, group, handle, key, value);
 }
 
-pub fn pin_meta(mepo: *Mepo, handle: [:0]const u8, key: [:0]const u8, value: [:0]const u8) !void {
+pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8, value: [:0]const u8) !void {
+    const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+
     var pin: *types.Pin = pin: {
         for (mepo.pin_groups[mepo.pin_group_active].pins.items) |*pin| {
             if (pin.handle != null and std.mem.eql(u8, pin.handle.?, handle)) {

@@ -91,8 +91,8 @@ printpins() {
       if(.instruction != null) then 
         "
           pin_add -1 0 \(.coords[1]) \(.coords[0]) [\(.idx)] [\(.instruction.text)]; 
-          pin_meta [\(.idx)] Time [\(.instruction.time / 1000 / 60) minutes]; 
-          pin_meta [\(.idx)] Distance [\(.instruction.distance)km];
+          pin_meta -1 [\(.idx)] Time [\(.instruction.time / 1000 / 60) minutes]; 
+          pin_meta -1 [\(.idx)] Distance [\(.instruction.distance)km];
         "
         else
         "pin_add -1 1 \(.coords[1]) \(.coords[0]) [] [];"

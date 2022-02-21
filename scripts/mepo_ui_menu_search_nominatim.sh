@@ -59,7 +59,7 @@ main() {
         end
       ) |
       .display_name as $displayname |
-      .extratags | with_entries(.value="pin_meta [\($osmid)] [\(.key)] [\(.value)];") | map(.)
+      .extratags | with_entries(.value="pin_meta -1 [\($osmid)] [\(.key)] [\(.value)];") | map(.)
     ) | .[] ]  | flatten(3) | .[]
   ' |
   tr -d '",'
