@@ -42,7 +42,7 @@ main() {
              .value = .value
            end
          ) | 
-         "pin_add 0 \(.lat) \(.lon) [\($osmid)] [\(.display_name)];"
+         "pin_add -1 0 \(.lat) \(.lon) [\($osmid)] [\(.display_name)];"
        )  | .[]
     ' |
     tr -d '"'

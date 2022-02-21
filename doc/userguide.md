@@ -193,7 +193,7 @@ Example `~/.mepo/bookmarks`:
 ```sh
 center_on_coords 42.3608 -71.0573;
 pin_groupprefset 3 active 1;
-pin_add 0 42.355 -71.0780 [foopin] [foopin];
+pin_add 3 0 42.355 -71.0780 [foopin] [foopin];
 prefset zoom 15;
 ```
 

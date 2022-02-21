@@ -68,7 +68,7 @@ main() {
   awk 'FNR==NR {x2[$1] = $0; next} $1 in x2 {print x2[$1]}' "$FILENODES" "$FILEREFSORDER" |
     cut -f 2- -d ' ' |
     sed 's/[^[:print:]]//g' |
-    xargs -ID echo 'pin_add 0 D;'
+    xargs -ID echo 'pin_add -1 0 D;'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
