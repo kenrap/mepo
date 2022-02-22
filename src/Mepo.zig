@@ -578,6 +578,26 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
+
+fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    var idx : usize = 0;
+    var pending : types.Pending = .None;
+    const text = e.text.text;
+    while (text[idx] != 0) : (idx += 1) {
+        const char_z: [2]u8 = .{std.ascii.toLower(text[idx]), 0};
+        const key = types.KeyInput{
+            .keymod = @intToEnum(sdl.SDL_Keymod, if (std.ascii.isUpper(text[idx])) sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT else 0),
+            .keycode = @intToEnum(sdl.SDL_KeyCode, sdl.SDL_GetKeyFromName(&char_z[0])),
+        };
+        if (mepo.table_keybindings.get(key)) |run_expression| {
+            utildbg.log("Got keybindings table function with run expression: <{s}>\n", .{run_expression});
+            mepo.mepolang_execute(run_expression) catch unreachable;
+            pending = .Redraw;
+        }
+    }
+    return pending;
+}
+
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold = 0.002;
     if (e.mgesture.dDist > threshold) {
@@ -835,6 +855,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 .SDL_MOUSEMOTION => event_mousemotion,
                 .SDL_MOUSEWHEEL => event_mousewheel,
                 .SDL_MULTIGESTURE => event_multigesture,
+                .SDL_TEXTINPUT => event_textinput,
                 .SDL_QUIT => event_quit,
                 .SDL_WINDOWEVENT => event_windowevent,
                 else => event_unhandled,
