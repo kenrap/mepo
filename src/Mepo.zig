@@ -580,7 +580,10 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 
 fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    defer sdl.SDL_FlushEvent(sdl.SDL_KEYDOWN);
+    defer {
+        sdl.SDL_PumpEvents();
+        sdl.SDL_FlushEvent(sdl.SDL_KEYUP);
+    }
 
     var idx : usize = 0;
     var pending : types.Pending = .None;
@@ -712,8 +715,11 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    defer sdl.SDL_FlushEvent(sdl.SDL_TEXTINPUT);
+fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    defer {
+        sdl.SDL_PumpEvents();
+        sdl.SDL_FlushEvent(sdl.SDL_TEXTINPUT);
+    }
 
     if (mepo.table_keybindings.get(.{
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
@@ -853,7 +859,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_FINGERDOWN => event_fingerdown,
                 .SDL_FINGERUP => event_fingerup,
-                .SDL_KEYDOWN => event_keydown,
+                .SDL_KEYUP => event_keyup,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
                 .SDL_MOUSEBUTTONUP => event_mousebuttonup,
                 .SDL_MOUSEMOTION => event_mousemotion,
