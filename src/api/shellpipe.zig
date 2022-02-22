@@ -15,6 +15,13 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
+    // Shellpipe scripts in some cases may launch the keyboard, and while
+    // default provided scripts do 'cleanup' themselves and close the OSK
+    // for compatibility sake, we trigger stop text input which closes the
+    // OSK incase a userscript forgot to do so; this helps for enviroments
+    // such as Phosh
+    defer sdl.SDL_StopTextInput();
+
     try mepo.update_debug_message(
         try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
