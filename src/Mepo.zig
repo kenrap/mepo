@@ -611,8 +611,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     {
         const is_outside_touch_bounds = !mepo.within_touch_bounds(e.button.x, e.button.y);
         const is_dragging = mepo.drag != null and
-            mepo.drag.?.delta_x + mepo.drag.?.delta_y > 10 and
-            sdl.SDL_GetTicks() - mepo.drag.?.begin_ticks >= 500;
+            mepo.drag.?.delta_x + mepo.drag.?.delta_y > 10;
         if (is_outside_touch_bounds or is_dragging) return .None;
     }
 
