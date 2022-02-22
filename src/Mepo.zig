@@ -580,6 +580,8 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 
 fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    defer sdl.SDL_FlushEvent(sdl.SDL_KEYDOWN);
+
     var idx : usize = 0;
     var pending : types.Pending = .None;
     const text = e.text.text;
@@ -590,7 +592,7 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             .keycode = @intToEnum(sdl.SDL_KeyCode, sdl.SDL_GetKeyFromName(&char_z[0])),
         };
         if (mepo.table_keybindings.get(key)) |run_expression| {
-            utildbg.log("Got keybindings table function with run expression: <{s}>\n", .{run_expression});
+            utildbg.log("Got keybindings table function via textinput with run expression: <{s}>\n", .{run_expression});
             mepo.mepolang_execute(run_expression) catch unreachable;
             pending = .Redraw;
         }
@@ -711,6 +713,8 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    defer sdl.SDL_FlushEvent(sdl.SDL_TEXTINPUT);
+
     if (mepo.table_keybindings.get(.{
         .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
         .keymod = keymod: {
@@ -730,7 +734,7 @@ fn event_keydown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             break :keymod @intToEnum(sdl.SDL_Keymod, @intCast(c_int, bitset));
         },
     })) |run_expression| {
-        utildbg.log("Got keybindings table function with run expression: <{s}>\n", .{run_expression});
+        utildbg.log("Got keybindings table function via keydown with run expression: <{s}>\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
     }
