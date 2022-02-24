@@ -28,15 +28,9 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         break :m modifier;
     };
 
-    // Keycode
-    const keycode = sdl.SDL_GetKeyFromName(key_str);
-    if (keycode == sdl.SDLK_UNKNOWN) {
-        return error.UnableToLookupKeyName;
-    }
-
     const key = .{
         .keymod = @intToEnum(sdl.SDL_Keymod, keymod),
-        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, keycode)),
+        .key = std.ascii.toLower(key_str[0]),
     };
 
     if (mepo.table_keybindings.get(key)) |heap_str| {

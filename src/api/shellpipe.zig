@@ -20,7 +20,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     // for compatibility sake, we trigger stop text input which closes the
     // OSK incase a userscript forgot to do so; this helps for enviroments
     // such as Phosh
-    defer sdl.SDL_StopTextInput();
+    defer if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasScreenKeyboardSupport()) sdl.SDL_StopTextInput();
 
     try mepo.update_debug_message(
         try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),

@@ -445,7 +445,7 @@ fn blit_help(mepo: *@This()) !void {
                 break :k "  ";
             };
 
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {s} = {s}", .{ keymod, sdl.SDL_GetKeyName(@enumToInt(kv.key_ptr.keycode)), kv.value_ptr.* }));
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
@@ -580,11 +580,7 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 
 fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    defer {
-        sdl.SDL_PumpEvents();
-        sdl.SDL_FlushEvent(sdl.SDL_KEYUP);
-    }
-
+    defer sdl.SDL_StopTextInput();
     var idx : usize = 0;
     var pending : types.Pending = .None;
     const text = e.text.text;
@@ -592,7 +588,7 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         const char_z: [2]u8 = .{std.ascii.toLower(text[idx]), 0};
         const key = types.KeyInput{
             .keymod = @intToEnum(sdl.SDL_Keymod, if (std.ascii.isUpper(text[idx])) sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT else 0),
-            .keycode = @intToEnum(sdl.SDL_KeyCode, sdl.SDL_GetKeyFromName(&char_z[0])),
+            .key = char_z[0],
         };
         if (mepo.table_keybindings.get(key)) |run_expression| {
             utildbg.log("Got keybindings table function via textinput with run expression: <{s}>\n", .{run_expression});
@@ -715,14 +711,20 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
+fn event_keymapchanged(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    sdl.SDL_StartTextInput();
+    return .None;
+}
+
 fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    defer {
-        sdl.SDL_PumpEvents();
-        sdl.SDL_FlushEvent(sdl.SDL_TEXTINPUT);
-    }
+    if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive()) return .None;
+
+    const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
+    std.debug.warn("Key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
+    if (std.mem.indexOfSentinel(u8, 0, key) != 1) return .None;
 
     if (mepo.table_keybindings.get(.{
-        .keycode = @intToEnum(sdl.SDL_KeyCode, @intCast(c_int, e.key.keysym.sym)),
+        .key = std.ascii.toLower(key[0]),
         .keymod = keymod: {
             // E.g. within bind_key we store modifiers as KMOD_SHIFT rather then both KMOD_{L,R}SHIFT
             // KMOD_SHIFT is actually (KMOD_LSHIFT | KMOD_RSHIFT)
@@ -859,7 +861,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_FINGERDOWN => event_fingerdown,
                 .SDL_FINGERUP => event_fingerup,
-                .SDL_KEYUP => event_keyup,
+                .SDL_KEYDOWN => event_keyup,
+                .SDL_KEYMAPCHANGED => event_keymapchanged,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
                 .SDL_MOUSEBUTTONUP => event_mousebuttonup,
                 .SDL_MOUSEMOTION => event_mousemotion,
@@ -1177,6 +1180,9 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
         sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
         break :window w;
     };
+
+    // Disable textinput method - we use keyup in all instances
+    sdl.SDL_StopTextInput();
 
     // Initialize TTF, load fonts
     try utilsdl.errorcheck(sdl.TTF_Init());
