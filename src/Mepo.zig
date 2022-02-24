@@ -717,7 +717,10 @@ fn event_keymapchanged(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive()) return .None;
+    if (
+        sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
+        e.key.keysym.mod == 0
+    ) return .None;
 
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
     std.debug.warn("Key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
@@ -861,7 +864,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
                 .SDL_FINGERDOWN => event_fingerdown,
                 .SDL_FINGERUP => event_fingerup,
-                .SDL_KEYDOWN => event_keyup,
+                .SDL_KEYUP => event_keyup,
                 .SDL_KEYMAPCHANGED => event_keymapchanged,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
                 .SDL_MOUSEBUTTONUP => event_mousebuttonup,
