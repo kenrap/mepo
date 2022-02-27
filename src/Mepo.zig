@@ -580,7 +580,6 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 
 fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    defer sdl.SDL_StopTextInput();
     var idx : usize = 0;
     var pending : types.Pending = .None;
     const text = e.text.text;
@@ -711,11 +710,6 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_keymapchanged(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    sdl.SDL_StartTextInput();
-    return .None;
-}
-
 fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (
         sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
@@ -724,6 +718,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
     std.debug.warn("Key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
+
     if (std.mem.indexOfSentinel(u8, 0, key) != 1) return .None;
 
     if (mepo.table_keybindings.get(.{
@@ -865,7 +860,6 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 .SDL_FINGERDOWN => event_fingerdown,
                 .SDL_FINGERUP => event_fingerup,
                 .SDL_KEYUP => event_keyup,
-                .SDL_KEYMAPCHANGED => event_keymapchanged,
                 .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
                 .SDL_MOUSEBUTTONUP => event_mousebuttonup,
                 .SDL_MOUSEMOTION => event_mousemotion,
@@ -1170,6 +1164,7 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
     }
     utildbg.log("Successfully initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
 
+
     // Initialize window
     const window = window: {
         const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
@@ -1184,8 +1179,11 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
         break :window w;
     };
 
-    // Disable textinput method - we use keyup in all instances
-    sdl.SDL_StopTextInput();
+    // E.g. on non OSK enviroments (like desktop, Sxmo, etc.) we enable
+    // the textinput system; textinput events are more reliable then
+    // keyevents for wtype (used by Sxmo); meanwhile on OSK-like enviroments
+    // like Phosh, we can just use keydown/up events directly
+    defer if (sdl.SDL_bool.SDL_FALSE == sdl.SDL_HasScreenKeyboardSupport()) sdl.SDL_StartTextInput();
 
     // Initialize TTF, load fonts
     try utilsdl.errorcheck(sdl.TTF_Init());
