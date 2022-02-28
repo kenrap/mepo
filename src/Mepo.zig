@@ -764,7 +764,9 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             mepo.win_w = @intCast(u32, gl_width);
             mepo.win_h = @intCast(u32, gl_height);
         },
-        else => {},
+        else => {
+            utildbg.log("Unhandled SDL Window Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_WindowEventID, @intCast(c_int, e.window.event)))});
+        },
     }
     return .Redraw;
 }
