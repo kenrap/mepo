@@ -715,10 +715,8 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
         e.key.keysym.mod == 0
     ) return .None;
-
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
-    std.debug.warn("Key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
-
+    std.debug.warn("Processing key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
     if (std.mem.indexOfSentinel(u8, 0, key) != 1) return .None;
 
     if (mepo.table_keybindings.get(.{
