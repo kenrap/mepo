@@ -1179,11 +1179,27 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
         break :window w;
     };
 
-    // E.g. on non OSK enviroments (like desktop, Sxmo, etc.) we enable
-    // the textinput system; textinput events are more reliable then
-    // keyevents for wtype (used by Sxmo); meanwhile on OSK-like enviroments
-    // like Phosh, we can just use keydown/up events directly
-    defer if (sdl.SDL_bool.SDL_FALSE == sdl.SDL_HasScreenKeyboardSupport()) sdl.SDL_StartTextInput();
+    // Initialize SDL Textinput system
+    // Controls input for unicode & IME methods etc.
+    // Application logic supports both raw keydowns & textinput
+    // Also note wtype on sway produces invalid keycodes in keydown
+    // so textinput is required here.
+    //
+    // The textinput system also controls OSK opening & closing.
+    // On Phosh this causes issues since there's an overeagerness to
+    // open the OSK with textinput (while in reality only shellpipe
+    // scripts need the OSK and besides that onscreen keyboard should
+    // be hidden).. so for Phosh we disable textinput
+    textinput_enable: {
+        const env_session_desktop = std.process.getEnvVarOwned(allocator, "XDG_SESSION_DESKTOP") catch break :textinput_enable;
+        defer allocator.free(env_session_desktop);
+
+        var textinput_enable = true;
+        if (std.mem.eql(u8, env_session_desktop, "phosh")) textinput_enable = false;
+
+        if (textinput_enable) sdl.SDL_StartTextInput();
+        utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
+    }
 
     // Initialize TTF, load fonts
     try utilsdl.errorcheck(sdl.TTF_Init());
