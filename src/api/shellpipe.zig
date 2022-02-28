@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
+const utilplatform = @import("../util/utilplatform.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const sdl = @import("../sdlshim.zig");
@@ -16,10 +17,7 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     defer arena.deinit();
 
     // TODO: move to window re-expose probably
-    defer d: {
-        const env_session_desktop = std.process.getEnvVarOwned(mepo.allocator, "XDG_SESSION_DESKTOP") catch break :d;
-        if (std.mem.eql(u8, env_session_desktop, "phosh")) sdl.SDL_StopTextInput();
-    }
+    defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
 
     try mepo.update_debug_message(
         try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),

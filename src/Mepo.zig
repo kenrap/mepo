@@ -7,6 +7,7 @@ const TileCache = @import("./TileCache.zig");
 const utilconversion = @import("./util/utilconversion.zig");
 const utilmepolang = @import("util/utilmepolang.zig");
 const utilstrings = @import("util/utilstrings.zig");
+const utilplatform = @import("util/utilplatform.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
@@ -1190,13 +1191,8 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
     // open the OSK with textinput (while in reality only shellpipe
     // scripts need the OSK and besides that onscreen keyboard should
     // be hidden).. so for Phosh we disable textinput
-    textinput_enable: {
-        const env_session_desktop = std.process.getEnvVarOwned(allocator, "XDG_SESSION_DESKTOP") catch break :textinput_enable;
-        defer allocator.free(env_session_desktop);
-
-        var textinput_enable = true;
-        if (std.mem.eql(u8, env_session_desktop, "phosh")) textinput_enable = false;
-
+    {
+        const textinput_enable = utilplatform.supports_osk();
         if (textinput_enable) sdl.SDL_StartTextInput();
         utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
     }
