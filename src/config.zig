@@ -15,7 +15,7 @@ pub const ZoomLevelToPinFontSize = [20]u8{
 };
 // Essentially the number of textures that are allowed to be loaded to
 // the GPU concurrently
-pub const MaxTextures = 500;
+pub const MaxTextures = 50;
 
 pub const DefaultBaseConfig =
     \\ # UI Buttons;

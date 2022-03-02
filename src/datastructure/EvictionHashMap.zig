@@ -24,10 +24,18 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, si
             return self.array_hash_map.values();
         }
 
-        pub fn put(self: *@This(), k: key_type, v: metadata_type) !void {
+        pub fn put(self: *@This(), k: key_type, v: metadata_type) !?metadata_type {
             const lock = self.mutex.acquire();
             defer lock.release();
+
             try self.array_hash_map.put(k, v);
+            return if (self.array_hash_map.count() > self.size) return self.shift() else null;
+        }
+
+        fn shift(self: *@This()) !metadata_type {
+            const shifted_val = self.array_hash_map.values()[0];
+            self.array_hash_map.orderedRemoveAt(0);
+            return shifted_val;
         }
 
         pub fn clearAndFree(self: *@This()) void {

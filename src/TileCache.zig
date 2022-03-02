@@ -274,7 +274,8 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         defer sdl.SDL_FreeSurface(surface);
         const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
         _ = tile_cache.surface_map.swapRemove(coords);
-        try tile_cache.texture_map.put(coords, texture);
+        const evicted_texture_opt = try tile_cache.texture_map.put(coords, texture);
+        if (evicted_texture_opt) |evicted_texture| sdl.SDL_DestroyTexture(evicted_texture);
         return TileData{ .texture = texture };
     }
 
