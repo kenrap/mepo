@@ -29,10 +29,7 @@ pub const MepoFnNargs = 6;
 pub const MepoFn = fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void;
 pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);
 
-pub const KeyInput = struct {
-    key: u8,
-    keymod: sdl.SDL_Keymod
-};
+pub const KeyInput = struct { key: u8, keymod: sdl.SDL_Keymod };
 pub const ClickInput = struct { button: u8, clicks: i8 };
 
 pub const Pending = enum { None, Redraw, Drag };

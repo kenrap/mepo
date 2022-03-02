@@ -579,13 +579,12 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-
 fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    var idx : usize = 0;
-    var pending : types.Pending = .None;
+    var idx: usize = 0;
+    var pending: types.Pending = .None;
     const text = e.text.text;
     while (text[idx] != 0) : (idx += 1) {
-        const char_z: [2]u8 = .{std.ascii.toLower(text[idx]), 0};
+        const char_z: [2]u8 = .{ std.ascii.toLower(text[idx]), 0 };
         const key = types.KeyInput{
             .keymod = @intToEnum(sdl.SDL_Keymod, if (std.ascii.isUpper(text[idx])) sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT else 0),
             .key = char_z[0],
@@ -712,12 +711,10 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (
-        sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
-        e.key.keysym.mod == 0
-    ) return .None;
+    if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
+        e.key.keysym.mod == 0) return .None;
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
-    std.debug.warn("Processing key in keyup: {s} and sen {d}\n", .{key, std.mem.indexOfSentinel(u8, 0, key)});
+    std.debug.warn("Processing key in keyup: {s} and sen {d}\n", .{ key, std.mem.indexOfSentinel(u8, 0, key) });
     if (std.mem.indexOfSentinel(u8, 0, key) != 1) return .None;
 
     if (mepo.table_keybindings.get(.{
@@ -1164,7 +1161,6 @@ pub fn init(allocator: *std.mem.Allocator, tile_cache: *TileCache, use_sw_render
         try utilsdl.errorcheck(sdl.SDL_VideoInit(null));
     }
     utildbg.log("Successfully initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
-
 
     // Initialize window
     const window = window: {

@@ -2,7 +2,7 @@ const sdl = @import("../sdlshim.zig");
 const std = @import("std");
 
 pub fn supports_osk() bool {
-    var env_session_desktop : []const u8 = "unknown";
+    var env_session_desktop: []const u8 = "unknown";
     if (std.os.getenv("XDG_SESSION_DESKTOP")) |v| {
         env_session_desktop = v;
     }
