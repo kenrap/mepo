@@ -53,7 +53,7 @@ queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
 source_url: [:0]const u8 = undefned,
 surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
-texture_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture),
+texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 
 /// Downloads tiles continuously
@@ -521,7 +521,7 @@ pub fn init(allocator: *std.mem.Allocator) anyerror!@This() {
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .surface_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface).init(allocator),
-            .texture_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Texture).init(allocator),
+            .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
     } else {
