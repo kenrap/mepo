@@ -38,7 +38,7 @@ main() {
           waySCOPE(BBOX);
           relationSCOPE(BBOX);
         );
-        out+body;
+        out+body 100;
         >;
         out+skel+qt;
       ' | sed "s/BBOX/$BBOX/g" | sed "s/SCOPE/$SCOPE/g"
