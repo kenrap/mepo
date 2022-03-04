@@ -9,4 +9,5 @@ ssh -t $CONN 'sudo sh -c "
   zig build
   cp zig-out/bin/* /usr/bin/
   cp zig-out/share/applications/* /usr/share/applications/
+  cp zig-out/share/mepo/mepo.png /usr/share/pixmaps/mepo.png
 "'

@@ -3,4 +3,6 @@ Name=Mepo
 Exec=mepo
 Terminal=false
 Type=Application
-X-Purism-FormFactor=Workstation;Mobile;
+Icon=mepo
+StartupWMClass=mepo
+SingleMainWindow=true
