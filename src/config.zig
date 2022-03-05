@@ -100,7 +100,7 @@ pub const DefaultBaseConfig =
     \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;
     \\ prefset debug_message_enabled 1;
-    \\ prefset debug_stderr 1;
+    \\ prefset debug_stderr 0;
     \\ prefset debug_tiles 0;
     \\ prefset overlay_debugbar 1;
     \\ prefset overlay_pindetails 1;

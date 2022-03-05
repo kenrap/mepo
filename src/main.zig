@@ -15,6 +15,7 @@ pub fn main() !void {
     }
 
     const allocator = std.heap.c_allocator;
+    var stderr_on: bool = false;
     var mode: enum { Graphical, Download, Version } = .Graphical;
     var download_request: []const u8 = undefined;
     var cfg: ?[]const u8 = null;
@@ -31,7 +32,9 @@ pub fn main() !void {
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
-            download_request = arg[2..];
+        } else if (std.mem.startsWith(u8, arg, "-e")) {
+            // -e: Enable stderr debugging
+            stderr_on = true;
         } else if (std.mem.startsWith(u8, arg, "-sw")) {
             // -sw: Use software renderer instead of default HW renderer
             use_sw_renderer = true;
@@ -45,7 +48,7 @@ pub fn main() !void {
     switch (mode) {
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, cfg);
+            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, stderr_on, cfg);
             mepo.sdl_event_loop() catch Mepo.graceful_terminate();
         },
         .Download => {
