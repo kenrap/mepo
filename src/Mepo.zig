@@ -758,7 +758,9 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             var gl_width: c_int = undefined;
             var gl_height: c_int = undefined;
             sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_width, &gl_height);
-            _ = sdl.SDL_RenderSetLogicalSize(mepo.renderer, gl_width, gl_height);
+            utilsdl.errorcheck(sdl.SDL_RenderSetLogicalSize(mepo.renderer, gl_width, gl_height)) catch |err| {
+                utildbg.log("Unable to set logical size: {}\n", .{err});
+            };
             mepo.win_w = @intCast(u32, gl_width);
             mepo.win_h = @intCast(u32, gl_height);
         },
