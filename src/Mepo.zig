@@ -378,13 +378,17 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
     const bottombar_height = mepo.fontsize_ui + 5;
 
     const bg: types.Color = color: {
-        if (mepo.tile_cache.thread_download != null) {
-            if (mepo.tile_cache.queue_lifo_ui.count() > 0 or
-                mepo.tile_cache.queue_lifo_bg.count() > 0) break :color .{ .value = 0xd7ffd6, .opacity = 255 } else break :color .{ .value = 0xffffff, .opacity = 100 };
+        if (mepo.tile_cache.thread_download == null)  {
+            break :color .{ .value = 0xffdfd1, .opacity = 255 } ;
+        } else if (mepo.tile_cache.queue_lifo_ui.count() > 0)  {
+            break :color .{ .value = 0xd7ffd6, .opacity = 255 };
+        } else if (mepo.tile_cache.queue_lifo_bg.count() > 0) {
+            break :color .{ .value = 0xc7d4ff, .opacity = 255 };
         } else {
-            break :color .{ .value = 0xffdfd1, .opacity = 255 };
+            break :color .{ .value = 0xffffff, .opacity = 100 };
         }
     };
+
     try utilsdl.sdl_renderer_rect(mepo.renderer, bg, sdl.SDL_Rect{
         .x = 0,
         .y = @intCast(i32, mepo.win_h) - bottombar_height,
