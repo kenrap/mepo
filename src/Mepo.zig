@@ -764,6 +764,9 @@ fn event_signal(mepo: *@This(), signal: u6) types.Pending {
 }
 
 fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    // Fix for certain platforms like Phosh like open keyboard on winevents
+    defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
+
     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
         .SDL_WINDOWEVENT_RESIZED => {
             var gl_width: c_int = undefined;

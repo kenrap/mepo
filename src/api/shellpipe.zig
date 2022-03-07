@@ -16,9 +16,6 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    // TODO: move to window re-expose probably
-    defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
-
     try mepo.update_debug_message(
         try std.fmt.allocPrint(&arena.allocator, "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
