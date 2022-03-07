@@ -27,6 +27,7 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 [Nom] [shellpipe mepo_ui_menu_search_nominatim.sh];
     \\ bind_button 0 [OP] [shellpipe mepo_ui_menu_search_overpass.sh];
     \\ bind_button 0 [GH] [shellpipe mepo_ui_menu_route_graphhopper.sh];
+    \\ bind_button 0 [DL] [shellpipe mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
     \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
