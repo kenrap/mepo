@@ -15,6 +15,7 @@
 - [Autoloading preferences](#strongautoloading-preferencesstrong)
 - [Offline Usage](#strongoffline-usagestrong)
 - [Mepolang](#strongmepolangstrong)
+- [Debugging](#strongdebuggingstrong)
 
 ## **Basic Interface Overview**
 
@@ -289,16 +290,11 @@ commandname textarg [multi word arg] 2;
 commandname2 arg 8.373 anothertextarg;
 ```
 
-### Using a custom Mepolang configuration
+### Debugging
 
-Eventually Mepo will be able to be continually fed Mepolang input as
-STDIN. This is not the case currently - and you can only feed in STDIN
-once as configuration upon boot. This can be done to override the default
-configuration. Use the `-i` option to indicate Mepo should look for STDIN
-configuration upon boot.
+By default debug messages are disabled. To start mepo with debugging via
+STDERR use the CLI flag `-e`. E.g. as:
 
-For example, to set the default zoom-level upon boot to 10:
-
-```sh
-echo "prefset zoom 10;" | mepo -i
+```
+mepo -e
 ```
