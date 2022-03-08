@@ -3,6 +3,7 @@ DISPLAYNAME=" POI Search: via Overpass"
 HOTKEY=b
 
 OPTIONS='
+  Cancel
   Bars:          [amenity=bar]
   Restraunt:     [amenity=restaurant]
   Pizza:         [amenity=restaurant] [cuisine=italian]
@@ -23,6 +24,7 @@ main() {
       cut -d ' ' -f2- |
       tr '\n' ' '
   )"
+  [ "$SCOPE" = "Cancel" ] && exit
   if [ -z "$SCOPE" ]; then
     echo "Invalid search query for overpass: $SCOPE" >&2
     exit 1

@@ -13,10 +13,11 @@ nominatimspecialphrasesfromwiki() {
 
 main() {
   QUERY="$(
-      echo "" |
+      echo "Cancel" |
       PROMPT="Nominatim search Bbox" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
+  [ "$QUERY" = "Cancel" ] && exit
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
   JSONRESULTS="$(

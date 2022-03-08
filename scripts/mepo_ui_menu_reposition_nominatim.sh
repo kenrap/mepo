@@ -9,6 +9,7 @@ err() {
 
 main() {
   OPTIONS='
+    Cancel
     Amsterdam
     Paris
     NYC
@@ -26,6 +27,7 @@ main() {
       sed 's/ /%20/g'
   )"
 
+  [ "$QUERY" = "Cancel" ] && exit
   echo "$QUERY" | grep -q . || err "Blank search query"
 
   RESULT="$(
