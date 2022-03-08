@@ -27,6 +27,7 @@ drag: ?struct {
     delta_y: i32 = 0,
 } = null,
 fingers: std.ArrayList(sdl.SDL_FingerID),
+fingers_gesture_delta: isize = 0,
 drag_scale: u8 = 1,
 fonts_normal: [50]*sdl.TTF_Font,
 fonts_bold: [50]*sdl.TTF_Font,
@@ -378,9 +379,9 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
     const bottombar_height = mepo.fontsize_ui + 5;
 
     const bg: types.Color = color: {
-        if (mepo.tile_cache.thread_download == null)  {
-            break :color .{ .value = 0xffdfd1, .opacity = 255 } ;
-        } else if (mepo.tile_cache.queue_lifo_ui.count() > 0)  {
+        if (mepo.tile_cache.thread_download == null) {
+            break :color .{ .value = 0xffdfd1, .opacity = 255 };
+        } else if (mepo.tile_cache.queue_lifo_ui.count() > 0) {
             break :color .{ .value = 0xd7ffd6, .opacity = 255 };
         } else if (mepo.tile_cache.queue_lifo_bg.count() > 0) {
             break :color .{ .value = 0xc7d4ff, .opacity = 255 };
@@ -576,6 +577,7 @@ pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY },
 fn event_fingerdown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     for (mepo.fingers.items) |f| if (e.tfinger.fingerId == f) return .None;
     mepo.fingers.append(e.tfinger.fingerId) catch unreachable;
+    if (mepo.fingers.items.len == 2) mepo.fingers_gesture_delta = 0;
     return .None;
 }
 
@@ -586,7 +588,7 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             break;
         }
     }
-
+    if (mepo.fingers.items.len == 2) mepo.fingers_gesture_delta = 0;
     return .None;
 }
 
@@ -611,11 +613,13 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold = 0.002;
-    if (e.mgesture.dDist > threshold) {
+    if (e.mgesture.dDist > threshold and mepo.fingers_gesture_delta < 2) {
+        mepo.fingers_gesture_delta += 1;
         zoom_relative(mepo, 1);
         return .Redraw;
     }
-    if (e.mgesture.dDist < -threshold) {
+    if (e.mgesture.dDist < -threshold and mepo.fingers_gesture_delta > -2) {
+        mepo.fingers_gesture_delta -= 1;
         zoom_relative(mepo, -1);
         return .Redraw;
     }
