@@ -7,6 +7,7 @@ ssh -t $CONN 'sudo sh -c "
   set -e
   cd /home/'$USER'/mepo
   zig build
+  pkill -9 mepo
   cp zig-out/bin/* /usr/bin/
   cp zig-out/share/applications/* /usr/share/applications/
   cp zig-out/share/icons/hicolor/512x512/apps/mepo.png /usr/share/icons/hicolor/512x512/apps/mepo.png
