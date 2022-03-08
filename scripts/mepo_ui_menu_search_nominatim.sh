@@ -13,9 +13,7 @@ nominatimspecialphrasesfromwiki() {
 
 main() {
   QUERY="$(
-    nominatimspecialphrasesfromwiki |
-      awk '{$1=$1};1' | 
-      grep . | 
+      echo "" |
       PROMPT="Nominatim search Bbox" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
