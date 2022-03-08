@@ -772,6 +772,9 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
 
     switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
+        .SDL_WINDOWEVENT_FOCUS_GAINED => {
+            sdl.SDL_RaiseWindow(mepo.window);
+        },
         .SDL_WINDOWEVENT_RESIZED => {
             var gl_width: c_int = undefined;
             var gl_height: c_int = undefined;
