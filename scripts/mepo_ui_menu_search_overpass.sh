@@ -3,7 +3,6 @@ DISPLAYNAME=" POI Search: via Overpass"
 HOTKEY=b
 
 OPTIONS='
-  Cancel
   Bars:          [amenity=bar]
   Restraunt:     [amenity=restaurant]
   Pizza:         [amenity=restaurant] [cuisine=italian]
@@ -16,15 +15,15 @@ OPTIONS='
 
 main() {
   SCOPE="$(
-    echo "$OPTIONS" |
+    echo -e "Cancel\n$OPTIONS" |
       sed 's/^ *//' |
       sed 's/ *$//' |
       grep . | 
-      PROMPT="Bbox POI Search" mepo_ui_helper_menu.sh |
-      cut -d ' ' -f2- |
-      tr '\n' ' '
+      PROMPT="Bbox POI Search" mepo_ui_helper_menu.sh
   )"
   [ "$SCOPE" = "Cancel" ] && exit
+  SCOPE="$(echo $SCOPE | cut -d ' ' -f2- | tr '\n' ' ')"
+
   if [ -z "$SCOPE" ]; then
     echo "Invalid search query for overpass: $SCOPE" >&2
     exit 1
