@@ -488,6 +488,9 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
     var right_pad: c_int = 10;
     const pad_bottom: c_int = mepo.fontsize_ui + 10;
 
+    var click_point: sdl.SDL_Point = undefined;
+    const click_isdown = (sdl.SDL_GetMouseState(&click_point.x, &click_point.y) & sdl.SDL_BUTTON_LMASK) != 0;
+
     while (btn_i > 0) {
         btn_i -= 1;
 
@@ -517,16 +520,25 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
                 return mepo.uibuttons.items[btn_i];
         } else {
             // Rendering
-            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, target, .Fill);
-            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
-            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
-            defer sdl.SDL_DestroyTexture(text);
-            var dest_rect_lab = sdl.SDL_Rect{
+            const dest_rect_lab = sdl.SDL_Rect{
                 .x = target.x + pad,
                 .y = target.y + pad,
                 .w = surf.w,
                 .h = surf.h,
             };
+
+            const bg_color = bg_color: {
+                if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_PointInRect(&click_point, &dest_rect_lab)) {
+                    break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
+                } else {
+                    break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
+                }
+            };
+
+            try utilsdl.sdl_renderer_rect(mepo.renderer, bg_color, target, .Fill);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
+            defer sdl.SDL_DestroyTexture(text);
             try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
         }
     }
@@ -635,7 +647,7 @@ fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = .{ .begin_ticks = sdl.SDL_GetTicks() };
     }
-    return .None;
+    return .Redraw;
 }
 
 fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
