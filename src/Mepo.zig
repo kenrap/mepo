@@ -23,6 +23,7 @@ debug_tiles: bool = false,
 distance_unit_tf_km_mi: bool = false,
 drag: ?struct {
     begin_ticks: u32,
+    point: sdl.SDL_Point,
     delta_x: i32 = 0,
     delta_y: i32 = 0,
 } = null,
@@ -488,9 +489,6 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
     var right_pad: c_int = 10;
     const pad_bottom: c_int = mepo.fontsize_ui + 10;
 
-    var click_point: sdl.SDL_Point = undefined;
-    const click_isdown = (sdl.SDL_GetMouseState(&click_point.x, &click_point.y) & sdl.SDL_BUTTON_LMASK) != 0;
-
     while (btn_i > 0) {
         btn_i -= 1;
 
@@ -528,7 +526,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
             };
 
             const bg_color = bg_color: {
-                if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_PointInRect(&click_point, &dest_rect_lab)) {
+                if (mepo.drag != null and sdl.SDL_bool.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_lab)) {
                     break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
                 } else {
                     break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
@@ -645,7 +643,10 @@ fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.drag = null;
         return .None;
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
-        mepo.drag = .{ .begin_ticks = sdl.SDL_GetTicks() };
+        mepo.drag = .{
+            .begin_ticks = sdl.SDL_GetTicks(),
+            .point = .{ .x = e.button.x, .y = e.button.y },
+        };
     }
     return .Redraw;
 }
@@ -717,6 +718,8 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
 
     if (mepo.drag != null and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
+        mepo.drag.?.point.x = e.motion.x;
+        mepo.drag.?.point.y = e.motion.y;
         mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
         mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
         mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.drag_scale));
