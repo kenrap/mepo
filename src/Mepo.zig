@@ -46,6 +46,7 @@ table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
 tile_cache: *TileCache,
+title_update_ms: usize = 0,
 uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
@@ -571,10 +572,15 @@ pub fn blit(mepo: *@This()) !void {
 
     sdl.SDL_RenderPresent(mepo.renderer);
 
-    // Update title
-    const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ mepo.lat, mepo.lon });
-    defer mepo.allocator.free(title);
-    _ = sdl.SDL_SetWindowTitle(mepo.window, title);
+    // Update title, this is actually a relatively slow operation on certain
+    // platforms such as Wayland/Phosh; thus we only update at a certain
+    // specified config frequency
+    if (sdl.SDL_GetTicks() > mepo.title_update_ms + config.TitleUpdateFrequencyMs) {
+        mepo.title_update_ms = sdl.SDL_GetTicks();
+        const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ mepo.lat, mepo.lon });
+        defer mepo.allocator.free(title);
+        _ = sdl.SDL_SetWindowTitle(mepo.window, title);
+    }
 }
 
 pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
@@ -883,6 +889,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
     while (true) {
         // Redraw
+        sdl.SDL_PumpEvents();
         const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
         if ((!has_pending_motion_events and pending == .Drag) or pending == .Redraw) {
             try blit(mepo);

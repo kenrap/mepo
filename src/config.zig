@@ -1,6 +1,7 @@
 pub const DownloadTimeoutSeconds = 5;
 pub const DownloadUseragent = "mepo";
 pub const DownloaderPollMs = 50;
+pub const TitleUpdateFrequencyMs = 2000;
 pub const InitWindowH = 950;
 pub const InitWindowW = 720;
 pub const InitWindowX = 0;
