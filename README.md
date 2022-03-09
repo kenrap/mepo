@@ -251,6 +251,10 @@ for implementing of the roadmap to reach 1.0 as seen above. We are
 very thankful to NLnet for accepting our application and making this
 development possible!
 
+## **Icon**
+The app icon used in Phosh and by the `.desktop` file was designed by
+[iccqton](https://www.twitter.com/iccqton).
+
 ## **Contributing**
 
 Mepo is surely welcome to contributors who have experience or interest
