@@ -199,17 +199,16 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 fn blit_overlay_pindetails(mepo: *@This()) !void {
     if (!mepo.overlay_pindetails) return;
 
-    const bbox = mepo.bounding_box();
     const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    var al = std.ArrayList([2][:0]const u8).init(arena.allocator);
+    var al = std.ArrayList([2][:0]const u8).init(arena.allocator());
     if (mepo.pin_group_active_item) |_| {
         const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
-        const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
-        const distance_str = try std.fmt.allocPrintZ(arena.allocator, "{d:.2}{s} away", .{
+        const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
+        const distance_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
                 if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
                 mepo.lat,
@@ -226,11 +225,11 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         }
         try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
         try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
-            arena.allocator,
+            arena.allocator(),
             "Group {d}:",
             .{mepo.pin_group_active + 1},
         ), try std.fmt.allocPrintZ(
-            arena.allocator,
+            arena.allocator(),
             "{d} of {d} ",
             .{
                 mepo.pin_group_active_item.? + 1,
@@ -432,7 +431,7 @@ fn blit_help(mepo: *@This()) !void {
                 else => "  ",
             };
 
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {s} = {s}", .{ keymod, sdl.SDL_GetKeyName(@intCast(i32, kv.key_ptr.keycode)), kv.value_ptr.* }));
+            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
@@ -499,7 +498,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
             };
 
             const bg_color = bg_color: {
-                if (mepo.drag != null and sdl.SDL_bool.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_lab)) {
+                if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_lab)) {
                     break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
                 } else {
                     break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
@@ -587,7 +586,7 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     while (text[idx] != 0) : (idx += 1) {
         const char_z: [2]u8 = .{ std.ascii.toLower(text[idx]), 0 };
         const key = types.KeyInput{
-            .keymod = @intToEnum(sdl.SDL_Keymod, if (std.ascii.isUpper(text[idx])) sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT else 0),
+            .keymod = if (std.ascii.isUpper(text[idx])) sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT else 0,
             .key = char_z[0],
         };
         if (mepo.table_keybindings.get(key)) |run_expression| {
@@ -719,7 +718,7 @@ fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (sdl.SDL_bool.SDL_TRUE == sdl.SDL_IsTextInputActive() and
+    if (sdl.SDL_TRUE == sdl.SDL_IsTextInputActive() and
         e.key.keysym.mod == 0) return .None;
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
     utildbg.log("Processing key in keyup: {s} and sen {d}\n", .{ key, std.mem.indexOfSentinel(u8, 0, key) });
@@ -741,7 +740,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
                 if (bitset & lr_set[0] == lr_set[0]) bitset |= lr_set[1];
                 if (bitset & lr_set[1] == lr_set[1]) bitset |= lr_set[0];
             }
-            break :keymod @intToEnum(sdl.SDL_Keymod, @intCast(c_int, bitset));
+            break :keymod bitset;
         },
     })) |run_expression| {
         utildbg.log("Got keybindings table function via keydown with run expression: <{s}>\n", .{run_expression});
@@ -764,11 +763,11 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     // Fix for certain platforms like Phosh like open keyboard on winevents
     defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
 
-    switch (@intToEnum(sdl.SDL_WindowEventID, e.window.event)) {
-        .SDL_WINDOWEVENT_FOCUS_GAINED => {
+    switch (e.window.event) {
+        sdl.SDL_WINDOWEVENT_FOCUS_GAINED => {
             sdl.SDL_RaiseWindow(mepo.window);
         },
-        .SDL_WINDOWEVENT_RESIZED => {
+        sdl.SDL_WINDOWEVENT_RESIZED => {
             var gl_width: c_int = undefined;
             var gl_height: c_int = undefined;
             sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_width, &gl_height);
@@ -779,7 +778,7 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             mepo.win_h = @intCast(u32, gl_height);
         },
         else => {
-            utildbg.log("Unhandled SDL Window Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_WindowEventID, @intCast(c_int, e.window.event)))});
+            //utildbg.log("Unhandled SDL Window Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_WindowEventID, @intCast(c_int, e.window.event)))});
         },
     }
     return .Redraw;
@@ -791,7 +790,8 @@ fn event_quit(_: *@This(), _: sdl.SDL_Event) types.Pending {
 }
 
 fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
-    utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
+    //utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
+    _ = e;
     return .None;
 }
 
@@ -862,7 +862,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     while (true) {
         // Redraw
         sdl.SDL_PumpEvents();
-        const has_pending_motion_events = (sdl.SDL_bool.SDL_TRUE == sdl.SDL_HasEvent(@enumToInt(sdl.SDL_EventType.SDL_MOUSEMOTION)));
+        const has_pending_motion_events = (sdl.SDL_TRUE == sdl.SDL_HasEvent(sdl.SDL_MOUSEMOTION));
         if ((!has_pending_motion_events and pending == .Drag) or pending == .Redraw) {
             try blit(mepo);
         }
@@ -871,18 +871,18 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
-            pending = switch (@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type))) {
-                .SDL_FINGERDOWN => event_fingerdown,
-                .SDL_FINGERUP => event_fingerup,
-                .SDL_KEYUP => event_keyup,
-                .SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
-                .SDL_MOUSEBUTTONUP => event_mousebuttonup,
-                .SDL_MOUSEMOTION => event_mousemotion,
-                .SDL_MOUSEWHEEL => event_mousewheel,
-                .SDL_MULTIGESTURE => event_multigesture,
-                .SDL_TEXTINPUT => event_textinput,
-                .SDL_QUIT => event_quit,
-                .SDL_WINDOWEVENT => event_windowevent,
+            pending = switch (e.type) {
+                sdl.SDL_FINGERDOWN => event_fingerdown,
+                sdl.SDL_FINGERUP => event_fingerup,
+                sdl.SDL_KEYUP => event_keyup,
+                sdl.SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
+                sdl.SDL_MOUSEBUTTONUP => event_mousebuttonup,
+                sdl.SDL_MOUSEMOTION => event_mousemotion,
+                sdl.SDL_MOUSEWHEEL => event_mousewheel,
+                sdl.SDL_MULTIGESTURE => event_multigesture,
+                sdl.SDL_TEXTINPUT => event_textinput,
+                sdl.SDL_QUIT => event_quit,
+                sdl.SDL_WINDOWEVENT => event_windowevent,
                 else => event_unhandled,
             }(mepo, e);
         }
@@ -945,7 +945,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Label
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
@@ -960,7 +960,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Value
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);

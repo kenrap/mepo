@@ -47,7 +47,7 @@ pub fn cache_dlbbox(tile_cache: *TileCache, download_request_str: []const u8) !v
         },
     );
     std.time.sleep(std.time.ns_per_s * delay_seconds);
-    const result = tile_cache.download_loop(false);
+    _ = tile_cache.download_loop(false) catch unreachable;
 }
 
 fn parse_download_request(download_request_str: []const u8) !TileCache.DownloadBBoxRequest {

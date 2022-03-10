@@ -51,7 +51,7 @@ max_n_transfers: u8 = 20,
 queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
-source_url: [:0]const u8 = undefned,
+source_url: [:0]const u8 = undefined,
 surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
 texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
@@ -421,6 +421,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
         curl.CURLE_OK => {
             if (tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
                 const transfer_datum = tile_cache.transfer_map.get(coords).?;
+                const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
                 if (tile_cache.cache_dir) |cache_dir| {
@@ -451,7 +452,6 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
 fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
     if (tile_cache.curl_client_to_coords(client)) |coords| {
         const transfer_datum = tile_cache.transfer_map.get(coords).?;
-        const datum_array = transfer_datum.data_arraylist.items;
         tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
         _ = tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
@@ -461,7 +461,7 @@ fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !vo
     }
 }
 
-fn load_data_to_surface(tile_cache: *@This(), coords: types.XYZ, data: []u8) !*sdl.SDL_Surface {
+fn load_data_to_surface(_: *@This(), _: types.XYZ, data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
     const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &data[0]), @intCast(c_int, data.len)));

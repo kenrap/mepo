@@ -28,8 +28,8 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         break :m modifier;
     };
 
-    const key = .{
-        .keymod = @intToEnum(sdl.SDL_Keymod, keymod),
+    const key : types.KeyInput = .{
+        .keymod = @intCast(c_uint, keymod),
         .key = std.ascii.toLower(key_str[0]),
     };
 
