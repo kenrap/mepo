@@ -49,7 +49,7 @@ pub const Color = struct {
         };
     }
 
-    pub fn toSdl(self: @This()) sdl.SDL_Color {
+    pub fn to_sdl(self: @This()) sdl.SDL_Color {
         const rgba = self.to_rgba();
         return .{ .r = rgba.r, .g = rgba.g, .b = rgba.b, .a = rgba.a };
     }

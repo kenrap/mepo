@@ -17,7 +17,7 @@ pub fn sdl_push_resize_event() void {
 }
 
 pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, color: types.Color) errors.SDLError!void {
-    var sdl_color = color.toSdl();
+    var sdl_color = color.to_sdl();
     const blend_mode = if (sdl_color.a != sdl.SDL_ALPHA_OPAQUE) sdl.SDL_BLENDMODE_ADD else sdl.SDL_BLENDMODE_NONE;
     try errorcheck(sdl.SDL_SetRenderDrawBlendMode(renderer, @intCast(c_uint, blend_mode)));
     try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, color.opacity));
