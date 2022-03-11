@@ -31,6 +31,9 @@ pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);
 
 pub const KeyInput = struct { key: u8, keymod: sdl.SDL_Keymod };
 pub const ClickInput = struct { button: u8, clicks: i8 };
+pub const GestureInputAction = enum{ Pan, Rotate };
+pub const GestureInputDirection = enum{ In, Out };
+pub const GestureInput = struct { action: GestureInputAction, direction: GestureInputDirection };
 
 pub const Pending = enum { None, Redraw, Drag };
 

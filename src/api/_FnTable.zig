@@ -5,6 +5,7 @@ const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
     .{ .name = "bind_button", .func = @import("bind_button.zig").f_bind_button },
     .{ .name = "bind_click", .func = @import("bind_click.zig").f_bind_click },
     .{ .name = "bind_key", .func = @import("bind_key.zig").f_bind_key },
+    .{ .name = "bind_gesture", .func = @import("bind_gesture.zig").f_bind_gesture },
     .{ .name = "bind_signal", .func = @import("bind_signal.zig").f_bind_signal },
     .{ .name = "center_on_coords", .func = @import("center_on_coords.zig").f_center_on_coords },
     .{ .name = "center_on_mouse", .func = @import("center_on_mouse.zig").f_center_on_mouse },
