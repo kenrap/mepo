@@ -29,6 +29,10 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 [Overpass] [shellpipe mepo_ui_menu_search_overpass.sh];
     \\ bind_button 0 [Download] [shellpipe mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
     \\
+    \\ # Gestures;
+    \\ bind_gesture pan 1 [zoom_relative 1];
+    \\ bind_gesture pan -1 [zoom_relative -1];
+    \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
     \\ bind_click 1 2  [zoom_relative 1];

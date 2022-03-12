@@ -600,18 +600,28 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    const threshold = 0.002;
-    if (e.mgesture.dDist > threshold and mepo.fingers_gesture_delta < 2) {
-        mepo.fingers_gesture_delta += 1;
-        zoom_relative(mepo, 1);
+    const threshold_pan = 0.004;
+    const delta_max = 2;
+    const run_gesture_opt : ?types.GestureInput = run_gesture: {
+        if (e.mgesture.dDist > threshold_pan and mepo.fingers_gesture_delta < delta_max) {
+            mepo.fingers_gesture_delta += 1;
+            break :run_gesture .{.action = .Pan, .direction = .In };
+        } else if (e.mgesture.dDist < -threshold_pan and mepo.fingers_gesture_delta > -delta_max) {
+            mepo.fingers_gesture_delta -= 1;
+            break :run_gesture .{.action = .Pan, .direction = .Out };
+        }
+        break :run_gesture null;
+    };
+
+    if (run_gesture_opt) |run_gesture| {
+        if (mepo.table_gestures.get(run_gesture)) |run_expression| {
+            utildbg.log("Got gestures table function with run expression: <{s}>\n", .{run_expression});
+            mepo.mepolang_execute(run_expression) catch unreachable;
+        }
         return .Redraw;
+    } else {
+        return .None;
     }
-    if (e.mgesture.dDist < -threshold and mepo.fingers_gesture_delta > -2) {
-        mepo.fingers_gesture_delta -= 1;
-        zoom_relative(mepo, -1);
-        return .Redraw;
-    }
-    return .None;
 }
 
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {

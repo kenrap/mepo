@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub fn f_bind_gesture(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const action : types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
-    const direction : types.GestureInputDirection = if (args[1].Number == -1) .In else .Out;
+    const direction : types.GestureInputDirection = if (args[1].Number == 1) .In else .Out;
     const expression = args[2].Text;
     try bind_gesture(mepo, action, direction, expression);
 }
