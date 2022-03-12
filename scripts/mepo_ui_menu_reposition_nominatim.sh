@@ -23,7 +23,7 @@ main() {
     echo "$OPTIONS" |
       awk '{$1=$1};1' | 
       grep . | 
-      PROMPT="Nominatim world search" mepo_ui_helper_menu.sh |
+      PROMPT="Nominatim Relocate" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
 

@@ -19,16 +19,15 @@ main() {
       sed 's/^ *//' |
       sed 's/ *$//' |
       grep . | 
-      PROMPT="Bbox POI Search" mepo_ui_helper_menu.sh
+      PROMPT="Overpass Search" mepo_ui_helper_menu.sh
   )"
   [ "$SCOPE" = "Cancel" ] && exit
-  SCOPE="$(echo $SCOPE | cut -d ' ' -f2- | tr '\n' ' ')"
-
-  if [ -z "$SCOPE" ]; then
+  if echo "$SCOPE" | grep -qv . ; then
     echo "Invalid search query for overpass: $SCOPE" >&2
     exit 1
   fi
 
+  SCOPE="$(echo $SCOPE | cut -d ' ' -f2- | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
   JSON_RESULTS="$(
     curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
