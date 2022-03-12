@@ -32,6 +32,8 @@ pub const DefaultBaseConfig =
     \\ # Gestures;
     \\ bind_gesture pan 1 [zoom_relative 1];
     \\ bind_gesture pan -1 [zoom_relative -1];
+    \\ bind_gesture rotate 1 [prefset crosshair_size 40];
+    \\ bind_gesture rotate -1 [prefset crosshair_size 10];
     \\
     \\ # Clickbindings;
     \\ bind_click 1 -1 [shellpipe mepo_ui_central_menu.sh];
