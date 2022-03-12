@@ -6,15 +6,17 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub fn f_bind_gesture(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const action : types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
-    const direction : types.GestureInputDirection = if (args[1].Number == 1) .In else .Out;
-    const expression = args[2].Text;
-    try bind_gesture(mepo, action, direction, expression);
+    const fingers : u8 = @floatToInt(u8, args[1].Number);
+    const direction : types.GestureInputDirection = if (args[2].Number == 1) .In else .Out;
+    const expression = args[3].Text;
+    try bind_gesture(mepo, action, fingers, direction, expression);
 }
 
-fn bind_gesture(mepo: *Mepo, action: types.GestureInputAction, direction: types.GestureInputDirection, expression: []const u8) !void {
-    utildbg.log("Binding gesture: action={} direction={} to expression {s}\n", .{ action, direction, expression });
+fn bind_gesture(mepo: *Mepo, action: types.GestureInputAction, fingers: u8, direction: types.GestureInputDirection, expression: []const u8) !void {
+    utildbg.log("Binding gesture: fingers={} action={} direction={} to expression {s}\n", .{ fingers, action, direction, expression });
 
     const gest = .{
+        .n_fingers = fingers,
         .action = action,
         .direction = direction,
     };

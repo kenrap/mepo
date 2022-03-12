@@ -565,7 +565,7 @@ pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY },
 fn event_fingerdown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     for (mepo.fingers.items) |f| if (e.tfinger.fingerId == f) return .None;
     mepo.fingers.append(e.tfinger.fingerId) catch unreachable;
-    if (mepo.fingers.items.len == 2) mepo.fingers_gesture_delta = 0;
+    if (mepo.fingers.items.len > 1) mepo.fingers_gesture_delta = 0;
     return .None;
 }
 
@@ -602,34 +602,33 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold_pan_dist = 0.004;
     const threshold_rotate_radians = 0.015;
-    const delta_max = 2;
 
+    const delta_max = 2;
     const run_gesture_opt : ?types.GestureInput = run_gesture: {
-        if (e.mgesture.dDist > threshold_pan_dist and mepo.fingers_gesture_delta < delta_max) {
-            mepo.fingers_gesture_delta += 1;
-            break :run_gesture .{.action = .Pan, .direction = .In };
-        } else if (e.mgesture.dDist < -threshold_pan_dist and mepo.fingers_gesture_delta > -delta_max) {
-            mepo.fingers_gesture_delta -= 1;
-            break :run_gesture .{.action = .Pan, .direction = .Out };
-        } else if (e.mgesture.dTheta > threshold_rotate_radians and mepo.fingers_gesture_delta < delta_max) {
-            mepo.fingers_gesture_delta += 1;
-            break :run_gesture .{.action = .Rotate, .direction = .In };
-        } else if (e.mgesture.dTheta < -threshold_rotate_radians and mepo.fingers_gesture_delta > -delta_max) {
-            mepo.fingers_gesture_delta -= 1;
-            break :run_gesture .{.action = .Rotate, .direction = .Out };
+        if (e.mgesture.dDist > threshold_pan_dist) {
+            break :run_gesture .{.action = .Pan, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+        } else if (e.mgesture.dDist < -threshold_pan_dist) {
+            break :run_gesture .{.action = .Pan, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+        } else if (e.mgesture.dTheta > threshold_rotate_radians) {
+            break :run_gesture .{.action = .Rotate, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+        } else if (e.mgesture.dTheta < -threshold_rotate_radians) {
+            break :run_gesture .{.action = .Rotate, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len )};
         }
         break :run_gesture null;
     };
 
-    if (run_gesture_opt) |run_gesture| {
+    if (run_gesture_opt) |run_gesture| run: {
+        if (run_gesture.direction == .In and mepo.fingers_gesture_delta == delta_max) break :run;
+        if (run_gesture.direction == .Out and mepo.fingers_gesture_delta == -delta_max) break :run;
+        mepo.fingers_gesture_delta += @as(isize, if (run_gesture.direction == .In) 1 else -1);
         if (mepo.table_gestures.get(run_gesture)) |run_expression| {
             utildbg.log("Got gestures table function with run expression: <{s}>\n", .{run_expression});
             mepo.mepolang_execute(run_expression) catch unreachable;
         }
         return .Redraw;
-    } else {
-        return .None;
     }
+
+    return .None;
 }
 
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
