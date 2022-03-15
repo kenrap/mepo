@@ -424,8 +424,8 @@ fn blit_help(mepo: *@This()) !void {
         var it = mepo.table_keybindings.iterator();
 
         while (it.next()) |kv| {
-           const keymod = switch (kv.key_ptr.keymod) {
-                sdl.KMOD_LCTRL | sdl.KMOD_RCTRL  => " C",
+            const keymod = switch (kv.key_ptr.keymod) {
+                sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => " C",
                 sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT => " S",
                 sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT | sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => "CS",
                 sdl.KMOD_LALT | sdl.KMOD_RALT => " A",
@@ -604,15 +604,15 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const threshold_rotate_radians = 0.015;
 
     const delta_max = 2;
-    const run_gesture_opt : ?types.GestureInput = run_gesture: {
+    const run_gesture_opt: ?types.GestureInput = run_gesture: {
         if (e.mgesture.dDist > threshold_pan_dist) {
-            break :run_gesture .{.action = .Pan, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+            break :run_gesture .{ .action = .Pan, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
         } else if (e.mgesture.dDist < -threshold_pan_dist) {
-            break :run_gesture .{.action = .Pan, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+            break :run_gesture .{ .action = .Pan, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
         } else if (e.mgesture.dTheta > threshold_rotate_radians) {
-            break :run_gesture .{.action = .Rotate, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len)};
+            break :run_gesture .{ .action = .Rotate, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
         } else if (e.mgesture.dTheta < -threshold_rotate_radians) {
-            break :run_gesture .{.action = .Rotate, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len )};
+            break :run_gesture .{ .action = .Rotate, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
         }
         break :run_gesture null;
     };
