@@ -425,10 +425,10 @@ fn blit_help(mepo: *@This()) !void {
 
         while (it.next()) |kv| {
            const keymod = switch (kv.key_ptr.keymod) {
-                sdl.KMOD_LCTRL => " C",
-                sdl.KMOD_LSHIFT => " S",
-                sdl.KMOD_LSHIFT | sdl.KMOD_LCTRL => "CS",
-                sdl.KMOD_LALT => " A",
+                sdl.KMOD_LCTRL | sdl.KMOD_RCTRL  => " C",
+                sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT => " S",
+                sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT | sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => "CS",
+                sdl.KMOD_LALT | sdl.KMOD_RALT => " A",
                 else => "  ",
             };
 
