@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="ﰸ Download: clear download queue"
+DISPLAYNAME="⊗ Download: clear download queue"
 HOTKEY=w
 
 main() {
