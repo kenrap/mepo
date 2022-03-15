@@ -22,6 +22,7 @@ const fn_bindings = &[_]struct { name: []const u8, func: types.MepoFn }{
     .{ .name = "pin_meta", .func = @import("pin_meta.zig").f_pin_meta },
     .{ .name = "pin_delete", .func = @import("pin_delete.zig").f_pin_delete },
     .{ .name = "pin_purge", .func = @import("pin_purge.zig").f_pin_purge },
+    .{ .name = "prefinc", .func = @import("prefinc.zig").f_prefinc },
     .{ .name = "prefset", .func = @import("prefset.zig").f_prefset },
     .{ .name = "preftoggle", .func = @import("preftoggle.zig").f_preftoggle },
     .{ .name = "quit", .func = @import("quit.zig").f_quit },
