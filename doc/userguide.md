@@ -49,8 +49,10 @@ devices and similar is a primary usecase. Take note of the following shortcuts:
 - **One finger drag:** Pan the map
 - **One finger double tap:** Zoom in
 - **One finger triple tap:** Zoom out
-- **Pan gesture in**: Zoom in (in testing)
-- **Pan gesture out**: Zoom out (in testing)
+- **Two fingers pan gesture in**: Zoom in (in testing)
+- **Two fingers pan gesture out**: Zoom out (in testing)
+- **Three fingers rotate gesture clockwise**: Increase UI fontsize (in testing)
+- **Three fingers rotate gesture counterclockwise**: Decrease UI fontsize (in testing)
 - **One finger hold:** Launch the [central menu](#the-central-menu)
 
 
@@ -77,11 +79,11 @@ to add your own custom buttons (tied to userscripts, etc.) this is doable.
 Here's an explanation of the provided script accessible in the button
 bar in the default config:
 
-- **Reloc**: Relocate map via nominatim
-- **Nom**: Nominatim POI Search script
-- **OP**: Overpass POI Search script
-- **GH**: Graphhopper routing script
 - **Menu**: Launch the [central menu]() for additional actions
+- **Relocate**: Relocate map via nominatim
+- **Nominatim**: Nominatim POI Search script
+- **Overpass**: Overpass POI Search script
+- **Download**: Download current viewport (all tiles in current/higher zoom levels)
 
 ## **The Central Menu**
 
