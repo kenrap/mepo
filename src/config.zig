@@ -78,7 +78,6 @@ pub const DefaultBaseConfig =
     \\ bind_key cs b [shellpipe [DIM=w MULT=-1 mepo_ui_helper_pref_pan.sh]];
     \\ bind_key _ q [shellpipe [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
     \\ bind_key s q [shellpipe [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
-    \\ bind_key _ a [shellpipe mepo_ui_menu_dbg_api.sh];
     \\ bind_key _ [1] [pin_groupprefset 0 active 1];
     \\ bind_key _ [2] [pin_groupprefset 1 active 1];
     \\ bind_key _ [3] [pin_groupprefset 2 active 1];
