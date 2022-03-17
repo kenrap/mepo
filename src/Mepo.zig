@@ -1231,7 +1231,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
     // scripts need the OSK and besides that onscreen keyboard should
     // be hidden).. so for Phosh we disable textinput
     {
-        const textinput_enable = utilplatform.supports_osk();
+        const textinput_enable = !utilplatform.supports_osk();
         if (textinput_enable) sdl.SDL_StartTextInput() else sdl.SDL_StopTextInput();
         utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
     }
