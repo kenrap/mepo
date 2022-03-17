@@ -1208,6 +1208,14 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
             sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         ));
         sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
+
+        // E.g. Phosh sometimes doesn't use all space, e.g. strange bar
+        // on bottom; so fullscreen & defullscreen to trigger window resize
+        if (utilplatform.is_phosh()) {
+            _ = sdl.SDL_SetWindowFullscreen(w, sdl.SDL_WINDOW_FULLSCREEN);
+            _ = sdl.SDL_SetWindowFullscreen(w, 0);
+        }
+
         break :window w;
     };
 
