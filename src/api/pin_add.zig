@@ -14,6 +14,7 @@ pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, handle: [:0]const u8, name: [:0]const u8) !void {
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    if (name.len == 0) return;
 
     try mepo.pin_groups[pin_group].pins.append(.{
         .lat = lat,
