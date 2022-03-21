@@ -764,7 +764,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             break :keymod bitset;
         },
     })) |run_expression| {
-        utildbg.log("Got keybindings table function via keydown with run expression: <{s}>\n", .{run_expression});
+        utildbg.log("Got keybindings table function via keyup with run expression: <{s}>\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
     }
@@ -1225,7 +1225,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
     // Initialize SDL Textinput system
     // Controls input for unicode & IME methods etc.
     // Application logic supports both raw keydowns & textinput
-    // Also note wtype on sway produces invalid keycodes in keydown
+    // Also note wtype on sway produces invalid keycodes in keyup
     // so textinput is required here.
     //
     // The textinput system also controls OSK opening & closing.
