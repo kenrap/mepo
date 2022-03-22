@@ -164,7 +164,7 @@ search scripts, bookmarks, and more.
       as XML response doesn't have coordinates for each node entry - effect is
       same)
 - **Milestone 4: Wayland & Mobile Support** (In-progress)
-  - **Todo:**
+  - **Done:**
     - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
       more reliable and test on PinePhone & mobile devices.
     - Rework pinch-to-zoom to not be hardcoded but to instead use new Mepolang
@@ -177,7 +177,8 @@ search scripts, bookmarks, and more.
       in scripts.
     - Allow binding left hand/right hand side of pin overlay via new
       (bind_button) command and set to pin_cycle by default. Thus enabling
-      touch-based pin-cycling for navigation.
+      touch-based pin-cycling for navigation. (Implemented buttons as
+      arbitrary used-defined bar on bottom right corner)
     - Build out context-menu to be used in mobile-context allowing functionality
       triggered on desktop via keybindings for search etc. to be simply triggered
       on mobile.

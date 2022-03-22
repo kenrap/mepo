@@ -55,7 +55,7 @@ pub fn main() !void {
             try Downloader.cache_dlbbox(&tile_cache, download_request);
         },
         .Version => {
-            utildbg.log("Mepo - version {d}\n", .{0.3});
+            utildbg.log("Mepo - version {d}\n", .{0.4});
         },
     }
 }
