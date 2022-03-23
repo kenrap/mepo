@@ -470,7 +470,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
 
         const surf = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf);
 
@@ -927,12 +927,12 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), undefined),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_val);
         width_label = std.math.max(width_label, surf_lab.w);
