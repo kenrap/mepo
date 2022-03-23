@@ -163,7 +163,7 @@ bookmarks, and more.
       and other overlays etc. (Implemented as overpass relation lookup instead
       as XML response doesn't have coordinates for each node entry - effect is
       same)
-- **Milestone 4: Wayland & Mobile Support** (In-progress)
+- **Milestone 4: Wayland & Mobile Support** (Complete: 3/22/2022, tag: 0.4)
   - **Done:**
     - Improve support for pinch-to-zoom using SDL multitouch gesture API to be
       more reliable and test on PinePhone & mobile devices.
@@ -192,7 +192,7 @@ bookmarks, and more.
       mobile/desktop & X/Wayland that should all have first-class support.
     - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
       greatest cross-compatibility between environments.
-- **Milestone 5: UI Niceties**
+- **Milestone 5: UI Niceties** (In-progress)
   - **Todo:**
     - Rework main application event loop to handle STDIN file descriptor in
       parallel to current SDL events processing. So commandline of application
