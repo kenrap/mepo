@@ -17,6 +17,7 @@ inspired underlying design, exposing a powerful command language called
 scripted to provide things like custom bounding-box search scripts,
 bookmarks, and more.
 
+- [Demo Video on Phone](https://media.lrdu.org/mepo_demos/mepo_demo_0.4.webm)
 - [Videos of User Interface](http://media.lrdu.org/mepo_demos)
 - [User Guide](doc/userguide.md)
 - [Development Guide](doc/developguide.md)
