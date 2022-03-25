@@ -3,6 +3,7 @@
 > **Disclaimer**: This guide is a work-in-progress and not complete!
 
 ## **Table of contents:**
+- [Installation](#stronginstallationstrong)
 - [Basic Interface Overview](#strongbasic-interface-overviewstrong)
 - [Touch & Mobile Support](#strongtouch-amp-mobile-supportstrong)
 - [Keyboard & Desktop Support](#strongkeyboard-amp-desktop-supportstrong)
@@ -16,6 +17,23 @@
 - [Offline Usage](#strongoffline-usagestrong)
 - [Mepolang](#strongmepolangstrong)
 - [Debugging](#strongdebuggingstrong)
+
+## **Installation**
+
+Mepo is available currently for postmarketOS (edge) and NixOS.
+To install on postmarketOS, depending on your targeted enviroment install
+either `mepo-wayland`, `mepo-xorg`, or `mepo-framebuffer`. For Sxmo or desktop
+X use mepo-xorg,  for Phosh, Swmo, sway, or desktop wayland use mepo-wayland, 
+or for framebuffer use `mepo-framebuffer`
+
+Examples install command:
+```sh
+apk add mepo-wayland
+```
+
+On Phosh, a new icon will appear for Mepo, and in S{x,w}mo, mepo will
+appear in the applications menu. To launch on desktop, you can directly
+run the command `mepo`.
 
 ## **Basic Interface Overview**
 
