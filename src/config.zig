@@ -131,5 +131,5 @@ pub const DefaultBaseConfig =
     \\ pin_groupprefset 4 visible 1;
     \\
     \\ # User-customizable bookmarks / arbitrary mepolang file;
-    \\ fileload ~/.mepo/bookmarks;
+    \\ fileload ~/.mepo/config;
 ;

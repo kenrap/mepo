@@ -205,11 +205,11 @@ reposition the map accordingly.
 
 ## **Autoloading preferences**
 
-Within the default config, the file located at `~/.mepo/bookmarks` is loaded
+Within the default config, the file located at `~/.mepo/config` is loaded
 from the filesystem by default when starting mepo. You can put user-specific
 configuration here that will override the default configuration.
 
-Example `~/.mepo/bookmarks`:
+Example `~/.mepo/config`:
 
 ```sh
 center_on_coords 42.3608 -71.0573;
