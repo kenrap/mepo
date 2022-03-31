@@ -3,8 +3,15 @@ const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = types.MepoFnSpec{
+    .args = (&[_]types.MepoArgTag{.Number, .Text, .Text})[0..],
+};
 
 pub fn f_bind_button(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
+
     const visible_only_when_has_pins = args[0].Number == 1;
     const text = args[1].Text;
     const expression = args[2].Text;
