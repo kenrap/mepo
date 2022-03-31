@@ -2,8 +2,14 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const pin_cycle = @import("pin_cycle.zig").pin_cycle;
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Text })[0..],
+};
 
 pub fn f_pin_groupprefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const group_number = @floatToInt(usize, args[0].Number);
     const prefname = args[1].Text;
 

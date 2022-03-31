@@ -1,8 +1,14 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Text, .Text })[0..],
+};
 
 pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const group = @floatToInt(i32, args[0].Number);
     const is_structural = args[1].Number == 1;
     const lat = args[2].Number;

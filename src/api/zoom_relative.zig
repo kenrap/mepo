@@ -1,8 +1,14 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{.Number})[0..],
+};
 
 pub fn f_zoom_relative(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const relative = @floatToInt(i32, args[0].Number);
     zoom_relative(mepo, relative);
 }

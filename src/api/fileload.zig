@@ -2,8 +2,14 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utilfile = @import("../util/utilfile.zig");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{.Text})[0..],
+};
 
 pub fn f_fileload(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const filepath = args[0].Text;
     try fileload(mepo, filepath);
 }

@@ -4,9 +4,15 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
+const utilarg = @import("../util/utilarg.zig");
 const config = @import("../config.zig");
 
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Number, .Number })[0..],
+};
+
 pub fn f_cache_dlbbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const a_lat = args[0].Number;
     const a_lon = args[1].Number;
     const b_lat = args[2].Number;

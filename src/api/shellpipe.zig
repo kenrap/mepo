@@ -5,9 +5,15 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utilplatform = @import("../util/utilplatform.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
+const utilarg = @import("../util/utilarg.zig");
 const sdl = @import("../sdlshim.zig");
 
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{.Text})[0..],
+};
+
 pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const cmd = args[0].Text;
     try shellpipe(mepo, cmd);
 }

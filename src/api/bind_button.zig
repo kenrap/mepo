@@ -5,8 +5,8 @@ const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilarg = @import("../util/utilarg.zig");
 
-pub const spec = types.MepoFnSpec{
-    .args = (&[_]types.MepoArgTag{.Number, .Text, .Text})[0..],
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Text, .Text })[0..],
 };
 
 pub fn f_bind_button(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {

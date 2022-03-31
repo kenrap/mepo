@@ -1,8 +1,14 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Text, .Text, .Text })[0..],
+};
 
 pub fn f_pin_meta(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const group = @floatToInt(i32, args[0].Number);
     const handle = args[1].Text;
     const key = args[2].Text;

@@ -1,8 +1,14 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Number, .Number })[0..],
+};
 
 pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const viewport_only = @floatToInt(i32, args[0].Number) == 1;
     const delta = @floatToInt(i32, args[1].Number);
     try pin_cycle(mepo, viewport_only, delta);

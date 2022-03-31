@@ -2,8 +2,14 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{.Text})[0..],
+};
 
 pub fn f_preftoggle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const name = args[0].Text;
 
     for (&[_]struct { prop: []const u8, ptr: *bool }{

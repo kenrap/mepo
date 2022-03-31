@@ -3,8 +3,14 @@ const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
+const utilarg = @import("../util/utilarg.zig");
+
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{ .Text, .Number, .Number, .Text })[0..],
+};
 
 pub fn f_bind_gesture(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = utilarg.validate_args(spec, args) catch |e| return e;
     const action: types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
     const fingers: u8 = @floatToInt(u8, args[1].Number);
     const direction: types.GestureInputDirection = if (args[2].Number == 1) .In else .Out;
