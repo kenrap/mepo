@@ -198,9 +198,6 @@ bookmarks, and more.
     - Rework main application event loop to handle STDIN file descriptor in
       parallel to current SDL events processing. So commandline of application
       can thus be used non-interactively / scripted. Also helpful for debugging.
-    - Gracefully handle switching tile sources (e.g. purge cache & reload).
-      Should be able to switch between OSM/bikemaps/stamen etc. without
-      glitches.
     - Add support for pasting / copying current coordinates from the system
       clipboard and ensure compatibility in both Wayland & X.
     - Add visual per-tile-downloading progress-indicators.
@@ -208,9 +205,6 @@ bookmarks, and more.
       tiles, disk, and memory usage.
     - Integrate gpsd into a script to update user's current location pin and
       fallback to geoclue2 as needed.
-    - Add routing script based on GraphHopper, OpenRouteService, or similar
-      to parse GeoJSON LineString API response into an ordered pin group. Thus
-      allowing for point-to-point navigation.
     - Refine existing Overpass search script (provide better recommendations
       illustrating OSM tag-based flexibility).
     - Add example bookmarking script based on pin API.
@@ -222,6 +216,13 @@ bookmarks, and more.
     - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
       result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
+  - **Done:**
+    - Gracefully handle switching tile sources (e.g. purge cache & reload).
+      Should be able to switch between OSM/bikemaps/stamen etc. without
+      glitches.
+    - Add routing script based on GraphHopper, OpenRouteService, or similar
+      to parse GeoJSON LineString API response into an ordered pin group. Thus
+      allowing for point-to-point navigation.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
