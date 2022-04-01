@@ -845,6 +845,10 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         if (FnTable.get(statement[0])) |fn_spec| {
             const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
+            _ = mepolang_execute_validate_args(fn_spec, args) catch |e| {
+                utildbg.log("Invalid args provided for ({s}) - {any}: wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args, args });
+                continue;
+            };
             fn_spec.execute(mepo, args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
             };
@@ -854,6 +858,26 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
             utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
         }
     }
+}
+
+fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: [types.MepoFnNargs]types.MepoArg) !bool {
+    for (spec.args) |expect_spec_arg, expect_spec_arg_i| {
+        switch (expect_spec_arg) {
+            .Number => {
+                switch (args[expect_spec_arg_i]) {
+                    .Text => return error.ExpectNumberGotText,
+                    .Number => continue,
+                }
+            },
+            .Text => {
+                switch (args[expect_spec_arg_i]) {
+                    .Number => return error.ExpectTextGotNumber,
+                    .Text => continue,
+                }
+            },
+        }
+    }
+    return true;
 }
 
 fn click_hold_check_dispatch(mepo: *@This()) void {
