@@ -6,10 +6,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Number, .Text })[0..],
+    .execute = execute,
 };
 
-pub fn f_pin_groupprefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const group_number = @floatToInt(usize, args[0].Number);
     const prefname = args[1].Text;
 

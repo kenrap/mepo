@@ -7,10 +7,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Text, .Text })[0..],
+    .execute = execute,
 };
 
-pub fn f_bind_signal(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const signo = args[0].Text;
     const expression = args[1].Text;
     try bind_signal(mepo, signo, expression);

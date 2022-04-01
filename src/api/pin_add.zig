@@ -5,10 +5,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Text, .Text })[0..],
+    .execute = execute,
 };
 
-pub fn f_pin_add(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const group = @floatToInt(i32, args[0].Number);
     const is_structural = args[1].Number == 1;
     const lat = args[2].Number;

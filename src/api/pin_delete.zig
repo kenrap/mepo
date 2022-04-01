@@ -5,10 +5,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .execute = execute,
 };
 
-pub fn f_pin_delete(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const handle = args[0].Text;
     try pin_delete(mepo, handle);
 }

@@ -7,10 +7,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Number, .Number, .Text })[0..],
+    .execute = execute,
 };
 
-pub fn f_bind_click(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const button = @floatToInt(u8, args[0].Number);
     const clicks = @floatToInt(i8, args[1].Number);
     const expression = args[2].Text;

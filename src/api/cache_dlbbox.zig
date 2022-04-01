@@ -9,10 +9,10 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Number, .Number })[0..],
+    .execute = execute,
 };
 
-pub fn f_cache_dlbbox(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const a_lat = args[0].Number;
     const a_lon = args[1].Number;
     const b_lat = args[2].Number;

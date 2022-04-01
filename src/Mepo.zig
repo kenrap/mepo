@@ -739,7 +739,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (sdl.SDL_TRUE == sdl.SDL_IsTextInputActive() and
         e.key.keysym.mod == 0) return .None;
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
-    utildbg.log("Processing key in keyup: {s}\n", .{ key });
+    utildbg.log("Processing key in keyup: {s}\n", .{key});
 
     // E.g. don't process anything but single-character hits
     // so things like "Left Shift" etc. are skipped
@@ -842,10 +842,10 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         if (statement.len < 1) continue;
 
         // Lookup and run fn
-        if (FnTable.get(statement[0])) |func| {
+        if (FnTable.get(statement[0])) |fn_spec| {
             const args: [types.MepoFnNargs]types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
-            func(mepo, args) catch |mepolang_err| {
+            fn_spec.execute(mepo, args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
             };
         } else if (statement[0].len == 1 and statement[0][0] == '#') {

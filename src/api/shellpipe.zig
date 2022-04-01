@@ -10,10 +10,10 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .execute = execute,
 };
 
-pub fn f_shellpipe(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const cmd = args[0].Text;
     try shellpipe(mepo, cmd);
 }

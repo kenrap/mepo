@@ -3,10 +3,14 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 
-// TODO: dynamic usage of mepolang 2nd arg..
-//       should there be prefset_number / prefset_text?
+pub const spec = .{
+    // TODO: dynamic usage of mepolang 2nd arg..
+    //       should there be prefset_number / prefset_text?
+    .args = (&[_]types.MepoArgTag{})[0..],
+    .execute = execute,
+};
 
-pub fn f_prefset(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
 
     // Bools

@@ -2,11 +2,12 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub fn f_pin_purge(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
-    try pin_purge(mepo);
-}
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{})[0..],
+    .execute = execute,
+};
 
-fn pin_purge(mepo: *Mepo) !void {
+fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     mepo.pin_group_active_item = null;
 
     for (mepo.pin_groups[mepo.pin_group_active].pins.items) |p| {

@@ -5,10 +5,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Number, .Number })[0..],
+    .execute = execute,
 };
 
-pub fn f_pin_cycle(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const viewport_only = @floatToInt(i32, args[0].Number) == 1;
     const delta = @floatToInt(i32, args[1].Number);
     try pin_cycle(mepo, viewport_only, delta);

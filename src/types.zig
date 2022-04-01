@@ -26,11 +26,11 @@ pub const MepoArgTag = enum { Text, Number };
 pub const MepoArg = union(MepoArgTag) { Text: [:0]const u8, Number: f64 };
 
 pub const MepoFnNargs = 6;
+
 pub const MepoFnSpec = struct {
     args: []const MepoArgTag,
+    execute: fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void,
 };
-pub const MepoFn = fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void;
-pub const MepoFnTable = std.array_hash_map.StringArrayHashMap(MepoFn);
 
 pub const KeyInput = struct { key: u8, keymod: sdl.SDL_Keymod };
 pub const ClickInput = struct { button: u8, clicks: i8 };

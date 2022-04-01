@@ -7,10 +7,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Text, .Number, .Number, .Text })[0..],
+    .execute = execute,
 };
 
-pub fn f_bind_gesture(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const action: types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
     const fingers: u8 = @floatToInt(u8, args[1].Number);
     const direction: types.GestureInputDirection = if (args[2].Number == 1) .In else .Out;

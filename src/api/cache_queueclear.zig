@@ -5,10 +5,11 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
-pub fn f_cache_queueclear(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
-    try cache_queueclear(mepo);
-}
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{})[0..],
+    .execute = execute,
+};
 
-fn cache_queueclear(mepo: *Mepo) !void {
+fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     mepo.tile_cache.set_queue(null);
 }

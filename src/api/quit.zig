@@ -2,6 +2,11 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub fn f_quit(_: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
+pub const spec = .{
+    .args = (&[_]types.MepoArgTag{})[0..],
+    .execute = execute,
+};
+
+fn execute(_: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     Mepo.graceful_terminate();
 }

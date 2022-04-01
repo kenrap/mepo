@@ -6,10 +6,10 @@ const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .execute = execute,
 };
 
-pub fn f_fileload(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    _ = utilarg.validate_args(spec, args) catch |e| return e;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const filepath = args[0].Text;
     try fileload(mepo, filepath);
 }
