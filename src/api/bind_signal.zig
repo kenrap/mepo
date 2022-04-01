@@ -3,7 +3,6 @@ const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
-const utilarg = @import("../util/utilarg.zig");
 
 pub const spec = .{
     .args = (&[_]types.MepoArgTag{ .Text, .Text })[0..],

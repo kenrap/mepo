@@ -5,7 +5,6 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utilplatform = @import("../util/utilplatform.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
-const utilarg = @import("../util/utilarg.zig");
 const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
