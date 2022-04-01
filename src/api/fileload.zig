@@ -4,6 +4,7 @@ const std = @import("std");
 const utilfile = @import("../util/utilfile.zig");
 
 pub const spec = .{
+    .name = "fileload",
     .args = (&[_]types.MepoArgTag{.Text})[0..],
     .execute = execute,
 };

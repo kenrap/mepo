@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 
 pub const spec = .{
+    .name = "pin_purge",
     .args = (&[_]types.MepoArgTag{})[0..],
     .execute = execute,
 };

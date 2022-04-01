@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 
 pub const spec = .{
+    .name = "zoom_relative",
     .args = (&[_]types.MepoArgTag{.Number})[0..],
     .execute = execute,
 };

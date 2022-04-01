@@ -4,6 +4,7 @@ const std = @import("std");
 const pin_cycle = @import("pin_cycle.zig").pin_cycle;
 
 pub const spec = .{
+    .name = "pin_groupprefset",
     .args = (&[_]types.MepoArgTag{ .Number, .Text })[0..],
     .execute = execute,
 };

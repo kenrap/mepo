@@ -5,6 +5,7 @@ const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
+    .name = "bind_signal",
     .args = (&[_]types.MepoArgTag{ .Text, .Text })[0..],
     .execute = execute,
 };

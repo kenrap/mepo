@@ -4,6 +4,7 @@ const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
+    .name = "preftoggle",
     .args = (&[_]types.MepoArgTag{.Text})[0..],
     .execute = execute,
 };

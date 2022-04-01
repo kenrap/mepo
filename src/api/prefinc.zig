@@ -4,6 +4,7 @@ const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
+    .name = "prefinc",
     .args = (&[_]types.MepoArgTag{ .Text, .Number })[0..],
     .execute = execute,
 };

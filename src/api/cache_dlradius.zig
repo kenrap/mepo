@@ -7,6 +7,7 @@ const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
 pub const spec = .{
+    .name = "cache_dlradius",
     .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Number })[0..],
     .execute = execute,
 };

@@ -8,6 +8,7 @@ const utilsdl = @import("../util/utilsdl.zig");
 const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
+    .name = "shellpipe",
     .args = (&[_]types.MepoArgTag{.Text})[0..],
     .execute = execute,
 };

@@ -5,6 +5,7 @@ const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
+    .name = "bind_click",
     .args = (&[_]types.MepoArgTag{ .Number, .Number, .Text })[0..],
     .execute = execute,
 };

@@ -28,6 +28,7 @@ pub const MepoArg = union(MepoArgTag) { Text: [:0]const u8, Number: f64 };
 pub const MepoFnNargs = 6;
 
 pub const MepoFnSpec = struct {
+    name: []const u8,
     args: []const MepoArgTag,
     execute: fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void,
 };

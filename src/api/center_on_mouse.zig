@@ -4,6 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
+    .name = "center_on_mouse",
     .args = (&[_]types.MepoArgTag{})[0..],
     .execute = execute,
 };
