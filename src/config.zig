@@ -60,6 +60,7 @@ pub const DefaultBaseConfig =
     \\ bind_key s o [pin_purge];
     \\ bind_key _ w [cache_queueclear];
     \\ bind_key c c [quit];
+    \\ bind_key _ y [clipcopy];
     \\
     \\ # Scripts hotkeys;
     \\ bind_key _ c [shellpipe mepo_ui_central_menu.sh];
