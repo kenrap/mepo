@@ -17,6 +17,6 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
         "{d:.5}, {d:.5}",
         .{mepo.lat, mepo.lon},
     );
-
+    defer mepo.allocator.free(copy_text);
     try utilsdl.errorcheck(sdl.SDL_SetClipboardText(copy_text));
 }
