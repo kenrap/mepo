@@ -42,5 +42,6 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
         return;
     }
 
-
+    // If not coordinates; run whatever is in clipboards as mepolang
+    try mepo.mepolang_execute(text);
 }
