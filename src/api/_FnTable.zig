@@ -14,6 +14,7 @@ const fn_specs = &[_]types.MepoFnSpec{
     @import("center_on_mouse.zig").spec,
     @import("center_on_pin.zig").spec,
     @import("clipcopy.zig").spec,
+    @import("clippaste.zig").spec,
     @import("fileload.zig").spec,
     @import("move_relative.zig").spec,
     @import("pin_add.zig").spec,
