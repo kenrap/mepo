@@ -862,7 +862,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 
 fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: [types.MepoFnNargs]types.MepoArg) !bool {
     for (spec.args) |expect_spec_arg, expect_spec_arg_i| {
-        switch (expect_spec_arg) {
+        switch (expect_spec_arg.tag) {
             .Number => {
                 switch (args[expect_spec_arg_i]) {
                     .Text => return error.ExpectNumberGotText,

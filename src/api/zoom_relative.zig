@@ -4,7 +4,9 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "zoom_relative",
-    .args = (&[_]types.MepoArgTag{.Number})[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "zoom_delta"},
+    })[0..],
     .execute = execute,
 };
 

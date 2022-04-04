@@ -5,7 +5,9 @@ const utilfile = @import("../util/utilfile.zig");
 
 pub const spec = .{
     .name = "fileload",
-    .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Text, .name = "filepath"},
+    })[0..],
     .execute = execute,
 };
 

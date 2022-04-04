@@ -8,7 +8,13 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_dlradius",
-    .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Number })[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "lat"},
+        .{.tag = .Number, .name = "lon"},
+        .{.tag = .Number, .name = "zoom_min"},
+        .{.tag = .Number, .name = "zoom_max"},
+        .{.tag = .Number, .name = "km_radius"},
+    })[0..],
     .execute = execute,
 };
 

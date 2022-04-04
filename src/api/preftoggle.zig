@@ -5,7 +5,9 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "preftoggle",
-    .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Text, .name = "prefname"},
+    })[0..],
     .execute = execute,
 };
 

@@ -5,7 +5,7 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .name = "center_on_mouse",
-    .args = (&[_]types.MepoArgTag{})[0..],
+    .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };
 

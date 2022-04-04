@@ -7,7 +7,7 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_queueclear",
-    .args = (&[_]types.MepoArgTag{})[0..],
+    .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };
 

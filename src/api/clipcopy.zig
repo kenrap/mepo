@@ -7,7 +7,7 @@ const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "clipcopy",
-    .args = (&[_]types.MepoArgTag{})[0..],
+    .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };
 

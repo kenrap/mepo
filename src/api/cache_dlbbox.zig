@@ -8,7 +8,14 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_dlbbox",
-    .args = (&[_]types.MepoArgTag{ .Number, .Number, .Number, .Number, .Number, .Number })[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "a_lat"},
+        .{.tag = .Number, .name = "a_lon"},
+        .{.tag = .Number, .name = "b_lat"},
+        .{.tag = .Number, .name = "b_lon"},
+        .{.tag = .Number, .name = "zoom_min"},
+        .{.tag = .Number, .name = "zoom_max"},
+    })[0..],
     .execute = execute,
 };
 

@@ -6,7 +6,11 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_click",
-    .args = (&[_]types.MepoArgTag{ .Number, .Number, .Text })[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "button"},
+        .{.tag = .Number, .name = "clicks"},
+        .{.tag = .Text, .name = "mepolang_expression"},
+    })[0..],
     .execute = execute,
 };
 

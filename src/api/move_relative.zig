@@ -4,7 +4,10 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "move_relative",
-    .args = (&[_]types.MepoArgTag{ .Number, .Number })[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "rel_x"},
+        .{.tag = .Number, .name = "rel_y"},
+    })[0..],
     .execute = execute,
 };
 

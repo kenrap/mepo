@@ -4,7 +4,12 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_meta",
-    .args = (&[_]types.MepoArgTag{ .Number, .Text, .Text, .Text })[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Number, .name = "group_number"},
+        .{.tag = .Text, .name = "pin_handle"},
+        .{.tag = .Text, .name = "key"},
+        .{.tag = .Text, .name = "value"},
+    })[0..],
     .execute = execute,
 };
 

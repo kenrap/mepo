@@ -9,7 +9,9 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .name = "shellpipe",
-    .args = (&[_]types.MepoArgTag{.Text})[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Text, .name = "shell_statement"},
+    })[0..],
     .execute = execute,
 };
 

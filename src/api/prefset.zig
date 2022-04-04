@@ -5,9 +5,11 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "prefset",
-    // TODO: dynamic usage of mepolang 2nd arg..
-    //       should there be prefset_number / prefset_text?
-    .args = (&[_]types.MepoArgTag{})[0..],
+    .args = (&[_]types.MepoFnSpecArg{
+        .{.tag = .Text, .name = "prefname"},
+        // TODO: dynamic usage of mepolang 2nd arg..
+        // should there be prefset_number / prefset_text?
+    })[0..],
     .execute = execute,
 };
 
