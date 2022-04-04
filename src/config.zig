@@ -115,7 +115,7 @@ pub const DefaultBaseConfig =
     \\ prefset zoom 14;
     \\ prefset tile_cache_network 1;
     \\ prefset tile_cache_max_n_transfers 20;
-    \\ prefset tile_cache_dir ~/.cache/mepo/tiles;
+    \\ prefset tile_cache_dir $XDG_CACHE_HOME/mepo/tiles;
     \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
     \\ # E.g. default 30 day expiry: 60s * 60m * 24h * 30 days;
     \\ prefset tile_cache_expiry_seconds 2592000;

@@ -15,7 +15,7 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     const copy_text = try std.fmt.allocPrintZ(
         mepo.allocator,
         "{d:.5}, {d:.5}",
-        .{mepo.lat, mepo.lon},
+        .{ mepo.lat, mepo.lon },
     );
     defer mepo.allocator.free(copy_text);
     try utilsdl.errorcheck(sdl.SDL_SetClipboardText(copy_text));

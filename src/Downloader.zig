@@ -5,7 +5,7 @@ const TileCache = @import("./TileCache.zig");
 pub fn cache_dlbbox(tile_cache: *TileCache, download_request_str: []const u8) !void {
     std.debug.print("Downloading based on BBox request: {s}\n", .{download_request_str});
 
-    try tile_cache.set_cache_dir("~/.cache/mepo/tiles");
+    try tile_cache.set_cache_dir("$XDG_CACHE_HOME/mepo/tiles");
     try tile_cache.set_cache_url("https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png");
 
     const delay_seconds = 3;
