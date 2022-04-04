@@ -908,9 +908,13 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
     );
     _ = thread;
 
-    const stream = &std.io.getStdIn().reader();
+    const stdin = &std.io.getStdIn().reader();
     const buffer = try mepo.allocator.alloc(u8, 1024 * 100);
-    _ = try stream.read(buffer);
+    while (try stdin.readUntilDelimiterOrEof(buffer, '\n')) |read_slice| {
+        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
+        try mepo.mepolang_execute(read_slice);
+        utilsdl.sdl_push_resize_event();
+    }
 }
 
 fn threadable_sdl_event_loop(userdata: ?*anyopaque) callconv(.C) c_int {
