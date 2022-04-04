@@ -16,7 +16,7 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
         if (std.os.getenv("HOME")) |home| {
             const xdg_home = try std.fmt.allocPrintZ(allocator, "XDG_CONFIG_HOME={s}/.config", .{home});
             defer allocator.free(xdg_home);
-            cstdlib.putenv(xdg_home);
+            _ = cstdlib.putenv(xdg_home);
             // Note at this point std.os.getenv("XDG_CONFIG_HOME") works
             // but wordexp doesnt...?
         }
