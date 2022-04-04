@@ -900,6 +900,26 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     }
 }
 
+pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
+    const thread = sdl.SDL_CreateThread(
+        threadable_sdl_event_loop,
+        "Mepo_SDL_Event_Loop_Thread",
+        mepo,
+    );
+    _ = thread;
+
+    const stream = &std.io.getStdIn().reader();
+    const buffer = try mepo.allocator.alloc(u8, 1024 * 100);
+    _ = try stream.read(buffer);
+}
+
+fn threadable_sdl_event_loop(userdata: ?*anyopaque) callconv(.C) c_int {
+    var mepo = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    sdl_event_loop(mepo) catch unreachable;
+    return 0;
+}
+
+
 pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;

@@ -48,7 +48,7 @@ pub fn main() !void {
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
             var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, stderr_on, cfg);
-            mepo.sdl_event_loop() catch Mepo.graceful_terminate();
+            mepo.event_loop_and_read_stdin() catch Mepo.graceful_terminate();
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);
