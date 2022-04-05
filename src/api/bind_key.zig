@@ -7,9 +7,9 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "bind_key",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Text, .name = "modifier"},
-        .{.tag = .Text, .name = "key"},
-        .{.tag = .Text, .name = "mepolang_expression"},
+        .{ .tag = .Text, .name = "modifier" },
+        .{ .tag = .Text, .name = "key" },
+        .{ .tag = .Text, .name = "mepolang_expression" },
     })[0..],
     .execute = execute,
 };

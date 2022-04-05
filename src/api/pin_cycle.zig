@@ -5,8 +5,8 @@ const std = @import("std");
 pub const spec = .{
     .name = "pin_cycle",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Number, .name = "viewport_only"},
-        .{.tag = .Number, .name = "delta"},
+        .{ .tag = .Number, .name = "viewport_only" },
+        .{ .tag = .Number, .name = "delta" },
     })[0..],
     .execute = execute,
 };

@@ -5,8 +5,8 @@ const std = @import("std");
 pub const spec = .{
     .name = "center_on_coords",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Number, .name = "lat"},
-        .{.tag = .Number, .name = "lon"},
+        .{ .tag = .Number, .name = "lat" },
+        .{ .tag = .Number, .name = "lon" },
     })[0..],
     .execute = execute,
 };

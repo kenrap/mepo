@@ -6,8 +6,8 @@ const pin_cycle = @import("pin_cycle.zig").pin_cycle;
 pub const spec = .{
     .name = "pin_groupprefset",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Number, .name = "group_number"},
-        .{.tag = .Text, .name = "prefrence_name"},
+        .{ .tag = .Number, .name = "group_number" },
+        .{ .tag = .Text, .name = "prefrence_name" },
         // TODO: 3rd argument treated as dynamic..
     })[0..],
     .execute = execute,

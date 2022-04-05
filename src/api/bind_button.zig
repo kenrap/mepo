@@ -7,9 +7,9 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "bind_button",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Number, .name = "visible_only_when_has_pins"},
-        .{.tag = .Text, .name = "button_text"},
-        .{.tag = .Text, .name = "mepolang_expression"},
+        .{ .tag = .Number, .name = "visible_only_when_has_pins" },
+        .{ .tag = .Text, .name = "button_text" },
+        .{ .tag = .Text, .name = "mepolang_expression" },
     })[0..],
     .execute = execute,
 };

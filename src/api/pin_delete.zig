@@ -5,7 +5,7 @@ const std = @import("std");
 pub const spec = .{
     .name = "pin_delete",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Text, .name = "pin_handle"},
+        .{ .tag = .Text, .name = "pin_handle" },
     })[0..],
     .execute = execute,
 };

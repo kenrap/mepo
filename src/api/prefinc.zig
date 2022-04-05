@@ -6,8 +6,8 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "prefinc",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Text, .name = "prefname"},
-        .{.tag = .Number, .name = "delta"},
+        .{ .tag = .Text, .name = "prefname" },
+        .{ .tag = .Number, .name = "delta" },
     })[0..],
     .execute = execute,
 };

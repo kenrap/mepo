@@ -7,10 +7,10 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "bind_gesture",
     .args = (&[_]types.MepoFnSpecArg{
-        .{.tag = .Text, .name = "action"},
-        .{.tag = .Number, .name = "fingers"},
-        .{.tag = .Number, .name = "direction"},
-        .{.tag = .Text, .name = "mepolang_expression"},
+        .{ .tag = .Text, .name = "action" },
+        .{ .tag = .Number, .name = "fingers" },
+        .{ .tag = .Number, .name = "direction" },
+        .{ .tag = .Text, .name = "mepolang_expression" },
     })[0..],
     .execute = execute,
 };
