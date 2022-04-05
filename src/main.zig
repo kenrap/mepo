@@ -24,11 +24,7 @@ pub fn main() !void {
     var arg_w = args_it.next(allocator);
     while (arg_w != null) : (arg_w = args_it.next(allocator)) {
         const arg = try arg_w.?;
-        if (std.mem.eql(u8, arg, "-i")) {
-            // -i: Read from STDIN
-            utildbg.log("Reading from STDIN", .{});
-            cfg = try read_stdin(allocator);
-        } else if (std.mem.startsWith(u8, arg, "-d")) {
+        if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
         } else if (std.mem.startsWith(u8, arg, "-e")) {
@@ -58,11 +54,4 @@ pub fn main() !void {
             utildbg.log("Mepo - version {d}\n", .{0.4});
         },
     }
-}
-
-fn read_stdin(allocator: std.mem.Allocator) anyerror![]const u8 {
-    const stream = &std.io.getStdIn().reader();
-    const buffer = try allocator.alloc(u8, 1024 * 100);
-    _ = try stream.read(buffer);
-    return std.mem.trim(u8, buffer, " \n");
 }
