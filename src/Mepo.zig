@@ -34,6 +34,7 @@ fontsize_ui: u8 = 20,
 help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
+mutex: std.Thread.Mutex,
 overlay_debugbar: bool = true,
 overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
@@ -897,11 +898,38 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     }
 }
 
+pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
+    const thread = sdl.SDL_CreateThread(
+        threadable_sdl_event_loop,
+        "Mepo_SDL_Event_Loop_Thread",
+        mepo,
+    );
+    _ = thread;
+
+    const stdin = &std.io.getStdIn().reader();
+    const buffer = try mepo.allocator.alloc(u8, 1024 * 100);
+    while (try stdin.readUntilDelimiterOrEof(buffer, '\n')) |read_slice| {
+        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
+        mepo.mutex.lock();
+        try mepo.mepolang_execute(read_slice);
+        mepo.mutex.unlock();
+        utilsdl.sdl_push_resize_event();
+    }
+}
+
+fn threadable_sdl_event_loop(userdata: ?*anyopaque) callconv(.C) c_int {
+    var mepo = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    sdl_event_loop(mepo) catch unreachable;
+    return 0;
+}
+
+
 pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
     while (true) {
+        mepo.mutex.lock();
         // Redraw
         sdl.SDL_PumpEvents();
         const has_pending_motion_events = (sdl.SDL_TRUE == sdl.SDL_HasEvent(sdl.SDL_MOUSEMOTION));
@@ -934,6 +962,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending = mepo.event_signal(sig);
             pending_signal = null;
         }
+        mepo.mutex.unlock();
     }
 }
 
@@ -1299,6 +1328,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
             break :fonts fonts;
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
+        .mutex = std.Thread.Mutex{},
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             window,
             -1,
