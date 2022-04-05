@@ -18,7 +18,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     // Bools
     for (&[_]struct { prop: []const u8, ptr: *bool }{
-        .{ .prop = "crosshair_on", .ptr = &mepo.crosshair_on },
         .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
         .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },
         .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },

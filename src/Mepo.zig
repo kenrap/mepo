@@ -14,7 +14,6 @@ const FnTable = @import("./api/_FnTable.zig");
 
 var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
-crosshair_on: bool = true,
 crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
@@ -54,8 +53,6 @@ window: *sdl.SDL_Window,
 zoom: u8 = 14,
 
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
-    if (!mepo.crosshair_on) return;
-
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,

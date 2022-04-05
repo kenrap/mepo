@@ -21,7 +21,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
         .{ .prop = "debug_tiles", .ptr = &mepo.debug_tiles },
         .{ .prop = "debug_stderr", .ptr = &utildbg.debug_stderr },
-        .{ .prop = "crosshair_on", .ptr = &mepo.crosshair_on },
     }) |stg| {
         if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = !stg.ptr.*;
     }

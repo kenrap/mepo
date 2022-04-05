@@ -105,7 +105,6 @@ pub const DefaultBaseConfig =
     \\ center_on_coords 40.78392 -73.96442;
     \\ prefset fontsize_ui 16;
     \\ prefset distance_unit_tf_km_mi 0;
-    \\ prefset crosshair_on 1;
     \\ prefset crosshair_size 15;
     \\ prefset debug_message_enabled 1;
     \\ prefset debug_stderr 0;
