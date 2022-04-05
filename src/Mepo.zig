@@ -912,8 +912,8 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
         mepo.mutex.lock();
         try mepo.mepolang_execute(read_slice);
-        mepo.mutex.unlock();
         utilsdl.sdl_push_resize_event();
+        mepo.mutex.unlock();
     }
 }
 
@@ -923,13 +923,12 @@ fn threadable_sdl_event_loop(userdata: ?*anyopaque) callconv(.C) c_int {
     return 0;
 }
 
-
 pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
+    mepo.mutex.lock();
     while (true) {
-        mepo.mutex.lock();
         // Redraw
         sdl.SDL_PumpEvents();
         const has_pending_motion_events = (sdl.SDL_TRUE == sdl.SDL_HasEvent(sdl.SDL_MOUSEMOTION));
@@ -962,7 +961,19 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending = mepo.event_signal(sig);
             pending_signal = null;
         }
-        mepo.mutex.unlock();
+
+        sdl.SDL_PumpEvents();
+        const n_events = sdl.SDL_PeepEvents(
+            null,
+            9999,
+            sdl.SDL_PEEKEVENT,
+            sdl.SDL_FIRSTEVENT,
+            sdl.SDL_LASTEVENT,
+        );
+        if (n_events == 0) {
+            mepo.mutex.unlock();
+            mepo.mutex.lock();
+        }
     }
 }
 
