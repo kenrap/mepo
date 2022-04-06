@@ -195,9 +195,6 @@ bookmarks, and more.
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties** (In-progress)
   - **Todo:**
-    - Rework main application event loop to handle STDIN file descriptor in
-      parallel to current SDL events processing. So commandline of application
-      can thus be used non-interactively / scripted. Also helpful for debugging.
     - Add support for pasting / copying current coordinates from the system
       clipboard and ensure compatibility in both Wayland & X.
     - Add visual per-tile-downloading progress-indicators.
@@ -217,6 +214,9 @@ bookmarks, and more.
       result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
   - **Done:**
+    - Rework main application event loop to handle STDIN file descriptor in
+      parallel to current SDL events processing. So commandline of application
+      can thus be used non-interactively / scripted. Also helpful for debugging.
     - Gracefully handle switching tile sources (e.g. purge cache & reload).
       Should be able to switch between OSM/bikemaps/stamen etc. without
       glitches.
