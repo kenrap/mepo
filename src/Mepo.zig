@@ -34,7 +34,10 @@ fontsize_ui: u8 = 20,
 help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
-mutex: std.Thread.Mutex,
+stdin_data: struct {
+    data: ?[]const u8,
+    mutex: std.Thread.Mutex,
+},
 overlay_debugbar: bool = true,
 overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
@@ -800,6 +803,7 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             //utildbg.log("Unhandled SDL Window Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_WindowEventID, @intCast(c_int, e.window.event)))});
         },
     }
+
     return .Redraw;
 }
 
@@ -906,14 +910,15 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
     );
     _ = thread;
 
-    const stdin = &std.io.getStdIn().reader();
-    const buffer = try mepo.allocator.alloc(u8, 1024 * 100);
-    while (try stdin.readUntilDelimiterOrEof(buffer, '\n')) |read_slice| {
-        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        mepo.mutex.lock();
-        try mepo.mepolang_execute(read_slice);
-        utilsdl.sdl_push_resize_event();
-        mepo.mutex.unlock();
+    var read_slice_opt: ?[]const u8 = null;
+    while (true) {
+        const stdin = &std.io.getStdIn().reader();
+        read_slice_opt = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
+        mepo.stdin_data.mutex.lock();
+        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice_opt.?.len});
+        if (mepo.stdin_data.data) |old_slice| mepo.allocator.free(old_slice);
+        mepo.stdin_data.data = read_slice_opt.?;
+        mepo.stdin_data.mutex.unlock();
     }
 }
 
@@ -927,7 +932,6 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
-    mepo.mutex.lock();
     while (true) {
         // Redraw
         sdl.SDL_PumpEvents();
@@ -962,17 +966,23 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             pending_signal = null;
         }
 
-        sdl.SDL_PumpEvents();
-        const n_events = sdl.SDL_PeepEvents(
-            null,
-            9999,
-            sdl.SDL_PEEKEVENT,
-            sdl.SDL_FIRSTEVENT,
-            sdl.SDL_LASTEVENT,
-        );
-        if (n_events == 0) {
-            mepo.mutex.unlock();
-            mepo.mutex.lock();
+        // Process STDIN event pending if queue empty
+        {
+            sdl.SDL_PumpEvents();
+            const n_events = sdl.SDL_PeepEvents(
+                null,
+                9999,
+                sdl.SDL_PEEKEVENT,
+                sdl.SDL_FIRSTEVENT,
+                sdl.SDL_LASTEVENT,
+            );
+            if (n_events == 0) {
+                if (mepo.stdin_data.mutex.tryLock()) {
+                    if (mepo.stdin_data.data) |d| try mepo.mepolang_execute(d);
+                    utilsdl.sdl_push_resize_event();
+                    mepo.stdin_data.mutex.unlock();
+                }
+            }
         }
     }
 }
@@ -1339,7 +1349,10 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
             break :fonts fonts;
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
-        .mutex = std.Thread.Mutex{},
+        .stdin_data = .{
+            .data = null,
+            .mutex = std.Thread.Mutex{},
+        },
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             window,
             -1,
