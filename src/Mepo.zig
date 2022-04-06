@@ -914,6 +914,7 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
         mepo.idle_mutex.lock();
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
         try mepo.mepolang_execute(read_slice);
+        utilsdl.sdl_push_resize_event();
         mepo.idle_mutex.unlock();
     }
 }
