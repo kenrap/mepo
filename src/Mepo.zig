@@ -34,10 +34,7 @@ fontsize_ui: u8 = 20,
 help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
-stdin_data: struct {
-    data: ?[]const u8,
-    mutex: std.Thread.Mutex,
-},
+idle_mutex: std.Thread.Mutex,
 overlay_debugbar: bool = true,
 overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
@@ -910,15 +907,14 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
     );
     _ = thread;
 
-    var read_slice_opt: ?[]const u8 = null;
     while (true) {
         const stdin = &std.io.getStdIn().reader();
-        read_slice_opt = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
-        mepo.stdin_data.mutex.lock();
-        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice_opt.?.len});
-        if (mepo.stdin_data.data) |old_slice| mepo.allocator.free(old_slice);
-        mepo.stdin_data.data = read_slice_opt.?;
-        mepo.stdin_data.mutex.unlock();
+        var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
+        defer mepo.allocator.free(read_slice);
+        mepo.idle_mutex.lock();
+        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
+        try mepo.mepolang_execute(read_slice);
+        mepo.idle_mutex.unlock();
     }
 }
 
@@ -977,10 +973,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 sdl.SDL_LASTEVENT,
             );
             if (n_events == 0) {
-                if (mepo.stdin_data.mutex.tryLock()) {
-                    if (mepo.stdin_data.data) |d| try mepo.mepolang_execute(d);
-                    utilsdl.sdl_push_resize_event();
-                    mepo.stdin_data.mutex.unlock();
+                if (mepo.idle_mutex.tryLock()) {
+                    mepo.idle_mutex.unlock();
                 }
             }
         }
@@ -1349,10 +1343,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
             break :fonts fonts;
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
-        .stdin_data = .{
-            .data = null,
-            .mutex = std.Thread.Mutex{},
-        },
+        .idle_mutex = std.Thread.Mutex{},
         .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             window,
             -1,
