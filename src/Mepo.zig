@@ -1221,7 +1221,7 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
     pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool, cfg_opt: ?[]const u8) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool) anyerror!@This() {
     // Dump debug info about SDL version compiled/linked
     {
         const version = v: {
@@ -1368,10 +1368,9 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         g.pins = std.ArrayList(types.Pin).init(allocator);
     }
 
-    // Run config (base and then user provided STDIN)
+    // Run base config, also flag stderr on if passed
     {
         try instance.mepolang_execute(config.DefaultBaseConfig);
-        if (cfg_opt) |cfg| try instance.mepolang_execute(cfg);
         if (stderr_on) try instance.mepolang_execute("prefset debug_stderr 1");
     }
 

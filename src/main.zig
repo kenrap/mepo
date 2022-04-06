@@ -17,7 +17,6 @@ pub fn main() !void {
     var stderr_on: bool = false;
     var mode: enum { Graphical, Download, Version } = .Graphical;
     var download_request: []const u8 = undefined;
-    var cfg: ?[]const u8 = null;
     var use_sw_renderer = false;
 
     var args_it = std.process.args();
@@ -43,7 +42,7 @@ pub fn main() !void {
     switch (mode) {
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, stderr_on, cfg);
+            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, stderr_on);
             mepo.event_loop_and_read_stdin() catch Mepo.graceful_terminate();
         },
         .Download => {
