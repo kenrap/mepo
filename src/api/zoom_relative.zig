@@ -4,8 +4,9 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "zoom_relative",
+    .desc = "Update the map's zoom level by a relative delta",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "zoom_delta" },
+        .{ .tag = .Number, .name = "zoom_delta", .desc = "Zoom level relative delta" },
     })[0..],
     .execute = execute,
 };

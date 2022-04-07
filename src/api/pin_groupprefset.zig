@@ -5,9 +5,11 @@ const pin_cycle = @import("pin_cycle.zig").pin_cycle;
 
 pub const spec = .{
     .name = "pin_groupprefset",
+    .desc = "Set a pin group's preference",
+    // TODO: figure out doc table/mapping here..
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "group_number" },
-        .{ .tag = .Text, .name = "prefrence_name" },
+        .{ .tag = .Number, .name = "group_number", .desc = "The pin group number" },
+        .{ .tag = .Text, .name = "prefrence_name", .desc = "Preference name" },
         // TODO: 3rd argument treated as dynamic..
     })[0..],
     .execute = execute,

@@ -4,9 +4,10 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "center_on_coords",
+    .desc = "Center the map on the given coordinate",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "lat" },
-        .{ .tag = .Number, .name = "lon" },
+        .{ .tag = .Number, .name = "lat", .desc = "Latitude" },
+        .{ .tag = .Number, .name = "lon", .desc = "Longitude" },
     })[0..],
     .execute = execute,
 };

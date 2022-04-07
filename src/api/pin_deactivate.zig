@@ -4,6 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_deactivate",
+    .desc = "Deactivate currently active pin",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

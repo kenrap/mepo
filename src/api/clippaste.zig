@@ -7,6 +7,7 @@ const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "clippaste",
+    .desc = "Extract clipboard contents and either center on coordinate (if passed `lat lon` format); otherwise run clipboard contents as mepolang",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

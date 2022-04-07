@@ -4,6 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "quit",
+    .desc = "Quit the application",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

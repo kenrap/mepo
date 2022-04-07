@@ -5,8 +5,10 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "preftoggle",
+    .desc = "Toggle a boolean number preference between `1` and `0`",
+    // TODO: document prefrences table
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "prefname" },
+        .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
     })[0..],
     .execute = execute,
 };

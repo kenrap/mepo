@@ -8,12 +8,13 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_dlradius",
+    .desc = "Queue tiles for a bounding box to download to the cache in the background for the given zoom levels",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "lat" },
-        .{ .tag = .Number, .name = "lon" },
-        .{ .tag = .Number, .name = "zoom_min" },
-        .{ .tag = .Number, .name = "zoom_max" },
-        .{ .tag = .Number, .name = "km_radius" },
+        .{ .tag = .Number, .name = "lat", .desc = "Centerpoint latitude" },
+        .{ .tag = .Number, .name = "lon", .desc = "Centerpoint longitude" },
+        .{ .tag = .Number, .name = "zoom_min", .desc = "Minimum zoom level" },
+        .{ .tag = .Number, .name = "zoom_max", .desc = "Maximum zoom level" },
+        .{ .tag = .Number, .name = "km_radius", .desc = "Radius from centerpoint in kilometers to download tiles for" },
     })[0..],
     .execute = execute,
 };

@@ -7,6 +7,7 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_queueclear",
+    .desc = "Clear any queued background downloading process",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

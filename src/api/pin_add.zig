@@ -4,13 +4,14 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_add",
+    .desc = "Add a pin to the map",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "group_number" },
-        .{ .tag = .Number, .name = "is_structural" },
-        .{ .tag = .Number, .name = "lat" },
-        .{ .tag = .Number, .name = "lon" },
-        .{ .tag = .Text, .name = "handle" },
-        .{ .tag = .Text, .name = "name" },
+        .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
+        .{ .tag = .Number, .name = "is_structural", .desc = "If set to `1`, will be a 'structural' pin which is useful for curved paths and similar" },
+        .{ .tag = .Number, .name = "lat", .desc = "Latitude" },
+        .{ .tag = .Number, .name = "lon", .desc = "Longitude" },
+        .{ .tag = .Text, .name = "handle", .desc = "*Unique* handle to refer to pin; can use this handle subsequently with `pin_meta` to update pin metadata" },
+        .{ .tag = .Text, .name = "name", .desc = "Pretty name to display for pin" },
     })[0..],
     .execute = execute,
 };

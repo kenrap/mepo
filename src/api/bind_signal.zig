@@ -6,34 +6,35 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_signal",
+    .desc = "Bind a signal to execute a mepolang action",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "signo" },
-        .{ .tag = .Text, .name = "mepolang_expression" },
+        .{ .tag = .Text, .name = "signal_name", .desc = "Signal name; can be `USR1` or `USR2`" },
+        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     })[0..],
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const signo = args[0].Text;
+    const signal_name = args[0].Text;
     const expression = args[1].Text;
-    try bind_signal(mepo, signo, expression);
+    try bind_signal(mepo, signal_name, expression);
 }
 
 fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !void {
-    utildbg.log("Binding signal: signo={s} to expression {s}\n", .{ signo_str, expression });
+    utildbg.log("Binding signal: signal_name={s} to expression {s}\n", .{ signo_str, expression });
 
     // Signal
-    var signo: u6 = 0;
+    var signal_name: u6 = 0;
     if (std.cstr.cmp(signo_str, "USR1") == 0) {
-        signo = std.os.SIG.USR1;
+        signal_name = std.os.SIG.USR1;
     } else if (std.cstr.cmp(signo_str, "USR2") == 0) {
-        signo = std.os.SIG.USR2;
+        signal_name = std.os.SIG.USR2;
     } else {
         return error.InvalidSignalName;
     }
 
     // Register generic signal handler
-    if (0 != std.os.linux.sigaction(signo, &.{
+    if (0 != std.os.linux.sigaction(signal_name, &.{
         .handler = .{ .handler = Mepo.sighandle_user },
         .mask = [_]u32{0} ** 32,
         .flags = @as(c_uint, 0),
@@ -41,10 +42,10 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
         return error.FailedToSetupSighandler;
     }
 
-    if (mepo.table_signals.get(signo)) |heap_str| {
+    if (mepo.table_signals.get(signal_name)) |heap_str| {
         mepo.allocator.free(heap_str);
-        _ = mepo.table_signals.swapRemove(signo);
+        _ = mepo.table_signals.swapRemove(signal_name);
     }
     const expression_heap_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.table_signals.put(signo, expression_heap_allocated);
+    try mepo.table_signals.put(signal_name, expression_heap_allocated);
 }

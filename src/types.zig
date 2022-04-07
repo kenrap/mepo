@@ -30,9 +30,11 @@ pub const MepoFnNargs = 6;
 pub const MepoFnSpecArg = struct {
     name: []const u8,
     tag: MepoArgTag,
+    desc: []const u8,
 };
 pub const MepoFnSpec = struct {
     name: []const u8,
+    desc: []const u8,
     args: []const MepoFnSpecArg,
     execute: fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void,
 };

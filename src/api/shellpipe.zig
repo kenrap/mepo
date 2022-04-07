@@ -9,8 +9,10 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .name = "shellpipe",
+    .desc = "Run a system (shell) command and pipe; STDOUT returned from command will be executed back as mepolang",
+    // TODO: document ENV vars usable in shell scripts context
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "shell_statement" },
+        .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
     })[0..],
     .execute = execute,
 };

@@ -8,13 +8,14 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_dlbbox",
+    .desc = "Queue tiles for a bounding box to download to the cache in the background for the given zoom levels",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "a_lat" },
-        .{ .tag = .Number, .name = "a_lon" },
-        .{ .tag = .Number, .name = "b_lat" },
-        .{ .tag = .Number, .name = "b_lon" },
-        .{ .tag = .Number, .name = "zoom_min" },
-        .{ .tag = .Number, .name = "zoom_max" },
+        .{ .tag = .Number, .name = "a_lat", .desc = "Starting latitude" },
+        .{ .tag = .Number, .name = "a_lon", .desc = "Starting longitude" },
+        .{ .tag = .Number, .name = "b_lat", .desc = "Ending latitude" },
+        .{ .tag = .Number, .name = "b_lon", .desc = "Ending longitude" },
+        .{ .tag = .Number, .name = "zoom_min", .desc = "Minimum zoom level" },
+        .{ .tag = .Number, .name = "zoom_max", .desc = "Maximum zoom level" },
     })[0..],
     .execute = execute,
 };

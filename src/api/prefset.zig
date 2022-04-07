@@ -5,8 +5,10 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "prefset",
+    .desc = "Set a preference value",
+    // TODO: document preference mapping table
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "prefname" },
+        .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
         // TODO: dynamic usage of mepolang 2nd arg..
         // should there be prefset_number / prefset_text?
     })[0..],

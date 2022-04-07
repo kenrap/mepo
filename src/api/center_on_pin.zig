@@ -4,6 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "center_on_pin",
+    .desc = "Center the map on the currently active pin",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };
