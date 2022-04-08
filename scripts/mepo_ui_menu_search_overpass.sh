@@ -46,8 +46,8 @@ main() {
   )"
 
   echo "
-    pin_groupprefset 0 ordered 0;
-    pin_groupprefset 0 active 1;
+    pin_groupprefset_n 0 ordered 0;
+    pin_groupprefset_n 0 active 1;
     pin_purge;
   "
 

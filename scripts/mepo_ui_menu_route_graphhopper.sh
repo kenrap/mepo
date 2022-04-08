@@ -75,8 +75,8 @@ printpins() {
   RESPONSE="$1"
 
   echo "
-    pin_groupprefset 1 ordered 1;
-    pin_groupprefset 1 active 1;
+    pin_groupprefset_n 1 ordered 1;
+    pin_groupprefset_n 1 active 1;
     pin_purge;
   "
 
