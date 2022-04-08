@@ -5,9 +5,8 @@ const types = @import("../types.zig");
 /// union types.
 ///
 /// Caller responsible for freeing returned memory
-pub fn argize(allocator: std.mem.Allocator, tokens: []const []const u8) ![types.MepoFnNargs]types.MepoArg {
-    var args_i: usize = 0;
-    var args: [types.MepoFnNargs]types.MepoArg = undefined;
+pub fn argize(allocator: std.mem.Allocator, tokens: []const []const u8) ![]types.MepoArg {
+    var args = std.ArrayList(types.MepoArg).init(allocator);
     var i: usize = 0;
     var bracket_start_i: usize = undefined;
     var bracket_nest_n: usize = 0;
@@ -19,21 +18,18 @@ pub fn argize(allocator: std.mem.Allocator, tokens: []const []const u8) ![types.
         if (bracket_nest_n == 1 and tok[0] == '[' and tok.len == 1) {
             bracket_start_i = i;
         } else if (bracket_nest_n == 0 and tok[0] == ']' and tok.len == 1) {
-            args[args_i] = .{ .Text = try std.mem.joinZ(allocator, " ", tokens[bracket_start_i + 1 .. i]) };
-            args_i += 1;
+            try args.append(.{ .Text = try std.mem.joinZ(allocator, " ", tokens[bracket_start_i + 1 .. i]) });
         } else if (bracket_nest_n >= 1) {
             // nop
         } else if ((tok[0] == '-' and tok.len > 1) or (tok[0] >= '0' and tok[0] <= '9')) {
-            args[args_i] = .{ .Number = try std.fmt.parseFloat(f64, tok) };
-            args_i += 1;
+            try args.append(.{ .Number = try std.fmt.parseFloat(f64, tok) });
         } else {
-            args[args_i] = .{ .Text = try allocator.dupeZ(u8, tok) };
-            args_i += 1;
+            try args.append(.{ .Text = try allocator.dupeZ(u8, tok) });
         }
         i += 1;
     }
 
-    return args;
+    return args.items;
 }
 
 /// Converts raw text input into tokens, respecting that [, ], and ; should
