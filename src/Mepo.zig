@@ -1377,7 +1377,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
     // Run base config, also flag stderr on if passed
     {
         try instance.mepolang_execute(config.DefaultBaseConfig);
-        if (stderr_on) try instance.mepolang_execute("prefset debug_stderr 1");
+        if (stderr_on) try instance.mepolang_execute("prefset_n debug_stderr 1");
     }
 
     // Setup TERM/INT signals
