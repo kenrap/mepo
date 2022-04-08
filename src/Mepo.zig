@@ -398,10 +398,11 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
         5,
         @intCast(i32, mepo.win_h) - bottombar_height + 3,
         null,
-        "{d:.3} {d:.3} O:{d}, Q:{d}, B:{d}, D:{d}, M:{d}",
+        "{d:.3} {d:.3} Z:{d} O:{d}, Q:{d}, B:{d}, D:{d}, M:{d}",
         .{
             mepo.lat,
             mepo.lon,
+            mepo.zoom,
             @boolToInt(mepo.tile_cache.thread_download != null),
             mepo.tile_cache.queue_lifo_ui.count(),
             mepo.tile_cache.queue_lifo_bg.count(),
