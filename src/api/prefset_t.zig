@@ -9,7 +9,7 @@ pub const spec = .{
     // TODO: document preference mapping table
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
-        .{ .tag = .Text, .name = "prefname", .desc = "Preference number value" },
+        .{ .tag = .Text, .name = "prefvalue", .desc = "Preference number value" },
     })[0..],
     .execute = execute,
 };
