@@ -3,7 +3,7 @@ DISPLAYNAME="漣 Update: Fontsize"
 HOTKEY=Z
 
 main() {
-  echo prefset fontsize_ui "$(
+  echo prefset_n fontsize_ui "$(
     seq 12 30 |
     PROMPT="Font size" mepo_ui_helper_menu.sh
   );"

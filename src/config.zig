@@ -103,21 +103,21 @@ pub const DefaultBaseConfig =
     \\
     \\ # Prefs;
     \\ center_on_coords 40.78392 -73.96442;
-    \\ prefset fontsize_ui 16;
-    \\ prefset distance_unit_tf_km_mi 0;
-    \\ prefset crosshair_size 15;
-    \\ prefset debug_message_enabled 1;
-    \\ prefset debug_stderr 0;
-    \\ prefset debug_tiles 0;
-    \\ prefset overlay_debugbar 1;
-    \\ prefset overlay_pindetails 1;
-    \\ prefset zoom 14;
-    \\ prefset tile_cache_network 1;
-    \\ prefset tile_cache_max_n_transfers 20;
-    \\ prefset tile_cache_dir $XDG_CACHE_HOME/mepo/tiles;
-    \\ prefset tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
+    \\ prefset_n fontsize_ui 16;
+    \\ prefset_n distance_unit_tf_km_mi 0;
+    \\ prefset_n crosshair_size 15;
+    \\ prefset_n debug_message_enabled 1;
+    \\ prefset_n debug_stderr 0;
+    \\ prefset_n debug_tiles 0;
+    \\ prefset_n overlay_debugbar 1;
+    \\ prefset_n overlay_pindetails 1;
+    \\ prefset_n zoom 14;
+    \\ prefset_n tile_cache_network 1;
+    \\ prefset_n tile_cache_max_n_transfers 20;
     \\ # E.g. default 30 day expiry: 60s * 60m * 24h * 30 days;
-    \\ prefset tile_cache_expiry_seconds 2592000;
+    \\ prefset_n tile_cache_expiry_seconds 2592000;
+    \\ prefset_t tile_cache_dir $XDG_CACHE_HOME/mepo/tiles;
+    \\ prefset_t tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
     \\
     \\ # Pins;
     \\ pin_groupprefset 0 color #0000ff;

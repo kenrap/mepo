@@ -4,19 +4,19 @@ const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
-    .name = "prefset",
-    .desc = "Set a preference value",
+    .name = "prefset_n",
+    .desc = "Set a preference number value",
     // TODO: document preference mapping table
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
-        // TODO: dynamic usage of mepolang 2nd arg..
-        // should there be prefset_number / prefset_text?
+        .{ .tag = .Number, .name = "prefvalue", .desc = "Preference number value" },
     })[0..],
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
+    const value = args[1].Number;
 
     // Bools
     for (&[_]struct { prop: []const u8, ptr: *bool }{
@@ -28,7 +28,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "overlay_pindetails", .ptr = &mepo.overlay_pindetails },
         .{ .prop = "help", .ptr = &mepo.help },
     }) |stg| {
-        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = args[1].Number == 1;
+        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = value == 1;
     }
 
     // U8 Ints
@@ -39,22 +39,17 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },
         .{ .prop = "tile_cache_max_n_transfers", .ptr = &mepo.tile_cache.max_n_transfers },
     }) |stg| {
-        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(u8, args[1].Number);
+        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(u8, value);
     }
 
     // I32 Ints
     for (&[_]struct { prop: []const u8, ptr: *i32 }{
         .{ .prop = "tile_cache_expiry_seconds", .ptr = &mepo.tile_cache.expiry_seconds },
     }) |stg| {
-        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(i32, args[1].Number);
+        if (std.mem.eql(u8, stg.prop, name)) stg.ptr.* = @floatToInt(i32, value);
     }
 
-    // Tilecache - TODO move above?
-    if (std.mem.eql(u8, "tile_cache_dir", name)) {
-        try mepo.tile_cache.set_cache_dir(args[1].Text);
-    } else if (std.mem.eql(u8, "tile_cache_url", name)) {
-        try mepo.tile_cache.set_cache_url(args[1].Text);
-    } else if (std.mem.eql(u8, "tile_cache_network", name)) {
-        mepo.tile_cache.set_network(args[1].Number == 1);
+    if (std.mem.eql(u8, "tile_cache_network", name)) {
+        mepo.tile_cache.set_network(value == 1);
     }
 }

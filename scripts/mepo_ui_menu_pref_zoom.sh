@@ -3,7 +3,7 @@ DISPLAYNAME="漣 Update: Zoom"
 HOTKEY=z
 
 main() {
-  echo prefset zoom "$(
+  echo prefset_n zoom "$(
     seq 1 16 |
     PROMPT="Zoom" mepo_ui_helper_menu.sh
   );"

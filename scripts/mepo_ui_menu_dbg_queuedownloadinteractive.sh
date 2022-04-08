@@ -41,7 +41,7 @@ main() {
         $ZOOM_MIN
         $ZOOM_MAX 
       ;
-      prefset download_bar 1;
+      prefset_n download_bar 1;
     "
   else
     # Radius-based downloading
@@ -53,7 +53,7 @@ main() {
         $ZOOM_MAX 
         $(echo "$TARGET" | tr -dc '[0-9.]')
       ;
-      prefset download_bar 1;
+      prefset_n download_bar 1;
     "
   fi
 }

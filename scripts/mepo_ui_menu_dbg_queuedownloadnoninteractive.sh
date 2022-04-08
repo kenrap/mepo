@@ -18,7 +18,7 @@ main() {
       $ZOOM_MAX 
     ;
 
-    prefset download_bar 1;
+    prefset_n download_bar 1;
   "
 }
 
