@@ -2,18 +2,8 @@
 DISPLAYNAME=" POI Search: via Overpass"
 HOTKEY=b
 
-OPTIONS='
-  Bars:          [amenity=bar]
-  Restraunt:     [amenity=restaurant]
-  Pizza:         [amenity=restaurant] [cuisine=italian]
-  Indian:        [amenity=restaurant] [cuisine=indian]
-  Supermarket:   [shop=supermarket]
-  Coffeshop:     [amenity=cafe]
-  Grocery:       [shop=grocery]
-  Bathrooms:     [amenity=toilets]
-'
-
 main() {
+  OPTIONS="$(mepo_generated_osmtags.sh)"
   SCOPE="$(
     echo -e "Cancel\n$OPTIONS" |
       sed 's/^ *//' |
@@ -27,7 +17,7 @@ main() {
     exit 1
   fi
 
-  SCOPE="$(echo $SCOPE | cut -d ' ' -f2- | tr '\n' ' ')"
+  SCOPE="$(echo $SCOPE | cut -d: -f1 | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
   JSON_RESULTS="$(
     curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
