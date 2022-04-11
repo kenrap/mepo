@@ -1,20 +1,23 @@
 #!/usr/bin/env sh
-# Pulls from taginfo.openstreemap.org to determine most used amenity tags
+# Pulls from taginfo.openstreemap.org to determine most used tags
 # and generates a script that just dumps that list
 #
 # Regeneration example: 
-# ./scriptsdev/mepo_updateamenitytags.sh > scripts/mepo_amenitytags.sh
+# ./scriptsdev/mepo_generateosmtags.sh > scripts/mepo_generated_osmtags.sh
 
 generate() {
+  KEY="$1"
+  NITEMS="$2"
+
   JSON="$(
-    curl 'https://taginfo.openstreetmap.org/api/4/key/values?key=amenity&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp=999&qtype=value&format=json_pretty'
+    curl 'https://taginfo.openstreetmap.org/api/4/key/values?key='${KEY}'&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp='${NITEMS}'&qtype=value&format=json_pretty'
   )"
 
   echo "$JSON" | 
     jq '
       .data | 
       .[] | 
-      "[ammenity=\(.value)]: \(
+      "['$KEY'=\(.value)]: \(
         if (.description != "" and .description != null)
           then .description 
           else .value 
@@ -26,11 +29,12 @@ generate() {
 
 generatescript() {
   echo "#!/usr/bin/env sh"
-  echo "# Generated via mepo's development script $0"
+  echo "# Generated via mepo's development script $(basename $0)"
   echo "# This script just prints a list of the top amenity tags from OSM's taginfo db"
   echo "# Regenerated at development time / per-release"
   echo 'echo "'
-  generate
+  generate amenity 999
+  generate cuisine 999
   echo '"'
 }
 
