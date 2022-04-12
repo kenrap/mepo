@@ -895,6 +895,14 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y <= config.DragThresholdDelta;
 
     if (threshold_hit_hold_ms and threshold_hit_distance) {
+        // E.g ignore hold on ui buttons
+        if (mepo.blit_uibuttons(b: {
+            var b: sdl.SDL_MouseButtonEvent = undefined;
+            b.x = mepo.drag.?.point.x;
+            b.y = mepo.drag.?.point.y;
+            break :b b;
+        }) catch null) |_| return;
+
         mepo.drag = null;
         // TODO: hold support for right click as well?
         if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1 })) |run_expression| {
