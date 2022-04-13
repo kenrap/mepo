@@ -14,6 +14,7 @@ const FnTable = @import("./api/_FnTable.zig");
 
 var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
+async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
 crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
@@ -1370,6 +1371,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
+        .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
         .window = window,
     });
 
