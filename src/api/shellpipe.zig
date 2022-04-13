@@ -12,17 +12,19 @@ pub const spec = .{
     .desc = "Run a system (shell) command and pipe; STDOUT returned from command will be executed back as mepolang",
     // TODO: document ENV vars usable in shell scripts context
     .args = (&[_]types.MepoFnSpecArg{
+        .{ .tag = .Number, .name = "as_async", .desc = "Set to 1 to run asynchronously (e.g. don't wait for process to complete)" },
         .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
     })[0..],
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const cmd = args[0].Text;
-    try shellpipe(mepo, cmd);
+    const as_async = args[0].Number == 1;
+    const cmd = args[1].Text;
+    try shellpipe(mepo, as_async, cmd);
 }
 
-fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
+fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
@@ -61,6 +63,8 @@ fn shellpipe(mepo: *Mepo, cmd: []const u8) !void {
 
         break :env_vars v;
     };
+
+    _ = as_async;
 
     const args = [_][]const u8{ "sh", "-c", cmd };
     const process_result = try std.ChildProcess.exec(.{
