@@ -24,7 +24,7 @@ main() {
     PROMPT="Tile Source" mepo_ui_helper_menu.sh |
     cut -d: -f2- |
     tr -d ' ' |
-    xargs -IURL echo 'prefset_n tile_cache_url URL;'
+    xargs -IURL echo 'prefset_t tile_cache_url URL;'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
