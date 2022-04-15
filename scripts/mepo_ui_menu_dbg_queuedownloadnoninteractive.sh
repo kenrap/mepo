@@ -6,7 +6,7 @@ BOUND_UPPER=19
 
 main() {
   ZOOM_MIN=$MEPO_ZOOM
-  ZOOM_MAX="$(echo -e "19\n$MEPO_ZOOM" | sort -rn | head -n1)"
+  ZOOM_MAX="$(printf %b "19\n$MEPO_ZOOM" | sort -rn | head -n1)"
 
   echo "
     cache_dlbbox

@@ -13,7 +13,7 @@ nominatimspecialphrasesfromwiki() {
 
 main() {
   QUERY="$(
-      echo -e "Cancel\nEnter specific POI name" |
+      printf %b "Cancel\nEnter specific POI name" |
       PROMPT="Nominatim Search" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"

@@ -4,6 +4,7 @@ HOTKEY=u
 
 main() {
   # Note X, Y, Z provided as %1$d, %2$d, %3$d respectively
+  # shellcheck disable=SC2016
   SOURCES='
     OSM Maps: https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png
     OpenTopoMap C: https://c.tile.opentopomap.org/%3$d/%1$d/%2$d.png

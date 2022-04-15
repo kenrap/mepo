@@ -13,7 +13,7 @@ nominatimquerytargetmenu() {
 
   while ! echo "$COORDS" | grep -Eq "[-0-9.]+[ ]+[-0-9.]+"; do
     QUERY="$(
-        echo -e "centerpoint\ncursor\nOr enter nominatim query location" |
+        printf %b "centerpoint\ncursor\nOr enter nominatim query location" |
         PROMPT="$1" mepo_ui_helper_menu.sh |
         sed 's/ /%20/g'
     )"
@@ -49,10 +49,10 @@ curlgraphhopper() {
   FROM="$2"
   DEST="$3"
 
-  FROMLAT="$(echo $FROM | cut -d " " -f1)"
-  FROMLON="$(echo $FROM | cut -d " " -f2)"
-  DESTLAT="$(echo $DEST | cut -d " " -f1)"
-  DESTLON="$(echo $DEST | cut -d " " -f2)"
+  FROMLAT="$(echo "$FROM" | cut -d " " -f1)"
+  FROMLON="$(echo "$FROM" | cut -d " " -f2)"
+  DESTLAT="$(echo "$DEST" | cut -d " " -f1)"
+  DESTLON="$(echo "$DEST" | cut -d " " -f2)"
 
   curl \
     -X POST \
@@ -63,10 +63,10 @@ curlgraphhopper() {
         "elevation": false,
         "points_encoded": false,
         "points": [
-          ['$FROMLON','$FROMLAT'],
-          ['$DESTLON','$DESTLAT']
+          ['"$FROMLON"','"$FROMLAT"'],
+          ['"$DESTLON"','"$DESTLAT"']
         ],
-        "vehicle": "'$MODE'"
+        "vehicle": "'"$MODE"'"
       }
     '
 }
@@ -105,7 +105,7 @@ main() {
   [ -z "$MEPO_GRAPHHOPPER_API_KEY" ] && MEPO_GRAPHHOPPER_API_KEY="$MEPO_GRAPHHOPPER_DEFAULT_API_KEY"
 
   MODE="$(
-    echo -e "car\nbike\nfoot" |
+    printf %b "car\nbike\nfoot" |
     PROMPT="Route mode" mepo_ui_helper_menu.sh
   )"
   echo "$MODE" | grep -qE "^(car|bike|foot)" || errexit "Unsupported route mode"

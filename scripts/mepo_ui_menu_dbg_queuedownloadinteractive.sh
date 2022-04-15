@@ -15,12 +15,12 @@ main() {
     PROMPT="Download Zoom Max:" mepo_ui_helper_menu.sh 
   )"
 
-  if ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); then
+  if ! { [ -n "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]; }; then
     echo "Invalid minimum zoom level" >&2
     exit 1
   fi
 
-  if ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]); then
+  if ! { [ -n "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]; }; then
     echo "Invalid maximum zoom level" >&2
     exit 1
   fi
@@ -51,7 +51,7 @@ main() {
         $MEPO_CENTER_LON
         $ZOOM_MIN
         $ZOOM_MAX 
-        $(echo "$TARGET" | tr -dc '[0-9.]')
+        $(echo "$TARGET" | tr -dc '0-9.')
       ;
       prefset_n download_bar 1;
     "

@@ -10,14 +10,14 @@ generate() {
   NITEMS="$2"
 
   JSON="$(
-    curl 'https://taginfo.openstreetmap.org/api/4/key/values?key='${KEY}'&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp='${NITEMS}'&qtype=value&format=json_pretty'
+    curl 'https://taginfo.openstreetmap.org/api/4/key/values?key='"${KEY}"'&filter=all&lang=en&sortname=count&sortorder=desc&page=1&rp='"${NITEMS}"'&qtype=value&format=json_pretty'
   )"
 
   echo "$JSON" | 
     jq '
       .data | 
       .[] | 
-      "['$KEY'=\(.value)]: \(
+      "['"$KEY"'=\(.value)]: \(
         if (.description != "" and .description != null)
           then .description 
           else .value 
@@ -29,7 +29,7 @@ generate() {
 
 generatescript() {
   echo "#!/usr/bin/env sh"
-  echo "# Generated via mepo's development script $(basename $0)"
+  echo "# Generated via mepo's development script $(basename "$0")"
   echo "# This script just prints a list of the top amenity tags from OSM's taginfo db"
   echo "# Regenerated at development time / per-release"
   echo 'echo "'

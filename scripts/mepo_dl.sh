@@ -8,13 +8,13 @@ errdie() {
 mepo_dashd_download() {
   DOWNLOAD_REQUEST=$1
 
-  if [ -f "$(realpath $(dirname "$0"))/../build.zig" ]; then
+  if [ -f "$(realpath "$(dirname "$0")")/../build.zig" ]; then
     # E.g. dev testing
-    cd "$(realpath $(dirname "$0"))"/..
-    zig build && ./zig-out/bin/mepo -d${DOWNLOAD_REQUEST}
+    cd "$(realpath "$(dirname "$0")")"/.. || errdie "Failed to cd"
+    zig build && ./zig-out/bin/mepo -d"${DOWNLOAD_REQUEST}"
   else
     # E.g. installed to system
-    mepo -d${DOWNLOAD_REQUEST}
+    mepo -d"${DOWNLOAD_REQUEST}"
   fi
 }
 
@@ -24,7 +24,8 @@ sep() {
 
 prompt() {
   NAME="$1"
-  read -p "$(tput bold)$NAME$(tput sgr0) " RES
+  printf "%b" "$(tput bold)$NAME$(tput sgr0) "
+  read -r RES
   echo "$RES"
 }
 
@@ -33,7 +34,7 @@ nominatim_spec() {
   ZOOM_MIN=""
   ZOOM_MAX=""
 
-  echo "$(tput bold)$(basename $0): nominatim_dl$(tput sgr0)" >&2
+  echo "$(tput bold)$(basename "$0"): nominatim_dl$(tput sgr0)" >&2
   sep
 
   # Location query
@@ -61,11 +62,11 @@ nominatim_spec() {
     BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
   done
 
-  while ! ( [ ! -z "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]); do
+  while ! { [ -n "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]; }; do
     ZOOM_MIN="$(prompt "Zoom minimum (0-19):")"
   done
 
-  while ! ( [ ! -z "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]); do
+  while ! { [ -n "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]; }; do
     ZOOM_MAX="$(prompt "Zoom maximum (0-19):")"
   done
 

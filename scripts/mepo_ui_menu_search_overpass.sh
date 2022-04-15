@@ -5,7 +5,7 @@ HOTKEY=b
 main() {
   OPTIONS="$(mepo_generated_osmtags.sh)"
   SCOPE="$(
-    echo -e "Cancel\n$OPTIONS" |
+    printf %b "Cancel\n$OPTIONS" |
       sed 's/^ *//' |
       sed 's/ *$//' |
       grep . | 
@@ -17,7 +17,7 @@ main() {
     exit 1
   fi
 
-  SCOPE="$(echo $SCOPE | cut -d: -f1 | tr '\n' ' ')"
+  SCOPE="$(echo "$SCOPE" | cut -d: -f1 | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
   JSON_RESULTS="$(
     curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(

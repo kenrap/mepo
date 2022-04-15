@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-cd "$(realpath $(dirname "$0"))"/..
+cd "$(realpath "$(dirname "$0")")"/.. || exit 1
 USER=user
 CONN=$USER@pine64-pinephone
 rsync --delete -v -a --exclude 'zig-out' --exclude 'zig-cache' . $CONN:/home/$USER/mepo
