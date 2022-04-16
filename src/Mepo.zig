@@ -817,6 +817,13 @@ fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
+pub fn mepolang_execute_threadsafe(mepo: *@This(), mepolang_text: []const u8) !void {
+    mepo.idle_mutex.lock();
+    try mepo.mepolang_execute(mepolang_text);
+    utilsdl.sdl_push_resize_event();
+    mepo.idle_mutex.unlock();
+}
+
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
@@ -926,11 +933,8 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
         const stdin = &std.io.getStdIn().reader();
         var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
         defer mepo.allocator.free(read_slice);
-        mepo.idle_mutex.lock();
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        try mepo.mepolang_execute(read_slice);
-        utilsdl.sdl_push_resize_event();
-        mepo.idle_mutex.unlock();
+        try mepo.mepolang_execute_threadsafe(read_slice);
     }
 }
 
