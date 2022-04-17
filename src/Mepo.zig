@@ -41,7 +41,7 @@ overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]types.PinGroup = undefined,
-renderer: *sdl.SDL_Renderer,
+renderer: *sdl.SDL_Renderer = undefined,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -51,7 +51,7 @@ title_update_ms: usize = 0,
 uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
-window: *sdl.SDL_Window,
+window: *sdl.SDL_Window = undefined,
 zoom: u8 = 14,
 
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
@@ -1325,7 +1325,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     };
 }
 
-fn setup_signals() void {
+pub fn setup_signals() void {
     const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
     for (sigs) |sig| {
         std.os.sigaction(sig, &.{
@@ -1336,18 +1336,25 @@ fn setup_signals() void {
     }
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool) anyerror!@This() {
-    setup_signals();
-    const window = try setup_sdl_video_and_window(allocator);
+pub fn video_init(mepo: *@This(), use_sw_renderer: bool) !void {
+    mepo.window = try setup_sdl_video_and_window(mepo.allocator);
+    mepo.renderer = renderer: {
+        var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
+            mepo.window,
+            -1,
+            if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
+        ));
+        break :renderer r;
+    };
+    mepo.tile_cache.renderer = mepo.renderer;
+}
 
-    // Initialize TTF, load fonts
-    try utilsdl.errorcheck(sdl.TTF_Init());
-    const font_dat = @embedFile("../assets/inconsolata.ttf");
-
-    // Create struct
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
         .fonts_normal = fonts: {
+            try utilsdl.errorcheck(sdl.TTF_Init());
+            const font_dat = @embedFile("../assets/inconsolata.ttf");
             var fonts: [50]*sdl.TTF_Font = undefined;
             var font_size: usize = 0;
             while (font_size < fonts.len) : (font_size += 1) {
@@ -1363,6 +1370,8 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
             break :fonts fonts;
         },
         .fonts_bold = fonts: {
+            try utilsdl.errorcheck(sdl.TTF_Init());
+            const font_dat = @embedFile("../assets/inconsolata.ttf");
             var fonts: [50]*sdl.TTF_Font = undefined;
             var font_size: usize = 0;
             while (font_size < fonts.len) : (font_size += 1) {
@@ -1380,17 +1389,6 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
         .idle_mutex = std.Thread.Mutex{},
-        .renderer = renderer: {
-            var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
-                window,
-                -1,
-                if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
-            ));
-            // Also set renderer for tile cache
-            tile_cache.renderer = r;
-
-            break :renderer r;
-        },
         .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
@@ -1406,6 +1404,5 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
-        .window = window,
     });
 }
