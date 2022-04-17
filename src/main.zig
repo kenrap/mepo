@@ -1,4 +1,5 @@
 const std = @import("std");
+const config = @import("./config.zig");
 const builtin = @import("builtin");
 const Mepo = @import("./Mepo.zig");
 const Downloader = @import("./Downloader.zig");
@@ -42,7 +43,9 @@ pub fn main() !void {
     switch (mode) {
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer, stderr_on);
+            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer);
+            try mepo.mepolang_execute(config.DefaultBaseConfig);
+            if (stderr_on) try mepo.mepolang_execute("prefset_n debug_stderr 1");
             mepo.event_loop_and_read_stdin() catch Mepo.graceful_terminate();
         },
         .Download => {

@@ -1240,18 +1240,7 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
     pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
-fn setup_signals() void {
-    const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
-    for (sigs) |sig| {
-        std.os.sigaction(sig, &.{
-            .handler = .{ .handler = sighandle_terminate },
-            .mask = [_]u32{0} ** 32,
-            .flags = @as(c_uint, 0),
-        }, null);
-    }
-}
-
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool) anyerror!@This() {
+fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     // Dump debug info about SDL version compiled/linked
     {
         const version = v: {
@@ -1296,8 +1285,25 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
     }
     utildbg.log("Successfully initialized SDL with videodriver: {s}\n", .{sdl.SDL_GetCurrentVideoDriver()});
 
+    // Initialize SDL Textinput system
+    // Controls input for unicode & IME methods etc.
+    // Application logic supports both raw keydowns & textinput
+    // Also note wtype on sway produces invalid keycodes in keyup
+    // so textinput is required here.
+    //
+    // The textinput system also controls OSK opening & closing.
+    // On Phosh this causes issues since there's an overeagerness to
+    // open the OSK with textinput (while in reality only shellpipe
+    // scripts need the OSK and besides that onscreen keyboard should
+    // be hidden).. so for Phosh we disable textinput
+    {
+        const textinput_enable = !utilplatform.supports_osk();
+        if (textinput_enable) sdl.SDL_StartTextInput() else sdl.SDL_StopTextInput();
+        utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
+    }
+
     // Initialize window
-    const window = window: {
+    return window: {
         const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
             "mepo",
             config.InitWindowX,
@@ -1317,30 +1323,29 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
 
         break :window w;
     };
+}
 
-    // Initialize SDL Textinput system
-    // Controls input for unicode & IME methods etc.
-    // Application logic supports both raw keydowns & textinput
-    // Also note wtype on sway produces invalid keycodes in keyup
-    // so textinput is required here.
-    //
-    // The textinput system also controls OSK opening & closing.
-    // On Phosh this causes issues since there's an overeagerness to
-    // open the OSK with textinput (while in reality only shellpipe
-    // scripts need the OSK and besides that onscreen keyboard should
-    // be hidden).. so for Phosh we disable textinput
-    {
-        const textinput_enable = !utilplatform.supports_osk();
-        if (textinput_enable) sdl.SDL_StartTextInput() else sdl.SDL_StopTextInput();
-        utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
+fn setup_signals() void {
+    const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
+    for (sigs) |sig| {
+        std.os.sigaction(sig, &.{
+            .handler = .{ .handler = sighandle_terminate },
+            .mask = [_]u32{0} ** 32,
+            .flags = @as(c_uint, 0),
+        }, null);
     }
+}
+
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool) anyerror!@This() {
+    setup_signals();
+    const window = try setup_sdl_video_and_window(allocator);
 
     // Initialize TTF, load fonts
     try utilsdl.errorcheck(sdl.TTF_Init());
     const font_dat = @embedFile("../assets/inconsolata.ttf");
 
     // Create struct
-    var instance = @as(@This(), .{
+    return @as(@This(), .{
         .allocator = allocator,
         .fonts_normal = fonts: {
             var fonts: [50]*sdl.TTF_Font = undefined;
@@ -1375,11 +1380,17 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         },
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
         .idle_mutex = std.Thread.Mutex{},
-        .renderer = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
-            window,
-            -1,
-            if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
-        )),
+        .renderer = renderer: {
+            var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
+                window,
+                -1,
+                if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
+            ));
+            // Also set renderer for tile cache
+            tile_cache.renderer = r;
+
+            break :renderer r;
+        },
         .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
@@ -1397,16 +1408,4 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
         .window = window,
     });
-
-    // Set renderer for tile cache
-    tile_cache.renderer = instance.renderer;
-
-    // Run base config, also flag stderr on if passed
-    {
-        try instance.mepolang_execute(config.DefaultBaseConfig);
-        if (stderr_on) try instance.mepolang_execute("prefset_n debug_stderr 1");
-    }
-
-    setup_signals();
-    return instance;
 }
