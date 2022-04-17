@@ -42,6 +42,7 @@ pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]types.PinGroup = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
+renderer_sw: bool,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -921,10 +922,12 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     }
 }
 
-pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
+
+pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), extra_config: []const u8) !void {
+    _ = extra_config;
     const thread = sdl.SDL_CreateThread(
-        threadable_sdl_event_loop,
-        "Mepo_SDL_Event_Loop_Thread",
+        mepo_sdl_loop_thread_boot,
+        "Mepo_SDL_Thread",
         mepo,
     );
     _ = thread;
@@ -938,8 +941,10 @@ pub fn event_loop_and_read_stdin(mepo: *@This()) !void {
     }
 }
 
-fn threadable_sdl_event_loop(userdata: ?*anyopaque) callconv(.C) c_int {
+fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     var mepo = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    video_init(mepo) catch unreachable;
+    mepo.mepolang_execute(config.DefaultBaseConfig) catch unreachable;
     sdl_event_loop(mepo) catch unreachable;
     return 0;
 }
@@ -1336,20 +1341,20 @@ pub fn setup_signals() void {
     }
 }
 
-pub fn video_init(mepo: *@This(), use_sw_renderer: bool) !void {
+pub fn video_init(mepo: *@This()) !void {
     mepo.window = try setup_sdl_video_and_window(mepo.allocator);
     mepo.renderer = renderer: {
         var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             mepo.window,
             -1,
-            if (use_sw_renderer) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
+            if (mepo.renderer_sw) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
         ));
         break :renderer r;
     };
     mepo.tile_cache.renderer = mepo.renderer;
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
         .fonts_normal = fonts: {
@@ -1404,5 +1409,6 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache) anyerror!@This
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
+        .renderer_sw = use_sw_renderer,
     });
 }

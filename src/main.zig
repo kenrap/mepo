@@ -44,11 +44,11 @@ pub fn main() !void {
         .Graphical => {
             Mepo.setup_signals();
             var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache);
-            try mepo.video_init(use_sw_renderer);
-            try mepo.mepolang_execute(config.DefaultBaseConfig);
-            if (stderr_on) try mepo.mepolang_execute("prefset_n debug_stderr 1");
-            mepo.event_loop_and_read_stdin() catch Mepo.graceful_terminate();
+            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer);
+            mepo.init_video_and_sdl_stdin_loop(
+                if (stderr_on) "prefset_n debug_stderr 1"
+                else ""
+            ) catch Mepo.graceful_terminate();
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);
