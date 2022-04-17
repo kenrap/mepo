@@ -1240,6 +1240,17 @@ pub fn sighandle_user(arg: c_int) callconv(.C) void {
     pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
+fn setup_signals() void {
+    const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
+    for (sigs) |sig| {
+        std.os.sigaction(sig, &.{
+            .handler = .{ .handler = sighandle_terminate },
+            .mask = [_]u32{0} ** 32,
+            .flags = @as(c_uint, 0),
+        }, null);
+    }
+}
+
 pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool, stderr_on: bool) anyerror!@This() {
     // Dump debug info about SDL version compiled/linked
     {
@@ -1373,6 +1384,14 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
+        .pin_groups = pin_groups: {
+            var pgs : [10]types.PinGroup = undefined;
+            for (pgs) |*g| {
+                g.ordered = true;
+                g.pins = std.ArrayList(types.Pin).init(allocator);
+            }
+            break :pin_groups pgs;
+        },
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
@@ -1382,29 +1401,12 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_rendere
     // Set renderer for tile cache
     tile_cache.renderer = instance.renderer;
 
-    // Initialize pin groups
-    for (instance.pin_groups) |*g| {
-        g.ordered = true;
-        g.pins = std.ArrayList(types.Pin).init(allocator);
-    }
-
     // Run base config, also flag stderr on if passed
     {
         try instance.mepolang_execute(config.DefaultBaseConfig);
         if (stderr_on) try instance.mepolang_execute("prefset_n debug_stderr 1");
     }
 
-    // Setup TERM/INT signals
-    {
-        const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
-        for (sigs) |sig| {
-            std.os.sigaction(sig, &.{
-                .handler = .{ .handler = sighandle_terminate },
-                .mask = [_]u32{0} ** 32,
-                .flags = @as(c_uint, 0),
-            }, null);
-        }
-    }
-
+    setup_signals();
     return instance;
 }
