@@ -31,14 +31,14 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
     if (as_async) {
-        var sp_req = ShellpipeRequest{
-            .cmd = try mepo.allocator.dupeZ(u8, cmd),
-            .mepo = mepo,
-        };
+        var sp_req = try mepo.allocator.create(ShellpipeRequest);
+        sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
+        sp_req.mepo = mepo;
+
         _ = sdl.SDL_CreateThread(
             async_shellpipe_run,
             "async_shellpipe",
-            &sp_req,
+            sp_req,
         );
     } else {
         try shellpipe_run(mepo, cmd, false);
