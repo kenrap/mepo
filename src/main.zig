@@ -44,11 +44,9 @@ pub fn main() !void {
         .Graphical => {
             Mepo.setup_signals();
             var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache, use_sw_renderer);
-            mepo.init_video_and_sdl_stdin_loop(
-                if (stderr_on) "prefset_n debug_stderr 1"
-                else ""
-            ) catch Mepo.graceful_terminate();
+            const base_config = if (stderr_on) config.DefaultBaseConfig ++ "prefset_n debug_stderr 1" else config.DefaultBaseConfig;
+            var mepo = try Mepo.init(allocator, &tile_cache, base_config, use_sw_renderer);
+            mepo.init_video_and_sdl_stdin_loop() catch Mepo.graceful_terminate();
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);

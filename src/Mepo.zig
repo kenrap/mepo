@@ -15,6 +15,7 @@ const FnTable = @import("./api/_FnTable.zig");
 var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
 async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
+config: []const u8,
 crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 debug_message_enabled: bool = false,
@@ -923,8 +924,7 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
 }
 
 
-pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), extra_config: []const u8) !void {
-    _ = extra_config;
+pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
     const thread = sdl.SDL_CreateThread(
         mepo_sdl_loop_thread_boot,
         "Mepo_SDL_Thread",
@@ -944,7 +944,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), extra_config: []const u8) !
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     var mepo = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
     video_init(mepo) catch unreachable;
-    mepo.mepolang_execute(config.DefaultBaseConfig) catch unreachable;
+    mepo.mepolang_execute(mepo.config) catch unreachable;
     sdl_event_loop(mepo) catch unreachable;
     return 0;
 }
@@ -1354,9 +1354,10 @@ pub fn video_init(mepo: *@This()) !void {
     mepo.tile_cache.renderer = mepo.renderer;
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_sw_renderer: bool) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, use_sw_renderer: bool) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
+        .config = use_config,
         .fonts_normal = fonts: {
             try utilsdl.errorcheck(sdl.TTF_Init());
             const font_dat = @embedFile("../assets/inconsolata.ttf");
