@@ -41,25 +41,30 @@ fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
             &sp_req,
         );
     } else {
-        try shellpipe_run(mepo, cmd);
+        try shellpipe_run(mepo, cmd, false);
     }
 }
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
     var shellpipe_request : *ShellpipeRequest = @ptrCast(*ShellpipeRequest, @alignCast(@alignOf(*ShellpipeRequest), userdata.?));
     // TODO: defer free cmd
-    shellpipe_run(shellpipe_request.mepo, shellpipe_request.cmd) catch return 1;
+    shellpipe_run(shellpipe_request.mepo, shellpipe_request.cmd, true) catch return 1;
     return 0;
 }
 
-fn shellpipe_run(mepo: *Mepo, cmd: []const u8) !void {
+fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
+
+    if (as_async) mepo.idle_mutex.lock();
+    defer {
+        if (as_async) mepo.idle_mutex.unlock();
+    }
 
     try mepo.update_debug_message(
         try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
-    try mepo.blit();
+    if (as_async) utilsdl.sdl_push_resize_event() else try mepo.blit();
 
     const env_vars = env_vars: {
         var v = try std.process.getEnvMap(arena.allocator());
@@ -103,7 +108,7 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8) !void {
     try mepo.update_debug_message(
         try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
     );
-    try mepo.blit();
+    if (as_async) utilsdl.sdl_push_resize_event() else try mepo.blit();
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
         try mepo.update_debug_message(null);
