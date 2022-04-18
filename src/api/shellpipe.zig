@@ -7,6 +7,8 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const sdl = @import("../sdlshim.zig");
 
+var set_cmd: []const u8 = undefined;
+
 pub const spec = .{
     .name = "shellpipe",
     .desc = "Run a system (shell) command and pipe; STDOUT returned from command will be executed back as mepolang",
@@ -25,11 +27,31 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
+    set_cmd = cmd;
+
+    if (as_async) {
+        _ = sdl.SDL_CreateThread(
+            run_shellpipe,
+            "async_shellpipe_thread_numbertodo",
+            mepo,
+        );
+    } else {
+        _ = run_shellpipe(mepo);
+    }
+}
+
+fn run_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
+    var mepo : *Mepo = @ptrCast(*Mepo, @alignCast(@alignOf(*Mepo), userdata.?));
+    run_shellpipe_errorified(mepo) catch unreachable;
+    return 0;
+}
+
+fn run_shellpipe_errorified(mepo: *Mepo) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{cmd}),
+        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{set_cmd}),
     );
     try mepo.blit();
 
@@ -64,9 +86,7 @@ fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
         break :env_vars v;
     };
 
-    _ = as_async;
-
-    const args = [_][]const u8{ "sh", "-c", cmd };
+    const args = [_][]const u8{ "sh", "-c", set_cmd};
     const process_result = try std.ChildProcess.exec(.{
         .allocator = arena.allocator(),
         .argv = args[0..],
@@ -74,12 +94,10 @@ fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
         .max_output_bytes = 10000 * 1024,
     });
     const exitcode = process_result.term.Exited;
-
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
+        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ set_cmd, process_result.stdout.len }),
     );
     try mepo.blit();
-
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
         try mepo.update_debug_message(null);
