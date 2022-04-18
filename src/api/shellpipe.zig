@@ -64,8 +64,7 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     try mepo.update_debug_message(
         try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
-    if (as_async) utilsdl.sdl_push_resize_event() else try mepo.blit();
-
+    try refresh_ui(mepo, as_async);
     const env_vars = env_vars: {
         var v = try std.process.getEnvMap(arena.allocator());
         const bbox = mepo.bounding_box();
@@ -108,7 +107,7 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     try mepo.update_debug_message(
         try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
     );
-    if (as_async) utilsdl.sdl_push_resize_event() else try mepo.blit();
+    try refresh_ui(mepo, as_async);
     if (exitcode == 0) {
         try mepo.mepolang_execute(process_result.stdout);
         try mepo.update_debug_message(null);
@@ -116,4 +115,8 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
         utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
         try mepo.update_debug_message(process_result.stderr);
     }
+}
+
+fn refresh_ui(mepo: *Mepo, as_async: bool) !void {
+    if (as_async) utilsdl.sdl_push_resize_event() else try mepo.blit();
 }
