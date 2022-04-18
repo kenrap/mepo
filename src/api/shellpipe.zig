@@ -7,7 +7,10 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const sdl = @import("../sdlshim.zig");
 
-var set_cmd: []const u8 = undefined;
+const ShellpipeRequest = struct {
+    mepo: *Mepo,
+    cmd: []const u8, 
+};
 
 pub const spec = .{
     .name = "shellpipe",
@@ -27,31 +30,34 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
-    set_cmd = cmd;
-
     if (as_async) {
+        var sp_req = ShellpipeRequest{
+            .cmd = try mepo.allocator.dupeZ(u8, cmd),
+            .mepo = mepo,
+        };
         _ = sdl.SDL_CreateThread(
-            run_shellpipe,
-            "async_shellpipe_thread_numbertodo",
-            mepo,
+            async_shellpipe_run,
+            "async_shellpipe",
+            &sp_req,
         );
     } else {
-        _ = run_shellpipe(mepo);
+        try shellpipe_run(mepo, cmd);
     }
 }
 
-fn run_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
-    var mepo : *Mepo = @ptrCast(*Mepo, @alignCast(@alignOf(*Mepo), userdata.?));
-    run_shellpipe_errorified(mepo) catch unreachable;
+fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
+    var shellpipe_request : *ShellpipeRequest = @ptrCast(*ShellpipeRequest, @alignCast(@alignOf(*ShellpipeRequest), userdata.?));
+    // TODO: defer free cmd
+    shellpipe_run(shellpipe_request.mepo, shellpipe_request.cmd) catch return 1;
     return 0;
 }
 
-fn run_shellpipe_errorified(mepo: *Mepo) !void {
+fn shellpipe_run(mepo: *Mepo, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{set_cmd}),
+        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{cmd}),
     );
     try mepo.blit();
 
@@ -86,7 +92,7 @@ fn run_shellpipe_errorified(mepo: *Mepo) !void {
         break :env_vars v;
     };
 
-    const args = [_][]const u8{ "sh", "-c", set_cmd};
+    const args = [_][]const u8{ "sh", "-c", cmd};
     const process_result = try std.ChildProcess.exec(.{
         .allocator = arena.allocator(),
         .argv = args[0..],
@@ -95,7 +101,7 @@ fn run_shellpipe_errorified(mepo: *Mepo) !void {
     });
     const exitcode = process_result.term.Exited;
     try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ set_cmd, process_result.stdout.len }),
+        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
     );
     try mepo.blit();
     if (exitcode == 0) {
