@@ -10,20 +10,23 @@ pub fn generate() !void {
         .Markdown => {
             try stdout.print("# Mepolang API\n", .{});
             for (FnTable.fn_specs) |fnc| {
-                try stdout.print("## {s}\n", .{fnc.name});
+                try stdout.print("## **{s}**\n", .{fnc.name});
                 try stdout.print("{s}\n\n", .{fnc.desc});
                 if (fnc.args.len > 0) {
                     try stdout.print("**Arguments**:\n", .{});
+
+                    try stdout.print("| **Name** | **Datatype** | **Description** |\n", .{});
+                    try stdout.print("| -------- | ------------ | --------------- |\n", .{});
                     for (fnc.args) |arg| {
-                        const tag = if (arg.tag == .Number) "(number)" else "(text) ";
-                        try stdout.print("  - {s} {s}: {s}\n", .{arg.name, tag, arg.desc});
+                        const tag = if (arg.tag == .Number) "Number" else "Text  ";
+                        try stdout.print("| {s} | {s} | {s} |\n", .{arg.name, tag, arg.desc});
                     }
                 }
                 try stdout.print("\n", .{});
             }
         },
         .Manpage => {
-            try stdout.print("Manpage format unsupported for now\n", .{});
+            std.debug.print("Manpage format unsupported for now\n", .{});
         }
     }
 }
