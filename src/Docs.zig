@@ -13,8 +13,7 @@ pub fn generate() !void {
                 try stdout.print("## **{s}**\n", .{fnc.name});
                 try stdout.print("{s}\n\n", .{fnc.desc});
                 if (fnc.args.len > 0) {
-                    try stdout.print("**Arguments**:\n", .{});
-
+                    try stdout.print("**Arguments**:\n\n", .{});
                     try stdout.print("| **Name** | **Datatype** | **Description** |\n", .{});
                     try stdout.print("| -------- | ------------ | --------------- |\n", .{});
                     for (fnc.args) |arg| {
