@@ -10,6 +10,14 @@ pub fn generate() !void {
             std.debug.print("# Mepolang API\n", .{});
             for (FnTable.fn_specs) |fnc| {
                 std.debug.print("## {s}\n", .{fnc.name});
+                std.debug.print("{s}\n\n", .{fnc.desc});
+                if (fnc.args.len > 0) {
+                    std.debug.print("**Arguments**:\n", .{});
+                    for (fnc.args) |arg| {
+                        const tag = if (arg.tag == .Number) "(number)" else "(text) ";
+                        std.debug.print("  - {s} {s}: {s}\n", .{arg.name, tag, arg.desc});
+                    }
+                }
                 std.debug.print("\n", .{});
             }
         },
