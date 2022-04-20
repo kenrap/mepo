@@ -2,6 +2,7 @@ const std = @import("std");
 const config = @import("./config.zig");
 const builtin = @import("builtin");
 const Mepo = @import("./Mepo.zig");
+const Docs = @import("./Docs.zig");
 const Downloader = @import("./Downloader.zig");
 const TileCache = @import("./TileCache.zig");
 const sdl = @import("./sdlshim.zig");
@@ -16,7 +17,7 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
     var stderr_on: bool = false;
-    var mode: enum { Graphical, Download, Version } = .Graphical;
+    var mode: enum { Graphical, Download, Version, Docs } = .Graphical;
     var download_request: []const u8 = undefined;
     var use_sw_renderer = false;
 
@@ -24,7 +25,10 @@ pub fn main() !void {
     var arg_w = args_it.next(allocator);
     while (arg_w != null) : (arg_w = args_it.next(allocator)) {
         const arg = try arg_w.?;
-        if (std.mem.startsWith(u8, arg, "-d")) {
+        if (std.mem.startsWith(u8, arg, "-doc")) {
+            // -doc: Documentation mode, generates docs for mepolang
+            mode = .Docs;
+        } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
         } else if (std.mem.startsWith(u8, arg, "-e")) {
@@ -41,6 +45,9 @@ pub fn main() !void {
 
     utildbg.log("Boot Mepo in mode: {}\n", .{mode});
     switch (mode) {
+        .Docs => {
+            try Docs.generate();
+        },
         .Graphical => {
             Mepo.setup_signals();
             var tile_cache = try TileCache.init(allocator);

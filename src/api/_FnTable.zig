@@ -1,7 +1,7 @@
 const types = @import("../types.zig");
 const std = @import("std");
 
-const fn_specs = &[_]types.MepoFnSpec{
+pub const fn_specs = &[_]types.MepoFnSpec{
     @import("bind_button.zig").spec,
     @import("bind_click.zig").spec,
     @import("bind_gesture.zig").spec,
