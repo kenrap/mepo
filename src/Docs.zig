@@ -3,7 +3,7 @@ const FnTable = @import("./api/_FnTable.zig");
 
 pub fn generate() !void {
     const Format = enum { Markdown, Manpage };
-    const use_format : Format = .Markdown;
+    const use_format: Format = .Markdown;
     const stdout = std.io.getStdOut().writer();
 
     switch (use_format) {
@@ -18,7 +18,7 @@ pub fn generate() !void {
                     try stdout.print("| -------- | ------------ | --------------- |\n", .{});
                     for (fnc.args) |arg| {
                         const tag = if (arg.tag == .Number) "Number" else "Text  ";
-                        try stdout.print("| {s} | {s} | {s} |\n", .{arg.name, tag, arg.desc});
+                        try stdout.print("| {s} | {s} | {s} |\n", .{ arg.name, tag, arg.desc });
                     }
                 }
                 try stdout.print("\n", .{});
@@ -26,6 +26,6 @@ pub fn generate() !void {
         },
         .Manpage => {
             std.debug.print("Manpage format unsupported for now\n", .{});
-        }
+        },
     }
 }

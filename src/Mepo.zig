@@ -923,7 +923,6 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
     }
 }
 
-
 pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
     const thread = sdl.SDL_CreateThread(
         mepo_sdl_loop_thread_boot,
@@ -1400,7 +1399,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .pin_groups = pin_groups: {
-            var pgs : [10]types.PinGroup = undefined;
+            var pgs: [10]types.PinGroup = undefined;
             for (pgs) |*g| {
                 g.ordered = true;
                 g.pins = std.ArrayList(types.Pin).init(allocator);

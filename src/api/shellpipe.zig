@@ -9,7 +9,7 @@ const sdl = @import("../sdlshim.zig");
 
 const ShellpipeRequest = struct {
     mepo: *Mepo,
-    cmd: []const u8, 
+    cmd: []const u8,
 };
 
 pub const spec = .{
