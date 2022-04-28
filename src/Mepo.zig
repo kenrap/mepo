@@ -1353,45 +1353,31 @@ pub fn video_init(mepo: *@This()) !void {
     mepo.tile_cache.renderer = mepo.renderer;
 }
 
+fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
+    try utilsdl.errorcheck(sdl.TTF_Init());
+    const font_dat = @embedFile("../assets/inconsolata.ttf");
+    var fonts: [50]*sdl.TTF_Font = undefined;
+    var font_size: usize = 0;
+    while (font_size < fonts.len) : (font_size += 1) {
+        fonts[font_size] = try utilsdl.errorcheck_ptr(
+            sdl.TTF_Font,
+            sdl.TTF_OpenFontRW(
+                sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
+                1,
+                @intCast(c_int, font_size),
+            ),
+        );
+        if (bold) sdl.TTF_SetFontStyle(fonts[font_size], sdl.TTF_STYLE_BOLD);
+    }
+    return fonts;
+}
+
 pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, use_sw_renderer: bool) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
         .config = use_config,
-        .fonts_normal = fonts: {
-            try utilsdl.errorcheck(sdl.TTF_Init());
-            const font_dat = @embedFile("../assets/inconsolata.ttf");
-            var fonts: [50]*sdl.TTF_Font = undefined;
-            var font_size: usize = 0;
-            while (font_size < fonts.len) : (font_size += 1) {
-                fonts[font_size] = try utilsdl.errorcheck_ptr(
-                    sdl.TTF_Font,
-                    sdl.TTF_OpenFontRW(
-                        sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
-                        1,
-                        @intCast(c_int, font_size),
-                    ),
-                );
-            }
-            break :fonts fonts;
-        },
-        .fonts_bold = fonts: {
-            try utilsdl.errorcheck(sdl.TTF_Init());
-            const font_dat = @embedFile("../assets/inconsolata.ttf");
-            var fonts: [50]*sdl.TTF_Font = undefined;
-            var font_size: usize = 0;
-            while (font_size < fonts.len) : (font_size += 1) {
-                fonts[font_size] = try utilsdl.errorcheck_ptr(
-                    sdl.TTF_Font,
-                    sdl.TTF_OpenFontRW(
-                        sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
-                        1,
-                        @intCast(c_int, font_size),
-                    ),
-                );
-                sdl.TTF_SetFontStyle(fonts[font_size], sdl.TTF_STYLE_BOLD);
-            }
-            break :fonts fonts;
-        },
+        .fonts_normal = try init_create_fonts_array(false),
+        .fonts_bold = try init_create_fonts_array(true),
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
         .idle_mutex = std.Thread.Mutex{},
         .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
