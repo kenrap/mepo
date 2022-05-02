@@ -11,6 +11,7 @@ const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
+const Prefs = @import("./Prefs.zig");
 
 var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
@@ -18,9 +19,6 @@ async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
 config: []const u8,
 crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
-debug_message_enabled: bool = false,
-debug_tiles: bool = false,
-distance_unit_tf_km_mi: bool = false,
 drag: ?struct {
     begin_ticks: u32,
     point: sdl.SDL_Point,
@@ -37,8 +35,6 @@ help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
 idle_mutex: std.Thread.Mutex,
-overlay_debugbar: bool = true,
-overlay_pindetails: bool = true,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]types.PinGroup = undefined,
@@ -55,6 +51,7 @@ win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window = undefined,
 zoom: u8 = 14,
+prefs: Prefs,
 
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
@@ -110,7 +107,7 @@ pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
 }
 
 pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
-    if (!mepo.debug_tiles) return;
+    if (!mepo.prefs.get_b("debug_tiles")) return;
     var dl_now: c_long = 0;
     var dl_total: c_long = 0;
 
@@ -248,7 +245,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 }
 
 fn blit_debugmessage(mepo: *@This()) !void {
-    if (mepo.debug_message_enabled and mepo.debug_message != null) {
+    if (mepo.prefs.get_b("debug_message_enabled") and mepo.debug_message != null) {
         const bottom_off: u32 = if (mepo.overlay_debugbar) mepo.fontsize_ui + 10 else 5;
         try mepo.blit_multiline_text(
             0xff0000,
@@ -1396,5 +1393,6 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
         .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
         .renderer_sw = use_sw_renderer,
+        .prefs = Prefs.init(),
     });
 }

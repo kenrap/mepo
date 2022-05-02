@@ -18,6 +18,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
     const value = args[1].Number;
 
+    mepo.prefs.set(name, value);
+
     // Bools
     for (&[_]struct { prop: []const u8, ptr: *bool }{
         .{ .prop = "debug_message_enabled", .ptr = &mepo.debug_message_enabled },
