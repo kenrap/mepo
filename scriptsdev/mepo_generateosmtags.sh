@@ -35,6 +35,7 @@ generatescript() {
   echo 'echo "'
   generate amenity 999
   generate cuisine 999
+  generate shop 999
   echo '"'
 }
 
