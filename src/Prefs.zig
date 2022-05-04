@@ -41,6 +41,19 @@ pub fn set_n(prefs: *@This(), prefname: []const u8, value: f64) void {
     }
 }
 
+pub fn toggle_bool(prefs: *@This(), prefname: []const u8) void {
+    for (prefs.prefs_mapping) |*pref| {
+        if (std.mem.eql(u8, pref.name, prefname)) {
+            switch (pref.value) {
+                .b => {
+                    pref.value = .{ .b = !pref.value.b };
+                },
+                else => {}
+            }
+        }
+    }
+}
+
 pub fn init() @This() {
     return @as(@This(), .{
         .prefs_mapping = mapping: {
