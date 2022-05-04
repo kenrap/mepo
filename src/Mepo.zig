@@ -107,7 +107,7 @@ pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
 }
 
 pub fn blit_tile_text(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32) !void {
-    if (!mepo.prefs.get_b("debug_tiles")) return;
+    if (!mepo.prefs.get("debug_tiles").b) return;
     var dl_now: c_long = 0;
     var dl_total: c_long = 0;
 
@@ -196,9 +196,10 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
 }
 
 fn blit_overlay_pindetails(mepo: *@This()) !void {
-    if (!mepo.overlay_pindetails) return;
+    if (!mepo.prefs.get("overlay_pindetails").b) return;
 
-    const d_unit = if (mepo.distance_unit_tf_km_mi) "km" else "mi";
+    const d_unit_km = mepo.prefs.get("distance_unit_tf_km_mi").b;
+    const d_unit = if (d_unit_km) "km" else "mi";
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
@@ -209,7 +210,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
         const distance_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
-                if (mepo.distance_unit_tf_km_mi) .Km else .Mi,
+                if (d_unit_km) .Km else .Mi,
                 mepo.lat,
                 mepo.lon,
                 pin.lat,
@@ -245,8 +246,8 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 }
 
 fn blit_debugmessage(mepo: *@This()) !void {
-    if (mepo.prefs.get_b("debug_message_enabled") and mepo.debug_message != null) {
-        const bottom_off: u32 = if (mepo.overlay_debugbar) mepo.fontsize_ui + 10 else 5;
+    if (mepo.prefs.get("debug_message_enabled").b and mepo.debug_message != null) {
+        const bottom_off: u32 = if (mepo.prefs.get("overlay_debugbar").b) mepo.prefs.get("fontsize_ui").u + 10 else 5;
         try mepo.blit_multiline_text(
             0xff0000,
             null,
@@ -352,7 +353,7 @@ fn blit_pins(mepo: *@This()) !void {
 }
 
 fn blit_overlay_debugbar(mepo: *@This()) !void {
-    if (!mepo.overlay_debugbar) return;
+    if (!mepo.prefs.get("overlay_debugbar").b) return;
     const bottombar_height = mepo.fontsize_ui + 5;
 
     const bg: types.Color = color: {
