@@ -17,7 +17,6 @@ var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
 async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
 config: []const u8,
-crosshair_size: u8 = 10,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
     begin_ticks: u32,
@@ -54,17 +53,17 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
-        @intCast(c_int, mepo.win_w / 2 - (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_w / 2 - (mepo.prefs.get("crosshair_size").u / 2)),
         @intCast(c_int, mepo.win_h / 2),
-        @intCast(c_int, mepo.win_w / 2 + (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_w / 2 + (mepo.prefs.get("crosshair_size").u / 2)),
         @intCast(c_int, mepo.win_h / 2),
     ));
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
         @intCast(c_int, mepo.win_w / 2),
-        @intCast(c_int, mepo.win_h / 2 - (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_h / 2 - (mepo.prefs.get("crosshair_size").u / 2)),
         @intCast(c_int, mepo.win_w / 2),
-        @intCast(c_int, mepo.win_h / 2 + (mepo.crosshair_size / 2)),
+        @intCast(c_int, mepo.win_h / 2 + (mepo.prefs.get("crosshair_size").u / 2)),
     ));
 }
 
