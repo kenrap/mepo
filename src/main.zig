@@ -31,6 +31,7 @@ pub fn main() !void {
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
+            download_request = arg[2..];
         } else if (std.mem.startsWith(u8, arg, "-e")) {
             // -e: Enable stderr debugging
             stderr_on = true;
