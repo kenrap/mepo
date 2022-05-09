@@ -51,7 +51,7 @@ pub fn toggle_bool(prefs: *@This(), prefname: []const u8) void {
                 .b => {
                     pref.value = .{ .b = !pref.value.b };
                 },
-                else => {}
+                else => {},
             }
         }
     }

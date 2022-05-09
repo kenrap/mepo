@@ -27,11 +27,8 @@ drag: ?struct {
 } = null,
 fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
-drag_scale: u8 = 1,
 fonts_normal: [50]*sdl.TTF_Font,
 fonts_bold: [50]*sdl.TTF_Font,
-fontsize_ui: u8 = 20,
-help: bool = false,
 lat: f64 = 0,
 lon: f64 = 0,
 idle_mutex: std.Thread.Mutex,
@@ -354,7 +351,7 @@ fn blit_pins(mepo: *@This()) !void {
 
 fn blit_overlay_debugbar(mepo: *@This()) !void {
     if (!mepo.prefs.get("overlay_debugbar").b) return;
-    const bottombar_height = mepo.fontsize_ui + 5;
+    const bottombar_height = mepo.prefs.get("fontsize_ui").u + 5;
 
     const bg: types.Color = color: {
         if (mepo.tile_cache.thread_download == null) {
@@ -414,7 +411,7 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
 }
 
 fn blit_help(mepo: *@This()) !void {
-    if (!mepo.help) return;
+    if (!mepo.prefs.get("help").b) return;
 
     var msg = msg: {
         var acc = std.ArrayList([]const u8).init(mepo.allocator);
@@ -460,7 +457,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
     var right_pad: c_int = 10;
-    const pad_bottom: c_int = mepo.fontsize_ui + 10;
+    const pad_bottom: c_int = mepo.prefs.get("fontsize_ui").u + 10;
 
     while (btn_i > 0) {
         btn_i -= 1;
@@ -470,7 +467,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
 
         const surf = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.prefs.get("fontsize_ui").u], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf);
 
@@ -717,8 +714,8 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.drag.?.point.y = e.motion.y;
         mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
         mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
-        mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.drag_scale));
-        mepo.set_y(mepo.get_y() - (e.motion.yrel * mepo.drag_scale));
+        mepo.set_x(mepo.get_x() - (e.motion.xrel * mepo.prefs.get("drag_scale").u));
+        mepo.set_y(mepo.get_y() - (e.motion.yrel * mepo.prefs.get("drag_scale").u));
         return .Drag;
     } else {
         mepo.drag = null;
@@ -1014,12 +1011,12 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.prefs.get("fontsize_ui").u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.prefs.get("fontsize_ui").u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_val);
         width_label = std.math.max(width_label, surf_lab.w);
@@ -1053,7 +1050,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Label
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.fontsize_ui], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_bold[mepo.prefs.get("fontsize_ui").u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
@@ -1068,7 +1065,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Value
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.fontsize_ui], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderText_Blended(mepo.fonts_normal[mepo.prefs.get("fontsize_ui").u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
@@ -1109,7 +1106,7 @@ pub fn blit_multiline_text(
         if (font_size_opt) |font_size| {
             if (font_size > mepo.fonts_normal.len) return error.FontTooBig else break :font_size font_size;
         } else {
-            break :font_size mepo.fontsize_ui;
+            break :font_size mepo.prefs.get("fontsize_ui").u;
         }
     };
 
