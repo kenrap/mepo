@@ -1258,6 +1258,15 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
         );
     }
 
+    // Initialize SDL Hints
+    {
+        // SDL 2.0.22 introduced a new bug where SDL mouse autocapturing
+        // causes touch-emulated mouse motion events to not appear.. disabling
+        // mouse autocapturing resolves this.
+        // See: https://github.com/libsdl-org/SDL/issues/5652
+        _ = sdl.SDL_SetHint("SDL_MOUSE_AUTO_CAPTURE", "0");
+    }
+
     // Initialize SDL video
     video_init: {
         // Attempt to initialize with whatever is set in SDL_VIDEODRIVER
