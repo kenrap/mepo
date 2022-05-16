@@ -1,14 +1,14 @@
 const std = @import("std");
 
-const PrefValueEnum = enum { b, t, f, u };
-const PrefValueUnion = union(PrefValueEnum) { b: bool, t: []const u8, f: f64, u: u8 };
+const PrefValueEnum = enum { b, t, f, u, v };
+const PrefValueUnion = union(PrefValueEnum) { b: bool, t: []const u8, f: f64, u: u8, v: void };
 const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
     desc: []const u8,
 };
 
-const n_prefs = 13;
+const n_prefs = 16;
 var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
     mapping[0] = .{
@@ -76,6 +76,21 @@ var prefs_mapping: [n_prefs]PrefMapping = mapping: {
         .value = .{ .f = -1 },
         .desc = "TODO",
     };
+    mapping[13] = .{
+        .name = "tile_cache_network",
+        .value = .{ .v = void{} },
+        .desc = "TODO",
+    };
+    mapping[14] = .{
+        .name = "tile_cache_dir",
+        .value = .{ .v = void{} },
+        .desc = "TODO",
+    };
+    mapping[15] = .{
+        .name = "tile_cache_url",
+        .value = .{ .v = void{} },
+        .desc = "TODO",
+    };
     break :mapping mapping;
 };
 
@@ -109,6 +124,7 @@ pub fn set_n(prefname: []const u8, value: f64) void {
                     pref.value = .{ .f = value };
                 },
                 .t => {},
+                .v => {},
             }
         }
     }

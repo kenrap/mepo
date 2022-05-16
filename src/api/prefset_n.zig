@@ -15,13 +15,13 @@ pub const spec = .{
     .execute = execute,
 };
 
-fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
     const value = args[1].Number;
 
-    utilprefs.set_n(name, value);
-
-    //if (std.mem.eql(u8, "tile_cache_network", name)) {
-    //    mepo.tile_cache.set_network(value == 1);
-    //}
+    if (std.mem.eql(u8, "tile_cache_network", name)) {
+        mepo.tile_cache.set_network(value == 1);
+    } else {
+        utilprefs.set_n(name, value);
+    }
 }
