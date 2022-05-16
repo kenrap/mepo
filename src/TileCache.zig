@@ -12,6 +12,7 @@ const utilsdl = @import("./util/utilsdl.zig");
 const utilconversion = @import("./util/utilconversion.zig");
 const utilfile = @import("./util/utilfile.zig");
 const utildbg = @import("./util/utildbg.zig");
+const utilprefs = @import("./util/utilprefs.zig");
 const datastructure = @import("./datastructure/datastructure.zig");
 
 pub const DownloadBBoxRequest = struct {
@@ -47,7 +48,6 @@ byte_counter: u64 = 0,
 cache_dir: ?std.fs.Dir = null,
 curl_multi: *curl.CURLM,
 expiry_seconds: i32 = -1,
-max_n_transfers: u8 = 20,
 queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
@@ -83,13 +83,13 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
         }
 
         // 2. Transfer from UI LIFO into transfers
-        while (tile_cache.queue_lifo_ui.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
+        while (tile_cache.queue_lifo_ui.count() > 0 and tile_cache.transfer_map.count() < utilprefs.get("tile_cache_max_n_transfers").u) {
             var coords = tile_cache.queue_lifo_ui.pop();
             try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
         }
 
         // 3. Transfer from BG LIFO into transfers
-        while (tile_cache.queue_lifo_bg.count() > 0 and tile_cache.transfer_map.count() < tile_cache.max_n_transfers) {
+        while (tile_cache.queue_lifo_bg.count() > 0 and tile_cache.transfer_map.count() < utilprefs.get("tile_cache_max_n_transfers").u) {
             var coords = tile_cache.queue_lifo_bg.pop();
             try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
         }
@@ -486,7 +486,8 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
         defer tile_cache.allocator.free(png);
         const tile_file = cache_dir.openFile(png, .{}) catch return false;
         defer tile_file.close();
-        if (tile_cache.expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + tile_cache.expiry_seconds) {
+        const expiry_seconds = @floatToInt(i32, utilprefs.get("tile_cache_expiry_seconds").f);
+        if (expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + expiry_seconds) {
             return true;
         }
     }

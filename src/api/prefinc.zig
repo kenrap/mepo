@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
+const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "prefinc",
@@ -13,12 +14,12 @@ pub const spec = .{
     .execute = execute,
 };
 
-fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
     const delta = args[1].Number;
 
-    const val = mepo.prefs.get(name).u;
-    mepo.prefs.set_n(name, @intToFloat(f64, val) + delta);
+    const val = utilprefs.get(name).u;
+    utilprefs.set_n(name, @intToFloat(f64, val) + delta);
 
     //for (&[_]struct { prop: []const u8, ptr: *u8 }{
     //    .{ .prop = "fontsize_ui", .ptr = &mepo.fontsize_ui },
