@@ -5,24 +5,77 @@ const PrefValueUnion = union(PrefValueEnum) { b: bool, t: []const u8, f: f64, u:
 const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
+    desc: []const u8,
 };
 
 const n_prefs = 13;
 var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
-    mapping[0] = .{ .name = "debug_message_enabled", .value = .{ .b = true } };
-    mapping[1] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false } };
-    mapping[2] = .{ .name = "overlay_debugbar", .value = .{ .b = true } };
-    mapping[3] = .{ .name = "help", .value = .{ .b = false } };
-    mapping[4] = .{ .name = "overlay_pindetails", .value = .{ .b = true } };
-    mapping[5] = .{ .name = "crosshair_size", .value = .{ .u = 15 } };
-    mapping[6] = .{ .name = "drag_scale", .value = .{ .u = 2 } };
-    mapping[7] = .{ .name = "fontsize_ui", .value = .{ .u = 20 } };
-    mapping[8] = .{ .name = "zoom", .value = .{ .u = 14 } };
-    mapping[9] = .{ .name = "debug_tiles", .value = .{ .b = false } };
-    mapping[10] = .{ .name = "debug_stderr", .value = .{ .b = false } };
-    mapping[11] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 } };
-    mapping[12] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 } };
+    mapping[0] = .{
+        .name = "debug_message_enabled",
+        .value = .{ .b = true },
+        .desc = "TODO",
+    };
+    mapping[1] = .{
+        .name = "distance_unit_tf_km_mi",
+        .value = .{ .b = false },
+        .desc = "TODO",
+    };
+    mapping[2] = .{
+        .name = "overlay_debugbar",
+        .value = .{ .b = true },
+        .desc = "TODO",
+    };
+    mapping[3] = .{
+        .name = "help",
+        .value = .{ .b = false },
+        .desc = "TODO",
+    };
+    mapping[4] = .{
+        .name = "overlay_pindetails",
+        .value = .{ .b = true },
+        .desc = "TODO",
+    };
+    mapping[5] = .{
+        .name = "crosshair_size",
+        .value = .{ .u = 15 },
+        .desc = "TODO",
+    };
+    mapping[6] = .{
+        .name = "drag_scale",
+        .value = .{ .u = 2 },
+        .desc = "TODO",
+    };
+    mapping[7] = .{
+        .name = "fontsize_ui",
+        .value = .{ .u = 20 },
+        .desc = "TODO",
+    };
+    mapping[8] = .{
+        .name = "zoom",
+        .value = .{ .u = 14 },
+        .desc = "TODO",
+    };
+    mapping[9] = .{
+        .name = "debug_tiles",
+        .value = .{ .b = false },
+        .desc = "TODO",
+    };
+    mapping[10] = .{
+        .name = "debug_stderr",
+        .value = .{ .b = false },
+        .desc = "TODO",
+    };
+    mapping[11] = .{
+        .name = "tile_cache_max_n_transfers",
+        .value = .{ .u = 20 },
+        .desc = "TODO",
+    };
+    mapping[12] = .{
+        .name = "tile_cache_expiry_seconds",
+        .value = .{ .f = -1 },
+        .desc = "TODO",
+    };
     break :mapping mapping;
 };
 
