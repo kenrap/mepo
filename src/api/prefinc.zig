@@ -20,20 +20,4 @@ fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     const val = utilprefs.get(name).u;
     utilprefs.set_n(name, @intToFloat(f64, val) + delta);
-
-    //for (&[_]struct { prop: []const u8, ptr: *u8 }{
-    //    .{ .prop = "fontsize_ui", .ptr = &mepo.fontsize_ui },
-    //    .{ .prop = "drag_scale", .ptr = &mepo.drag_scale },
-    //    .{ .prop = "zoom", .ptr = &mepo.zoom },
-    //    .{ .prop = "crosshair_size", .ptr = &mepo.crosshair_size },
-    //    .{ .prop = "tile_cache_max_n_transfers", .ptr = &mepo.tile_cache.max_n_transfers },
-    //}) |stg| {
-    //    if (std.mem.eql(u8, stg.prop, name)) {
-    //        if (delta > 0) {
-    //            stg.ptr.* +|= @floatToInt(u8, delta);
-    //        } else {
-    //            stg.ptr.* -|= @intCast(u8, try std.math.absInt(@floatToInt(i8, delta)));
-    //        }
-    //    }
-    //}
 }
