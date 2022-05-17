@@ -1,7 +1,6 @@
 const std = @import("std");
-
-pub var debug_stderr: bool = true;
+const utilprefs = @import("./utilprefs.zig");
 
 pub fn log(comptime msg: []const u8, args: anytype) void {
-    if (debug_stderr) std.debug.print(msg, args);
+    if (utilprefs.get("debug_stderr").b) std.debug.print(msg, args);
 }
