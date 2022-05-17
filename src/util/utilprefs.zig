@@ -1,7 +1,7 @@
 const std = @import("std");
 
 const PrefValueEnum = enum { b, t, f, u };
-const PrefValueUnion = union(PrefValueEnum) { b: bool, t: ?[]const u8, f: f64, u: u8 };
+const PrefValueUnion = union(PrefValueEnum) { b: bool, t: ?[:0]const u8, f: f64, u: u8 };
 const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
@@ -124,7 +124,20 @@ pub fn set_n(prefname: []const u8, value: f64) void {
                     pref.value = .{ .f = value };
                 },
                 .t => {},
-                .v => {},
+            }
+        }
+    }
+}
+
+pub fn set_t(allocator: std.mem.Allocator, prefname: []const u8, value: []const u8) !void {
+    for (prefs_mapping) |*pref| {
+        if (std.mem.eql(u8, pref.name, prefname)) {
+            switch (pref.value) {
+                .t => {
+                    if (pref.value.t) |heap_allocated_text| allocator.free(heap_allocated_text);
+                    pref.value.t = try allocator.dupeZ(u8, value);
+                },
+                else => {}
             }
         }
     }

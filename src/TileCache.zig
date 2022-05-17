@@ -51,7 +51,6 @@ expiry_seconds: i32 = -1,
 queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
-source_url: [:0]const u8 = undefined,
 surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
 texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
@@ -135,12 +134,12 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     tile_cache.queue_lifo_ui.clearAndFree();
     tile_cache.queue_lifo_bg.clearAndFree();
 
-    // Set new URL
-    tile_cache.allocator.free(tile_cache.source_url);
-    tile_cache.source_url = try tile_cache.allocator.dupeZ(u8, url);
+    try utilprefs.set_t(tile_cache.allocator, "tile_cache_url", url);
 }
 
 pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
+    //try utilprefs.set_t(tile_cache.allocator, "tile_cache_url", url);
+
     const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, path);
     defer tile_cache.allocator.free(expanded_path);
     try std.fs.cwd().makePath(expanded_path);
@@ -256,7 +255,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
 
         // Load tile to surface
         {
-            const png = try png_path(tile_cache.allocator, tile_cache.source_url, coords);
+            const png = try png_path(tile_cache.allocator, utilprefs.get("tile_cache_url").t.?, coords);
             defer tile_cache.allocator.free(png);
             file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
             if (file_cached_png_opt) |file_cached_png| {
@@ -308,10 +307,10 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
     try tile_cache.transfer_map.put(coords, transfer_datum);
 
     var tile_url = url: {
-        var url = try tile_cache.allocator.alloc(u8, tile_cache.source_url.len + (3 * 10));
+        var url = try tile_cache.allocator.alloc(u8, utilprefs.get("tile_cache_url").t.?.len + (3 * 10));
         if (cstdio.sprintf(
             &url[0],
-            tile_cache.source_url,
+            utilprefs.get("tile_cache_url").t.?,
             @intCast(c_int, coords.x),
             @intCast(c_int, coords.y),
             @intCast(c_int, coords.z),
@@ -426,7 +425,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
 
                 if (tile_cache.cache_dir) |cache_dir| {
                     // Save to FS
-                    const path = try png_path(tile_cache.allocator, tile_cache.source_url, coords);
+                    const path = try png_path(tile_cache.allocator, utilprefs.get("tile_cache_url").t.?, coords);
                     try cache_dir.writeFile(path, datum_array);
                 }
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
@@ -482,7 +481,7 @@ fn png_path(allocator: std.mem.Allocator, source: []const u8, coords: types.XYZ)
 /// to creation time & expiry seconds setting
 fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !bool {
     if (tile_cache.cache_dir) |cache_dir| {
-        const png = try png_path(tile_cache.allocator, tile_cache.source_url, coords);
+        const png = try png_path(tile_cache.allocator, utilprefs.get("tile_cache_url").t.?, coords);
         defer tile_cache.allocator.free(png);
         const tile_file = cache_dir.openFile(png, .{}) catch return false;
         defer tile_file.close();
@@ -518,7 +517,6 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
         return @as(@This(), .{
             .allocator = allocator,
             .curl_multi = curl.curl_multi_init().?,
-            .source_url = try allocator.dupeZ(u8, ""),
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .surface_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface).init(allocator),

@@ -21,7 +21,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     if (std.mem.eql(u8, "tile_cache_network", name)) {
         mepo.tile_cache.set_network(value == 1);
-    } else {
-        utilprefs.set_n(name, value);
     }
+    utilprefs.set_n(name, value);
 }

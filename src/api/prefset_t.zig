@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
+const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "prefset_t",
@@ -18,7 +19,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
     const value = args[1].Text;
 
-    // Tilecache
+    // Under the hood uses utilprefs.set_t
+    // but unlike numerical updates, these generally need 'syncing' fns
     if (std.mem.eql(u8, "tile_cache_dir", name)) {
         try mepo.tile_cache.set_cache_dir(value);
     } else if (std.mem.eql(u8, "tile_cache_url", name)) {
