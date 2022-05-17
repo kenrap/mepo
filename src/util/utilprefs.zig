@@ -1,7 +1,7 @@
 const std = @import("std");
 
-const PrefValueEnum = enum { b, t, f, u, v };
-const PrefValueUnion = union(PrefValueEnum) { b: bool, t: []const u8, f: f64, u: u8, v: void };
+const PrefValueEnum = enum { b, t, f, u };
+const PrefValueUnion = union(PrefValueEnum) { b: bool, t: ?[]const u8, f: f64, u: u8 };
 const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
@@ -78,17 +78,17 @@ var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     };
     mapping[13] = .{
         .name = "tile_cache_network",
-        .value = .{ .v = void{} },
+        .value = .{ .b = true },
         .desc = "TODO",
     };
     mapping[14] = .{
         .name = "tile_cache_dir",
-        .value = .{ .v = void{} },
+        .value = .{ .t = null },
         .desc = "TODO",
     };
     mapping[15] = .{
         .name = "tile_cache_url",
-        .value = .{ .v = void{} },
+        .value = .{ .t = null },
         .desc = "TODO",
     };
     break :mapping mapping;
