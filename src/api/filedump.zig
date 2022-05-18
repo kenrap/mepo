@@ -22,4 +22,16 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
     defer mepo.allocator.free(expanded_path);
     const mepolang_file = try std.fs.openFileAbsolute(expanded_path, .{ .write = true });
     defer mepolang_file.close();
+
+    // Save tables:
+    //   bind_button
+    //   bind_gesture
+    //   bind_click
+    //   bind_key
+    //   bind_signal
+    // Save prefs:
+    //   loop prefs
+    //   TODO: rework for pin_groups prefs merge into prefs system
+    // Save pins:
+    //   loop pins
 }
