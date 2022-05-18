@@ -62,6 +62,8 @@ pub const DefaultBaseConfig =
     \\ bind_key c c [quit];
     \\ bind_key _ y [clipcopy];
     \\ bind_key s y [clippaste];
+    \\ bind_key c s [filedump $XDG_CONFIG_HOME/mepo/savestate];
+    \\ bind_key cs s [fileload $XDG_CONFIG_HOME/mepo/savestate];
     \\
     \\ # Scripts hotkeys;
     \\ bind_key _ c [shellpipe 0 mepo_ui_central_menu.sh];
