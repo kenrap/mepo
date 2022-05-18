@@ -20,7 +20,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn filedump(mepo: *Mepo, filepath: []const u8) !void {
     const expanded_path = try utilfile.wordexp_filepath(mepo.allocator, filepath);
     defer mepo.allocator.free(expanded_path);
-    const mepolang_file = try std.fs.openFileAbsolute(expanded_path, .{ .write = true });
+    try utilfile.mkdirp_folder_basename(expanded_path);
+    const mepolang_file = try std.fs.createFileAbsoluteZ(expanded_path, .{});
     defer mepolang_file.close();
 
     // Save tables:
