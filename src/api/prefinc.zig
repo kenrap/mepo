@@ -2,7 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
-const utilprefs = @import("../util/utilprefs.zig");
+const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "prefinc",
@@ -18,6 +18,8 @@ fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const name = args[0].Text;
     const delta = args[1].Number;
 
-    const val = utilprefs.get(name).u;
-    utilprefs.set_n(name, @intToFloat(f64, val) + delta);
+    if (p.lookup_pref_from_string(name)) |key| {
+        const val = p.get(key).u;
+        p.set_n(key, @intToFloat(f64, val) + delta);
+    }
 }
