@@ -28,8 +28,6 @@ fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
 fonts_normal: [50]*sdl.TTF_Font,
 fonts_bold: [50]*sdl.TTF_Font,
-lat: f64 = 0,
-lon: f64 = 0,
 idle_mutex: std.Thread.Mutex,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
@@ -46,7 +44,6 @@ uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window = undefined,
-zoom: u8 = 14,
 
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
@@ -67,8 +64,8 @@ fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
 }
 
 pub fn blit_tiles_all(mepo: *@This(), bbox: sdl.SDL_Rect, zoom: u8) !void {
-    const vpx = utilconversion.lon_to_px_x(mepo.lon, zoom) - @divTrunc(@intCast(i32, mepo.win_w), 2);
-    const vpy = utilconversion.lat_to_px_y(mepo.lat, zoom) - @divTrunc(@intCast(i32, mepo.win_h), 2);
+    const vpx = utilconversion.lon_to_px_x(utilprefs.get("lon").f, zoom) - @divTrunc(@intCast(i32, mepo.win_w), 2);
+    const vpy = utilconversion.lat_to_px_y(utilprefs.get("lat").f, zoom) - @divTrunc(@intCast(i32, mepo.win_h), 2);
     const begx = vpx - config.Tsize;
     const begy = vpy - config.Tsize;
     const endx = vpx + @intCast(i32, bbox.w) + config.Tsize;
@@ -206,8 +203,8 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         const distance_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
                 if (d_unit_km) .Km else .Mi,
-                mepo.lat,
-                mepo.lon,
+                utilprefs.get("lat").f,
+                utilprefs.get("lon").f,
                 pin.lat,
                 pin.lon,
             ),
@@ -287,7 +284,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
             .{},
             x,
             y,
-            config.ZoomLevelToPinFontSize[mepo.zoom],
+            config.ZoomLevelToPinFontSize[utilprefs.get("zoom").u],
             "{s}",
             .{pin.name},
         );
@@ -396,9 +393,9 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
         null,
         "{d:.3} {d:.3} Z:{d} O:{d}, Q:{d}, B:{d}, D:{d}, M:{d}",
         .{
-            mepo.lat,
-            mepo.lon,
-            mepo.zoom,
+            utilprefs.get("lat").f,
+            utilprefs.get("lon").f,
+            utilprefs.get("zoom").u,
             @boolToInt(mepo.tile_cache.thread_download != null),
             mepo.tile_cache.queue_lifo_ui.count(),
             mepo.tile_cache.queue_lifo_bg.count(),
@@ -527,7 +524,7 @@ pub fn blit(mepo: *@This()) !void {
             .w = @intCast(c_int, mepo.win_w),
             .h = @intCast(c_int, mepo.win_h),
         },
-        mepo.zoom,
+        utilprefs.get("zoom").u,
     );
     try mepo.blit_pins();
     try mepo.blit_crosshair();
@@ -544,7 +541,7 @@ pub fn blit(mepo: *@This()) !void {
     // specified config frequency
     if (sdl.SDL_GetTicks() > mepo.title_update_ms + config.TitleUpdateFrequencyMs) {
         mepo.title_update_ms = sdl.SDL_GetTicks();
-        const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ mepo.lat, mepo.lon });
+        const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ utilprefs.get("lat").f, utilprefs.get("lon").f });
         defer mepo.allocator.free(title);
         _ = sdl.SDL_SetWindowTitle(mepo.window, title);
     }
@@ -552,8 +549,8 @@ pub fn blit(mepo: *@This()) !void {
 
 pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
     return switch (lat_or_lon) {
-        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, mepo.zoom)),
-        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, mepo.zoom)),
+        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, utilprefs.get("zoom").u)),
+        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, utilprefs.get("zoom").u)),
     };
 }
 
@@ -1195,28 +1192,28 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     utilsdl.sdl_push_resize_event();
 }
 
-pub fn get_x(mepo: *@This()) i32 {
-    return utilconversion.lon_to_px_x(mepo.lon, mepo.zoom);
+pub fn get_x(_: *@This()) i32 {
+    return utilconversion.lon_to_px_x(utilprefs.get("lon").f, utilprefs.get("zoom").u);
 }
 
-pub fn get_y(mepo: *@This()) i32 {
-    return utilconversion.lat_to_px_y(mepo.lat, mepo.zoom);
+pub fn get_y(_: *@This()) i32 {
+    return utilconversion.lat_to_px_y(utilprefs.get("lat").f, utilprefs.get("zoom").u);
 }
 
-pub fn set_x(mepo: *@This(), x: i32) void {
-    mepo.lon = utilconversion.px_x_to_lon(x, mepo.zoom);
+pub fn set_x(_: *@This(), x: i32) void {
+    utilprefs.set_n("lon", utilconversion.px_x_to_lon(x, utilprefs.get("zoom").u));
 }
 
-pub fn set_y(mepo: *@This(), y: i32) void {
-    mepo.lat = utilconversion.px_y_to_lat(y, mepo.zoom);
+pub fn set_y(_: *@This(), y: i32) void {
+    utilprefs.set_n("lat", utilconversion.px_y_to_lat(y, utilprefs.get("zoom").u));
 }
 
 pub fn bounding_box(mepo: *@This()) types.LatLonBox {
     return .{
-        .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom),
-        .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom),
-        .bottomright_lat = utilconversion.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), mepo.zoom),
-        .bottomright_lon = utilconversion.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), mepo.zoom),
+        .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), utilprefs.get("zoom").u),
+        .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), utilprefs.get("zoom").u),
+        .bottomright_lat = utilconversion.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), utilprefs.get("zoom").u),
+        .bottomright_lon = utilconversion.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), utilprefs.get("zoom").u),
     };
 }
 

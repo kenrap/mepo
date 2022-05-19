@@ -1,6 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "zoom_relative",
@@ -16,6 +17,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     zoom_relative(mepo, relative);
 }
 
-pub fn zoom_relative(mepo: *Mepo, relative: i32) void {
-    mepo.zoom = @intCast(u8, std.math.min(19, std.math.max(0, @intCast(i32, mepo.zoom) + relative)));
+pub fn zoom_relative(_: *Mepo, relative: i32) void {
+    utilprefs.set_n("zoom", @intToFloat(f64, @intCast(u8, std.math.min(19, std.math.max(0, @intCast(i32, utilprefs.get("zoom").u) + relative)))));
 }

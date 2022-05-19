@@ -5,6 +5,7 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utilplatform = @import("../util/utilplatform.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
+const utilprefs = @import("../util/utilprefs.zig");
 const sdl = @import("../sdlshim.zig");
 
 const ShellpipeRequest = struct {
@@ -153,17 +154,17 @@ fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.BufMap {
     var cursor_x: c_int = undefined;
     var cursor_y: c_int = undefined;
     _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
-    const cursor_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, mepo.zoom);
-    const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, mepo.zoom);
+    const cursor_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, utilprefs.get("zoom").u);
+    const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, utilprefs.get("zoom").u);
 
     // Window and zoom info
     try v.put("MEPO_WIN_W", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_w}));
     try v.put("MEPO_WIN_H", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_h}));
-    try v.put("MEPO_ZOOM", try std.fmt.allocPrint(allocator, "{d}", .{mepo.zoom}));
+    try v.put("MEPO_ZOOM", try std.fmt.allocPrint(allocator, "{d}", .{utilprefs.get("zoom").u}));
 
     // Center and bbox
-    try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(allocator, "{d}", .{mepo.lat}));
-    try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(allocator, "{d}", .{mepo.lon}));
+    try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(allocator, "{d}", .{utilprefs.get("lat").f}));
+    try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(allocator, "{d}", .{utilprefs.get("lon").f}));
     try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lat}));
     try v.put("MEPO_TL_LON", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lon}));
     try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.bottomright_lat}));

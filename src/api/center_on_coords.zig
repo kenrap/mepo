@@ -1,6 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "center_on_coords",
@@ -12,9 +13,9 @@ pub const spec = .{
     .execute = execute,
 };
 
-fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const lat = args[0].Number;
     const lon = args[1].Number;
-    mepo.lon = lon;
-    mepo.lat = lat;
+    utilprefs.set_n("lat", lat);
+    utilprefs.set_n("lon", lon);
 }

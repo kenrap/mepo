@@ -4,6 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
+const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "clippaste",
@@ -38,8 +39,8 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
         }
 
         if (lat == null or lon == null) break :parse_lat_lon;
-        mepo.lat = lat.?;
-        mepo.lon = lon.?;
+        utilprefs.set_n("lat", lat.?);
+        utilprefs.set_n("lon", lon.?);
         return;
     }
 

@@ -8,89 +8,27 @@ const PrefMapping = struct {
     desc: []const u8,
 };
 
-const n_prefs = 16;
+const n_prefs = 18;
 pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
-    mapping[0] = .{
-        .name = "debug_message_enabled",
-        .value = .{ .b = true },
-        .desc = "TODO",
-    };
-    mapping[1] = .{
-        .name = "distance_unit_tf_km_mi",
-        .value = .{ .b = false },
-        .desc = "TODO",
-    };
-    mapping[2] = .{
-        .name = "overlay_debugbar",
-        .value = .{ .b = true },
-        .desc = "TODO",
-    };
-    mapping[3] = .{
-        .name = "help",
-        .value = .{ .b = false },
-        .desc = "TODO",
-    };
-    mapping[4] = .{
-        .name = "overlay_pindetails",
-        .value = .{ .b = true },
-        .desc = "TODO",
-    };
-    mapping[5] = .{
-        .name = "crosshair_size",
-        .value = .{ .u = 15 },
-        .desc = "TODO",
-    };
-    mapping[6] = .{
-        .name = "drag_scale",
-        .value = .{ .u = 2 },
-        .desc = "TODO",
-    };
-    mapping[7] = .{
-        .name = "fontsize_ui",
-        .value = .{ .u = 20 },
-        .desc = "TODO",
-    };
-    mapping[8] = .{
-        .name = "zoom",
-        .value = .{ .u = 14 },
-        .desc = "TODO",
-    };
-    mapping[9] = .{
-        .name = "debug_tiles",
-        .value = .{ .b = false },
-        .desc = "TODO",
-    };
-    mapping[10] = .{
-        .name = "debug_stderr",
-        .value = .{ .b = false },
-        .desc = "TODO",
-    };
-    mapping[11] = .{
-        .name = "tile_cache_max_n_transfers",
-        .value = .{ .u = 20 },
-        .desc = "TODO",
-    };
-    mapping[12] = .{
-        .name = "tile_cache_expiry_seconds",
-        .value = .{ .f = -1 },
-        .desc = "TODO",
-    };
-    mapping[13] = .{
-        .name = "tile_cache_network",
-        .value = .{ .b = true },
-        .desc = "TODO",
-    };
-    mapping[14] = .{
-        .name = "tile_cache_dir",
-        .value = .{ .t = null },
-        .desc = "TODO",
-    };
-    mapping[15] = .{
-        .name = "tile_cache_url",
-        .value = .{ .t = null },
-        .desc = "TODO",
-    };
+    mapping[0] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .desc = "TODO" };
+    mapping[1] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .desc = "TODO" };
+    mapping[2] = .{ .name = "zoom", .value = .{ .u = 14 }, .desc = "TODO" };
+    mapping[3] = .{ .name = "debug_message_enabled", .value = .{ .b = true }, .desc = "TODO" };
+    mapping[4] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false }, .desc = "TODO" };
+    mapping[5] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "TODO" };
+    mapping[6] = .{ .name = "help", .value = .{ .b = false }, .desc = "TODO" };
+    mapping[7] = .{ .name = "overlay_pindetails", .value = .{ .b = true }, .desc = "TODO" };
+    mapping[8] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .desc = "TODO" };
+    mapping[9] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .desc = "TODO" };
+    mapping[10] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .desc = "TODO" };
+    mapping[11] = .{ .name = "debug_tiles", .value = .{ .b = false }, .desc = "TODO" };
+    mapping[12] = .{ .name = "debug_stderr", .value = .{ .b = false }, .desc = "TODO" };
+    mapping[13] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .desc = "TODO" };
+    mapping[14] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .desc = "TODO" };
+    mapping[15] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "TODO" };
+    mapping[16] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "TODO" };
+    mapping[17] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "TODO" };
     break :mapping mapping;
 };
 
