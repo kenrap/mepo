@@ -9,7 +9,7 @@ const PrefMapping = struct {
 };
 
 const n_prefs = 16;
-var prefs_mapping: [n_prefs]PrefMapping = mapping: {
+pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
     mapping[0] = .{
         .name = "debug_message_enabled",
