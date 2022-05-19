@@ -40,9 +40,9 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
         };
         const prefset_statement = statement: {
             if (is_text) {
-                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}]", .{pref.name, pref.value.t});
+                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{pref.name, pref.value.t});
             } else {
-                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.02}", .{pref.name, numerical_val});
+                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.02};", .{pref.name, numerical_val});
             }
         };
         try lines.append(prefset_statement);
