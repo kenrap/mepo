@@ -30,7 +30,7 @@ fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, han
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
     if (name.len == 0) return;
 
-    try mepo.pin_groups[pin_group].pins.append(.{
+    try mepo.pin_groups[pin_group].append(.{
         .lat = lat,
         .lon = lon,
         .handle = if (handle.len == 0) null else try mepo.allocator.dupeZ(u8, handle),

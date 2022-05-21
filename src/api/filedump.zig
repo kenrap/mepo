@@ -31,18 +31,25 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
 
     // 1. Preferences
     for (utilprefs.prefs_mapping) |pref| {
-        var is_text = false;
+        var format_as : enum { Text, HexText, Number } = .Number;
+
         const numerical_val : f64 = switch (pref.value) {
           .b => @intToFloat(f64, @boolToInt(pref.value.b)),
           .u => @intToFloat(f64, pref.value.u),
+          .u24 => v: { format_as = .HexText; break :v -1; },
           .f => pref.value.f,
-          .t => v: { is_text = true; break :v -1; },
+          .t => v: { format_as = .Text; break :v -1; },
         };
         const prefset_statement = statement: {
-            if (is_text) {
+            if (format_as == .Text) {
                 break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{pref.name, pref.value.t});
-            } else {
+            } else if (format_as == .Number) {
                 break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.02};", .{pref.name, numerical_val});
+            } else if (format_as == .HexText) {
+                // TODO
+                break :statement "#000000";
+            } else {
+                break :statement "";
             }
         };
         try lines.append(prefset_statement);
@@ -56,7 +63,7 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
 
     // 7. Pins data
     for (mepo.pin_groups) |pg, pg_i| {
-        for (pg.pins.items) |pin| {
+        for (pg.items) |pin| {
             const statement_pin_add = try std.fmt.allocPrint(
                 arena.allocator(),
                 "pin_add {d} {d} {d:.4} {d:.4} [{s}] [{s}];",

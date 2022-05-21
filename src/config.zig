@@ -120,14 +120,17 @@ pub const DefaultBaseConfig =
     \\ prefset_n tile_cache_expiry_seconds 2592000;
     \\ prefset_t tile_cache_dir $XDG_CACHE_HOME/mepo/tiles;
     \\ prefset_t tile_cache_url https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png;
-    \\
-    \\ # Pins;
-    \\ pin_groupprefset_t 0 color #0000ff;
-    \\ pin_groupprefset_t 1 color #116e0e;
-    \\ pin_groupprefset_t 2 color #7502ab;
-    \\ pin_groupprefset_t 3 color #cf0064;
-    \\ pin_groupprefset_t 4 color #b89600;
-    \\
+    \\ prefset_t pingroup_0_color #0000ff;
+    \\ prefset_t pingroup_1_color #116e0e;
+    \\ prefset_t pingroup_2_color #7502ab;
+    \\ prefset_t pingroup_3_color #cf0064;
+    \\ prefset_t pingroup_4_color #b89600;
+    \\ prefset_n pingroup_0_ordered 0;
+    \\ prefset_n pingroup_1_ordered 0;
+    \\ prefset_n pingroup_2_ordered 0;
+    \\ prefset_n pingroup_3_ordered 0;
+    \\ prefset_n pingroup_4_ordered 0;
+    \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CONFIG_HOME/mepo/config;
 ;

@@ -12,7 +12,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     if (mepo.pin_group_active_item != null) {
-        const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+        const pin = mepo.pin_groups[mepo.pin_group_active].items[mepo.pin_group_active_item.?];
         p.set_n(p.pref.lat, pin.lat);
         p.set_n(p.pref.lon, pin.lon);
     }

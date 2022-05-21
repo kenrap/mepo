@@ -26,7 +26,7 @@ pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
 
     var pin: *types.Pin = pin: {
-        for (mepo.pin_groups[pin_group].pins.items) |*pin| {
+        for (mepo.pin_groups[pin_group].items) |*pin| {
             if (pin.handle != null and std.mem.eql(u8, pin.handle.?, handle)) {
                 break :pin pin;
             }

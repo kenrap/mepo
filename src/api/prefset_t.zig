@@ -25,5 +25,10 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         try mepo.tile_cache.set_cache_dir(value);
     } else if (std.mem.eql(u8, "tile_cache_url", name)) {
         try mepo.tile_cache.set_cache_url(value);
+    } else if (std.mem.startsWith(u8, name, "pingroup_") and std.mem.endsWith(u8, name, "_color")) {
+        //if (value.len < 1 or value[0] != '#') return error.InvalidColor;
+        //const color = try std.fmt.parseUnsigned(u24, value[1..], 16);
+        //mepo.pin_groups[group_number].color = color;
     }
+
 }

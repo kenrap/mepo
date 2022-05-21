@@ -31,7 +31,7 @@ fonts_bold: [50]*sdl.TTF_Font,
 idle_mutex: std.Thread.Mutex,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
-pin_groups: [10]types.PinGroup = undefined,
+pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_sw: bool,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
@@ -198,7 +198,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
 
     var al = std.ArrayList([2][:0]const u8).init(arena.allocator());
     if (mepo.pin_group_active_item) |_| {
-        const pin = mepo.pin_groups[mepo.pin_group_active].pins.items[mepo.pin_group_active_item.?];
+        const pin = mepo.pin_groups[mepo.pin_group_active].items[mepo.pin_group_active_item.?];
         const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
         const distance_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.2}{s} away", .{
             utilconversion.distance_haversine(
@@ -225,7 +225,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             "{d} of {d} ",
             .{
                 mepo.pin_group_active_item.? + 1,
-                mepo.pin_groups[mepo.pin_group_active].pins.items.len,
+                mepo.pin_groups[mepo.pin_group_active].items.len,
             },
         ) })[0..].*);
         try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
@@ -291,7 +291,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
     }
 
     // Draw connecting line for ordered pin group
-    if (mepo.pin_groups[pin_group].ordered and prev_pin != null) {
+    if (p.get(p.pingroup_prop(pin_group, .Ordered)).b and prev_pin != null) {
         try utilsdl.errorcheck(sdl.aalineColor(
             mepo.renderer,
             @intCast(i16, prev_pin_x),
@@ -307,19 +307,21 @@ fn blit_pins(mepo: *@This()) !void {
     for (mepo.pin_groups) |pin_group, pin_group_i| {
         var ordered_group_active_path = false;
         var prev_pin: ?*types.Pin = null;
-        for (pin_group.pins.items) |*pin, pin_i| {
+        for (pin_group.items) |*pin, pin_i| {
             defer prev_pin = pin;
 
+            const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
+            const pg_color = p.get(p.pingroup_prop(pin_group_i, .Color)).u24;
             const color = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
-                ((mepo.pin_groups[pin_group_i].ordered and ordered_group_active_path) or
-                (!mepo.pin_groups[pin_group_i].ordered and mepo.pin_group_active_item.? == pin_i))) 0xff0000 else pin_group.color;
+                ((is_ordered and ordered_group_active_path) or
+                (!is_ordered and mepo.pin_group_active_item.? == pin_i))) 0xff0000 else pg_color;
 
             // E.g. ordered_group_active_path just tracks every time
             // an instructive pin is hit so subsequent structural pins
             // highlighted in "active"/red color until next structural pin
             // hit and full "path" of the active segment of an ordered pin
             // group shows continuously as the active color
-            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].pins.items[pin_i].category == .Instructive)
+            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
                 ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
 
             try mepo.blit_pin(
@@ -334,7 +336,7 @@ fn blit_pins(mepo: *@This()) !void {
 
     if (mepo.pin_group_active_item) |active_pin_i| {
         try mepo.blit_pin(
-            mepo.pin_groups[mepo.pin_group_active].pins.items[active_pin_i],
+            mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
             null,
             mepo.pin_group_active,
             .{ .value = 0xff0000 },
@@ -456,7 +458,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
     while (btn_i > 0) {
         btn_i -= 1;
 
-        if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins and mepo.pin_groups[mepo.pin_group_active].pins.items.len == 0)
+        if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins and mepo.pin_groups[mepo.pin_group_active].items.len == 0)
             continue;
 
         const surf = try utilsdl.errorcheck_ptr(
@@ -667,7 +669,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             delta_dist: i32,
         } = null;
         for (mepo.pin_groups) |pin_group, pin_group_i| {
-            for (pin_group.pins.items) |*item, pin_i| {
+            for (pin_group.items) |*item, pin_i| {
                 if (item.category == .Structural) continue;
                 const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
@@ -1382,11 +1384,8 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
         .pin_groups = pin_groups: {
-            var pgs: [10]types.PinGroup = undefined;
-            for (pgs) |*g| {
-                g.ordered = true;
-                g.pins = std.ArrayList(types.Pin).init(allocator);
-            }
+            var pgs: [10]std.ArrayList(types.Pin) = undefined;
+            for (pgs) |_, i| pgs[i] = std.ArrayList(types.Pin).init(allocator);
             break :pin_groups pgs;
         },
         .tile_cache = tile_cache,
