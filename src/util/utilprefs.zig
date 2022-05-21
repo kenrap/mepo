@@ -113,7 +113,7 @@ pub fn set_n(prefname: pref, value: f64) void {
             prefs_mapping[@enumToInt(prefname)].value = .{ .f = value };
         },
         .t => {},
-        .u24 => {},
+        .u24 => { prefs_mapping[@enumToInt(prefname)].value = .{ .u24 = @floatToInt(u24, value) }; },
     }
 }
 
