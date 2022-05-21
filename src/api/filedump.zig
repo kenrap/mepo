@@ -53,7 +53,26 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
     // 4. Bind_click table
     // 5. Bind_key table
     // 6. Bind_signal table
+
     // 7. Pins data
+    for (mepo.pin_groups) |pg, pg_i| {
+        for (pg.pins.items) |pin| {
+            const statement_pin_add = try std.fmt.allocPrint(
+                arena.allocator(),
+                "pin_add {d} {d} {d:.4} {d:.4} [{s}] [{s}];",
+                .{
+                    pg_i + 1, 
+                    @as(f64, if (pin.category == .Structural) 1.0 else 0.0),
+                    pin.lat,
+                    pin.lon,
+                    pin.handle,
+                    pin.name,
+                },
+            );
+            try lines.append(statement_pin_add);
+        }
+    }
+
     // 8. TODO: need to rework pin_groups to be reworked into (1) prefs
 
     const file_data = try std.mem.join(arena.allocator(), "\n", lines.items);
