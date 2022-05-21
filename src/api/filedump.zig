@@ -46,7 +46,7 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
             } else if (format_as == .Number) {
                 break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.02};", .{pref.name, numerical_val});
             } else if (format_as == .HexText) {
-                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} #000000;", .{pref.name});
+                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} #{x};", .{pref.name, pref.value.u24});
             } else {
                 break :statement "";
             }
