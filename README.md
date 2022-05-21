@@ -195,8 +195,6 @@ bookmarks, and more.
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties** (In-progress)
   - **Todo:**
-    - Add support for pasting / copying current coordinates from the system
-      clipboard and ensure compatibility in both Wayland & X.
     - Add visual per-tile-downloading progress-indicators.
     - Improve bottom status bar display to show bandwidth usage / download of
       tiles, disk, and memory usage.
@@ -214,6 +212,8 @@ bookmarks, and more.
       result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
   - **Done:**
+    - Add support for pasting / copying current coordinates from the system
+      clipboard and ensure compatibility in both Wayland & X.
     - Rework main application event loop to handle STDIN file descriptor in
       parallel to current SDL events processing. So commandline of application
       can thus be used non-interactively / scripted. Also helpful for debugging.
