@@ -46,8 +46,7 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
             } else if (format_as == .Number) {
                 break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.02};", .{pref.name, numerical_val});
             } else if (format_as == .HexText) {
-                // TODO
-                break :statement "#000000";
+                break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} #000000;", .{pref.name});
             } else {
                 break :statement "";
             }
@@ -64,12 +63,16 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
     // 7. Pins data
     for (mepo.pin_groups) |pg, pg_i| {
         for (pg.items) |pin| {
+            const is_structural : u32 = b: {
+                if (pin.category == .Structural) break :b 1;
+                break :b 0;
+            };
             const statement_pin_add = try std.fmt.allocPrint(
                 arena.allocator(),
                 "pin_add {d} {d} {d:.4} {d:.4} [{s}] [{s}];",
                 .{
-                    pg_i + 1, 
-                    @as(f64, if (pin.category == .Structural) 1.0 else 0.0),
+                    pg_i, 
+                    is_structural,
                     pin.lat,
                     pin.lon,
                     pin.handle,
