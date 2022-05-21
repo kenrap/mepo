@@ -83,8 +83,6 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
         }
     }
 
-    // 8. TODO: need to rework pin_groups to be reworked into (1) prefs
-
     const file_data = try std.mem.join(arena.allocator(), "\n", lines.items);
     try mepolang_file.writeAll(file_data);
 }
