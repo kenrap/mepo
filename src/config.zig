@@ -127,11 +127,6 @@ pub const DefaultBaseConfig =
     \\ pin_groupprefset_t 2 color #7502ab;
     \\ pin_groupprefset_t 3 color #cf0064;
     \\ pin_groupprefset_t 4 color #b89600;
-    \\ pin_groupprefset_n 0 visible 1;
-    \\ pin_groupprefset_n 1 visible 1;
-    \\ pin_groupprefset_n 2 visible 1;
-    \\ pin_groupprefset_n 3 visible 1;
-    \\ pin_groupprefset_n 4 visible 1;
     \\
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CONFIG_HOME/mepo/config;

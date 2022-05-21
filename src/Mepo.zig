@@ -306,7 +306,6 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 fn blit_pins(mepo: *@This()) !void {
     for (mepo.pin_groups) |pin_group, pin_group_i| {
         var ordered_group_active_path = false;
-        if (!pin_group.visible) continue;
         var prev_pin: ?*types.Pin = null;
         for (pin_group.pins.items) |*pin, pin_i| {
             defer prev_pin = pin;
@@ -668,7 +667,6 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             delta_dist: i32,
         } = null;
         for (mepo.pin_groups) |pin_group, pin_group_i| {
-            if (!pin_group.visible) continue;
             for (pin_group.pins.items) |*item, pin_i| {
                 if (item.category == .Structural) continue;
                 const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);

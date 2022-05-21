@@ -16,7 +16,6 @@ pub const Pin = struct {
 pub const PinGroup = struct {
     pins: std.ArrayList(Pin),
     ordered: bool = false,
-    visible: bool = true,
     color: u24 = 0x000000,
 };
 

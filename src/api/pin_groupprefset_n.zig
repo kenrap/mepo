@@ -22,8 +22,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     if (std.mem.eql(u8, prefname, "ordered")) {
         mepo.pin_groups[group_number].ordered = value == 1;
-    } else if (std.mem.eql(u8, prefname, "visible")) {
-        mepo.pin_groups[group_number].visible = value == 1;
     } else if (std.mem.eql(u8, prefname, "active") and value == 1) {
         mepo.pin_group_active_item = null;
         mepo.pin_group_active = @intCast(u8, group_number);
