@@ -70,16 +70,19 @@ fn filedump(mepo: *Mepo, filepath: []const u8) !void {
             const statement_pin_add = try std.fmt.allocPrint(
                 arena.allocator(),
                 "pin_add {d} {d} {d:.4} {d:.4} [{s}] [{s}];",
-                .{
-                    pg_i, 
-                    is_structural,
-                    pin.lat,
-                    pin.lon,
-                    pin.handle,
-                    pin.name,
-                },
+                .{ pg_i, is_structural, pin.lat, pin.lon, pin.handle, pin.name },
             );
             try lines.append(statement_pin_add);
+
+            var it = pin.metadata.iterator();
+            while (it.next()) |kv| {
+                const statement_meta = try std.fmt.allocPrint(
+                    arena.allocator(),
+                    "pin_meta {d} [{s}] [{s}] [{s}];",
+                    .{ pg_i, pin.handle, kv.key_ptr.*, kv.value_ptr.* },
+                );
+                try lines.append(statement_meta);
+            }
         }
     }
 
