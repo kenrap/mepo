@@ -417,14 +417,7 @@ fn blit_help(mepo: *@This()) !void {
         var it = mepo.table_keybindings.iterator();
 
         while (it.next()) |kv| {
-            const keymod = switch (kv.key_ptr.keymod) {
-                sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => " C",
-                sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT => " S",
-                sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT | sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => "CS",
-                sdl.KMOD_LALT | sdl.KMOD_RALT => " A",
-                else => "  ",
-            };
-
+            const keymod = utilsdl.sdl_keymod_to_str(kv.key_ptr.keymod);
             try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
         }
 

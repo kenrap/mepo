@@ -4,6 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 
 const utilfile = @import("../util/utilfile.zig");
+const utilsdl = @import("../util/utilsdl.zig");
 const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
@@ -97,8 +98,18 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             try lines.append(statement_signal);
         }
 
+        // Keybindings
+        var it_keys = mepo.table_keybindings.iterator();
+        while (it_keys.next()) |key| {
+            const keymod = utilsdl.sdl_keymod_to_str(key.key_ptr.keymod);
+            const statement_signal = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_key {s} {c} [{s}];",
+                .{keymod, key.key_ptr.*.key, key.value_ptr.*},
+            );
+            try lines.append(statement_signal);
+        }
 
-        // - TODO: Bind_key table
         // - TODO: Bind_button table
     }
 

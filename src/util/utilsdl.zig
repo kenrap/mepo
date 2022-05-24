@@ -44,6 +44,16 @@ pub fn sdl_renderer_draw_rect(renderer: *sdl.SDL_Renderer, color: types.Color, r
     try errorcheck(sdl.SDL_RenderDrawRect(renderer, rect_ptr));
 }
 
+pub fn sdl_keymod_to_str(c: u32) *const [3]u8 {
+    return switch (c) {
+        sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => "  s",
+        sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT => "  s",
+        sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT | sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => " cs",
+        sdl.KMOD_LALT | sdl.KMOD_RALT => "  a",
+        else => "   ",
+    };
+}
+
 pub fn errorcheck(return_value: c_int) errors.SDLError!void {
     if (return_value != 0) {
         utildbg.log("SDL Error: {s}\n", .{sdl.SDL_GetError()});
