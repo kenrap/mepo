@@ -65,11 +65,12 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // Gestures
         var it_gestures = mepo.table_gestures.iterator();
         while (it_gestures.next()) |gest| {
+            const direction : i8 = if (gest.key_ptr.*.direction == .In) 1 else -1;
             const act = if (gest.key_ptr.*.action == .Pan) "pan   " else "rotate";
             const statement_gest = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_gesture {s} {d} {d} [{s}];",
-                .{act, gest.key_ptr.*.n_fingers, gest.key_ptr.*.direction, gest.value_ptr.*},
+                .{act, gest.key_ptr.*.n_fingers, direction, gest.value_ptr.*},
             );
             try lines.append(statement_gest);
         }
