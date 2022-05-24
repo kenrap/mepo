@@ -112,10 +112,11 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
 
         // UI Buttons
         for (mepo.uibuttons.items) |btn| {
+            const pins_only_btn : u8 = if (btn.only_visible_when_has_pins) 1 else 0;
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} [{s}] [{s}];",
-                .{btn.only_visible_when_has_pins, btn.text, btn.mepolang},
+                .{pins_only_btn, btn.text, btn.mepolang},
             );
             try lines.append(statement_button);
         }
