@@ -1,6 +1,8 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
+const sdl = @import("../sdlshim.zig");
+
 const utilfile = @import("../util/utilfile.zig");
 const utilprefs = @import("../util/utilprefs.zig");
 
@@ -59,6 +61,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
 
     // 2. Bindings
     if (std.mem.containsAtLeast(u8, save_types, 1, "b")) {
+        // Gestures
         var it_gestures = mepo.table_gestures.iterator();
         while (it_gestures.next()) |gest| {
             const act = if (gest.key_ptr.*.action == .Pan) "pan   " else "rotate";
@@ -70,8 +73,20 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             try lines.append(statement_gest);
         }
 
+        // Clicks
+        var it_clicks = mepo.table_clicks.iterator();
+        while (it_clicks.next()) |click| {
+            const btn : u8 = if (click.key_ptr.*.button == sdl.SDL_BUTTON_LEFT) 1 else 2;
+            const statement_click = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_click {d} {d} [{s}];",
+                .{btn, click.key_ptr.*.clicks, click.value_ptr.*},
+            );
+            try lines.append(statement_click);
+        }
+
+
         // - TODO: Bind_button table
-        // - TODO: Bind_click table
         // - TODO: Bind_key table
         // - TODO: Bind_signal table
     }
