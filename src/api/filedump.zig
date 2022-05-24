@@ -59,8 +59,18 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
 
     // 2. Bindings
     if (std.mem.containsAtLeast(u8, save_types, 1, "b")) {
+        var it_gestures = mepo.table_gestures.iterator();
+        while (it_gestures.next()) |gest| {
+            const act = if (gest.key_ptr.*.action == .Pan) "pan   " else "rotate";
+            const statement_gest = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_gesture {s} {d} {d} [{s}];",
+                .{act, gest.key_ptr.*.n_fingers, gest.key_ptr.*.direction, gest.value_ptr.*},
+            );
+            try lines.append(statement_gest);
+        }
+
         // - TODO: Bind_button table
-        // - TODO: Bind_gesture table
         // - TODO: Bind_click table
         // - TODO: Bind_key table
         // - TODO: Bind_signal table
