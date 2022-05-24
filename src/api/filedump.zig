@@ -85,10 +85,21 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             try lines.append(statement_click);
         }
 
+        // Signals
+        var it_sigs = mepo.table_signals.iterator();
+        while (it_sigs.next()) |sig| {
+            const signame = if (sig.key_ptr.* == std.os.SIG.USR1) "USR1" else "USR2";
+            const statement_signal = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_signal {s} [{s}];",
+                .{signame, sig.value_ptr.*},
+            );
+            try lines.append(statement_signal);
+        }
 
-        // - TODO: Bind_button table
+
         // - TODO: Bind_key table
-        // - TODO: Bind_signal table
+        // - TODO: Bind_button table
     }
 
     // 3. Pins data
