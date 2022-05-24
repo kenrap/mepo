@@ -110,7 +110,16 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             try lines.append(statement_signal);
         }
 
-        // - TODO: Bind_button table
+        // UI Buttons
+        for (mepo.uibuttons.items) |btn| {
+            const statement_button = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_button {d} [{s}] [{s}];",
+                .{btn.only_visible_when_has_pins, btn.text, btn.mepolang},
+            );
+            try lines.append(statement_button);
+        }
+
     }
 
     // 3. Pins data
