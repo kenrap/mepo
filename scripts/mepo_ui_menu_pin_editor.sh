@@ -17,7 +17,31 @@ main() {
 
   PINDATA="$(cat "$TMPFILE")"
 
-  echo "$PINDATA" | PROMPT="Pin editor" mepo_ui_helper_menu.sh
+  PINS="$(
+    echo "$PINDATA" |
+    grep '^pin_add' | 
+    cut -d ' ' -f6- | 
+    tr -d ';]['
+  )"
+
+  CHOICE="$(
+    printf %b "Add Pin\nSave to file\n Load from file\n$PINS" | 
+    PROMPT="Pin editor" mepo_ui_helper_menu.sh
+  )"
+
+  if [ "$CHOICE" = "Cancel" ]; then
+    return
+  elif [ "$CHOICE" = "Add Pin" ]; then
+    PIN_TO_ADD="$(
+      PROMPT="Pin handle" mepo_ui_helper_menu.sh
+    )"
+    echo "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
+  else
+    echo "Delete pin\nUpdate coords\nUpdate handle"
+    # Update coords
+    # Update handle
+    # Edit metadata
+  fi
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
