@@ -45,7 +45,7 @@ main() {
     .elements |
     .[] |
     select(.lat != null and .lon != null and .tags.name != null) |
-    "pin_add -1 0 \(.lat) \(.lon) [\(.tags.name)] [\(.tags.name)];"
+    "pin_add -1 0 \(.lat) \(.lon) [\(.tags.name)];"
   ' | tr -d ',"'
 
   # Add pin metadata

@@ -47,7 +47,7 @@ main() {
   # E.g. get all nodes with tags
   NODES="$(
     echo "$JSON_RESULTS" |
-      jq '.elements | .[] | "\(.lat) \(.lon) \(.id) \(.tags.name)" ' |
+      jq '.elements | .[] | "\(.lat) \(.lon) \(.id)" ' |
       tr -d \" |
       grep -vE 'null$' |
       grep -vE '^null' |
@@ -61,7 +61,6 @@ main() {
     pingroup_activate 1;
     pin_purge;
   "
-
 
   # Sort nodes based on reference ids, delete first item, only show printable chars
   # and pin add each entry

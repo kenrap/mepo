@@ -211,7 +211,6 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             d_unit,
         });
 
-        try al.append(([_][:0]const u8{ "Pin:", pin.name })[0..].*);
         if (pin.handle != null) {
             try al.append(([_][:0]const u8{ "Handle:", pin.handle.? })[0..].*);
         }
@@ -277,6 +276,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
         const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
+        const label = if (pin.metadata.get("name")) |name| name else pin.handle;
         try mepo.blit_multiline_text(
             0x000000,
             pin_label_border,
@@ -286,7 +286,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
             y,
             config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u],
             "{s}",
-            .{pin.name},
+            .{label},
         );
     }
 

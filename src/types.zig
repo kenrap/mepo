@@ -9,7 +9,6 @@ pub const Pin = struct {
     lat: f64,
     lon: f64,
     handle: ?[:0]const u8 = null,
-    name: [:0]const u8,
     category: enum { Instructive, Structural } = .Instructive,
     metadata: std.array_hash_map.StringArrayHashMap([:0]const u8),
 };

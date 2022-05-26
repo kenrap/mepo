@@ -90,12 +90,13 @@ printpins() {
       .[] | 
       if(.instruction != null) then 
         "
-          pin_add -1 0 \(.coords[1]) \(.coords[0]) [\(.idx)] [\(.instruction.text)]; 
+          pin_add -1 0 \(.coords[1]) \(.coords[0]) [\(.idx)]; 
+          pin_meta -1 [\(.idx)] Instruction [\(.instruction.text)]; 
           pin_meta -1 [\(.idx)] Time [\(.instruction.time / 1000 / 60) minutes]; 
           pin_meta -1 [\(.idx)] Distance [\(.instruction.distance)km];
         "
         else
-        "pin_add -1 1 \(.coords[1]) \(.coords[0]) [] [];"
+        "pin_add -1 1 \(.coords[1]) \(.coords[0]) [];"
       end
     ' | tr -d '"' | sed 's/\\n//g'
 }

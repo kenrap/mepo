@@ -143,8 +143,8 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
                 };
                 const statement_pin_add = try std.fmt.allocPrint(
                     arena.allocator(),
-                    "pin_add {d} {d} {d:.4} {d:.4} [{s}] [{s}];",
-                    .{ pg_i, is_structural, pin.lat, pin.lon, pin.handle, pin.name },
+                    "pin_add {d} {d} {d:.4} {d:.4} [{s}];",
+                    .{ pg_i, is_structural, pin.lat, pin.lon, pin.handle },
                 );
                 try lines.append(statement_pin_add);
 

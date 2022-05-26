@@ -21,7 +21,6 @@ fn pin_delete(mepo: *Mepo, handle: [:0]const u8) !void {
         if (pin.handle == null) continue;
 
         if (std.mem.eql(u8, pin.handle.?, handle)) {
-            mepo.allocator.free(pin.name);
             mepo.allocator.free(pin.handle.?);
             _ = mepo.pin_groups[mepo.pin_group_active].orderedRemove(pin_i);
             return;

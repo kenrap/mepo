@@ -45,7 +45,7 @@ main() {
              .value = .value
            end
          ) | 
-         "pin_add -1 0 \(.lat) \(.lon) [\($osmid)] [\(.display_name)];"
+         "pin_add -1 0 \(.lat) \(.lon) [\($osmid)]; pin_meta -1 [\($osmid)] name [\(.display_name)];"
        )  | .[]
     ' |
     tr -d '"'
