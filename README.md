@@ -206,8 +206,6 @@ bookmarks, and more.
     - Finalize Mepolang 1.0 API and add error checking so things don't crash
       when accessing invalid union tag etc (improve robustness of mepolang
       parser).
-    - Implement save state / restore state Mepolang API command that dumps
-      current state to file (as Mepolang) / and can restore via loading file.
     - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
       result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
@@ -223,6 +221,8 @@ bookmarks, and more.
     - Add routing script based on GraphHopper, OpenRouteService, or similar
       to parse GeoJSON LineString API response into an ordered pin group. Thus
       allowing for point-to-point navigation.
+    - Implement save state / restore state Mepolang API command that dumps
+      current state to file (as Mepolang) / and can restore via loading file.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
