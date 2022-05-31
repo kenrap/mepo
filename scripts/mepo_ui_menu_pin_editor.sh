@@ -25,7 +25,7 @@ main() {
   )"
 
   CHOICE="$(
-    printf %b "Add Pin\nSave to file\n Load from file\n$PINS" | 
+    printf %b "Add Pin\nSave to file\nLoad from file\n$PINS" | 
     PROMPT="Pin editor" mepo_ui_helper_menu.sh
   )"
 
