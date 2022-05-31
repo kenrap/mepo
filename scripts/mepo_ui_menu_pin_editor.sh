@@ -31,6 +31,16 @@ main() {
 
   if [ "$CHOICE" = "Cancel" ]; then
     return
+  elif [ "$CHOICE" = "Save to file" ]; then
+    FILEPATH="$(
+      PROMPT="Filepath" mepo_ui_helper_menu.sh
+    )"
+    echo "filedump p $FILEPATH;"
+  elif [ "$CHOICE" = "Load from file" ]; then
+    FILEPATH="$(
+      PROMPT="Filepath" mepo_ui_helper_menu.sh
+    )"
+    echo "fileload $FILEPATH;"
   elif [ "$CHOICE" = "Add Pin" ]; then
     PIN_TO_ADD="$(
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
