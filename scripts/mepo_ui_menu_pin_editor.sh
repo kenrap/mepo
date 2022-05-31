@@ -47,10 +47,20 @@ main() {
     )"
     echo "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
   else
-    echo "Delete pin\nUpdate coords\nUpdate handle"
-    # Update coords
-    # Update handle
-    # Edit metadata
+    PINHANDLE="$CHOICE"
+    EDITCHOICE="$(
+      printf %b "Delete pin\nUpdate coords\nUpdate handle\nUpdate metadata" | 
+      PROMPT="Pin editor ($PINHANDLE)" mepo_ui_helper_menu.sh
+    )"
+    if [ "$EDITCHOICE" = "Delete pin" ]; then
+      echo "pin_delete $PINHANDLE;"
+    elif [ "$EDITCHOICE" = "Update coords" ]; then
+      echo # TODO
+    elif [ "$EDITCHOICE" = "Update handle" ]; then
+      echo # TODO
+    elif [ "$EDITCHOICE" = "Update metadata" ]; then
+      echo # TODO
+    fi
   fi
 }
 
