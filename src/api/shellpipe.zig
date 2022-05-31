@@ -105,6 +105,8 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
     defer child.deinit();
     child.stdin_behavior = .Ignore;
     child.stdout_behavior = .Pipe;
+    const env = try get_env_vars(mepo, allocator);
+    child.env_map = &env;
     try child.spawn();
     var stdout = std.ArrayList(u8).init(allocator);
     errdefer stdout.deinit();
