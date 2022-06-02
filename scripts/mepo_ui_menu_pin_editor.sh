@@ -46,7 +46,7 @@ main() {
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
     )"
     echo "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
-  else
+  elif echo "$CHOICE" | grep -q .; then
     PINHANDLE="$CHOICE"
     EDITCHOICE="$(
       printf %b "Delete pin\nUpdate coords\nUpdate handle\nUpdate metadata" | 
