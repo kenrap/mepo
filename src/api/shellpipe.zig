@@ -57,12 +57,6 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    mepo.idle_mutex.lock();
-    try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) in progress - run!", .{cmd}),
-    );
-    try refresh_ui(mepo, as_async);
-    mepo.idle_mutex.unlock();
 
     if (as_async) {
         // Async:
@@ -73,6 +67,13 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
         // Non-async:
         // Basically single lock of the mutex, run result mepolang stdout unlock
         mepo.idle_mutex.lock();
+        try mepo.update_debug_message(
+            try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) in progress - run!", .{cmd}),
+        );
+        try refresh_ui(mepo, as_async);
+        mepo.idle_mutex.unlock();
+        mepo.idle_mutex.lock();
+
         const env_vars = try get_env_vars(mepo, arena.allocator());
         const args = [_][]const u8{ "sh", "-c", cmd };
         const process_result = try std.ChildProcess.exec(.{
@@ -83,7 +84,7 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
         });
         const exitcode = process_result.term.Exited;
         try mepo.update_debug_message(
-            try std.fmt.allocPrint(arena.allocator(), "Shellpipe ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
+            try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
         );
         try refresh_ui(mepo, as_async);
         if (exitcode == 0) {
