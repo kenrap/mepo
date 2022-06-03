@@ -19,7 +19,7 @@ main() {
   [ -z "$PICKED" ] && return
   [ "$PICKED" = "Close Menu" ] && return
   RUNSCRIPT="$(echo "$OPTIONS" | grep "$PICKED" | head -n1 | cut -d^ -f2)"
-  eval "$RUNSCRIPT"
+  echo "shellpipe 1 $RUNSCRIPT;"
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
