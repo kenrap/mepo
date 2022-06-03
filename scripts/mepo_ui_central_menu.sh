@@ -3,9 +3,10 @@
 menuoptions() {
   echo "$PATH" | tr : '\n' | xargs ls -1 2>/dev/null | grep mepo_ | while read -r SCRIPT; do
     unset DISPLAYNAME
-    eval "$(cat "$(which "$SCRIPT")" | grep -E '^(DISPLAYNAME|HOTKEY)=' )"
+    ASYNC=0
+    eval "$(cat "$(which "$SCRIPT")" | grep -E '^(DISPLAYNAME|HOTKEY|ASYNC)=' )"
     [ -z "$DISPLAYNAME" ] && continue
-    echo "$DISPLAYNAME ^ $SCRIPT ^ $HOTKEY"
+    echo "$DISPLAYNAME ^ $SCRIPT ^ $HOTKEY ^ $ASYNC"
   done | uniq | sort -d
 }
 
@@ -19,7 +20,19 @@ main() {
   [ -z "$PICKED" ] && return
   [ "$PICKED" = "Close Menu" ] && return
   RUNSCRIPT="$(echo "$OPTIONS" | grep "$PICKED" | head -n1 | cut -d^ -f2)"
-  echo "shellpipe 1 $RUNSCRIPT;"
+  ASYNC="$(echo "$OPTIONS" | grep "$PICKED" | head -n1 | cut -d^ -f4)"
+
+  # E.g. if script is tagged with variable ASYNC, run the script
+  # as an asynchronous shellpipe (e.g. wont lock UI etc).
+  #
+  # Otherwise, runs script directly (not as a shellpipe since that would
+  # need to wait for this script (which is also run from shellpipe) to return
+  # but directly evals the script
+  if echo "$ASYNC" | grep -q 1; then
+    echo "shellpipe 1 $RUNSCRIPT;"
+  else
+    eval "$RUNSCRIPT"
+  fi
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
