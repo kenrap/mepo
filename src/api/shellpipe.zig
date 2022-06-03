@@ -142,7 +142,7 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
             break :loop;
         }
     }
-    _ = try child.wait();
+    _ = try child.kill();
 }
 
 fn refresh_ui(mepo: *Mepo, as_async: bool) !void {
