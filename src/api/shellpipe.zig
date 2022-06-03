@@ -57,7 +57,6 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-
     if (as_async) {
         // Async:
         // Continually looks at stdout, lock/unlock mutex and run mepolang
@@ -117,14 +116,18 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
     };
     const bump_amt = 512;
 
-    while (true) loop: {
+    var continue_reading = true;
+    while (continue_reading) {
         const events = try std.os.poll(&poll_fds, std.math.maxInt(i32));
         if (events == 0) continue;
         if (poll_fds[0].revents & std.os.POLL.IN != 0) {
             try stdout.ensureTotalCapacity(std.math.min(stdout.items.len + bump_amt, max_output_bytes));
             if (stdout.unusedCapacitySlice().len == 0) return error.StdoutStreamTooLong;
             const nread = try std.os.read(poll_fds[0].fd, stdout.unusedCapacitySlice());
-            if (nread == 0) break :loop;
+            if (nread == 0) {
+                continue_reading = false;
+                continue;
+            }
             stdout.items.len += nread;
             if (std.mem.indexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
@@ -139,7 +142,8 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
                 while (i > 0) : (i -= 1) _ = stdout.swapRemove(0);
             }
         } else if (poll_fds[0].revents & (std.os.POLL.ERR | std.os.POLL.NVAL | std.os.POLL.HUP) != 0) {
-            break :loop;
+            continue_reading = false;
+            continue;
         }
     }
     _ = try child.kill();
