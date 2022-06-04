@@ -24,6 +24,11 @@ fn pin_delete(mepo: *Mepo, handle: [:0]const u8) !void {
             mepo.allocator.free(pin.handle.?);
             // TODO: free metadata
             _ = mepo.pin_groups[mepo.pin_group_active].orderedRemove(pin_i);
+            if (mepo.pin_group_active_item) |active_pin_item| {
+                if (active_pin_item == pin_i) {
+                    mepo.pin_group_active_item = null;
+                }
+            }
             return;
         }
     }
