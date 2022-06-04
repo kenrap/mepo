@@ -206,9 +206,6 @@ bookmarks, and more.
     - Finalize Mepolang 1.0 API and add error checking so things don't crash
       when accessing invalid union tag etc (improve robustness of mepolang
       parser).
-    - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
-      result) or otherwise implement timeout so that runaway scripts don't
-      freeze application.
   - **Done:**
     - Add support for pasting / copying current coordinates from the system
       clipboard and ensure compatibility in both Wayland & X.
@@ -223,6 +220,9 @@ bookmarks, and more.
       allowing for point-to-point navigation.
     - Implement save state / restore state Mepolang API command that dumps
       current state to file (as Mepolang) / and can restore via loading file.
+    - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
+      result) or otherwise implement timeout so that runaway scripts don't
+      freeze application.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
