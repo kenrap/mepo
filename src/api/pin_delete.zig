@@ -17,7 +17,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_delete(mepo: *Mepo, handle: [:0]const u8) !void {
-    for (mepo.pin_groups[mepo.pin_group_active].items) |pin, pin_i| {
+    for (mepo.pin_groups[mepo.pin_group_active].items) |*pin, pin_i| {
         if (pin.handle == null) continue;
 
         if (std.mem.eql(u8, pin.handle.?, handle)) {
