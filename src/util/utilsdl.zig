@@ -3,10 +3,23 @@ const types = @import("../types.zig");
 const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
 const RectOpt = enum { Draw, Fill };
-var sdl_user_event_0 : ?u32 = null;
 
-// E.g. basically used as a refresh event
-pub fn sdl_push_resize_event() void {
+pub fn sdl_usereventtype(event_type: enum{Mepolang, Signal}) u32 {
+    // E.g. static local, via var in struct
+    const static_local = struct {
+        var sdl_user_event_0: ?u32 = null;
+        var sdl_user_event_1: ?u32 = null;
+    };
+    if (static_local.sdl_user_event_0 == null) static_local.sdl_user_event_0 = sdl.SDL_RegisterEvents(1);
+    if (static_local.sdl_user_event_1 == null) static_local.sdl_user_event_1 = sdl.SDL_RegisterEvents(1);
+    return switch (event_type) {
+        .Mepolang => static_local.sdl_user_event_0.?,
+        .Signal => static_local.sdl_user_event_1.?,
+    };
+}
+
+pub fn sdl_push_event_resize() void {
+    // E.g. Used internally by blit as basically manual refresh
     const pending_drag = sdl.SDL_HasEvent(sdl.SDL_MOUSEMOTION) == sdl.SDL_TRUE;
     const pending_redraw = sdl.SDL_HasEvent(sdl.SDL_WINDOWEVENT) == sdl.SDL_TRUE;
     if (pending_drag or pending_redraw) return;
@@ -17,16 +30,17 @@ pub fn sdl_push_resize_event() void {
     _ = sdl.SDL_PushEvent(&sdlevent);
 }
 
-pub fn sdl_eventtype_mepolang() u32 {
-    if (sdl_user_event_0) |u| return u;
-    sdl_user_event_0 = sdl.SDL_RegisterEvents(1);
-    return sdl_user_event_0.?;
+pub fn sdl_push_event_mepolang_execution(mepolang_text: *[]const u8) void {
+    var sdlevent: sdl.SDL_Event = undefined;
+    sdlevent.type = sdl_usereventtype(.Mepolang);
+    sdlevent.user.data1 = mepolang_text;
+    _ = sdl.SDL_PushEvent(&sdlevent);
 }
 
-pub fn sdl_push_user_mepolang_execution(mepolang_text: *[]const u8) void {
+pub fn sdl_push_event_signal(signal: c_int) callconv(.C) void {
     var sdlevent: sdl.SDL_Event = undefined;
-    sdlevent.type = sdl_eventtype_mepolang();
-    sdlevent.user.data1 = mepolang_text;
+    sdlevent.type = sdl_usereventtype(.Signal);
+    sdlevent.user.code = signal;
     _ = sdl.SDL_PushEvent(&sdlevent);
 }
 

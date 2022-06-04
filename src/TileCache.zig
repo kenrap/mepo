@@ -103,7 +103,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
         // 6. Refresh UI if greater then threshold
         if (graphical_mode and sdl.SDL_GetTicks() > ui_last_update_ticks + 1000) {
             ui_last_update_ticks = sdl.SDL_GetTicks();
-            utilsdl.sdl_push_resize_event();
+            utilsdl.sdl_push_event_resize();
         }
     }
 
@@ -123,7 +123,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
         tile_cache.set_network(false);
         defer tile_cache.set_network(true);
     }
-    defer utilsdl.sdl_push_resize_event();
+    defer utilsdl.sdl_push_event_resize();
 
     // Empty texture map, surface map, & queues
     for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
@@ -430,7 +430,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
                     // Load to surface
                     _ = try tile_cache.load_data_to_surface(coords, datum_array);
-                    utilsdl.sdl_push_resize_event();
+                    utilsdl.sdl_push_event_resize();
                 }
             } else {
                 utildbg.log("Failed to find coordinates associated with downloaded data?\n", .{});

@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
+const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "bind_signal",
@@ -35,7 +36,7 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
 
     // Register generic signal handler
     if (0 != std.os.linux.sigaction(signal_name, &.{
-        .handler = .{ .handler = Mepo.sighandle_user },
+        .handler = .{ .handler = utilsdl.sdl_push_event_signal },
         .mask = [_]u32{0} ** 32,
         .flags = @as(c_uint, 0),
     }, null)) {

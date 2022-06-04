@@ -13,7 +13,6 @@ const utilsdl = @import("util/utilsdl.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
-var pending_signal: ?u6 = null;
 allocator: std.mem.Allocator,
 async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
 config: []const u8,
@@ -756,8 +755,8 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_signal(mepo: *@This(), signal: u6) types.Pending {
-    if (mepo.table_signals.get(signal)) |run_expression| {
+fn event_signal(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    if (mepo.table_signals.get(@intCast(u6, e.user.code))) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
@@ -903,7 +902,7 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
         if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1 })) |run_expression| {
             utildbg.log("Got hold table function {s} after dispatch time\n", .{run_expression});
             mepo.mepolang_execute(run_expression) catch unreachable;
-            utilsdl.sdl_push_resize_event();
+            utilsdl.sdl_push_event_resize();
         }
     }
 }
@@ -920,7 +919,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
         const stdin = &std.io.getStdIn().reader();
         var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        utilsdl.sdl_push_user_mepolang_execution(&read_slice);
+        utilsdl.sdl_push_event_mepolang_execution(&read_slice);
     }
 }
 
@@ -961,16 +960,14 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 sdl.SDL_QUIT => event_quit,
                 sdl.SDL_WINDOWEVENT => event_windowevent,
                 else => b: {
-                    if (e.type == utilsdl.sdl_eventtype_mepolang()) break :b event_mepolangexecution;
+                    // Async events triggered outside of main thread:
+                    // 1) signals & 2) mepolang trigged via shellpipe or STDIN
+                    if (e.type == utilsdl.sdl_usereventtype(.Mepolang)) break :b event_mepolangexecution;
+                    if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b event_signal;
+                    // Unhandled case
                     break :b event_unhandled;
                 },
             }(mepo, e);
-        }
-
-        // Process user signals
-        if (pending_signal) |sig| {
-            pending = mepo.event_signal(sig);
-            pending_signal = null;
         }
     }
 }
@@ -1169,7 +1166,7 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     } else {
         mepo.debug_message = null;
     }
-    utilsdl.sdl_push_resize_event();
+    utilsdl.sdl_push_event_resize();
 }
 
 pub fn get_x(_: *@This()) i32 {
@@ -1207,11 +1204,6 @@ pub fn graceful_terminate() void {
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
     utildbg.log("Graceful shutdown via signal: {}", .{arg});
     graceful_terminate();
-}
-
-pub fn sighandle_user(arg: c_int) callconv(.C) void {
-    utildbg.log("User signal: {}\n", .{arg});
-    pending_signal = @truncate(u6, @bitCast(c_uint, arg));
 }
 
 fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
