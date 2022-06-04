@@ -128,7 +128,7 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
                 utildbg.log("Running mepolang statement from async shellipe: {s}\n", .{statement});
                 var heap_statement = try mepo.allocator.dupe(u8, statement);
-                mepo.sdl_pushevent_mepolang_execution(&heap_statement);
+                utilsdl.sdl_push_user_mepolang_execution(&heap_statement);
 
                 // TODO: is there a slice 'shift' like functionality in arraylist?
                 var i: usize = mepolang_statement_end_index + 2;

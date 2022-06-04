@@ -811,13 +811,6 @@ fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-pub fn sdl_pushevent_mepolang_execution(mepo: *@This(), mepolang_text: *[]const u8) void {
-    var sdlevent: sdl.SDL_Event = undefined;
-    sdlevent.type = mepo.sdl_event_type_mepolang_execution;
-    sdlevent.user.data1 = mepolang_text;
-    _ = sdl.SDL_PushEvent(&sdlevent);
-}
-
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
@@ -927,7 +920,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
         const stdin = &std.io.getStdIn().reader();
         var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        mepo.sdl_pushevent_mepolang_execution(&read_slice);
+        utilsdl.sdl_push_user_mepolang_execution(&read_slice);
     }
 }
 
@@ -968,7 +961,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 sdl.SDL_QUIT => event_quit,
                 sdl.SDL_WINDOWEVENT => event_windowevent,
                 else => b: {
-                    if (e.type == mepo.sdl_event_type_mepolang_execution) break :b event_mepolangexecution;
+                    if (e.type == utilsdl.sdl_eventtype_mepolang()) break :b event_mepolangexecution;
                     break :b event_unhandled;
                 },
             }(mepo, e);
