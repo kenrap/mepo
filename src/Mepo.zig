@@ -28,12 +28,12 @@ fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
 fonts_normal: [50]*sdl.TTF_Font,
 fonts_bold: [50]*sdl.TTF_Font,
-idle_mutex: std.Thread.Mutex,
 pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_sw: bool,
+sdl_event_type_mepolang_execution: u32,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -791,6 +791,15 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
+fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+    const heap_str = @ptrCast(*[]u8, @alignCast(@alignOf(*[]u8), e.user.data1)).*;
+    mepo.mepolang_execute(heap_str) catch |err| {
+        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}", .{heap_str, err});
+    };
+    mepo.allocator.free(heap_str);
+    return .Redraw;
+}
+
 fn event_quit(_: *@This(), _: sdl.SDL_Event) types.Pending {
     graceful_terminate();
     return .None;
@@ -802,11 +811,11 @@ fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-pub fn mepolang_execute_threadsafe(mepo: *@This(), mepolang_text: []const u8) !void {
-    mepo.idle_mutex.lock();
-    try mepo.mepolang_execute(mepolang_text);
-    utilsdl.sdl_push_resize_event();
-    mepo.idle_mutex.unlock();
+pub fn sdl_pushevent_mepolang_execution(mepo: *@This(), mepolang_text: *[]const u8) void {
+    var sdlevent: sdl.SDL_Event = undefined;
+    sdlevent.type = mepo.sdl_event_type_mepolang_execution;
+    sdlevent.user.data1 = mepolang_text;
+    _ = sdl.SDL_PushEvent(&sdlevent);
 }
 
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
@@ -917,9 +926,8 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
     while (true) {
         const stdin = &std.io.getStdIn().reader();
         var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
-        defer mepo.allocator.free(read_slice);
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        try mepo.mepolang_execute_threadsafe(read_slice);
+        mepo.sdl_pushevent_mepolang_execution(&read_slice);
     }
 }
 
@@ -959,7 +967,10 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 sdl.SDL_TEXTINPUT => event_textinput,
                 sdl.SDL_QUIT => event_quit,
                 sdl.SDL_WINDOWEVENT => event_windowevent,
-                else => event_unhandled,
+                else => b: {
+                    if (e.type == mepo.sdl_event_type_mepolang_execution) break :b event_mepolangexecution;
+                    break :b event_unhandled;
+                },
             }(mepo, e);
         }
 
@@ -967,23 +978,6 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         if (pending_signal) |sig| {
             pending = mepo.event_signal(sig);
             pending_signal = null;
-        }
-
-        // Process STDIN event pending if queue empty
-        {
-            sdl.SDL_PumpEvents();
-            const n_events = sdl.SDL_PeepEvents(
-                null,
-                9999,
-                sdl.SDL_PEEKEVENT,
-                sdl.SDL_FIRSTEVENT,
-                sdl.SDL_LASTEVENT,
-            );
-            if (n_events == 0) {
-                if (mepo.idle_mutex.tryLock()) {
-                    mepo.idle_mutex.unlock();
-                }
-            }
         }
     }
 }
@@ -1371,7 +1365,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
-        .idle_mutex = std.Thread.Mutex{},
+        .sdl_event_type_mepolang_execution = sdl.SDL_RegisterEvents(1),
         .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),

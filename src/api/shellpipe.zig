@@ -65,14 +65,10 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
     } else {
         // Non-async:
         // Basically single lock of the mutex, run result mepolang stdout unlock
-        mepo.idle_mutex.lock();
         try mepo.update_debug_message(
             try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) in progress - run!", .{cmd}),
         );
-        try refresh_ui(mepo, as_async);
-        mepo.idle_mutex.unlock();
-        mepo.idle_mutex.lock();
-
+        try mepo.blit();
         const env_vars = try get_env_vars(mepo, arena.allocator());
         const args = [_][]const u8{ "sh", "-c", cmd };
         const process_result = try std.ChildProcess.exec(.{
@@ -85,7 +81,7 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
         try mepo.update_debug_message(
             try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
         );
-        try refresh_ui(mepo, as_async);
+        try mepo.blit();
         if (exitcode == 0) {
             try mepo.mepolang_execute(process_result.stdout);
             try mepo.update_debug_message(null);
@@ -93,7 +89,6 @@ fn shellpipe_run(mepo: *Mepo, cmd: []const u8, as_async: bool) !void {
             utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
             try mepo.update_debug_message(process_result.stderr);
         }
-        mepo.idle_mutex.unlock();
     }
 }
 
@@ -132,10 +127,8 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
             if (std.mem.indexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
                 utildbg.log("Running mepolang statement from async shellipe: {s}\n", .{statement});
-
-                mepo.idle_mutex.lock();
-                try mepo.mepolang_execute(statement);
-                mepo.idle_mutex.unlock();
+                var heap_statement = try mepo.allocator.dupe(u8, statement);
+                mepo.sdl_pushevent_mepolang_execution(&heap_statement);
 
                 // TODO: is there a slice 'shift' like functionality in arraylist?
                 var i: usize = mepolang_statement_end_index + 2;
