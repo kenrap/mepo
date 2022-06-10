@@ -129,10 +129,7 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
                 utildbg.log("Running mepolang statement from async shellipe: {s}\n", .{statement});
                 var heap_statement = try mepo.allocator.dupe(u8, statement);
                 utilsdl.sdl_push_event_mepolang_execution(&heap_statement);
-
-                // TODO: is there a slice 'shift' like functionality in arraylist?
-                var i: usize = mepolang_statement_end_index + 2;
-                while (i > 0) : (i -= 1) _ = stdout.swapRemove(0);
+                try stdout.replaceRange(0, mepolang_statement_end_index + 1, &[_]u8{});
             }
         } else if (poll_fds[0].revents & (std.os.POLL.ERR | std.os.POLL.NVAL | std.os.POLL.HUP) != 0) {
             continue_reading = false;
