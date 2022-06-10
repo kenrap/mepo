@@ -790,9 +790,10 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    const heap_str = @ptrCast(*[]u8, @alignCast(@alignOf(*[]u8), e.user.data1)).*;
+    const heap_str = std.mem.sliceTo(@ptrCast([*c]u8, @alignCast(@alignOf([*c]u8), e.user.data1)), 0);
+    utildbg.log("SDL mepolang event proccessing: <{s}>\n", .{heap_str});
     mepo.mepolang_execute(heap_str) catch |err| {
-        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}", .{heap_str, err});
+        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}\n", .{heap_str, err});
     };
     mepo.allocator.free(heap_str);
     return .Redraw;
@@ -917,8 +918,10 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
     while (true) {
         const stdin = &std.io.getStdIn().reader();
         var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
-        std.debug.print("Read {d} bytes, running input as mepolang\n", .{read_slice.len});
-        utilsdl.sdl_push_event_mepolang_execution(&read_slice);
+        const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
+        mepo.allocator.free(read_slice);
+        std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
+        utilsdl.sdl_push_event_mepolang_execution(mepo.allocator, slice_z);
     }
 }
 

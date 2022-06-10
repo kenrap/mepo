@@ -1,3 +1,4 @@
+const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const types = @import("../types.zig");
 const errors = @import("../errors.zig");
@@ -27,14 +28,21 @@ pub fn sdl_push_event_resize() void {
     var sdlevent: sdl.SDL_Event = undefined;
     sdlevent.type = sdl.SDL_WINDOWEVENT;
     sdlevent.window.event = sdl.SDL_WINDOWEVENT_EXPOSED;
-    _ = sdl.SDL_PushEvent(&sdlevent);
+    errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
+        utildbg.log("Error pushing resize event to SDL queue: {s}\n", .{err});
+    };
 }
 
-pub fn sdl_push_event_mepolang_execution(mepolang_text: *[]const u8) void {
-    var sdlevent: sdl.SDL_Event = undefined;
+pub fn sdl_push_event_mepolang_execution(allocator: std.mem.Allocator, mepolang_text: [:0]const u8) void {
+    var sdlevent: *sdl.SDL_Event = allocator.create(sdl.SDL_Event) catch unreachable;
+    const str_ptr = &mepolang_text[0];
     sdlevent.type = sdl_usereventtype(.Mepolang);
-    sdlevent.user.data1 = mepolang_text;
-    _ = sdl.SDL_PushEvent(&sdlevent);
+    sdlevent.user.code = 0;
+    sdlevent.user.data1 = @intToPtr([*c]u8, @ptrToInt(str_ptr));
+    sdlevent.user.data2 = null;
+    errorcheck(sdl.SDL_PushEvent(sdlevent)) catch |err| {
+        utildbg.log("Error pushing mepolang event to SDL queue: {s}\n", .{err});
+    };
 }
 
 pub fn sdl_push_event_signal(signal: c_int) callconv(.C) void {
