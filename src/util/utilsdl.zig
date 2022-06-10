@@ -90,7 +90,7 @@ pub fn sdl_keymod_to_str(c: u32) *const [3]u8 {
 }
 
 pub fn errorcheck(return_value: c_int) errors.SDLError!void {
-    if (return_value != 0) {
+    if (return_value < 0) {
         utildbg.log("SDL Error: {s}\n", .{sdl.SDL_GetError()});
         sdl.SDL_ClearError();
         return errors.SDLError.GenericSDLError;
