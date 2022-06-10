@@ -9,7 +9,7 @@ ASYNC=1
 mainloop() {
   # E.g. dump pin data to file & wait for complete
   TMPFILE="$(mktemp)"
-  printf %b "filedump p $TMPFILE;"
+  printf %b "filedump rp $TMPFILE;"
   while true; do
     cat "$TMPFILE" | grep -q . && break
     sleep 1
@@ -17,6 +17,8 @@ mainloop() {
 
   PINDATA="$(cat "$TMPFILE")"
 
+  LAT="$(echo "$PINDATA" | grep 'prefset_n lat' | cut -d ' ' -f3 | tr -d ';')"
+  LON="$(echo "$PINDATA" | grep 'prefset_n lon' | cut -d ' ' -f3 | tr -d ';')"
   PINS="$(
     printf %b "$PINDATA" |
     grep '^pin_add' | 
@@ -43,7 +45,7 @@ mainloop() {
     PIN_TO_ADD="$(
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
     )"
-    printf %b "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
+    printf %b "pin_add 0 0 $LAT $LON [$PIN_TO_ADD];"
   elif printf %b "$CHOICE" | grep -q .; then
     PINHANDLE="$CHOICE"
     EDITCHOICE="$(
