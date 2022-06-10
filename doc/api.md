@@ -84,17 +84,6 @@ Queue tiles for a bounding box to download to the cache in the background for th
 ## **cache_queueclear**
 Clear any queued background downloading process
 
-
-## **center_on_coords**
-Center the map on the given coordinate
-
-**Arguments**:
-
-| **Name** | **Datatype** | **Description** |
-| -------- | ------------ | --------------- |
-| lat | Number | Latitude |
-| lon | Number | Longitude |
-
 ## **center_on_mouse**
 Center the map on the current position of the mouse
 

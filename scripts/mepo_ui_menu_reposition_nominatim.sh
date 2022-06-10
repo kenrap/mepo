@@ -48,7 +48,10 @@ main() {
       exit 1
   }
 
-  echo "center_on_coords $COORDS;"
+  LAT="$(echo "$COORDS" | cut -d ' ' -f1)"
+  LON="$(echo "$COORDS" | cut -d ' ' -f2)"
+  echo "prefset_n lat $LAT;"
+  echo "prefset_n lon $LON;"
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi

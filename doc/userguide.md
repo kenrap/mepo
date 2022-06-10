@@ -212,12 +212,12 @@ configuration here that will override the default configuration.
 Example `~/.mepo/config`:
 
 ```sh
-center_on_coords 42.3608 -71.0573;
+prefset_n lat 42.3608;
+prefset_n lon -71.0573;
 pin_groupprefset 3 active 1;
 pin_add 3 0 42.355 -71.0780 [foopin] [foopin];
-prefset zoom 15;
+prefset_n zoom 15;
 ```
-
 In the above example, the map is repositioned to Boson, MA, US and an
 arbitrary bookmark pin named foopin is placed on the map.
 
