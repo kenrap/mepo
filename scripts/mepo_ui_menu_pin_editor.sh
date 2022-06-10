@@ -6,10 +6,10 @@ ASYNC=1
 # changes to support async items, pin script needs to be updated to support
 # this
 
-main() {
+mainloop() {
   # E.g. dump pin data to file & wait for complete
   TMPFILE="$(mktemp)"
-  echo "filedump p $TMPFILE;"
+  printf %b "filedump p $TMPFILE;"
   while true; do
     cat "$TMPFILE" | grep -q . && break
     sleep 1
@@ -18,50 +18,58 @@ main() {
   PINDATA="$(cat "$TMPFILE")"
 
   PINS="$(
-    echo "$PINDATA" |
+    printf %b "$PINDATA" |
     grep '^pin_add' | 
     cut -d ' ' -f6- | 
     tr -d ';]['
   )"
 
   CHOICE="$(
-    printf %b "Add Pin\nSave to file\nLoad from file\n$PINS" | 
+    printf %b "Close Menu\nAdd Pin\nSave to file\nLoad from file\n$PINS" | 
     PROMPT="Pin editor" mepo_ui_helper_menu.sh
   )"
 
-  if [ "$CHOICE" = "Cancel" ]; then
-    return
-  elif [ "$CHOICE" = "Save to file" ]; then
+  if [ "$CHOICE" = "Save to file" ]; then
     FILEPATH="$(
       PROMPT="Filepath" mepo_ui_helper_menu.sh
     )"
-    echo "filedump p $FILEPATH;"
+    printf %b "filedump p $FILEPATH;"
   elif [ "$CHOICE" = "Load from file" ]; then
     FILEPATH="$(
       PROMPT="Filepath" mepo_ui_helper_menu.sh
     )"
-    echo "fileload $FILEPATH;"
+    printf %b "fileload $FILEPATH;"
   elif [ "$CHOICE" = "Add Pin" ]; then
     PIN_TO_ADD="$(
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
     )"
-    echo "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
-  elif echo "$CHOICE" | grep -q .; then
+    printf %b "pin_add 0 0 $MEPO_CENTER_LAT $MEPO_CENTER_LON [$PIN_TO_ADD];"
+  elif printf %b "$CHOICE" | grep -q .; then
     PINHANDLE="$CHOICE"
     EDITCHOICE="$(
       printf %b "Delete pin\nUpdate coords\nUpdate handle\nUpdate metadata" | 
       PROMPT="Pin editor ($PINHANDLE)" mepo_ui_helper_menu.sh
     )"
     if [ "$EDITCHOICE" = "Delete pin" ]; then
-      echo "pin_delete $PINHANDLE;"
+      printf %b "pin_delete $PINHANDLE;"
     elif [ "$EDITCHOICE" = "Update coords" ]; then
-      echo # TODO
+      printf %b # TODO
     elif [ "$EDITCHOICE" = "Update handle" ]; then
-      echo # TODO
+      printf %b # TODO
     elif [ "$EDITCHOICE" = "Update metadata" ]; then
-      echo # TODO
+      printf %b # TODO
     fi
+  elif [ "$CHOICE" = "Close Menu" ]; then
+    exit
+  else
+    exit
   fi
+}
+
+main() {
+  while true; do
+    mainloop
+  done
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
