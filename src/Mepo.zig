@@ -921,7 +921,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
         const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
         mepo.allocator.free(read_slice);
         std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
-        utilsdl.sdl_push_event_mepolang_execution(mepo.allocator, slice_z);
+        utilsdl.sdl_push_event_mepolang_execution(slice_z);
     }
 }
 

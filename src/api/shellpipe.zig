@@ -128,7 +128,7 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
                 utildbg.log("Running mepolang statement from async shellpipe: {s}\n", .{statement});
                 var heap_statement = try mepo.allocator.dupeZ(u8, statement);
-                utilsdl.sdl_push_event_mepolang_execution(mepo.allocator, heap_statement);
+                utilsdl.sdl_push_event_mepolang_execution(heap_statement);
                 try stdout.replaceRange(0, mepolang_statement_end_index + 1, &[_]u8{});
             }
         } else if (poll_fds[0].revents & (std.os.POLL.ERR | std.os.POLL.NVAL | std.os.POLL.HUP) != 0) {

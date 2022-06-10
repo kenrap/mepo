@@ -1,4 +1,3 @@
-const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const types = @import("../types.zig");
 const errors = @import("../errors.zig");
@@ -33,14 +32,14 @@ pub fn sdl_push_event_resize() void {
     };
 }
 
-pub fn sdl_push_event_mepolang_execution(allocator: std.mem.Allocator, mepolang_text: [:0]const u8) void {
-    var sdlevent: *sdl.SDL_Event = allocator.create(sdl.SDL_Event) catch unreachable;
+pub fn sdl_push_event_mepolang_execution(mepolang_text: [:0]const u8) void {
+    var sdlevent: sdl.SDL_Event = undefined;
     const str_ptr = &mepolang_text[0];
     sdlevent.type = sdl_usereventtype(.Mepolang);
     sdlevent.user.code = 0;
     sdlevent.user.data1 = @intToPtr([*c]u8, @ptrToInt(str_ptr));
     sdlevent.user.data2 = null;
-    errorcheck(sdl.SDL_PushEvent(sdlevent)) catch |err| {
+    errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
         utildbg.log("Error pushing mepolang event to SDL queue: {s}\n", .{err});
     };
 }
