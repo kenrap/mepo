@@ -55,7 +55,7 @@ mainloop() {
       PROMPT="Pin editor ($PINHANDLE)" mepo_ui_helper_menu.sh
     )"
     if [ "$EDITCHOICE" = "Delete pin" ]; then
-      printf %b "pin_delete $PINHANDLE;"
+      printf %b "pin_delete -1 $PINHANDLE;"
     elif [ "$EDITCHOICE" = "Update coords" ]; then
       printf %b # TODO
     elif [ "$EDITCHOICE" = "Update handle" ]; then
