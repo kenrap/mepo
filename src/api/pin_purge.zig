@@ -13,7 +13,16 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     mepo.pin_group_active_item = null;
 
     for (mepo.pin_groups[mepo.pin_group_active].items) |p| {
-        if (p.handle != null) mepo.allocator.free(p.handle.?);
+        if (p.handle != null) {
+            mepo.allocator.free(p.handle.?);
+
+            // Free up metadata strings
+            var it = p.metadata.iterator();
+            while (it.next()) |kv| {
+                mepo.allocator.free(kv.key_ptr.*);
+                mepo.allocator.free(kv.value_ptr.*);
+            }
+        }
     }
     mepo.pin_groups[mepo.pin_group_active].clearAndFree();
 }
