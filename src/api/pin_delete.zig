@@ -22,7 +22,13 @@ fn pin_delete(mepo: *Mepo, handle: [:0]const u8) !void {
 
         if (std.mem.eql(u8, pin.handle.?, handle)) {
             mepo.allocator.free(pin.handle.?);
-            // TODO: free metadata
+
+            var it = pin.metadata.iterator();
+            while (it.next()) |kv| {
+                mepo.allocator.free(kv.key_ptr.*);
+                mepo.allocator.free(kv.value_ptr.*);
+            }
+
             if (mepo.pin_group_active_item) |active_pin_item| {
                 if (active_pin_item == pin_i) {
                     mepo.pin_group_active_item = null;
