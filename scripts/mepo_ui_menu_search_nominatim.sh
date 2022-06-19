@@ -30,7 +30,7 @@ main() {
 
   echo "
     prefset_n pingroup_0_ordered 0;
-    pingroup_activate 0;
+    pin_groupactivate 0;
     pin_purge;
   "
 

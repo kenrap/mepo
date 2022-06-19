@@ -76,7 +76,7 @@ printpins() {
 
   echo "
     prefset_n pingroup_1_ordered 1;
-    pingroup_activate 1;
+    pin_groupactivate 1;
     pin_purge;
   "
 
