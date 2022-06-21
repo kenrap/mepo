@@ -14,4 +14,5 @@ pub const spec = .{
 fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     const latlon = mepo.cursor_latlon();
     p.set_n(p.pref.lat, latlon.Lat);
+    p.set_n(p.pref.lon, latlon.Lon);
 }
