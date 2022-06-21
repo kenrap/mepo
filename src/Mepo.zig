@@ -1174,9 +1174,31 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
 pub fn cursor_latlon(mepo: *@This()) struct{ Lat: f64, Lon: f64 } {
     var cursor_x: c_int = undefined;
     var cursor_y: c_int = undefined;
+    var gl_w: c_int = undefined;
+    var gl_h: c_int = undefined;
+    var win_w: c_int = undefined;
+    var win_h: c_int = undefined;
+
     _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
-    const cursor_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, p.get(p.pref.zoom).u);
-    const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, p.get(p.pref.zoom).u);
+    sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_w, &gl_h);
+    sdl.SDL_GetWindowSize(mepo.window, &win_w, &win_h);
+    const scale_x = @divTrunc(gl_w, win_w);
+    const scale_y = @divTrunc(gl_h, win_h);
+
+    // GetMouseState does not respect scaled logical size set for high-DPI
+    // displays in resizing logic (e.g. we store mepo.win_w/mepo.win_h
+    // as the actual GL resolution).. thus we calculate scaling factor
+    // here and scale up cursor position based on *= (gl_{w,h} / win_{w,h}
+    cursor_x *= scale_x;
+    cursor_y *= scale_y;
+
+    const cursor_lat = utilconversion.px_y_to_lat(
+        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, p.get(p.pref.zoom).u,
+    );
+    const cursor_lon = utilconversion.px_x_to_lon(
+        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, p.get(p.pref.zoom).u,
+    );
+
     return .{
         .Lat = cursor_lat,
         .Lon = cursor_lon,
