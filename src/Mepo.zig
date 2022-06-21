@@ -1171,6 +1171,18 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     utilsdl.sdl_push_event_resize();
 }
 
+pub fn cursor_latlon(mepo: *@This()) struct{ Lat: f64, Lon: f64 } {
+    var cursor_x: c_int = undefined;
+    var cursor_y: c_int = undefined;
+    _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
+    const cursor_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, p.get(p.pref.zoom).u);
+    const cursor_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, p.get(p.pref.zoom).u);
+    return .{
+        .Lat = cursor_lat,
+        .Lon = cursor_lon,
+    };
+}
+
 pub fn get_x(_: *@This()) i32 {
     return utilconversion.lon_to_px_x(p.get(p.pref.lon).f, p.get(p.pref.zoom).u);
 }
