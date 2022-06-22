@@ -41,6 +41,7 @@ const TileDataTag = enum { transfer_datum, texture, queued_position, error_type 
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
 allocator: std.mem.Allocator,
+dev_null_fd: ?*cstdio.FILE,
 thread_download: ?*sdl.SDL_Thread = null,
 thread_queuebbox: ?*sdl.SDL_Thread = null,
 bbox_queue: ?DownloadBBoxRequest = null,
@@ -328,8 +329,9 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, curl_callback_tile_write);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_STDERR, tile_cache.dev_null_fd);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, curl_callback_tile_xferinfo);
-
     try curl_errorcheck(curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client));
     utildbg.log("Add multi handle {any}\n", .{coords});
 }
@@ -515,6 +517,7 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |_| {
         return @as(@This(), .{
             .allocator = allocator,
+            .dev_null_fd = cstdio.fopen("/dev/null", "wb"),
             .curl_multi = curl.curl_multi_init().?,
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
