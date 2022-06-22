@@ -149,7 +149,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         .texture => |text| {
             try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
         },
-        .queued_position => |queued_position| {
+        .queued_position => |_| {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, rect_intersect, .Fill);
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
             try mepo.blit_multiline_text(
@@ -160,12 +160,31 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
                 20,
-                "{d}",
-                .{queued_position},
+                "Queued",
+                .{},
             );
         },
-        .transfer_datum => {
+        .transfer_datum => |transfer_datum| {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
+            var dl_now: c_long = 0;
+            var dl_total: c_long = 0;
+            if (transfer_datum.progress_dl_now) |dln| dl_now = dln;
+            if (transfer_datum.progress_dl_total) |dlt| dl_total = dlt;
+            var percent : f64 = 0;
+            if (dl_total != 0) {
+                percent = @intToFloat(f64, dl_now) / @intToFloat(f64, dl_total);
+            }
+            try mepo.blit_multiline_text(
+                0x000000,
+                null,
+                null,
+                .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
+                @intCast(i32, tile_x * config.Tsize) - x_off,
+                @intCast(i32, tile_y * config.Tsize) - y_off,
+                null,
+                "{d:0.2}%\n{d}/{d} bytes",
+                .{ percent * 100, dl_now, dl_total },
+            );
         },
         .error_type => {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffdfd1 }, rect_intersect, .Fill);
