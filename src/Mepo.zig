@@ -166,13 +166,13 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
         },
         .transfer_datum => |transfer_datum| {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
-            var dl_now: c_long = 0;
-            var dl_total: c_long = 0;
-            if (transfer_datum.progress_dl_now) |dln| dl_now = dln;
-            if (transfer_datum.progress_dl_total) |dlt| dl_total = dlt;
+            var dl_now_kb: f64 = 0;
+            var dl_total_kb: f64 = 0;
+            if (transfer_datum.progress_dl_now) |dln| dl_now_kb = @intToFloat(f64, dln) / 1000;
+            if (transfer_datum.progress_dl_total) |dlt| dl_total_kb = @intToFloat(f64, dlt) / 1000;
             var percent : f64 = 0;
-            if (dl_total != 0) {
-                percent = @intToFloat(f64, dl_now) / @intToFloat(f64, dl_total);
+            if (dl_total_kb != 0) {
+                percent = dl_now_kb / dl_total_kb;
             }
             try mepo.blit_multiline_text(
                 0x000000,
@@ -182,8 +182,8 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
                 @intCast(i32, tile_x * config.Tsize) - x_off,
                 @intCast(i32, tile_y * config.Tsize) - y_off,
                 null,
-                "{d:0.2}%\n{d}/{d} bytes",
-                .{ percent * 100, dl_now, dl_total },
+                "{d:0.2}%\n{d:0.1}/{d:0.1}Kb",
+                .{ percent * 100, dl_now_kb, dl_total_kb },
             );
         },
         .error_type => {
