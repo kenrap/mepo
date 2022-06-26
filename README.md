@@ -195,7 +195,6 @@ bookmarks, and more.
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties** (In-progress)
   - **Todo:**
-    - Add visual per-tile-downloading progress-indicators.
     - Improve bottom status bar display to show bandwidth usage / download of
       tiles, disk, and memory usage.
     - Integrate gpsd into a script to update user's current location pin and
@@ -207,6 +206,7 @@ bookmarks, and more.
       when accessing invalid union tag etc (improve robustness of mepolang
       parser).
   - **Done:**
+    - Add visual per-tile-downloading progress-indicators.
     - Add support for pasting / copying current coordinates from the system
       clipboard and ensure compatibility in both Wayland & X.
     - Rework main application event loop to handle STDIN file descriptor in

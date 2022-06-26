@@ -165,7 +165,6 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             );
         },
         .transfer_datum => |transfer_datum| {
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x006400 }, rect_intersect, .Fill);
             var dl_now_kb: f64 = 0;
             var dl_total_kb: f64 = 0;
             if (transfer_datum.progress_dl_now) |dln| dl_now_kb = @intToFloat(f64, dln) / 1000;
@@ -174,8 +173,17 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             if (dl_total_kb != 0) {
                 percent = dl_now_kb / dl_total_kb;
             }
+
+            const color = c: {
+                const r = @floatToInt(u24, 255 * percent);
+                const g = @floatToInt(u24, 255 * percent);
+                const b = @floatToInt(u24, 255 * percent);
+                const color : u24 = (r << 16) | (g << 8) | (b << 0);
+                break :c color;
+            };
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color }, rect_intersect, .Fill);
             try mepo.blit_multiline_text(
-                0x000000,
+                0xffffff,
                 null,
                 null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
