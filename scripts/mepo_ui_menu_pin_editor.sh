@@ -64,6 +64,7 @@ mainloop() {
       LAT="$(echo "$NEWCORDS" | cut -d' ' -f1)"
       LON="$(echo "$NEWCORDS" | cut -d' ' -f2)"
       printf %b "
+        pin_activate -1 [$PINHANDLE];
         pin_meta -1 [$PINHANDLE] lat [$LAT];
         pin_meta -1 [$PINHANDLE] lon [$LON];
       "

@@ -17,6 +17,7 @@ pub const fn_specs = &[_]types.MepoFnSpec{
     @import("fileload.zig").spec,
     @import("filedump.zig").spec,
     @import("move_relative.zig").spec,
+    @import("pin_activate.zig").spec,
     @import("pin_add.zig").spec,
     @import("pin_cycle.zig").spec,
     @import("pin_deactivate.zig").spec,
