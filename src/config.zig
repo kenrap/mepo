@@ -1,3 +1,4 @@
+pub const Version = "0.4";
 pub const DownloadTimeoutSeconds = 5;
 pub const DownloadUseragent = "mepo";
 pub const DownloaderPollMs = 50;

@@ -458,12 +458,12 @@ fn blit_help(mepo: *@This()) !void {
         0,
         0,
         null,
-        \\mepo - Development version (0.4)
+        \\mepo - Development version ({s})
         \\ 
         \\Keybindings:
         \\{s}
     ,
-        .{msg},
+        .{config.Version, msg},
     );
 }
 
