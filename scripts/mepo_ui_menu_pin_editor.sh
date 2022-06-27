@@ -45,7 +45,10 @@ mainloop() {
     PIN_TO_ADD="$(
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
     )"
-    printf %b "pin_add 0 0 $LAT $LON [$PIN_TO_ADD];"
+    printf %b "
+      pin_add 0 0 $LAT $LON [$PIN_TO_ADD];
+      pin_activate -1 [$PIN_TO_ADD];
+    "
   elif [ "$CHOICE" = "Close Menu" ]; then
     exit
   elif printf %b "$CHOICE" | grep -q .; then
@@ -71,7 +74,10 @@ mainloop() {
     elif [ "$EDITCHOICE" = "Update metadata" ]; then
       METAKEY="$(PROMPT="($PINHANDLE): Metadata key" mepo_ui_helper_menu.sh)"
       METAVALUE="$(PROMPT="($PINHANDLE): Metadata value" mepo_ui_helper_menu.sh)"
-      echo "pin_meta -1 [$PINHANDLE] [$METAKEY] [$METAVALUE];"
+      echo "
+        pin_activate -1 [$PINHANDLE];
+        pin_meta -1 [$PINHANDLE] [$METAKEY] [$METAVALUE];
+      "
     fi
   else
     exit
