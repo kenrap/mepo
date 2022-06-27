@@ -51,15 +51,22 @@ mainloop() {
   elif printf %b "$CHOICE" | grep -q .; then
     PINHANDLE="$CHOICE"
     EDITCHOICE="$(
-      printf %b "Delete pin\nUpdate coords\nUpdate handle\nUpdate metadata" | 
+      printf %b "Delete pin\nUpdate coords\nUpdate metadata" | 
       PROMPT="Pin editor ($PINHANDLE)" mepo_ui_helper_menu.sh
     )"
     if [ "$EDITCHOICE" = "Delete pin" ]; then
       printf %b "pin_delete -1 $PINHANDLE;"
     elif [ "$EDITCHOICE" = "Update coords" ]; then
-      printf %b # TODO
-    elif [ "$EDITCHOICE" = "Update handle" ]; then
-      printf %b # TODO
+      NEWCORDS="$(
+        printf %b "$LAT $LON (Cursor location)" | 
+        PROMPT="New coordinates lat lon ($PINHANDLE)" mepo_ui_helper_menu.sh
+      )"
+      LAT="$(echo "$NEWCORDS" | cut -d' ' -f1)"
+      LON="$(echo "$NEWCORDS" | cut -d' ' -f2)"
+      printf %b "
+        pin_meta -1 [$PINHANDLE] lat [$LAT];
+        pin_meta -1 [$PINHANDLE] lon [$LON];
+      "
     elif [ "$EDITCHOICE" = "Update metadata" ]; then
       METAKEY="$(PROMPT="($PINHANDLE): Metadata key" mepo_ui_helper_menu.sh)"
       METAVALUE="$(PROMPT="($PINHANDLE): Metadata value" mepo_ui_helper_menu.sh)"
