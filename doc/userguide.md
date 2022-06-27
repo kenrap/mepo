@@ -17,6 +17,7 @@
 - [Offline Usage](#strongoffline-usagestrong)
 - [Mepolang](#strongmepolangstrong)
 - [Debugging](#strongdebuggingstrong)
+- [CLI Options](#strongcli-optionsstrong#)
 
 ## **Installation**
 
@@ -318,3 +319,17 @@ STDERR use the CLI flag `-e`. E.g. as:
 ```
 mepo -e
 ```
+
+### CLI Options
+
+- `mepo -doc`
+  - Generate documentation for mepolang API
+- `mepo -d`
+  - Non-interactive downloader mode, see above for usage
+  - Ex: `mepo -d40.74946,-74.04673,40.818358,-73.88211,3,16`
+- `mepo -e`
+  - Enable debugging to STDERR
+- `mepo -sw`
+  - Use SDL Software renderer instead of GPU renderer used by default
+- `mepo -v`
+  - Print version number and exit
