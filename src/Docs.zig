@@ -1,5 +1,6 @@
 const std = @import("std");
 const FnTable = @import("./api/_FnTable.zig");
+const config = @import("./config.zig");
 
 pub fn generate() !void {
     const Format = enum { Markdown, Manpage };
@@ -8,7 +9,7 @@ pub fn generate() !void {
 
     switch (use_format) {
         .Markdown => {
-            try stdout.print("# Mepolang API\n", .{});
+            try stdout.print("# Mepolang API ({s})\n", .{config.Version});
             for (FnTable.fn_specs) |fnc| {
                 try stdout.print("## **{s}**\n", .{fnc.name});
                 try stdout.print("{s}\n\n", .{fnc.desc});
