@@ -38,6 +38,10 @@ pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8
 
     if (value.len == 0) {
         _ = pin.metadata.swapRemove(key);
+    } else if (std.mem.eql(u8, "lat", key)) {
+        pin.lat = try std.fmt.parseFloat(f64, value);
+    } else if (std.mem.eql(u8, "lon", key)) {
+        pin.lon = try std.fmt.parseFloat(f64, value);
     } else {
         const heap_key = try mepo.allocator.dupeZ(u8, key);
         const heap_val = try mepo.allocator.dupeZ(u8, value);
