@@ -199,8 +199,6 @@ bookmarks, and more.
       tiles, disk, and memory usage.
     - Integrate gpsd into a script to update user's current location pin and
       fallback to geoclue2 as needed.
-    - Refine existing Overpass search script (provide better recommendations
-      illustrating OSM tag-based flexibility).
     - Add example bookmarking script based on pin API.
     - Finalize Mepolang 1.0 API and add error checking so things don't crash
       when accessing invalid union tag etc (improve robustness of mepolang
@@ -223,6 +221,8 @@ bookmarks, and more.
     - Make shell pipe non-blocking (e.g. don't freeze UI while waiting for
       result) or otherwise implement timeout so that runaway scripts don't
       freeze application.
+    - Refine existing Overpass search script (provide better recommendations
+      illustrating OSM tag-based flexibility).
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
