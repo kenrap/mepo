@@ -124,7 +124,7 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
                 continue;
             }
             stdout.items.len += nread;
-            if (std.mem.indexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
+            if (std.mem.lastIndexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
                 utildbg.log("Running mepolang statement from async shellpipe: {s}\n", .{statement});
                 var heap_statement = try mepo.allocator.dupeZ(u8, statement);
