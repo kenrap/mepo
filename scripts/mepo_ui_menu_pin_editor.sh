@@ -90,5 +90,4 @@ main() {
   done
 }
 
-pgrep -f "$(basename $0)" | grep -qEv "^${$}$" && exit 0
 if [ -n "$1" ]; then "$@"; else main; fi
