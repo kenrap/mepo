@@ -32,7 +32,10 @@ mainloop() {
   )"
 
   if [ "$CHOICE" = "Save to file" ]; then
+    [ -z "$XDG_CONFIG_HOME" ] && XDG_CONFIG_HOME=$HOME/.config
+    mkdir -p $XDG_CONFIG_HOME/mepo
     FILEPATH="$(
+      echo "$XDG_CONFIG_HOME/mepo/bookmarks" |
       PROMPT="Filepath" mepo_ui_helper_menu.sh
     )"
     printf %b "filedump p $FILEPATH;"

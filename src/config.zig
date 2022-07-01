@@ -135,4 +135,5 @@ pub const DefaultBaseConfig =
     \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CONFIG_HOME/mepo/config;
+    \\ fileload $XDG_CONFIG_HOME/mepo/bookmarks;
 ;
