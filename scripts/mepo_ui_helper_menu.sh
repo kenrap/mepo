@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-N_LINES=15
+N_LINES=17
 FONT="Inconsolata"
 
 main() {
