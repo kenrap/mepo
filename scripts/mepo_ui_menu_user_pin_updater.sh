@@ -14,10 +14,18 @@ coordsviamls() {
 }
 
 coordsviageoclue() {
-  /usr/libexec/geoclue-2.0/demos/agent &
+  /usr/libexec/geoclue-2.0/demos/agent > /dev/null &
   AGENTPID=$!
-  #/usr/libexec/geoclue-2.0/demos/where-am-i
+  LATLON="$(
+          ( /usr/libexec/geoclue-2.0/demos/where-am-i -t 10 & ) |
+          grep -E "Latitude|Longitude:" -m2 |
+          cut -d: -f2 |
+          tr -d "° " |
+          tr "\n" " "
+  )"
   kill $AGENTPID
+  pkill -f where-am-i
+  echo "$LATLON"
 }
 
 coordsviagpsd() {
@@ -25,7 +33,7 @@ coordsviagpsd() {
 }
 
 main() {
-  SOURCE=mls
+  SOURCE=geoclue
 
   if [ "$SOURCE" = mls ]; then
     COORDS="$(coordsviamls)"
