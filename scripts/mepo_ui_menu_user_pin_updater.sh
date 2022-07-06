@@ -23,8 +23,8 @@ coordsviageoclue() {
           tr -d "° " |
           tr "\n" " "
   )"
-  kill $AGENTPID
-  pkill -f where-am-i
+  kill -9 $AGENTPID
+  pkill -9 -f where-am-i
   echo "$LATLON"
 }
 
@@ -50,6 +50,7 @@ main() {
   echo "pin_meta 7 user_location source $SOURCE;"
   echo "pin_activate 7 user_location;"
   echo "center_on_pin;"
+  exit 0
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
