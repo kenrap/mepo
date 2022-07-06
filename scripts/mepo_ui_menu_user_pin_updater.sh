@@ -3,11 +3,11 @@ DISPLAYNAME=" User Location Pin: Toggle autoupdate"
 HOTKEY=x
 
 coordsviamls() {
+  MLSKEY=9a418f3c-364a-418a-85e8-1bde733f0c88
   MLSRESULT="$(
     # TODO: MLS supports POST buffer with network names -- scrape from nmcli
-    curl 'https://location.services.mozilla.com/v1/geolocate?key=geoclue'
+    curl "https://location.services.mozilla.com/v1/geolocate?key=$MLSKEY"
   )"
-
   LAT="$(echo "$MLSRESULT" | jq '.location.lat')"
   LON="$(echo "$MLSRESULT" | jq '.location.lng')"
   echo "$LAT $LON"
