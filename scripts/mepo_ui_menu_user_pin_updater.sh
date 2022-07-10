@@ -32,17 +32,32 @@ coordsviagpsd() {
   echo # TODO
 }
 
-main() {
-  SOURCE=geoclue
+supportsgeoclue() {
+  stat /usr/libexec/geoclue-2.0/demos/agent > /dev/null &&
+  stat /usr/libexec/geoclue-2.0/demos/where-am-i > /dev/null
+}
 
-  if [ "$SOURCE" = mls ]; then
-    COORDS="$(coordsviamls)"
-  elif [ "$SOURCE" = geoclue ]; then
+supportsgpsd() {
+  return 1 # TODO
+}
+
+main() {
+  SOURCE=""
+  COORDS=""
+
+  # Pull coords from gpsd if available, if not use geoclue
+  if supportsgpsd; then
+    SOURCE=gpsd
+    COORDS="$(coordsviagps)"
+  elif supportsgeoclue; then
+    SOURCE=geoclue
     COORDS="$(coordsviageoclue)"
-  elif [ "$SOURCE" = gpsd ]; then
-    COORDS="$(coordsviagpsd)"
-  else
-    COORDS=""
+  fi
+
+  # E.g. fall back to MLS if coordinate via geoclue or gpsd fails
+  if echo "$COORDS" | grep -vq .; then
+    SOURCE=mls
+    COORDS="$(coordsviamls)"
   fi
 
   echo "pin_delete 7 user_location;"
