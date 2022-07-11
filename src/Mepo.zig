@@ -10,11 +10,12 @@ const utilplatform = @import("util/utilplatform.zig");
 const p = @import("util/utilprefs.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
+const datastructure = @import("datastructure/datastructure.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
-async_shellpipe_threads: std.ArrayList(*sdl.SDL_Thread),
+async_shellpipe_threads: datastructure.QueueHashMap(sdl.SDL_threadID, void),
 config: []const u8,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
@@ -1424,7 +1425,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         },
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
-        .async_shellpipe_threads = std.ArrayList(*sdl.SDL_Thread).init(allocator),
+        .async_shellpipe_threads = datastructure.QueueHashMap(sdl.SDL_threadID, void).init(allocator),
         .renderer_sw = use_sw_renderer,
     });
 }
