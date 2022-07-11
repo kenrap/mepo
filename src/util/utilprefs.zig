@@ -113,11 +113,13 @@ pub fn set_n(prefname: pref, value: f64) void {
             prefs_mapping[@enumToInt(prefname)].value = .{ .f = value };
         },
         .t => {},
-        .u24 => { prefs_mapping[@enumToInt(prefname)].value = .{ .u24 = @floatToInt(u24, value) }; },
+        .u24 => {
+            prefs_mapping[@enumToInt(prefname)].value = .{ .u24 = @floatToInt(u24, value) };
+        },
     }
 }
 
-pub fn pingroup_prop(pingroup: usize, prop: enum{Ordered, Color}) pref {
+pub fn pingroup_prop(pingroup: usize, prop: enum { Ordered, Color }) pref {
     if (pingroup == 0 and prop == .Ordered) return pref.pingroup_0_ordered;
     if (pingroup == 1 and prop == .Ordered) return pref.pingroup_1_ordered;
     if (pingroup == 2 and prop == .Ordered) return pref.pingroup_2_ordered;

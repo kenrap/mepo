@@ -170,7 +170,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
             var dl_total_kb: f64 = 0;
             if (transfer_datum.progress_dl_now) |dln| dl_now_kb = @intToFloat(f64, dln) / 1000;
             if (transfer_datum.progress_dl_total) |dlt| dl_total_kb = @intToFloat(f64, dlt) / 1000;
-            var percent : f64 = 0;
+            var percent: f64 = 0;
             if (dl_total_kb != 0) {
                 percent = dl_now_kb / dl_total_kb;
             }
@@ -179,7 +179,7 @@ pub fn blit_tile_surface(mepo: *@This(), tile_x: u32, tile_y: u32, zoom: u8, x_o
                 const r = @floatToInt(u24, 255 * percent);
                 const g = @floatToInt(u24, 255 * percent);
                 const b = @floatToInt(u24, 255 * percent);
-                const color : u24 = (r << 16) | (g << 8) | (b << 0);
+                const color: u24 = (r << 16) | (g << 8) | (b << 0);
                 break :c color;
             };
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = color }, rect_intersect, .Fill);
@@ -464,7 +464,7 @@ fn blit_help(mepo: *@This()) !void {
         \\Keybindings:
         \\{s}
     ,
-        .{config.Version, msg},
+        .{ config.Version, msg },
     );
 }
 
@@ -821,7 +821,7 @@ fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const heap_str = std.mem.sliceTo(@ptrCast([*c]u8, @alignCast(@alignOf([*c]u8), e.user.data1)), 0);
     utildbg.log("SDL mepolang event proccessing: <{s}>\n", .{heap_str});
     mepo.mepolang_execute(heap_str) catch |err| {
-        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}\n", .{heap_str, err});
+        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}\n", .{ heap_str, err });
     };
     mepo.allocator.free(heap_str);
     return .Redraw;
@@ -1199,7 +1199,7 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     utilsdl.sdl_push_event_resize();
 }
 
-pub fn cursor_latlon(mepo: *@This()) struct{ Lat: f64, Lon: f64 } {
+pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
     var cursor_x: c_int = undefined;
     var cursor_y: c_int = undefined;
     var gl_w: c_int = undefined;
@@ -1221,10 +1221,12 @@ pub fn cursor_latlon(mepo: *@This()) struct{ Lat: f64, Lon: f64 } {
     cursor_y *= scale_y;
 
     const cursor_lat = utilconversion.px_y_to_lat(
-        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y, p.get(p.pref.zoom).u,
+        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y,
+        p.get(p.pref.zoom).u,
     );
     const cursor_lon = utilconversion.px_x_to_lon(
-        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x, p.get(p.pref.zoom).u,
+        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x,
+        p.get(p.pref.zoom).u,
     );
 
     return .{
@@ -1410,6 +1412,7 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
 pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, use_sw_renderer: bool) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
+        .async_shellpipe_threads = datastructure.QueueHashMap(sdl.SDL_threadID, void).init(allocator),
         .config = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
@@ -1425,7 +1428,6 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         },
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
-        .async_shellpipe_threads = datastructure.QueueHashMap(sdl.SDL_threadID, void).init(allocator),
         .renderer_sw = use_sw_renderer,
     });
 }

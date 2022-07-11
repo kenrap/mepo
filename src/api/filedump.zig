@@ -41,22 +41,28 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         try lines.append("\n# Preferences;");
 
         for (utilprefs.prefs_mapping) |pref| {
-            var format_as : enum { Text, HexText, Number } = .Number;
+            var format_as: enum { Text, HexText, Number } = .Number;
 
-            const numerical_val : f64 = switch (pref.value) {
-              .b => @intToFloat(f64, @boolToInt(pref.value.b)),
-              .u => @intToFloat(f64, pref.value.u),
-              .u24 => v: { format_as = .HexText; break :v -1; },
-              .f => pref.value.f,
-              .t => v: { format_as = .Text; break :v -1; },
+            const numerical_val: f64 = switch (pref.value) {
+                .b => @intToFloat(f64, @boolToInt(pref.value.b)),
+                .u => @intToFloat(f64, pref.value.u),
+                .u24 => v: {
+                    format_as = .HexText;
+                    break :v -1;
+                },
+                .f => pref.value.f,
+                .t => v: {
+                    format_as = .Text;
+                    break :v -1;
+                },
             };
             const prefset_statement = statement: {
                 if (format_as == .Text) {
-                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{pref.name, pref.value.t});
+                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{ pref.name, pref.value.t });
                 } else if (format_as == .Number) {
-                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.04};", .{pref.name, numerical_val});
+                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.04};", .{ pref.name, numerical_val });
                 } else if (format_as == .HexText) {
-                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} #{x};", .{pref.name, pref.value.u24});
+                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} #{x};", .{ pref.name, pref.value.u24 });
                 } else {
                     break :statement "";
                 }
@@ -72,12 +78,12 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // Gestures
         var it_gestures = mepo.table_gestures.iterator();
         while (it_gestures.next()) |gest| {
-            const direction : i8 = if (gest.key_ptr.*.direction == .In) 1 else -1;
+            const direction: i8 = if (gest.key_ptr.*.direction == .In) 1 else -1;
             const act = if (gest.key_ptr.*.action == .Pan) "pan   " else "rotate";
             const statement_gest = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_gesture {s} {d} {d} [{s}];",
-                .{act, gest.key_ptr.*.n_fingers, direction, gest.value_ptr.*},
+                .{ act, gest.key_ptr.*.n_fingers, direction, gest.value_ptr.* },
             );
             try lines.append(statement_gest);
         }
@@ -85,11 +91,11 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // Clicks
         var it_clicks = mepo.table_clicks.iterator();
         while (it_clicks.next()) |click| {
-            const btn : u8 = if (click.key_ptr.*.button == sdl.SDL_BUTTON_LEFT) 1 else 2;
+            const btn: u8 = if (click.key_ptr.*.button == sdl.SDL_BUTTON_LEFT) 1 else 2;
             const statement_click = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_click {d} {d} [{s}];",
-                .{btn, click.key_ptr.*.clicks, click.value_ptr.*},
+                .{ btn, click.key_ptr.*.clicks, click.value_ptr.* },
             );
             try lines.append(statement_click);
         }
@@ -101,7 +107,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             const statement_signal = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_signal {s} [{s}];",
-                .{signame, sig.value_ptr.*},
+                .{ signame, sig.value_ptr.* },
             );
             try lines.append(statement_signal);
         }
@@ -113,22 +119,21 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             const statement_signal = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_key {s} {c} [{s}];",
-                .{keymod, key.key_ptr.*.key, key.value_ptr.*},
+                .{ keymod, key.key_ptr.*.key, key.value_ptr.* },
             );
             try lines.append(statement_signal);
         }
 
         // UI Buttons
         for (mepo.uibuttons.items) |btn| {
-            const pins_only_btn : u8 = if (btn.only_visible_when_has_pins) 1 else 0;
+            const pins_only_btn: u8 = if (btn.only_visible_when_has_pins) 1 else 0;
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} [{s}] [{s}];",
-                .{pins_only_btn, btn.text, btn.mepolang},
+                .{ pins_only_btn, btn.text, btn.mepolang },
             );
             try lines.append(statement_button);
         }
-
     }
 
     // 3. Pins data
@@ -137,7 +142,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
 
         for (mepo.pin_groups) |pg, pg_i| {
             for (pg.items) |pin| {
-                const is_structural : u32 = b: {
+                const is_structural: u32 = b: {
                     if (pin.category == .Structural) break :b 1;
                     break :b 0;
                 };

@@ -32,5 +32,4 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
             p.set_n(prefname, @intToFloat(f64, color));
         }
     }
-
 }

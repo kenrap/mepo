@@ -61,7 +61,7 @@ pub fn tokenize(allocator: std.mem.Allocator, input: []const u8) ![][]const u8 {
 
 /// Test that the given tokens have balanced [] brackets
 pub fn brackets_balanced(tokens: []const []const u8) bool {
-    var nest : usize = 0;
+    var nest: usize = 0;
     for (tokens) |token| {
         if (token.len == 1 and token[0] == '[') nest += 1;
         if (token.len == 1 and token[0] == ']' and nest == 0) return false;
@@ -96,7 +96,6 @@ pub fn statementize(allocator: std.mem.Allocator, tokens: []const []const u8) ![
     return statements.items;
 }
 
-
 test "brackets_balanced" {
     {
         const input = &[_][]const u8{ "foo", "bar", "baz" };
@@ -122,7 +121,6 @@ test "brackets_balanced" {
         const input = &[_][]const u8{ "[", "[", "bar", "]" };
         try std.testing.expect(!brackets_balanced(input[0..]));
     }
-
 }
 
 test "statementize" {

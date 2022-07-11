@@ -4,7 +4,7 @@ const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
 const RectOpt = enum { Draw, Fill };
 
-pub fn sdl_usereventtype(event_type: enum{Mepolang, Signal}) u32 {
+pub fn sdl_usereventtype(event_type: enum { Mepolang, Signal }) u32 {
     // E.g. static local, via var in struct
     const static_local = struct {
         var sdl_user_event_0: ?u32 = null;

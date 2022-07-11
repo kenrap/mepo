@@ -47,7 +47,6 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
     }
 }
 
-
 pub fn mkdirp_folder_basename(file_path: []const u8) !void {
     if (std.fs.path.dirname(file_path)) |dir_fp| {
         try std.fs.cwd().makePath(dir_fp);

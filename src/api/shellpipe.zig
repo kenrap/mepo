@@ -35,7 +35,7 @@ fn shellpipe(mepo: *Mepo, as_async: bool, cmd: []const u8) !void {
         var sp_req = try mepo.allocator.create(ShellpipeRequest);
         sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
         sp_req.mepo = mepo;
-        if (sdl.SDL_CreateThread( async_shellpipe_run, "async_shellpipe", sp_req)) |sdl_thread| {
+        if (sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req)) |sdl_thread| {
             const thread_id = sdl.SDL_GetThreadID(sdl_thread);
             try mepo.async_shellpipe_threads.put(thread_id, void{});
         }
