@@ -135,6 +135,8 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
         }
     }
     _ = try child.kill();
+    const sdl_thread_id = sdl.SDL_GetThreadID(null);
+    _ = mepo.async_shellpipe_threads.swapRemove(sdl_thread_id);
 }
 
 fn refresh_ui(mepo: *Mepo, as_async: bool) !void {
