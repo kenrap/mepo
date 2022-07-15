@@ -11,7 +11,6 @@ const sdl = @import("../sdlshim.zig");
 pub const spec = .{
     .name = "shellpipe_sync",
     .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as mepolang",
-    // TODO: document ENV vars usable in shell scripts context
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
     })[0..],
@@ -54,6 +53,7 @@ fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
 }
 
 // TODO: perhaps this should be moved to Mepo.zig ? used by both shellpipe_{,a}sync
+// TODO: document ENV vars usable in shell scripts context
 pub fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.BufMap {
     var v = try std.process.getEnvMap(allocator);
 
