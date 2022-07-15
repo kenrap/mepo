@@ -30,7 +30,8 @@ pub const fn_specs = &[_]types.MepoFnSpec{
     @import("prefset_t.zig").spec,
     @import("preftoggle.zig").spec,
     @import("quit.zig").spec,
-    @import("shellpipe.zig").spec,
+    @import("shellpipe_async.zig").spec,
+    @import("shellpipe_sync.zig").spec,
     @import("zoom_relative.zig").spec,
 };
 

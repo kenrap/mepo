@@ -24,11 +24,11 @@ pub const DefaultBaseConfig =
     \\ bind_button 1 [Purge] [pin_purge];
     \\ bind_button 1 [<] [pin_cycle 0 -1; center_on_pin];
     \\ bind_button 1 [>] [pin_cycle 0 1; center_on_pin];
-    \\ bind_button 0 [Menu] [shellpipe 0 mepo_ui_central_menu.sh];
-    \\ bind_button 0 [Relocate] [shellpipe 0 mepo_ui_menu_reposition_nominatim.sh];
-    \\ bind_button 0 [Nominatim] [shellpipe 0 mepo_ui_menu_search_nominatim.sh];
-    \\ bind_button 0 [Overpass] [shellpipe 0 mepo_ui_menu_search_overpass.sh];
-    \\ bind_button 0 [Download] [shellpipe 0 mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
+    \\ bind_button 0 [Menu] [shellpipe_sync mepo_ui_central_menu.sh];
+    \\ bind_button 0 [Relocate] [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
+    \\ bind_button 0 [Nominatim] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button 0 [Overpass] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
+    \\ bind_button 0 [Download] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
     \\
     \\ # Gestures;
     \\ bind_gesture pan 2 1 [zoom_relative 1];
@@ -37,7 +37,7 @@ pub const DefaultBaseConfig =
     \\ bind_gesture rotate 3 -1 [prefinc fontsize_ui -1];
     \\
     \\ # Clickbindings;
-    \\ bind_click 1 -1 [shellpipe 0 mepo_ui_central_menu.sh];
+    \\ bind_click 1 -1 [shellpipe_sync mepo_ui_central_menu.sh];
     \\ bind_click 1 2  [zoom_relative 1];
     \\ bind_click 1 3  [zoom_relative -2];
     \\ bind_click 2 1  [zoom_relative -1];
@@ -67,23 +67,23 @@ pub const DefaultBaseConfig =
     \\ bind_key cs s [fileload $XDG_CONFIG_HOME/mepo/savestate];
     \\
     \\ # Scripts hotkeys;
-    \\ bind_key _ c [shellpipe 0 mepo_ui_central_menu.sh];
-    \\ bind_key _ f [shellpipe 1 mepo_ui_menu_pin_editor.sh];
-    \\ bind_key _ g [shellpipe 0 mepo_ui_menu_reposition_nominatim.sh];
-    \\ bind_key s g [shellpipe 0 mepo_ui_menu_search_nominatim.sh];
-    \\ bind_key _ b [shellpipe 0 mepo_ui_menu_search_overpass.sh];
-    \\ bind_key s r [shellpipe 0 mepo_ui_menu_route_overpassrelation.sh];
-    \\ bind_key _ r [shellpipe 0 mepo_ui_menu_route_graphhopper.sh];
-    \\ bind_key s z [shellpipe 0 mepo_ui_menu_pref_fontsize.sh];
-    \\ bind_key _ z [shellpipe 0 mepo_ui_menu_pref_zoom.sh];
-    \\ bind_key _ u [shellpipe 0 mepo_ui_menu_pref_url.sh];
-    \\ bind_key c f [shellpipe 0  [DIM=h MULT=1  mepo_ui_helper_pref_pan.sh]];
-    \\ bind_key c b [shellpipe 0  [DIM=h MULT=-1 mepo_ui_helper_pref_pan.sh]];
-    \\ bind_key cs f [shellpipe 0 [DIM=w MULT=1  mepo_ui_helper_pref_pan.sh]];
-    \\ bind_key cs b [shellpipe 0 [DIM=w MULT=-1 mepo_ui_helper_pref_pan.sh]];
-    \\ bind_key _ q [shellpipe 0 [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
-    \\ bind_key s q [shellpipe 0 [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
-    \\ bind_key _ x [shellpipe 0 [mepo_ui_menu_user_pin_updater.sh]];
+    \\ bind_key _ c [shellpipe_sync mepo_ui_central_menu.sh];
+    \\ bind_key _ f [shellpipe_async mepo_ui_menu_pin_editor.sh];
+    \\ bind_key _ g [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
+    \\ bind_key s g [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
+    \\ bind_key _ b [shellpipe_sync mepo_ui_menu_search_overpass.sh];
+    \\ bind_key s r [shellpipe_sync mepo_ui_menu_route_overpassrelation.sh];
+    \\ bind_key _ r [shellpipe_sync mepo_ui_menu_route_graphhopper.sh];
+    \\ bind_key s z [shellpipe_sync mepo_ui_menu_pref_fontsize.sh];
+    \\ bind_key _ z [shellpipe_sync mepo_ui_menu_pref_zoom.sh];
+    \\ bind_key _ u [shellpipe_sync mepo_ui_menu_pref_url.sh];
+    \\ bind_key c f [shellpipe_sync  [DIM=h MULT=1  mepo_ui_helper_pref_pan.sh]];
+    \\ bind_key c b [shellpipe_sync  [DIM=h MULT=-1 mepo_ui_helper_pref_pan.sh]];
+    \\ bind_key cs f [shellpipe_sync [DIM=w MULT=1  mepo_ui_helper_pref_pan.sh]];
+    \\ bind_key cs b [shellpipe_sync [DIM=w MULT=-1 mepo_ui_helper_pref_pan.sh]];
+    \\ bind_key _ q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
+    \\ bind_key s q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
+    \\ bind_key _ x [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh]];
     \\ bind_key _ [1] [pin_groupprefset_n 0 active 1];
     \\ bind_key _ [2] [pin_groupprefset_n 1 active 1];
     \\ bind_key _ [3] [pin_groupprefset_n 2 active 1];
