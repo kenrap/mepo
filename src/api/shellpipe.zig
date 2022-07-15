@@ -143,10 +143,6 @@ fn async_mepolang_execute(mepo: *Mepo, allocator: std.mem.Allocator, cmd: []cons
     _ = mepo.async_shellpipe_threads.swapRemove(sdl_thread_id);
 }
 
-fn refresh_ui(mepo: *Mepo, as_async: bool) !void {
-    if (as_async) utilsdl.sdl_push_event_resize() else try mepo.blit();
-}
-
 fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.BufMap {
     var v = try std.process.getEnvMap(allocator);
 
