@@ -68,7 +68,7 @@ pub const DefaultBaseConfig =
     \\
     \\ # Scripts hotkeys;
     \\ bind_key _ c [shellpipe_sync mepo_ui_central_menu.sh];
-    \\ bind_key _ f [shellpipe_async mepo_ui_menu_pin_editor.sh];
+    \\ bind_key _ f [shellpipe_async 0 mepo_ui_menu_pin_editor.sh];
     \\ bind_key _ g [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
     \\ bind_key s g [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
     \\ bind_key _ b [shellpipe_sync mepo_ui_menu_search_overpass.sh];

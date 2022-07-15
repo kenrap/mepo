@@ -15,7 +15,7 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
-async_shellpipe_threads: datastructure.QueueHashMap(sdl.SDL_threadID, void),
+async_shellpipe_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 config: []const u8,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
@@ -1416,7 +1416,7 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
 pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, use_sw_renderer: bool) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
-        .async_shellpipe_threads = datastructure.QueueHashMap(sdl.SDL_threadID, void).init(allocator),
+        .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),

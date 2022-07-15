@@ -11,6 +11,7 @@ const get_env_vars = @import("./shellpipe_sync.zig").get_env_vars;
 
 const AsyncShellpipeRequest = struct {
     mepo: *Mepo,
+    unique_handle_id: i8,
     cmd: []const u8,
 };
 
@@ -18,19 +19,22 @@ pub const spec = .{
     .name = "shellpipe_async",
     .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as mepolang",
     .args = (&[_]types.MepoFnSpecArg{
+        .{ .tag = .Number, .name = "unique_handle_id", .desc = "Optional id to deduplicate individual async shellpipe requests" },
         .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
     })[0..],
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const cmd = args[0].Text;
-    try async_shellpipe(mepo, cmd);
+    const unique_handle_id = @floatToInt(i8, args[0].Number);
+    const cmd = args[1].Text;
+    try async_shellpipe(mepo, unique_handle_id, cmd);
 }
 
-fn async_shellpipe(mepo: *Mepo, cmd: []const u8) !void {
+fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     var sp_req = try mepo.allocator.create(AsyncShellpipeRequest);
     // TODO: defer free cmd
+    sp_req.unique_handle_id = unique_handle_id;
     sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
     sp_req.mepo = mepo;
     _ = sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req);
@@ -38,16 +42,15 @@ fn async_shellpipe(mepo: *Mepo, cmd: []const u8) !void {
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
     var shellpipe_request: *AsyncShellpipeRequest = @ptrCast(*AsyncShellpipeRequest, @alignCast(@alignOf(*AsyncShellpipeRequest), userdata.?));
-    async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.cmd) catch |err| {
+    async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
     return 0;
 }
 
-fn async_shellpipe_run_catch_errors(mepo: *Mepo, cmd: []const u8) !void {
-
+fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     const thread_id = sdl.SDL_GetThreadID(null);
-    try mepo.async_shellpipe_threads.put(thread_id, void{});
+    try mepo.async_shellpipe_threads.put(unique_handle_id, thread_id);
 
     // More or less from zig 0.9 stdlib child process's spawnPosix
     const argv = [_][]const u8{ "sh", "-c", cmd };
@@ -93,6 +96,5 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, cmd: []const u8) !void {
         }
     }
     _ = try child.kill();
-    const sdl_thread_id = sdl.SDL_GetThreadID(null);
-    _ = mepo.async_shellpipe_threads.swapRemove(sdl_thread_id);
+    _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
 }
