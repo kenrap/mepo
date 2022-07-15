@@ -50,6 +50,10 @@ fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
 
 fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     const thread_id = sdl.SDL_GetThreadID(null);
+    if (mepo.async_shellpipe_threads.get(unique_handle_id)) |already_spawned_thread_id| {
+        utildbg.log("Async shellpipe id {} already present with thread_id {}\n", .{unique_handle_id, already_spawned_thread_id});
+        return;
+    }
     try mepo.async_shellpipe_threads.put(unique_handle_id, thread_id);
 
     // More or less from zig 0.9 stdlib child process's spawnPosix
