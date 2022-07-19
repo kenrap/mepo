@@ -33,7 +33,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     var sp_req = try mepo.allocator.create(AsyncShellpipeRequest);
-    // TODO: defer free cmd
     sp_req.unique_handle_id = unique_handle_id;
     sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
     sp_req.mepo = mepo;
@@ -49,6 +48,7 @@ fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
 }
 
 fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
+    defer mepo.allocator.free(cmd);
     const thread_id = sdl.SDL_GetThreadID(null);
     if (mepo.async_shellpipe_threads.get(unique_handle_id)) |already_spawned_thread_id| {
         utildbg.log("Async shellpipe id {} already present with thread_id {}\n", .{unique_handle_id, already_spawned_thread_id});
