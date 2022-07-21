@@ -17,7 +17,7 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
     var stderr_on: bool = false;
-    var mode: enum { Graphical, Download, Version, Docs } = .Graphical;
+    var mode: enum { Graphical, Download, Version, Docs, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var use_sw_renderer = false;
 
@@ -25,26 +25,28 @@ pub fn main() !void {
     var arg_w = args_it.next(allocator);
     while (arg_w != null) : (arg_w = args_it.next(allocator)) {
         const arg = try arg_w.?;
-        if (std.mem.startsWith(u8, arg, "-doc")) {
+        if (std.mem.eql(u8, arg, "-doc")) {
             // -doc: Documentation mode, generates docs for mepolang
             mode = .Docs;
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
             download_request = arg[2..];
-        } else if (std.mem.startsWith(u8, arg, "-e")) {
+        } else if (std.mem.eql(u8, arg, "-e")) {
             // -e: Enable stderr debugging
             stderr_on = true;
-        } else if (std.mem.startsWith(u8, arg, "-sw")) {
+        } else if (std.mem.eql(u8, arg, "-sw")) {
             // -sw: Use software renderer instead of default HW renderer
             use_sw_renderer = true;
-        } else if (std.mem.startsWith(u8, arg, "-v")) {
+        } else if (std.mem.eql(u8, arg, "-v")) {
             // -v: Version
             mode = .Version;
+        } else if (std.mem.eql(u8, arg, "-h")) {
+            // -v: Version
+            mode = .Help;
         }
     }
 
-    utildbg.log("Boot Mepo in mode: {}\n", .{mode});
     switch (mode) {
         .Docs => {
             try Docs.generate();
@@ -61,7 +63,23 @@ pub fn main() !void {
             try Downloader.cache_dlbbox(&tile_cache, download_request);
         },
         .Version => {
-            utildbg.log("Mepo - version {s}\n", .{config.Version});
+            std.debug.print("Mepo - version {s}\n", .{config.Version});
+        },
+        .Help => {
+            std.debug.print(
+                \\Mepo {s} - fast simple hackable OSM map viewer:
+                \\===============================================
+                \\  mepo -doc : Print documentation for mepolang API to STDOUT
+                \\  mepo -dlat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max : Non-interactively download tiles for given range
+                \\  mepo -e : Enable debug mode to log messages to STDERR
+                \\  mepo -sw : Use software renderer rather then default GPU/hardware based renderer
+                \\  mepo -v : Print version number
+                \\  mepo -h : Print this help text
+                \\===============================================
+                \\
+                ,
+                .{config.Version},
+            );
         },
     }
 }
