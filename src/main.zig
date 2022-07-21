@@ -44,6 +44,9 @@ pub fn main() !void {
         } else if (std.mem.eql(u8, arg, "-h")) {
             // -v: Version
             mode = .Help;
+        } else if (std.mem.startsWith(u8, arg, "-")) {
+            std.debug.print("Unknown CLI flag: '{s}'\nUsage - ", .{arg});
+            mode = .Help;
         }
     }
 
