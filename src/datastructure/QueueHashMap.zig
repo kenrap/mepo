@@ -27,6 +27,13 @@ pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type 
             return self.array_hash_map.get(key);
         }
 
+        pub fn getPtr(self: *@This(), key: key_type) ?*metadata_type {
+            self.mutex.lock();
+            defer self.mutex.unlock();
+
+            return self.array_hash_map.getPtr(key);
+        }
+
         pub fn pop(self: *@This()) struct { key: key_type, value: metadata_type } {
             self.mutex.lock();
             defer self.mutex.unlock();
