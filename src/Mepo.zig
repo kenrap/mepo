@@ -876,11 +876,13 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
                 const err = try std.fmt.allocPrintZ(mepo.allocator, "Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
                 defer mepo.allocator.free(err);
                 try mepo.update_debug_message(err);
-                continue;
+                return;
             };
+
             fn_spec.execute(mepo, caller_args) catch |mepolang_err| {
                 utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
             };
+            try mepo.update_debug_message(null);
         } else if (statement[0].len == 1 and statement[0][0] == '#') {
             // Comment nop
         } else {
