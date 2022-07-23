@@ -111,7 +111,14 @@ pub fn set_n(prefname: pref, value: f64) void {
             prefs_mapping[@enumToInt(prefname)].value = .{ .b = value == 1 };
         },
         .u => {
-            prefs_mapping[@enumToInt(prefname)].value = .{ .u = @floatToInt(u8, value) };
+            var bounded_value = @floatToInt(i64, value);
+            if (prefs_mapping[@enumToInt(prefname)].bounds) |bounds| {
+                if (bounded_value > bounds.max) bounded_value = bounds.max;
+                if (bounded_value < bounds.min) bounded_value = bounds.min;
+            } else if (bounded_value > std.math.maxInt(u8)) {
+                bounded_value = std.math.maxInt(u8);
+            }
+            prefs_mapping[@enumToInt(prefname)].value = .{ .u = @intCast(u8, bounded_value) };
         },
         .f => {
             prefs_mapping[@enumToInt(prefname)].value = .{ .f = value };
