@@ -126,6 +126,8 @@ pub fn set_n(prefname: pref, value: f64) void {
         },
         .t => {},
         .u24 => {
+            if (bounded_value > std.math.maxInt(u24)) bounded_value = std.math.maxInt(u24);
+            if (bounded_value < std.math.minInt(u24)) bounded_value = std.math.minInt(u24);
             prefs_mapping[@enumToInt(prefname)].value = .{ .u24 = @floatToInt(u24, value) };
         },
     }
