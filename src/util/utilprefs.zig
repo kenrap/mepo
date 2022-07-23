@@ -48,8 +48,8 @@ const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
     bounds: ?struct {
-        min: i64,
-        max: i64,
+        min: f64,
+        max: f64,
     } = null,
     desc: []const u8,
 };
@@ -106,19 +106,20 @@ pub fn get(prefname: pref) PrefValueUnion {
 }
 
 pub fn set_n(prefname: pref, value: f64) void {
+    var bounded_value : f64 = value;
+    if (prefs_mapping[@enumToInt(prefname)].bounds) |bounds| {
+        if (bounded_value > bounds.max) bounded_value = bounds.max;
+        if (bounded_value < bounds.min) bounded_value = bounds.min;
+    }
+
     switch (prefs_mapping[@enumToInt(prefname)].value) {
         .b => {
             prefs_mapping[@enumToInt(prefname)].value = .{ .b = value == 1 };
         },
         .u => {
-            var bounded_value = @floatToInt(i64, value);
-            if (prefs_mapping[@enumToInt(prefname)].bounds) |bounds| {
-                if (bounded_value > bounds.max) bounded_value = bounds.max;
-                if (bounded_value < bounds.min) bounded_value = bounds.min;
-            } else if (bounded_value > std.math.maxInt(u8)) {
-                bounded_value = std.math.maxInt(u8);
-            }
-            prefs_mapping[@enumToInt(prefname)].value = .{ .u = @intCast(u8, bounded_value) };
+            if (bounded_value > std.math.maxInt(u8)) bounded_value = std.math.maxInt(u8);
+            if (bounded_value < std.math.minInt(u8)) bounded_value = std.math.minInt(u8);
+            prefs_mapping[@enumToInt(prefname)].value = .{ .u = @floatToInt(u8, bounded_value) };
         },
         .f => {
             prefs_mapping[@enumToInt(prefname)].value = .{ .f = value };
