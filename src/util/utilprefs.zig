@@ -47,27 +47,31 @@ pub const pref = enum(u8) {
 const PrefMapping = struct {
     name: []const u8,
     value: PrefValueUnion,
+    bounds: ?struct {
+        min: i64,
+        max: i64,
+    } = null,
     desc: []const u8,
 };
 
 const n_prefs = 38;
 pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
-    mapping[@enumToInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .desc = "Latitude of the map" };
-    mapping[@enumToInt(pref.lon)] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .desc = "Longitude of the map" };
-    mapping[@enumToInt(pref.zoom)] = .{ .name = "zoom", .value = .{ .u = 14 }, .desc = "Zoom level of the map (should be set between 0-19)" };
+    mapping[@enumToInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
+    mapping[@enumToInt(pref.lon)] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .bounds = .{ .min = -180, .max = 180 }, .desc = "Longitude of the map" };
+    mapping[@enumToInt(pref.zoom)] = .{ .name = "zoom", .value = .{ .u = 14, }, .bounds = .{ .min = 0, .max = 19 }, .desc = "Zoom level of the map (should be set between 0-19)" };
     mapping[@enumToInt(pref.debug_message_enabled)] = .{ .name = "debug_message_enabled", .value = .{ .b = true }, .desc = "Whether debug overlay message should be shown in the UI" };
     mapping[@enumToInt(pref.distance_unit_tf_km_mi)] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false }, .desc = "Whether to show distance in km or mi" };
     mapping[@enumToInt(pref.overlay_debugbar)] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "Whether to show the debug bar" };
     mapping[@enumToInt(pref.help)] = .{ .name = "help", .value = .{ .b = false }, .desc = "Whether to show the help overlay" };
     mapping[@enumToInt(pref.overlay_pindetails)] = .{ .name = "overlay_pindetails", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay" };
-    mapping[@enumToInt(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .desc = "Pixel size of the crosshairs" };
-    mapping[@enumToInt(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .desc = "Scale for dragging" };
-    mapping[@enumToInt(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .desc = "Size of the font in the UI" };
+    mapping[@enumToInt(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .bounds = .{ .min = 0, .max = 300 }, .desc = "Pixel size of the crosshairs" };
+    mapping[@enumToInt(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Scale for dragging" };
+    mapping[@enumToInt(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Size of the font in the UI" };
     mapping[@enumToInt(pref.debug_tiles)] = .{ .name = "debug_tiles", .value = .{ .b = false }, .desc = "Whether to show debug information on tiles" };
     mapping[@enumToInt(pref.debug_stderr)] = .{ .name = "debug_stderr", .value = .{ .b = false }, .desc = "Send debug information to STDERR" };
-    mapping[@enumToInt(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .desc = "Maximum number of concurrent transfers for curl" };
-    mapping[@enumToInt(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };
+    mapping[@enumToInt(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 9999 }, .desc = "Maximum number of concurrent transfers for curl" };
+    mapping[@enumToInt(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .bounds = .{ .min = -1, .max = 99999999 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };
     mapping[@enumToInt(pref.tile_cache_network)] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "Whether to donwload new tiledata from external servers; if 0 that means you're offline" };
     mapping[@enumToInt(pref.tile_cache_dir)] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "Path of directory to store the downloaded tiles" };
     mapping[@enumToInt(pref.tile_cache_url)] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "URL source for the tiles, uses %1/%2/%3 to represent X/Y/Z" };
