@@ -3,20 +3,20 @@ const config = @import("../config.zig");
 
 pub fn lon_to_px_x(lon: f64, zoom: u32) i32 {
     const tilex: f64 = (lon + 180.0) / 360.0;
-    return std.math.lossyCast(i32, tilex * zoom_bit(zoom));
+    return lossyCastWithNan(i32, tilex * zoom_bit(zoom));
 }
 
 pub fn lat_to_px_y(lat: f64, zoom: u32) i32 {
     const tiley : f64 = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
-    return std.math.lossyCast(i32, tiley * zoom_bit(zoom));
+    return lossyCastWithNan(i32, tiley * zoom_bit(zoom));
 }
 
 pub fn px_x_to_lon(px: i32, zoom: u32) f64 {
-    return std.math.lossyCast(f64, px) / zoom_bit(zoom) * 360.0 - 180.0;
+    return lossyCastWithNan(f64, px) / zoom_bit(zoom) * 360.0 - 180.0;
 }
 
 pub fn px_y_to_lat(px: i32, zoom: u32) f64 {
-    const n = std.math.pi - 2.0 * std.math.pi * std.math.lossyCast(f64, px) / zoom_bit(zoom);
+    const n = std.math.pi - 2.0 * std.math.pi * lossyCastWithNan(f64, px) / zoom_bit(zoom);
     return 180.0 / std.math.pi * std.math.atan(0.5 * (std.math.exp(n) - std.math.exp(-n)));
 }
 
@@ -41,7 +41,16 @@ pub fn distance_haversine(distance_unit: enum { Km, Mi }, lat_a: f64, lon_a: f64
 }
 
 fn zoom_bit(zoom: u32) f32 {
-    return @intToFloat(f32, (std.math.lossyCast(i32, config.Tsize) << std.math.lossyCast(u5, zoom)));
+    return @intToFloat(f32, (lossyCastWithNan(i32, config.Tsize) << lossyCastWithNan(u5, zoom)));
+}
+
+fn lossyCastWithNan(comptime to_type: type, value: anytype) to_type {
+    if (std.math.isNan(value)) {
+        const t : to_type = 0;
+        return t;
+    } else {
+        return std.math.lossyCast(to_type, value);
+    }
 }
 
 test "lon_to_px_x roundtrips with px_x_to_lon" {
