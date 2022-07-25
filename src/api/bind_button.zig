@@ -15,10 +15,10 @@ pub const spec = .{
     .execute = execute,
 };
 
-fn execute(mepo: *Mepo, argsm: [types.MepoFnNargs]types.MepoArg) !void {
-    const visible_only_when_has_pins = argsm[0].Number == 1;
-    const text = argsm[1].Text;
-    const expression = argsm[2].Text;
+fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
+    const visible_only_when_has_pins = args[0].Number == 1;
+    const text = args[1].Text;
+    const expression = args[2].Text;
     try bind_button(mepo, visible_only_when_has_pins, text, expression);
 }
 
