@@ -14,6 +14,8 @@ coordsviamls() {
 }
 
 coordsviageoclue() {
+  supportsgeoclue || return 1
+
   /usr/libexec/geoclue-2.0/demos/agent > /dev/null &
   AGENTPID=$!
   LATLON="$(
@@ -28,37 +30,41 @@ coordsviageoclue() {
   echo "$LATLON"
 }
 
-coordsviagpsd() {
-  echo # TODO
-}
-
 supportsgeoclue() {
   stat /usr/libexec/geoclue-2.0/demos/agent > /dev/null &&
   stat /usr/libexec/geoclue-2.0/demos/where-am-i > /dev/null
 }
 
-supportsgpsd() {
-  return 1 # TODO
+coordsviagpsd() {
+  # On pmOS: sudo /etc/gpsd/device-hook "" ACTIVATE
+  gpspipe -w -n 10 | grep -m 1 TPV | jq '.lat, .lon' | tr '\n' ' '
+}
+
+iscoords() {
+  echo "$1" | grep -qE '[0-9.\-]+ [0-9.\-]+'
+}
+
+getcoords() {
+  # Try to get coords from GPSD first
+  COORDS="$(coordsviagpsd)"
+  iscoords "$COORDS" && echo "gpsd $COORDS" && return 0
+
+  # If gpsd fails use geoclue
+  COORDS="$(coordsviageoclue)"
+  iscoords "$COORDS" && echo "geoclue $COORDS" && return 0
+
+  # If geoclue fails use mls
+  COORDS="$(coordsviamls)"
+  iscoords "$COORDS" && echo "mls $COORDS" && return 0
+
+  return 1
 }
 
 main() {
-  SOURCE=""
-  COORDS=""
-
-  # Pull coords from gpsd if available, if not use geoclue
-  if supportsgpsd; then
-    SOURCE=gpsd
-    COORDS="$(coordsviagps)"
-  elif supportsgeoclue; then
-    SOURCE=geoclue
-    COORDS="$(coordsviageoclue)"
-  fi
-
-  # E.g. fall back to MLS if coordinate via geoclue or gpsd fails
-  if echo "$COORDS" | grep -vq .; then
-    SOURCE=mls
-    COORDS="$(coordsviamls)"
-  fi
+  SOURCEANDCOORDS="$(getcoords)"
+  [ $? == 1 ] && return
+  SOURCE="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f1)"
+  COORDS="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f2-3)"
 
   echo "pin_delete 7 user_location;"
   echo "pin_add 7 0 $COORDS user_location;"
