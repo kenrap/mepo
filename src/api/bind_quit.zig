@@ -19,8 +19,6 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn bind_quit(mepo: *Mepo, expression: []const u8) !void {
-    if (mepo.quit_action) |quit_action| {
-        mepo.allocator.free(quit_action);
-    }
+    if (mepo.quit_action) |quit_action| mepo.allocator.free(quit_action);
     mepo.quit_action = try mepo.allocator.dupe(u8, expression);
 }

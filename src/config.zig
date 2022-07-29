@@ -107,8 +107,11 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
-    \\ bind_signal TERM [quit];
-    \\ bind_signal INT [quit];
+    \\ bind_signal TERM [filedump rbp $XDG_CONFIG_HOME/mepo/savestate; quit];
+    \\ bind_signal INT  [filedump rbp $XDG_CONFIG_HOME/mepo/savestate; quit];
+    \\
+    \\ # Quit action;
+    \\ bind_quit [filedump rbp $XDG_CONFIG_HOME/mepo/savestate; quit];
     \\
     \\ # Prefs;
     \\ prefset_n lat 40.78392;
@@ -141,5 +144,6 @@ pub const DefaultBaseConfig =
     \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CONFIG_HOME/mepo/config;
+    \\ fileload $XDG_CONFIG_HOME/mepo/savestate;
     \\ fileload $XDG_CONFIG_HOME/mepo/bookmarks;
 ;
