@@ -83,8 +83,10 @@ pub const DefaultBaseConfig =
     \\ bind_key cs b [shellpipe_sync [DIM=w MULT=-1 mepo_ui_helper_pref_pan.sh]];
     \\ bind_key _ q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
     \\ bind_key s q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
-    \\ bind_key _ x [shellpipe_async 1 [mepo_ui_menu_user_pin_updater.sh]];
-    \\ bind_key s x [shellpipe_async_kill 1];
+    \\ bind_key _ x [shellpipe_async 1 [mepo_ui_menu_user_pin_updater.sh droppin]];
+    \\ bind_key s x [shellpipe_async 1 [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
+    \\ bind_key cs x [shellpipe_async_kill 1];
+
     \\ bind_key _ [1] [pin_groupprefset_n 0 active 1];
     \\ bind_key _ [2] [pin_groupprefset_n 1 active 1];
     \\ bind_key _ [3] [pin_groupprefset_n 2 active 1];

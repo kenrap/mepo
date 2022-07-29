@@ -60,7 +60,7 @@ getcoords() {
   return 1
 }
 
-main() {
+droppin() {
   SOURCEANDCOORDS="$(getcoords)"
   [ $? == 1 ] && return
   SOURCE="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f1)"
@@ -69,9 +69,16 @@ main() {
   echo "pin_delete 7 user_location;"
   echo "pin_add 7 0 $COORDS user_location;"
   echo "pin_meta 7 user_location source $SOURCE;"
-  echo "pin_activate 7 user_location;"
-  echo "center_on_pin;"
-  exit 0
 }
 
-if [ -n "$1" ]; then "$@"; else main; fi
+droppinactivateandcenter() {
+  droppin
+  echo "pin_activate 7 user_location;"
+  echo "center_on_pin;"
+}
+
+main() {
+  droppin
+}
+
+if [ -n "$1" ]; then "$@"; else main "$@"; fi
