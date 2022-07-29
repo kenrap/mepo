@@ -9,6 +9,6 @@ pub const spec = .{
     .execute = execute,
 };
 
-fn execute(_: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
-    Mepo.graceful_terminate();
+fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
+    _ = mepo.event_quit(undefined);
 }

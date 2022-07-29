@@ -43,6 +43,7 @@ uibuttons: std.ArrayList(types.UIButton),
 win_h: u32 = config.InitWindowH,
 win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window = undefined,
+quit_action: ?[]const u8 = null,
 
 fn blit_crosshair(mepo: *@This()) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
@@ -828,8 +829,13 @@ fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_quit(_: *@This(), _: sdl.SDL_Event) types.Pending {
-    graceful_terminate();
+pub fn event_quit(mepo: *@This(), _: sdl.SDL_Event) types.Pending {
+    if (mepo.quit_action) |quit_action| {
+        mepo.mepolang_execute(quit_action) catch |err| {
+            utildbg.log("Error with running mepolang quit action: {}\n", .{err});
+        };
+    }
+    graceful_terminate_sdl();
     return .None;
 }
 
@@ -1266,7 +1272,7 @@ pub fn bounding_box(mepo: *@This()) types.LatLonBox {
     };
 }
 
-pub fn graceful_terminate() void {
+pub fn graceful_terminate_sdl() void {
     utildbg.log("Graceful shutdown\n", .{});
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
@@ -1275,7 +1281,7 @@ pub fn graceful_terminate() void {
 
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
     utildbg.log("Graceful shutdown via signal: {}", .{arg});
-    graceful_terminate();
+    graceful_terminate_sdl();
 }
 
 fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {

@@ -7,6 +7,7 @@ pub const fn_specs = &[_]types.MepoFnSpec{
     @import("bind_gesture.zig").spec,
     @import("bind_key.zig").spec,
     @import("bind_signal.zig").spec,
+    @import("bind_quit.zig").spec,
     @import("cache_dlbbox.zig").spec,
     @import("cache_dlradius.zig").spec,
     @import("cache_queueclear.zig").spec,

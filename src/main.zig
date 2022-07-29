@@ -58,7 +58,7 @@ pub fn main() !void {
             var tile_cache = try TileCache.init(allocator);
             const base_config = if (stderr_on) config.DefaultBaseConfig ++ "prefset_n debug_stderr 1" else config.DefaultBaseConfig;
             var mepo = try Mepo.init(allocator, &tile_cache, base_config, use_sw_renderer);
-            mepo.init_video_and_sdl_stdin_loop() catch Mepo.graceful_terminate();
+            mepo.init_video_and_sdl_stdin_loop() catch Mepo.graceful_terminate_sdl();
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);
