@@ -9,7 +9,7 @@ pub const spec = .{
     .name = "bind_signal",
     .desc = "Bind a signal to execute a mepolang action",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "signal_name", .desc = "Signal name; can be `USR1` or `USR2`" },
+        .{ .tag = .Text, .name = "signal_name", .desc = "Signal name; can be `USR1`, `USR2`, `TERM`, or `INT`" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     })[0..],
     .execute = execute,
@@ -30,6 +30,10 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
         signal_name = std.os.SIG.USR1;
     } else if (std.cstr.cmp(signo_str, "USR2") == 0) {
         signal_name = std.os.SIG.USR2;
+    } else if (std.cstr.cmp(signo_str, "TERM") == 0) {
+        signal_name = std.os.SIG.TERM;
+    } else if (std.cstr.cmp(signo_str, "INT") == 0) {
+        signal_name = std.os.SIG.INT;
     } else {
         return error.InvalidSignalName;
     }

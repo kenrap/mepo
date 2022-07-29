@@ -105,6 +105,8 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
+    \\ bind_signal TERM [quit];
+    \\ bind_signal INT [quit];
     \\
     \\ # Prefs;
     \\ prefset_n lat 40.78392;

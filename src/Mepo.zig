@@ -1372,17 +1372,6 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     };
 }
 
-pub fn setup_signals() void {
-    const sigs: [2]u6 = .{ std.os.SIG.TERM, std.os.SIG.INT };
-    for (sigs) |sig| {
-        std.os.sigaction(sig, &.{
-            .handler = .{ .handler = sighandle_terminate },
-            .mask = [_]u32{0} ** 32,
-            .flags = @as(c_uint, 0),
-        }, null);
-    }
-}
-
 pub fn video_init(mepo: *@This()) !void {
     mepo.window = try setup_sdl_video_and_window(mepo.allocator);
     mepo.renderer = renderer: {

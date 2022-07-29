@@ -55,7 +55,6 @@ pub fn main() !void {
             try Docs.generate();
         },
         .Graphical => {
-            Mepo.setup_signals();
             var tile_cache = try TileCache.init(allocator);
             const base_config = if (stderr_on) config.DefaultBaseConfig ++ "prefset_n debug_stderr 1" else config.DefaultBaseConfig;
             var mepo = try Mepo.init(allocator, &tile_cache, base_config, use_sw_renderer);
