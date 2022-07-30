@@ -29,7 +29,7 @@ main() {
   # need to wait for this script (which is also run from shellpipe) to return
   # but directly evals the script
   if echo "$ASYNC" | grep -q 1; then
-    echo "shellpipe 1 $RUNSCRIPT;"
+    echo "shellpipe_async 99 $RUNSCRIPT;"
   else
     eval "$RUNSCRIPT"
   fi
