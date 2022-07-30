@@ -111,7 +111,7 @@ pub const DefaultBaseConfig =
     \\ bind_signal INT  [filedump rbp $XDG_CONFIG_HOME/mepo/savestate; quit];
     \\
     \\ # Quit action;
-    \\ bind_quit [filedump rbp $XDG_CONFIG_HOME/mepo/savestate; quit];
+    \\ bind_quit [filedump rbp $XDG_CONFIG_HOME/mepo/savestate];
     \\
     \\ # Prefs;
     \\ prefset_n lat 40.78392;
