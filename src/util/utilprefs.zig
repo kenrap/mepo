@@ -15,7 +15,6 @@ pub const pref = enum(u8) {
     crosshair_size,
     drag_scale,
     fontsize_ui,
-    debug_tiles,
     debug_stderr,
     tile_cache_max_n_transfers,
     tile_cache_expiry_seconds,
@@ -68,7 +67,6 @@ pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     mapping[@enumToInt(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .bounds = .{ .min = 0, .max = 300 }, .desc = "Pixel size of the crosshairs" };
     mapping[@enumToInt(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Scale for dragging" };
     mapping[@enumToInt(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Size of the font in the UI" };
-    mapping[@enumToInt(pref.debug_tiles)] = .{ .name = "debug_tiles", .value = .{ .b = false }, .desc = "Whether to show debug information on tiles" };
     mapping[@enumToInt(pref.debug_stderr)] = .{ .name = "debug_stderr", .value = .{ .b = false }, .desc = "Send debug information to STDERR" };
     mapping[@enumToInt(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 9999 }, .desc = "Maximum number of concurrent transfers for curl" };
     mapping[@enumToInt(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .bounds = .{ .min = -1, .max = 99999999 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };

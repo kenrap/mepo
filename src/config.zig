@@ -98,7 +98,6 @@ pub const DefaultBaseConfig =
     \\ bind_key _ [9] [pin_groupprefset_n 8 active 1];
     \\ bind_key _ [0] [pin_groupprefset_n 9 active 1];
     \\ bind_key _ / [preftoggle help];
-    \\ bind_key _ d [preftoggle debug_tiles];
     \\ bind_key _ e [preftoggle overlay_pindetails];
     \\ bind_key _ s [preftoggle overlay_debugbar];
     \\ bind_key _ m [preftoggle tile_cache_network];
@@ -121,7 +120,6 @@ pub const DefaultBaseConfig =
     \\ prefset_n crosshair_size 15;
     \\ prefset_n debug_message_enabled 1;
     \\ prefset_n debug_stderr 0;
-    \\ prefset_n debug_tiles 0;
     \\ prefset_n overlay_debugbar 1;
     \\ prefset_n overlay_pindetails 1;
     \\ prefset_n zoom 14;
