@@ -118,7 +118,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             const keymod = utilsdl.sdl_keymod_to_str(key.key_ptr.keymod);
             const statement_signal = try std.fmt.allocPrint(
                 arena.allocator(),
-                "bind_key {s} {c} [{s}];",
+                "bind_key [{s}] [{c}] [{s}];",
                 .{ keymod, key.key_ptr.*.key, key.value_ptr.* },
             );
             try lines.append(statement_signal);
