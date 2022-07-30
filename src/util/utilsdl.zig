@@ -85,7 +85,7 @@ pub fn sdl_keymod_to_str(c: u32) *const [3]u8 {
         sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT => "  s",
         sdl.KMOD_LSHIFT | sdl.KMOD_RSHIFT | sdl.KMOD_LCTRL | sdl.KMOD_RCTRL => " cs",
         sdl.KMOD_LALT | sdl.KMOD_RALT => "  a",
-        else => "   ",
+        else => "  _",
     };
 }
 
