@@ -53,7 +53,7 @@ const PrefMapping = struct {
     desc: []const u8,
 };
 
-const n_prefs = 38;
+const n_prefs = 37;
 pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
     mapping[@enumToInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
