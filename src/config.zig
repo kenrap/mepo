@@ -63,7 +63,7 @@ pub const DefaultBaseConfig =
     \\ bind_key c c [quit];
     \\ bind_key _ y [clipcopy];
     \\ bind_key s y [clippaste];
-    \\ bind_key c s [filedump rbp $XDG_CACHE_HOME/mepo/savestate];
+    \\ bind_key c s [filedump rp $XDG_CACHE_HOME/mepo/savestate];
     \\ bind_key cs s [fileload $XDG_CACHE_HOME/mepo/savestate];
     \\
     \\ # Scripts hotkeys;
@@ -106,11 +106,11 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
-    \\ bind_signal TERM [filedump rbp $XDG_CACHE_HOME/mepo/savestate; quit];
-    \\ bind_signal INT  [filedump rbp $XDG_CACHE_HOME/mepo/savestate; quit];
+    \\ bind_signal TERM [filedump rp $XDG_CACHE_HOME/mepo/savestate; quit];
+    \\ bind_signal INT  [filedump rp $XDG_CACHE_HOME/mepo/savestate; quit];
     \\
     \\ # Quit action;
-    \\ bind_quit [filedump rbp $XDG_CACHE_HOME/mepo/savestate];
+    \\ bind_quit [filedump rp $XDG_CACHE_HOME/mepo/savestate];
     \\
     \\ # Prefs;
     \\ prefset_n lat 40.78392;
