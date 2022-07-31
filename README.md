@@ -195,13 +195,8 @@ bookmarks, and more.
       greatest cross-compatibility between environments.
 - **Milestone 5: UI Niceties** (In-progress)
   - **Todo:**
-    - Improve bottom status bar display to show bandwidth usage / download of
-      tiles, disk, and memory usage.
-    - Integrate gpsd into a script to update user's current location pin and
-      fallback to geoclue2 as needed.
-    - Finalize Mepolang 1.0 API and add error checking so things don't crash
-      when accessing invalid union tag etc (improve robustness of mepolang
-      parser).
+    - Autoupdate user current location either through introducing
+      bind_interval command or continously running async_shellpipe script.
   - **Done:**
     - Add visual per-tile-downloading progress-indicators.
     - Add support for pasting / copying current coordinates from the system
@@ -223,6 +218,13 @@ bookmarks, and more.
     - Refine existing Overpass search script (provide better recommendations
       illustrating OSM tag-based flexibility).
     - Add example bookmarking script based on pin API.
+    - Improve bottom status bar display to show bandwidth usage / download of
+      tiles, disk, and memory usage.
+    - Finalize Mepolang 1.0 API and add error checking so things don't crash
+      when accessing invalid union tag etc (improve robustness of mepolang
+      parser).
+    - Integrate gpsd into a script to update user's current location pin and
+      fallback to geoclue2 as needed.
 - **Milestone 6: Documentation & Packaging**
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
