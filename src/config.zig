@@ -87,16 +87,16 @@ pub const DefaultBaseConfig =
     \\ bind_key s x [shellpipe_async 1 [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
     \\ bind_key cs x [shellpipe_async_kill 1];
 
-    \\ bind_key _ [1] [pin_groupprefset_n 0 active 1];
-    \\ bind_key _ [2] [pin_groupprefset_n 1 active 1];
-    \\ bind_key _ [3] [pin_groupprefset_n 2 active 1];
-    \\ bind_key _ [4] [pin_groupprefset_n 3 active 1];
-    \\ bind_key _ [5] [pin_groupprefset_n 4 active 1];
-    \\ bind_key _ [6] [pin_groupprefset_n 5 active 1];
-    \\ bind_key _ [7] [pin_groupprefset_n 6 active 1];
-    \\ bind_key _ [8] [pin_groupprefset_n 7 active 1];
-    \\ bind_key _ [9] [pin_groupprefset_n 8 active 1];
-    \\ bind_key _ [0] [pin_groupprefset_n 9 active 1];
+    \\ bind_key _ [1] [pin_groupactivate 0];
+    \\ bind_key _ [2] [pin_groupactivate 1];
+    \\ bind_key _ [3] [pin_groupactivate 2];
+    \\ bind_key _ [4] [pin_groupactivate 3];
+    \\ bind_key _ [5] [pin_groupactivate 4];
+    \\ bind_key _ [6] [pin_groupactivate 5];
+    \\ bind_key _ [7] [pin_groupactivate 6];
+    \\ bind_key _ [8] [pin_groupactivate 7];
+    \\ bind_key _ [9] [pin_groupactivate 8];
+    \\ bind_key _ [0] [pin_groupactivate 9];
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ e [preftoggle overlay_pindetails];
     \\ bind_key _ s [preftoggle overlay_debugbar];

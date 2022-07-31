@@ -214,7 +214,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
         try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
             arena.allocator(),
             "Group {d}:",
-            .{mepo.pin_group_active + 1},
+            .{mepo.pin_group_active},
         ), try std.fmt.allocPrintZ(
             arena.allocator(),
             "{d} of {d} ",
@@ -388,12 +388,13 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
         5,
         @intCast(i32, mepo.win_h) - bottombar_height + 3,
         null,
-        "{d:.3} {d:.3} Z:{d} O:{d}, Q:{d}, B:{d}, D:{d}, M:{d} S:{d}",
+        "{d:.3} {d:.3} Z:{d} O:{d} P:{d} Q:{d} B:{d} D:{d} M:{d} S:{d}",
         .{
             p.get(p.pref.lat).f,
             p.get(p.pref.lon).f,
             p.get(p.pref.zoom).u,
             @boolToInt(mepo.tile_cache.thread_download != null),
+            mepo.pin_group_active,
             mepo.tile_cache.queue_lifo_ui.count(),
             mepo.tile_cache.queue_lifo_bg.count(),
             mepo.tile_cache.transfer_map.count(),
