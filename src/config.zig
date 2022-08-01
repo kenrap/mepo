@@ -134,6 +134,7 @@ pub const DefaultBaseConfig =
     \\ prefset_t pingroup_2_color #7502ab;
     \\ prefset_t pingroup_3_color #cf0064;
     \\ prefset_t pingroup_4_color #b89600;
+    \\ prefset_t pingroup_7_color #004a0c;
     \\ prefset_n pingroup_0_ordered 0;
     \\ prefset_n pingroup_1_ordered 0;
     \\ prefset_n pingroup_2_ordered 0;
