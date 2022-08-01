@@ -37,6 +37,7 @@ table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const 
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
 table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
+table_timers: std.array_hash_map.AutoArrayHashMap(types.TimerInput, []const u8),
 tile_cache: *TileCache,
 title_update_ms: usize = 0,
 uibuttons: std.ArrayList(types.UIButton),
@@ -1392,6 +1393,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
         .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
+        .table_timers = std.array_hash_map.AutoArrayHashMap(types.TimerInput, []const u8).init(allocator),
         .pin_groups = pin_groups: {
             var pgs: [10]std.ArrayList(types.Pin) = undefined;
             for (pgs) |_, i| pgs[i] = std.ArrayList(types.Pin).init(allocator);

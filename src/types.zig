@@ -42,6 +42,7 @@ pub const ClickInput = struct { button: u8, clicks: i8 };
 pub const GestureInputAction = enum { Pan, Rotate };
 pub const GestureInputDirection = enum { In, Out };
 pub const GestureInput = struct { action: GestureInputAction, direction: GestureInputDirection, n_fingers: u8 };
+pub const TimerInput = struct { interval_seconds: u32, created_at_ticks: u32 };
 
 pub const Pending = enum { None, Redraw, Drag };
 
