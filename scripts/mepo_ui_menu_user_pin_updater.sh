@@ -65,10 +65,14 @@ droppin() {
   [ $? == 1 ] && return
   SOURCE="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f1)"
   COORDS="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f2-3)"
+  LAT="$(echo $SOURCE | cut -d " " -f1)"
+  LON="$(echo $SOURCE | cut -d " " -f2)"
 
-  echo "pin_delete 7 user_location;"
   echo "pin_add 7 0 $COORDS user_location;"
+  echo "pin_meta 7 user_location lat $LAT;"
+  echo "pin_meta 7 user_location lat $LON;"
   echo "pin_meta 7 user_location source $SOURCE;"
+  echo "pin_meta 7 user_location updated_at [$(date)];"
 }
 
 droppinactivateandcenter() {
