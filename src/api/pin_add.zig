@@ -27,6 +27,15 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, handle: [:0]const u8) !void {
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
 
+    // E.g. nop if adding a pin_handle that already exists
+    if (handle.len != 0) {
+        for (mepo.pin_groups[pin_group].items) |pin| {
+            if (pin.handle) |pin_handle| {
+                if (std.mem.eql(u8, pin_handle, handle)) return;
+            }
+        }
+    }
+
     try mepo.pin_groups[pin_group].append(.{
         .lat = lat,
         .lon = lon,
