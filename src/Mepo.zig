@@ -890,7 +890,7 @@ fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg)
     return true;
 }
 
-fn click_hold_check_dispatch(mepo: *@This()) void {
+fn dispatch_check_click_hold(mepo: *@This()) void {
     if (mepo.drag == null or mepo.fingers.items.len > 1) {
         mepo.drag = null;
         return;
@@ -914,6 +914,23 @@ fn click_hold_check_dispatch(mepo: *@This()) void {
             utildbg.log("Got hold table function {s} after dispatch time\n", .{run_expression});
             mepo.mepolang_execute(run_expression) catch unreachable;
             utilsdl.sdl_push_event_resize();
+        }
+    }
+}
+
+fn dispatch_check_timers(mepo: *@This()) !void {
+    var it = mepo.table_timers.iterator();
+    while (it.next()) |kv| {
+        const timer_input = kv.key_ptr.*;
+        const timer_mepolang = kv.value_ptr.*;
+        if (sdl.SDL_GetTicks() > timer_input.created_at_ticks + (timer_input.interval_seconds * 1000)) {
+            mepo.mepolang_execute(timer_mepolang) catch unreachable;
+            const new_timer = .{
+                .created_at_ticks = sdl.SDL_GetTicks(),
+                .interval_seconds = timer_input.interval_seconds,
+            };
+            _ = mepo.table_timers.swapRemove(timer_input);
+            try mepo.table_timers.put(new_timer, timer_mepolang);
         }
     }
 }
@@ -956,7 +973,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
             try blit(mepo);
         }
 
-        mepo.click_hold_check_dispatch();
+        mepo.dispatch_check_click_hold();
+        try mepo.dispatch_check_timers();
 
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
