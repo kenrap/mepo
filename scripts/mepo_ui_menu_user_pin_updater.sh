@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" User Location Pin: Toggle autoupdate"
+DISPLAYNAME=" Location Pin: Center on user location"
 HOTKEY=x
 
 coordsviamls() {
@@ -82,7 +82,7 @@ droppinactivateandcenter() {
 }
 
 main() {
-  droppin
+  droppinactivateandcenter
 }
 
 if [ -n "$1" ]; then "$@"; else main "$@"; fi
