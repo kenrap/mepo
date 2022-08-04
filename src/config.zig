@@ -27,9 +27,9 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 [Menu] [shellpipe_sync mepo_ui_central_menu.sh];
     \\ bind_button 0 [Center] [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
     \\ bind_button 0 [Relocate] [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
-    \\ bind_button 0 [Nominatim] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
-    \\ bind_button 0 [Overpass] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
-    \\ bind_button 0 [Download] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
+    \\ bind_button 0 [Nm] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button 0 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
+    \\ bind_button 0 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
     \\
     \\ # Gestures;
     \\ bind_gesture pan 2 1 [zoom_relative 1];
