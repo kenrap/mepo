@@ -120,12 +120,12 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         }
 
         // Timers
-        var it_timers = mepo.table_signals.iterator();
+        var it_timers = mepo.table_timers.iterator();
         while (it_timers.next()) |sig| {
             const statement_timer = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_timer {d} [{s}];",
-                .{ sig.key_ptr.*, sig.value_ptr.* },
+                .{ sig.key_ptr.*.interval_seconds, sig.value_ptr.* },
             );
             try lines.append(statement_timer);
         }
