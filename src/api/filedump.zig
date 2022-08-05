@@ -119,6 +119,17 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             try lines.append(statement_signal);
         }
 
+        // Timers
+        var it_timers = mepo.table_signals.iterator();
+        while (it_timers.next()) |sig| {
+            const statement_timer = try std.fmt.allocPrint(
+                arena.allocator(),
+                "bind_timer {d} [{s}];",
+                .{ sig.key_ptr.*, sig.value_ptr.* },
+            );
+            try lines.append(statement_timer);
+        }
+
         // Keybindings
         var it_keys = mepo.table_keybindings.iterator();
         while (it_keys.next()) |key| {
