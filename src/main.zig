@@ -19,6 +19,7 @@ pub fn main() !void {
     var stderr_on: bool = false;
     var mode: enum { Graphical, Download, Version, Docs, Help } = .Graphical;
     var download_request: []const u8 = undefined;
+    var enable_default_config = true;
     var use_sw_renderer = false;
 
     var args_it = std.process.args();
@@ -41,6 +42,9 @@ pub fn main() !void {
         } else if (std.mem.eql(u8, arg, "-v")) {
             // -v: Version
             mode = .Version;
+        } else if (std.mem.eql(u8, arg, "-ndc")) {
+            // -ndc: No default config
+            enable_default_config = false;
         } else if (std.mem.eql(u8, arg, "-h")) {
             // -v: Version
             mode = .Help;
@@ -56,7 +60,18 @@ pub fn main() !void {
         },
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            const base_config = if (stderr_on) config.DefaultBaseConfig ++ "prefset_n debug_stderr 1" else config.DefaultBaseConfig;
+            const base_config = cfg: {
+                const dbg = "prefset_n debug_stderr 1;";
+
+                if (stderr_on and enable_default_config) {
+                    break :cfg config.DefaultBaseConfig ++ dbg;
+                } else if (stderr_on and !enable_default_config) {
+                    break :cfg dbg;
+                } else if (!stderr_on and enable_default_config) {
+                    break :cfg config.DefaultBaseConfig;
+                }
+                break :cfg "";
+            };
             var mepo = try Mepo.init(allocator, &tile_cache, base_config, use_sw_renderer);
             mepo.init_video_and_sdl_stdin_loop() catch Mepo.graceful_terminate_sdl();
         },
@@ -74,6 +89,7 @@ pub fn main() !void {
                 \\  mepo -doc : Print documentation for mepolang API to STDOUT
                 \\  mepo -dlat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max : Non-interactively download tiles for given range
                 \\  mepo -e : Enable debug mode to log messages to STDERR
+                \\  mepo -ndc : Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`
                 \\  mepo -sw : Use software renderer rather then default GPU/hardware based renderer
                 \\  mepo -v : Print version number
                 \\  mepo -h : Print this help text
