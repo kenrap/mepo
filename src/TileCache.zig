@@ -515,7 +515,7 @@ fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.C) c_int {
 
 pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
     if (curl.curl_multi_init()) |_| {
-        return @as(@This(), .{
+        var tc = @as(@This(), .{
             .allocator = allocator,
             .dev_null_fd = cstdio.fopen("/dev/null", "wb"),
             .curl_multi = curl.curl_multi_init().?,
@@ -525,6 +525,8 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
             .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
+        try tc.set_cache_url(try allocator.dupeZ(u8, "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"));
+        return tc;
     } else {
         return error.MultiInitFail;
     }
