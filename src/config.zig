@@ -110,8 +110,8 @@ pub const DefaultBaseConfig =
     \\ # Signals;
     \\ bind_signal USR1 [zoom_relative 1];
     \\ bind_signal USR2 [zoom_relative -1];
-    \\ bind_signal TERM [filedump rp $XDG_CACHE_HOME/mepo/savestate; quit];
-    \\ bind_signal INT  [filedump rp $XDG_CACHE_HOME/mepo/savestate; quit];
+    \\ bind_signal TERM [quit];
+    \\ bind_signal INT  [quit];
     \\
     \\ # Quit action;
     \\ bind_quit [filedump rp $XDG_CACHE_HOME/mepo/savestate];
