@@ -24,7 +24,7 @@ sep() {
 
 prompt() {
   NAME="$1"
-  printf "%b" "$(tput bold)$NAME$(tput sgr0) "
+  printf "%b" "$(tput bold)$NAME$(tput sgr0) " >&2
   read -r RES
   echo "$RES"
 }
@@ -56,7 +56,7 @@ nominatim_spec() {
   while [ -z "$BBOX" ]; do
     echo "$OPTIONS" >&2
     NUMBER="$(prompt "Pick number:")"
-    BBOX="$(echo "$OPTIONS" | grep -E "^${NUMBER}\t" | awk -F' ' '{print $NF}')"
+    BBOX="$(echo "$OPTIONS" | awk '$1 == '"$NUMBER"' {print $NF}')"
     [ -z "$BBOX" ] && echo "Invalid option" >&2 && continue
     # Nominatim BBOX south lat , north lat, west lon, east lon -> conv to mepo format lat1,lon1,lat2,lon2Q
     BBOX="$(echo "$BBOX" | awk -F, '{print $1, $3, $2, $4 }' | tr " " ",")"
