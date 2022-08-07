@@ -182,6 +182,13 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
                 }
             }
         }
+
+        // Activate current pingroup
+        try lines.append(try std.fmt.allocPrint(
+            arena.allocator(),
+            "pin_groupactivate {d};",
+            .{ mepo.pin_group_active },
+        ));
     }
 
     const file_data = try std.mem.join(arena.allocator(), "\n", lines.items);
