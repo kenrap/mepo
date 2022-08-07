@@ -17,6 +17,7 @@ mainloop() {
 
   PINDATA="$(cat "$TMPFILE")"
 
+  PINGROUP="$(echo "$PINDATA" | grep 'pin_groupactivate' | cut -d ' ' -f2 | tr -d ';')"
   LAT="$(echo "$PINDATA" | grep 'prefset_n lat' | cut -d ' ' -f3 | tr -d ';')"
   LON="$(echo "$PINDATA" | grep 'prefset_n lon' | cut -d ' ' -f3 | tr -d ';')"
   PINS="$(
@@ -27,8 +28,8 @@ mainloop() {
   )"
 
   CHOICE="$(
-    printf %b "Close Menu\nAdd Pin\nSave to file\nLoad from file\n$PINS" | 
-    PROMPT="Pin editor" mepo_ui_helper_menu.sh
+    printf %b "Close Menu\nAdd Pin\nSave to file\nLoad from file\nChange Group\n$PINS" |
+    PROMPT="Pin editor (Group $PINGROUP)" mepo_ui_helper_menu.sh
   )"
 
   if [ "$CHOICE" = "Save to file" ]; then
@@ -44,6 +45,11 @@ mainloop() {
       PROMPT="Filepath" mepo_ui_helper_menu.sh
     )"
     printf %b "fileload $FILEPATH;"
+  elif [ "$CHOICE" = "Change Group" ]; then
+    GROUP="$(
+      seq 0 9 | PROMPT="Activate Group" mepo_ui_helper_menu.sh
+    )"
+    printf %b "pin_groupactivate $GROUP;"
   elif [ "$CHOICE" = "Add Pin" ]; then
     PIN_TO_ADD="$(
       PROMPT="Pin handle" mepo_ui_helper_menu.sh
