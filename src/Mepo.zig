@@ -389,7 +389,7 @@ fn blit_overlay_debugbar(mepo: *@This()) !void {
         5,
         @intCast(i32, mepo.win_h) - bottombar_height + 3,
         null,
-        "{d:.3} {d:.3} Z:{d} O:{d} P:{d} Q:{d} B:{d} D:{d} M:{d} S:{d}",
+        "{d:.3} {d:.3} Z{d} O{d} P{d} Q{d} B{d} D{d} M{d} S{d}",
         .{
             p.get(p.pref.lat).f,
             p.get(p.pref.lon).f,
