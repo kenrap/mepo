@@ -441,7 +441,7 @@ fn blit_help(mepo: *@This()) !void {
     );
 }
 
-fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEvent) !?types.UIButton {
+fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
     var right_pad: c_int = 10;
@@ -472,8 +472,9 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_MouseButtonEv
 
         if (determine_click_target) |want_target| {
             // Determine if click fell within btn
-            if (want_target.x >= target.x and want_target.y >= target.y and want_target.x <= target.x + target.w and want_target.y <= target.y + target.h)
+            if (want_target.x >= target.x and want_target.y >= target.y and want_target.x <= target.x + target.w and want_target.y <= target.y + target.h) {
                 return mepo.uibuttons.items[btn_i];
+            }
         } else {
             // Rendering
             const dest_rect_lab = sdl.SDL_Rect{
@@ -619,13 +620,14 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
 
-    if (!mepo.within_touch_bounds(e.button.x, e.button.y)) {
+    const cursor = mepo.scaled_mouse_position();
+    if (!mepo.within_touch_bounds(cursor.x, cursor.y)) {
         mepo.drag = null;
         return .None;
     } else if (e.button.button == sdl.SDL_BUTTON_LEFT) {
         mepo.drag = .{
             .begin_ticks = sdl.SDL_GetTicks(),
-            .point = .{ .x = e.button.x, .y = e.button.y },
+            .point = .{ .x = cursor.x, .y = cursor.y },
         };
     }
     return .Redraw;
@@ -635,9 +637,11 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
     defer mepo.drag = null;
 
+    const cursor = mepo.scaled_mouse_position();
+
     // 1. Invalidation checks: ensure not out of bounds or not dragging
     {
-        const is_outside_touch_bounds = !mepo.within_touch_bounds(e.button.x, e.button.y);
+        const is_outside_touch_bounds = !mepo.within_touch_bounds(cursor.x, cursor.y);
         const is_dragging = mepo.drag != null and
             mepo.drag.?.delta_x + mepo.drag.?.delta_y > 10;
         if (is_outside_touch_bounds or is_dragging) return .None;
@@ -645,7 +649,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
     // 2. UI on elements clcking overrides (uibtns)
     //    these actions take preference *over* bind_click actions
-    if (mepo.blit_uibuttons(e.button) catch null) |clicked_btn| {
+    if (mepo.blit_uibuttons(cursor) catch null) |clicked_btn| {
         // Click on UI button check
         utildbg.log("Clicked on button: {}\n", .{clicked_btn});
         mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
@@ -665,7 +669,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
                 if (item.category == .Structural) continue;
                 const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
-                const delta = (std.math.absInt(pin_x - e.button.x) catch continue) + (std.math.absInt(pin_y - e.button.y) catch continue);
+                const delta = (std.math.absInt(pin_x - cursor.x) catch continue) + (std.math.absInt(pin_y - cursor.y) catch continue);
                 if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
                     closest_match_pin = .{
                         .pin_group_i = @intCast(u8, pin_group_i),
@@ -696,9 +700,10 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
 
-    if (mepo.drag != null and mepo.within_touch_bounds(e.motion.x, e.motion.y)) {
-        mepo.drag.?.point.x = e.motion.x;
-        mepo.drag.?.point.y = e.motion.y;
+    const cursor = mepo.scaled_mouse_position();
+    if (mepo.drag != null and mepo.within_touch_bounds(cursor.x, cursor.y)) {
+        mepo.drag.?.point.x = cursor.x;
+        mepo.drag.?.point.y = cursor.y;
         mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
         mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
         mepo.set_x(mepo.get_x() - (e.motion.xrel * p.get(p.pref.drag_scale).u));
@@ -899,14 +904,12 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
     const threshold_hit_hold_ms = sdl.SDL_GetTicks() >= mepo.drag.?.begin_ticks + config.DragThresholdTicks;
     const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y <= config.DragThresholdDelta;
 
+    // E.g ignore hold on ui buttons
+    if (threshold_hit_distance) {
+        if (mepo.blit_uibuttons(mepo.drag.?.point) catch null) |_| return;
+    }
+
     if (threshold_hit_hold_ms and threshold_hit_distance) {
-        // E.g ignore hold on ui buttons
-        if (mepo.blit_uibuttons(b: {
-            var b: sdl.SDL_MouseButtonEvent = undefined;
-            b.x = mepo.drag.?.point.x;
-            b.y = mepo.drag.?.point.y;
-            break :b b;
-        }) catch null) |_| return;
 
         mepo.drag = null;
         // TODO: hold support for right click as well?
@@ -1200,33 +1203,40 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     utilsdl.sdl_push_event_resize();
 }
 
-pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
+
+// Returns the scaled mouse position based on the gl_drawablesize which
+// is also set on resizes rather then the raw position which comes in
+// from GetMouseState
+//
+// This is used in several places as its more reliable then motion/button
+// events which seem to have some issue with SetLogicalSize in certain
+// platforms as of SDL 2.0.22
+pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
     var cursor_x: c_int = undefined;
     var cursor_y: c_int = undefined;
     var gl_w: c_int = undefined;
     var gl_h: c_int = undefined;
     var win_w: c_int = undefined;
     var win_h: c_int = undefined;
-
     _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
     sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_w, &gl_h);
     sdl.SDL_GetWindowSize(mepo.window, &win_w, &win_h);
     const scale_x = @divTrunc(gl_w, win_w);
     const scale_y = @divTrunc(gl_h, win_h);
+    const scaled_x = cursor_x * scale_x;
+    const scaled_y = cursor_y * scale_y;
+    return .{.x = scaled_x, .y = scaled_y};
+}
 
-    // GetMouseState does not respect scaled logical size set for high-DPI
-    // displays in resizing logic (e.g. we store mepo.win_w/mepo.win_h
-    // as the actual GL resolution).. thus we calculate scaling factor
-    // here and scale up cursor position based on *= (gl_{w,h} / win_{w,h}
-    cursor_x *= scale_x;
-    cursor_y *= scale_y;
+pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
+    const cursor = mepo.scaled_mouse_position();
 
     const cursor_lat = utilconversion.px_y_to_lat(
-        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor_y,
+        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor.y,
         p.get(p.pref.zoom).u,
     );
     const cursor_lon = utilconversion.px_x_to_lon(
-        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor_x,
+        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor.x,
         p.get(p.pref.zoom).u,
     );
 
