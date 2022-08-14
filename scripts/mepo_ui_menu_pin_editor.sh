@@ -2,9 +2,6 @@
 DISPLAYNAME="⊕ Pin editor: Edit, save, and restore pin metadata"
 HOTKEY=f
 ASYNC=1
-# TODO, Sxmo's central menu generates shellpipe statements, for 0.5 syntax
-# changes to support async items, pin script needs to be updated to support
-# this
 
 mainloop() {
   # E.g. dump pin data to file & wait for complete
