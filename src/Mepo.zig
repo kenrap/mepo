@@ -938,21 +938,25 @@ fn dispatch_check_timers(mepo: *@This()) !void {
     }
 }
 
-pub fn init_video_and_sdl_stdin_loop(mepo: *@This()) !void {
-    const thread = sdl.SDL_CreateThread(
-        mepo_sdl_loop_thread_boot,
-        "Mepo_SDL_Thread",
-        mepo,
-    );
-    _ = thread;
+pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl: bool) !void {
+    if (enable_stdin_mepolang_repl) {
+        const thread = sdl.SDL_CreateThread(
+            mepo_sdl_loop_thread_boot,
+            "Mepo_SDL_Thread",
+            mepo,
+        );
+        _ = thread;
 
-    while (true) {
-        const stdin = &std.io.getStdIn().reader();
-        var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
-        const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
-        mepo.allocator.free(read_slice);
-        std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
-        utilsdl.sdl_push_event_mepolang_execution(slice_z);
+        while (true) {
+            const stdin = &std.io.getStdIn().reader();
+            var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
+            const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
+            mepo.allocator.free(read_slice);
+            std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
+            utilsdl.sdl_push_event_mepolang_execution(slice_z);
+        }
+    } else {
+        _ = mepo_sdl_loop_thread_boot(mepo);
     }
 }
 
