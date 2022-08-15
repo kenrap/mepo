@@ -1,4 +1,4 @@
-# Mepolang API
+# Mepolang API (0.5)
 ## **bind_button**
 Create a UI button which executes a mepolang action
 
@@ -30,7 +30,7 @@ Bind a multitouch gesture event to execute a mepolang action
 | -------- | ------------ | --------------- |
 | action | Text   | Gesture action (set to either `pan` or `rotate`) |
 | fingers | Number | Number of fingers to trigger expression |
-| direction | Number | Direction for gesture (e.g. `1` for in or `2` for out) |
+| direction | Number | Direction for gesture (e.g. `1` for in or `-1` for out) |
 | mepolang_expression | Text   | Mepolang expression to run |
 
 ## **bind_key**
@@ -51,7 +51,26 @@ Bind a signal to execute a mepolang action
 
 | **Name** | **Datatype** | **Description** |
 | -------- | ------------ | --------------- |
-| signal_name | Text   | Signal name; can be `USR1` or `USR2` |
+| signal_name | Text   | Signal name; can be `USR1`, `USR2`, `TERM`, or `INT` |
+| mepolang_expression | Text   | Mepolang expression to run |
+
+## **bind_timer**
+Bind a timer to execute a mepolang action at the given interval
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
+| interval_seconds | Number | Number of seconds between runs of mepolang code |
+| mepolang_expression | Text   | Mepolang expression to run |
+
+## **bind_quit**
+Bind a mepolang expression to run on quitting the application
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
 | mepolang_expression | Text   | Mepolang expression to run |
 
 ## **cache_dlbbox**
@@ -84,6 +103,7 @@ Queue tiles for a bounding box to download to the cache in the background for th
 ## **cache_queueclear**
 Clear any queued background downloading process
 
+
 ## **center_on_mouse**
 Center the map on the current position of the mouse
 
@@ -109,6 +129,16 @@ Load mepolang from an arbitrary filesystem file
 | -------- | ------------ | --------------- |
 | filepath | Text   | Path to file to load |
 
+## **filedump**
+Save the current state of all preferences to a file.
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
+| datatypes | Text   | Types of data to save (p = pins, r = preferences, b = bindings); ex. 'pr' would save both pins and preferences but not bindings |
+| filepath | Text   | Path to file to save state to |
+
 ## **move_relative**
 Move the map by a relative x/y amount
 
@@ -118,6 +148,16 @@ Move the map by a relative x/y amount
 | -------- | ------------ | --------------- |
 | rel_x | Number | Relative x amount |
 | rel_y | Number | Relative y amount |
+
+## **pin_activate**
+Activate a pin by its handle
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
+| group_number | Number | Group number |
+| pin_handle | Text   | Pin's handle to activate |
 
 ## **pin_add**
 Add a pin to the map
@@ -131,7 +171,6 @@ Add a pin to the map
 | lat | Number | Latitude |
 | lon | Number | Longitude |
 | handle | Text   | *Unique* handle to refer to pin; can use this handle subsequently with `pin_meta` to update pin metadata |
-| name | Text   | Pretty name to display for pin |
 
 ## **pin_cycle**
 Cycle the currently focused pin
@@ -147,6 +186,15 @@ Cycle the currently focused pin
 Deactivate currently active pin
 
 
+## **pin_groupactivate**
+Activate the pin group specified
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
+| group_number | Number | Group number |
+
 ## **pin_delete**
 Delete a pin by its handle
 
@@ -154,29 +202,8 @@ Delete a pin by its handle
 
 | **Name** | **Datatype** | **Description** |
 | -------- | ------------ | --------------- |
+| group_number | Number | Group number |
 | pin_handle | Text   | Pin's handle to delete |
-
-## **pin_groupprefset_n**
-Set a pin group's number preference
-
-**Arguments**:
-
-| **Name** | **Datatype** | **Description** |
-| -------- | ------------ | --------------- |
-| group_number | Number | The pin group number |
-| prefrence_name | Text   | Preference name |
-| prefrence_value | Number | Preference number value |
-
-## **pin_groupprefset_t**
-Set a pin group's text preference
-
-**Arguments**:
-
-| **Name** | **Datatype** | **Description** |
-| -------- | ------------ | --------------- |
-| group_number | Number | The pin group number |
-| prefrence_name | Text   | Preference name |
-| prefrence_value | Text   | Preference text value |
 
 ## **pin_meta**
 Update a pin's metadata
@@ -237,14 +264,23 @@ Toggle a boolean number preference between `1` and `0`
 Quit the application
 
 
-## **shellpipe**
-Run a system (shell) command and pipe; STDOUT returned from command will be executed back as mepolang
+## **shellpipe_async**
+Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as mepolang
 
 **Arguments**:
 
 | **Name** | **Datatype** | **Description** |
 | -------- | ------------ | --------------- |
-| as_async | Number | Set to 1 to run asynchronously (e.g. don't wait for process to complete) |
+| unique_handle_id | Number | Optional id to deduplicate individual async shellpipe requests |
+| shell_statement | Text   | Shell statement to execute |
+
+## **shellpipe_sync**
+Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as mepolang
+
+**Arguments**:
+
+| **Name** | **Datatype** | **Description** |
+| -------- | ------------ | --------------- |
 | shell_statement | Text   | Shell statement to execute |
 
 ## **zoom_relative**
