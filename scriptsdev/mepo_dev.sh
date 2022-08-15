@@ -7,6 +7,8 @@ zig build
 
 if [ "$GDB" = 1 ]; then
   gdb ./zig-out/bin/mepo "$@"
+elif [ "$STRACE" = 1 ]; then
+  strace ./zig-out/bin/mepo "$@"
 else
   ./zig-out/bin/mepo "$@"
 fi
