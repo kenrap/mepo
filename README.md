@@ -246,6 +246,28 @@ bookmarks, and more.
     - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
     - Tag 1.0 release.
+- **Milestone 7: Documentation Website**
+  - **Todo:**
+    - Development of a documentation website
+    - Docs section: highlighting the various end-user documentation guides &
+      tutorials (such as the installation guide, userguide, scripting guide,
+      mepolang documentation etc.).
+    - Videos section: to demonstrate both end-user functionality (such as with
+      the [video created for 0.4](https://media.lrdu.org/mepo_demos/mepo_demo_0.4.webm)),
+      and additionally this section could host new screencasts showing how to
+      hack on mepo (e.g. examples of showing editing mepolang configuration
+      and showing the end result; rather then just 'end-user' functionality
+      as was the target with the 0.4 demo video).
+    - Contribute section: information on how to contribute,
+      links to repository, bug tracker, mailing list, IRC, and details on
+      how to get involved.
+- **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri**
+  - **Todo:**
+    - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
+      like zenity or another window-based input method may be used).
+    - Add support for Lomiri.
+    - Investigate & possibly add Flatpak compatability as this will likely
+      be the simplest packaging route for Ubuntu Touch etc.
 
 ## **Funding**
 [NLnet](https://nlnet.nl) has kindly awarded a grant to support Mepo's
