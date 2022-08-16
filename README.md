@@ -193,7 +193,7 @@ bookmarks, and more.
       mobile/desktop & X/Wayland that should all have first-class support.
     - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
       greatest cross-compatibility between environments.
-- **Milestone 5: UI Niceties** (In-progress)
+- **Milestone 5: UI Niceties** (Complete: 8/15/2022, tag 0.5)
   - **Done:**
     - Add visual per-tile-downloading progress-indicators.
     - Add support for pasting / copying current coordinates from the system
@@ -224,7 +224,7 @@ bookmarks, and more.
       fallback to geoclue2 as needed.
     - Autoupdate user current location either through introducing
       bind_interval command or continously running async_shellpipe script.
-- **Milestone 6: Documentation & Packaging**
+- **Milestone 6: Documentation & Packaging** (In-progress)
   - **Todo:**
     - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
