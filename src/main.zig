@@ -96,19 +96,20 @@ pub fn main() !void {
             std.debug.print(
                 \\Mepo {s} - fast simple hackable OSM map viewer:
                 \\===============================================
-                \\  mepo -docmd : Print markdown documentation for mepolang API to STDOUT
-                \\  mepo -docman : Print manpage documentation for mepolang API to STDOUT
-                \\  mepo -dlat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max : Non-interactively download tiles for given range
-                \\  mepo -i : Read mepolang from STDIN continually
-                \\  mepo -e : Enable debug mode to log messages to STDERR
-                \\  mepo -ndc : Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`
-                \\  mepo -sw : Use software renderer rather then default GPU/hardware based renderer
-                \\  mepo -v : Print version number
-                \\  mepo -h : Print this help text
-                \\===============================================
                 \\
                 ,
                 .{config.Version},
+            );
+            for (Docs.CliFlags) |flag_spec| {
+                std.debug.print(
+                    "{s}: {s}\n",
+                    .{flag_spec.flag, flag_spec.desc},
+                );
+            }
+            std.debug.print(
+                \\===============================================
+                ,
+                .{},
             );
         },
     }

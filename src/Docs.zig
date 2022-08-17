@@ -2,6 +2,22 @@ const std = @import("std");
 const FnTable = @import("./api/_FnTable.zig");
 const config = @import("./config.zig");
 
+pub const CliFlags = &[_]struct{
+    flag: []const u8,
+    param: ?[]const u8 = null,
+    desc: []const u8,
+}{
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for mepolang API to STDOUT" },
+    .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT" },
+    .{ .flag = "-d", .desc = "Non-interactively download tiles for given range", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
+    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually" },
+    .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
+    .{ .flag = "-ndc", .desc = "Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`" },
+    .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer" },
+    .{ .flag = "-v", .desc = "Print version number" },
+    .{ .flag = "-h", .desc = "Print this help text" },
+};
+
 pub fn generate(format: enum{Markdown, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
 
