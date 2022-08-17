@@ -18,7 +18,7 @@ pub fn main() !void {
     const allocator = std.heap.c_allocator;
     var stderr_debugging_on: bool = false;
     var stdin_mepolang_parsing_on: bool = false;
-    var mode: enum { Graphical, Download, Version, Docs, Help } = .Graphical;
+    var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var enable_default_config = true;
     var use_sw_renderer = false;
@@ -27,9 +27,12 @@ pub fn main() !void {
     var arg_w = args_it.next(allocator);
     while (arg_w != null) : (arg_w = args_it.next(allocator)) {
         const arg = try arg_w.?;
-        if (std.mem.eql(u8, arg, "-doc")) {
-            // -doc: Documentation mode, generates docs for mepolang
-            mode = .Docs;
+        if (std.mem.eql(u8, arg, "-docmd")) {
+            // -docmd: Documentation mode, generates markdown docs for mepolang
+            mode = .DocsMarkdown;
+        } else if (std.mem.eql(u8, arg, "-docman")) {
+            // -docman: Documentation mode, generates manpage docs for mepolang
+            mode = .DocsManpage;
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
@@ -59,8 +62,11 @@ pub fn main() !void {
     }
 
     switch (mode) {
-        .Docs => {
-            try Docs.generate();
+        .DocsMarkdown => {
+            try Docs.generate(.Markdown);
+        },
+        .DocsManpage => {
+            try Docs.generate(.Manpage);
         },
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
@@ -90,7 +96,8 @@ pub fn main() !void {
             std.debug.print(
                 \\Mepo {s} - fast simple hackable OSM map viewer:
                 \\===============================================
-                \\  mepo -doc : Print documentation for mepolang API to STDOUT
+                \\  mepo -docmd : Print markdown documentation for mepolang API to STDOUT
+                \\  mepo -docman : Print manpage documentation for mepolang API to STDOUT
                 \\  mepo -dlat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max : Non-interactively download tiles for given range
                 \\  mepo -i : Read mepolang from STDIN continually
                 \\  mepo -e : Enable debug mode to log messages to STDERR

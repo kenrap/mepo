@@ -2,12 +2,10 @@ const std = @import("std");
 const FnTable = @import("./api/_FnTable.zig");
 const config = @import("./config.zig");
 
-pub fn generate() !void {
-    const Format = enum { Markdown, Manpage };
-    const use_format: Format = .Markdown;
+pub fn generate(format: enum{Markdown, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
 
-    switch (use_format) {
+    switch (format) {
         .Markdown => {
             try stdout.print("# Mepolang API ({s})\n", .{config.Version});
             for (FnTable.fn_specs) |fnc| {
