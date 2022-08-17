@@ -74,27 +74,27 @@ pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     mapping[@enumToInt(pref.tile_cache_dir)] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "Path of directory to store the downloaded tiles" };
     mapping[@enumToInt(pref.tile_cache_url)] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "URL source for the tiles, uses %1/%2/%3 to represent X/Y/Z" };
 
-    mapping[@enumToInt(pref.pingroup_0_ordered)] = .{ .name = "pingroup_0_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_1_ordered)] = .{ .name = "pingroup_1_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_2_ordered)] = .{ .name = "pingroup_2_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_3_ordered)] = .{ .name = "pingroup_3_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_4_ordered)] = .{ .name = "pingroup_4_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_5_ordered)] = .{ .name = "pingroup_5_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_6_ordered)] = .{ .name = "pingroup_6_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_7_ordered)] = .{ .name = "pingroup_7_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_8_ordered)] = .{ .name = "pingroup_8_ordered", .value = .{ .b = false }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_9_ordered)] = .{ .name = "pingroup_9_ordered", .value = .{ .b = false }, .desc = "TODO" };
+    mapping[@enumToInt(pref.pingroup_0_ordered)] = .{ .name = "pingroup_0_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 0 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_1_ordered)] = .{ .name = "pingroup_1_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 1 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_2_ordered)] = .{ .name = "pingroup_2_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 2 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_3_ordered)] = .{ .name = "pingroup_3_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 3 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_4_ordered)] = .{ .name = "pingroup_4_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 4 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_5_ordered)] = .{ .name = "pingroup_5_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 5 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_6_ordered)] = .{ .name = "pingroup_6_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 6 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_7_ordered)] = .{ .name = "pingroup_7_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 7 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_8_ordered)] = .{ .name = "pingroup_8_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 8 should be ordered" };
+    mapping[@enumToInt(pref.pingroup_9_ordered)] = .{ .name = "pingroup_9_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 9 should be ordered" };
 
-    mapping[@enumToInt(pref.pingroup_0_color)] = .{ .name = "pingroup_0_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_1_color)] = .{ .name = "pingroup_1_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_2_color)] = .{ .name = "pingroup_2_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_3_color)] = .{ .name = "pingroup_3_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_4_color)] = .{ .name = "pingroup_4_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_5_color)] = .{ .name = "pingroup_5_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_6_color)] = .{ .name = "pingroup_6_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_7_color)] = .{ .name = "pingroup_7_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_8_color)] = .{ .name = "pingroup_8_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
-    mapping[@enumToInt(pref.pingroup_9_color)] = .{ .name = "pingroup_9_color", .value = .{ .u24 = 0x0 }, .desc = "TODO" };
+    mapping[@enumToInt(pref.pingroup_0_color)] = .{ .name = "pingroup_0_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 0" };
+    mapping[@enumToInt(pref.pingroup_1_color)] = .{ .name = "pingroup_1_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 1" };
+    mapping[@enumToInt(pref.pingroup_2_color)] = .{ .name = "pingroup_2_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 2" };
+    mapping[@enumToInt(pref.pingroup_3_color)] = .{ .name = "pingroup_3_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 3" };
+    mapping[@enumToInt(pref.pingroup_4_color)] = .{ .name = "pingroup_4_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 4" };
+    mapping[@enumToInt(pref.pingroup_5_color)] = .{ .name = "pingroup_5_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 5" };
+    mapping[@enumToInt(pref.pingroup_6_color)] = .{ .name = "pingroup_6_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 6" };
+    mapping[@enumToInt(pref.pingroup_7_color)] = .{ .name = "pingroup_7_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 7" };
+    mapping[@enumToInt(pref.pingroup_8_color)] = .{ .name = "pingroup_8_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 8" };
+    mapping[@enumToInt(pref.pingroup_9_color)] = .{ .name = "pingroup_9_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 9" };
 
     break :mapping mapping;
 };
