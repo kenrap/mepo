@@ -24,7 +24,18 @@ pub fn generate(format: enum{Markdown, Manpage}) !void {
             }
         },
         .Manpage => {
-            std.debug.print("Manpage format unsupported for now\n", .{});
+            try stdout.print(
+              \\.TH Mepo 1
+              \\
+              \\.SH NAME
+              \\mepo - fast, simple, and hackable OSM map viewer for desktop & mobile Linux
+              \\
+              \\.SH SYNOPSIS
+              \\.B mepo
+              \\[\fB\-i\fR]
+              ,
+              .{},
+            );
         },
     }
 }
