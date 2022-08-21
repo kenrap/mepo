@@ -100,9 +100,19 @@ pub fn generate(format: enum{Markdown, Manpage}) !void {
                     );
                 }
             }
+
+            try stdout.print(".SH MEPOLANG\n", .{});
+            for (FnTable.fn_specs) |fnc| {
+                try stdout.print(".B {s}\n", .{fnc.name});
+                try stdout.print("{s}\n\nArguments:\n", .{fnc.desc});
+                for (fnc.args) |arg| {
+                    const tag = if (arg.tag == .Number) "Number" else "Text  ";
+                    try stdout.print("  {s} ({s}): {s}\n", .{ arg.name, tag, arg.desc });
+                }
+                try stdout.print("\n", .{});
+            }
+
             try stdout.print(
-                \\.SH MEPOLANG
-                \\TODO
                 \\
                 \\.SH VERSION
                 \\Manual page generated against mepo version {s}
