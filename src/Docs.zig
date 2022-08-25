@@ -36,7 +36,7 @@ pub fn generate(format: enum{Markdown, Manpage}) !void {
                         try stdout.print("| {s} | {s} | {s} |\n", .{ arg.name, tag, arg.desc });
                     }
                 }
-                try stdout.print("\n", .{});
+                try stdout.print("\n---\n\n", .{});
             }
         },
         .Manpage => {
