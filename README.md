@@ -234,9 +234,6 @@ bookmarks, and more.
       Overpass, GraphHopper, etc. locally.
     - Document examples on how to write custom scripts interfacing with
       mepolang.
-    - Modify internals of Mepolang to include documentation directly in
-      structs so that Mepolang API documentation can be automatically generated
-      as a webpage for end-users.
     - Modify internals of prefset / preferences table to automatically generate
       documentation directly from code / structs.
     - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
@@ -246,7 +243,11 @@ bookmarks, and more.
     - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
     - Tag 1.0 release.
-- **Milestone 7: Documentation Website**
+  - **Todo:**
+    - Modify internals of Mepolang to include documentation directly in
+      structs so that Mepolang API documentation can be automatically generated
+      as a webpage for end-users.
+- **Milestone 7: Documentation Website** (In-progress)
   - **Todo:**
     - Development of a documentation website
     - Docs section: highlighting the various end-user documentation guides &
@@ -261,7 +262,7 @@ bookmarks, and more.
     - Contribute section: information on how to contribute,
       links to repository, bug tracker, mailing list, IRC, and details on
       how to get involved.
-- **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri**
+- **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
   - **Todo:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
       like zenity or another window-based input method may be used).
