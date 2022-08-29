@@ -1,4 +1,4 @@
-# Mepo: **Software Bill of Materials**
+# Software Bill of Materials
 
 **Base application** (mepo):
 - Zig: Used to compile core application logic

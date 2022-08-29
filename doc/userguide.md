@@ -1,4 +1,4 @@
-# Mepo: **User Guide**
+# User Guide
 
 > **Disclaimer**: This guide is a work-in-progress and not complete!
 

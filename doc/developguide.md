@@ -1,4 +1,4 @@
-# Mepo: **Development Guide**
+# Development Guide
 
 ## Overview
 
