@@ -1,0 +1,50 @@
+# Flatpak Manifest
+app-id: com.milesalan.mepo
+runtime: org.freedesktop.Platform
+runtime-version: '21.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions: ["org.freedesktop.Sdk.Extension.ziglang"]
+extension-tag: '21.08'
+build-options: { append-path: "/usr/lib/sdk/ziglang" }
+command: mepo
+modules:
+  - name: SDL2
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL
+        tag: release-2.0.20
+
+  - name: SDL2_image
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_image
+        tag: release-2.6.2
+
+  - name: SDL2_ttf
+    buildsystem: autotools
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_ttf
+        tag: release-2.20.1
+
+  - name: SDL2_gfx
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: http://www.ferzkopp.net/Software/SDL2_gfx/SDL2_gfx-1.0.4.tar.gz
+        sha256: 63e0e01addedc9df2f85b93a248f06e8a04affa014a835c2ea34bfe34e576262
+
+  - name: Mepo
+    buildsystem: simple
+    build-commands:
+      - zig build
+      - install zig-out/bin/* "/app/bin/"
+      - mkdir -p /app/usr/share/applications /app/usr/share/pixmaps
+      - install zig-out/share/applications/mepo.desktop "/app/usr/share/applications/"
+      - install zig-out/share/pixmaps/mepo.png "/app/usr/share/pixmaps/"
+    sources:
+      - type: git
+        url: https://git.sr.ht/~mil/mepo
+        tag: "0.5"
