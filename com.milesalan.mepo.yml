@@ -5,9 +5,18 @@ runtime-version: '21.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions: ["org.freedesktop.Sdk.Extension.ziglang"]
 extension-tag: '21.08'
+finish-args:
+  - --device=dri
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --share=network
+  - --filesystem=xdg-documents
+
 build-options: { append-path: "/usr/lib/sdk/ziglang" }
 command: mepo
 modules:
+  # Core build deps for mepo
   - name: SDL2
     buildsystem: autotools
     sources:
@@ -36,6 +45,52 @@ modules:
         url: http://www.ferzkopp.net/Software/SDL2_gfx/SDL2_gfx-1.0.4.tar.gz
         sha256: 63e0e01addedc9df2f85b93a248f06e8a04affa014a835c2ea34bfe34e576262
 
+
+  # Mepo_script runtime deps
+  - name: jq
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-1.6.tar.gz
+        sha256: "5de8c8e29aaa3fb9cc6b47bb27299f271354ebb72514e3accadc7d38b5bbaa72"
+  - name: ncurses
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://invisible-mirror.net/archives/ncurses/current/ncurses-6.3-20220827.tgz
+        sha256: "e9daea489c50be3c325db8d49891e412a75c64aa0cfb3252d0b3d8f02529b748"
+
+  - name: dmenu
+    buildsystem: simple
+    build-commands:
+      - PREFIX="" DESTDIR=/app make install
+    sources:
+      - type: archive
+        url: https://dl.suckless.org/tools/dmenu-5.1.tar.gz
+        sha256: "1f4d709ebba37eb7326eba0e665e0f13be4fa24ee35c95b0d79c30f14a348fd5"
+  - name: bemenu
+    buildsystem: simple
+    build-commands:
+      - PREFIX="" DESTDIR=/app make install
+    sources:
+      - type: archive
+        url: https://github.com/Cloudef/bemenu/releases/download/0.6.10/bemenu-0.6.10.tar.gz
+        sha256: "9d47557ed4572fa66e6a80364b95e4dd7a588ca75fe89c68c029b7f240b56a60"
+
+        
+
+  # TODO:
+  #- name: busybox
+  #  buildsystem: simple
+  #  build-commands:
+  #    - make config
+  #    - make install
+  #  sources:
+  #    - type: archive
+  #      url: https://busybox.net/downloads/busybox-1.35.0.tar.bz2
+  #      sha256: "faeeb244c35a348a334f4a59e44626ee870fb07b6884d68c10ae8bc19f83a694"
+
+  # Build mepo
   - name: Mepo
     buildsystem: simple
     build-commands:
