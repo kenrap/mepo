@@ -79,7 +79,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                 }
                 defer allocator.free(value);
 
-                std.debug.print(
+                try stdout.print(
                     "| {s} | {s} | {s} | {s} | {s} | {s} |\n",
                     .{
                         pref.name,
