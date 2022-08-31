@@ -1,13 +1,15 @@
 const std = @import("std");
 const FnTable = @import("./api/_FnTable.zig");
 const config = @import("./config.zig");
+const utilprefs = @import("./util/utilprefs.zig");
 
 pub const CliFlags = &[_]struct{
     flag: []const u8,
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmd", .desc = "Print markdown documentation for mepolang API to STDOUT" },
+    .{ .flag = "-docmdapi", .desc = "Print markdown documentation for mepolang API to STDOUT" },
+    .{ .flag = "-docmdprefs", .desc = "Print markdown documentation for prefs to STDOUT" },
     .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT" },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually" },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
@@ -18,11 +20,11 @@ pub const CliFlags = &[_]struct{
     .{ .flag = "-d", .desc = "Non-interactively download tiles for given range", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
 };
 
-pub fn generate(format: enum{Markdown, Manpage}) !void {
+pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, MarkdownPrefs, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
 
     switch (format) {
-        .Markdown => {
+        .MarkdownAPI => {
             try stdout.print("# Mepolang API ({s})\n", .{config.Version});
             for (FnTable.fn_specs) |fnc| {
                 try stdout.print("## **{s}**\n", .{fnc.name});
@@ -37,6 +39,57 @@ pub fn generate(format: enum{Markdown, Manpage}) !void {
                     }
                 }
                 try stdout.print("\n---\n\n", .{});
+            }
+        },
+        .MarkdownPrefs => {
+            try stdout.print("# Mepolang Preferences ({s})\n\n", .{config.Version});
+            try stdout.print(
+                \\| **Name** | **Description** | **Datatype** | **Min** | **Max** | **Default Value** |
+                \\| -------- | --------------- | ------------ | ------- | ------- | ----------------- |
+                \\
+                , 
+                .{}
+            );
+            for (utilprefs.prefs_mapping) |pref| {
+                const datatype = switch(pref.value) {
+                    .b =>    "Bool (0/1)",
+                    .t =>    "Text      ",
+                    .f =>    "Float     ",
+                    .u =>    "Uint8     ",
+                    .u24 =>  "Uint24    ",
+                };
+
+                var min : []const u8 = "";
+                var max : []const u8 = "";
+
+                if (pref.bounds) |bounds| {
+                    min = try std.fmt.allocPrint(allocator, "{d}", .{bounds.min});
+                    max = try std.fmt.allocPrint(allocator, "{d}", .{bounds.max});
+                    defer allocator.free(min);
+                    defer allocator.free(max);
+                }
+
+                var value : []const u8 = "";
+                switch(pref.value) {
+                    .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
+                    .b =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.b}); },
+                    .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
+                    .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
+                    .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
+                }
+                defer allocator.free(value);
+
+                std.debug.print(
+                    "| {s} | {s} | {s} | {s} | {s} | {s} |\n",
+                    .{
+                        pref.name,
+                        pref.desc,
+                        datatype,
+                        min,
+                        max,
+                        value
+                    }
+                );
             }
         },
         .Manpage => {

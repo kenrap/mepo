@@ -18,7 +18,7 @@ pub fn main() !void {
     const allocator = std.heap.c_allocator;
     var stderr_debugging_on: bool = false;
     var stdin_mepolang_parsing_on: bool = false;
-    var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
+    var mode: enum { Graphical, Download, Version, DocsMarkdownAPI, DocsMarkdownPrefs, DocsManpage, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var enable_default_config = true;
     var use_sw_renderer = false;
@@ -27,9 +27,12 @@ pub fn main() !void {
     var arg_w = args_it.next(allocator);
     while (arg_w != null) : (arg_w = args_it.next(allocator)) {
         const arg = try arg_w.?;
-        if (std.mem.eql(u8, arg, "-docmd")) {
-            // -docmd: Documentation mode, generates markdown docs for mepolang
-            mode = .DocsMarkdown;
+        if (std.mem.eql(u8, arg, "-docmdapi")) {
+            // -docmdapi: Documentation mode, generates markdown docs for mepolang API
+            mode = .DocsMarkdownAPI;
+        } else if (std.mem.eql(u8, arg, "-docmdprefs")) {
+            // -docmdprefs: Documentation mode, generates markdown docs for prefs
+            mode = .DocsMarkdownPrefs;
         } else if (std.mem.eql(u8, arg, "-docman")) {
             // -docman: Documentation mode, generates manpage docs for mepolang
             mode = .DocsManpage;
@@ -62,11 +65,14 @@ pub fn main() !void {
     }
 
     switch (mode) {
-        .DocsMarkdown => {
-            try Docs.generate(.Markdown);
+        .DocsMarkdownAPI => {
+            try Docs.generate(allocator, .MarkdownAPI);
+        },
+        .DocsMarkdownPrefs => {
+            try Docs.generate(allocator, .MarkdownPrefs);
         },
         .DocsManpage => {
-            try Docs.generate(.Manpage);
+            try Docs.generate(allocator, .Manpage);
         },
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
