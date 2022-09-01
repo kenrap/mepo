@@ -2,41 +2,23 @@
 
 > **Disclaimer**: This guide is a work-in-progress and not complete!
 
-## **Table of contents:**
-- [Installation](#stronginstallationstrong)
-- [Basic Interface Overview](#strongbasic-interface-overviewstrong)
-- [Touch & Mobile Support](#strongtouch-amp-mobile-supportstrong)
-- [Keyboard & Desktop Support](#strongkeyboard-amp-desktop-supportstrong)
+## Table of contents:
+- [Basic Interface Overview](#basic-interface-overview)
+- [Touch & Mobile Support](#touch-amp-mobile-support)
+- [Keyboard & Desktop Support](#keyboard-amp-desktop-support)
 - [Visual UI Overview](##visual-ui-overview)
 - [The UI Buttonbar](##the-ui-button-bar)
-- [The Central Menu](##strongthe-central-menustrong)
-- [POI Searches](#strongpoi-searchesstrong)
-- [Routing](#strongroutingstrong)
-- [Repositioning the map](#strongrepositioning-the-mapstrong)
-- [Autoloading preferences](#strongautoloading-preferencesstrong)
-- [Offline Usage](#strongoffline-usagestrong)
-- [Mepolang](#strongmepolangstrong)
-- [Debugging](#strongdebuggingstrong)
-- [CLI Options](#strongcli-optionsstrong#)
+- [The Central Menu](##the-central-menu)
+- [POI Searches](#poi-searches)
+- [Routing](#routing)
+- [Repositioning the map](#repositioning-the-map)
+- [Autoloading preferences](#autoloading-preferences)
+- [Offline Usage](#offline-usage)
+- [Mepolang](#mepolang)
+- [Debugging](#debugging)
+- [CLI Options](#cli-options#)
 
-## **Installation**
-
-Mepo is available currently for postmarketOS (edge) and NixOS.
-To install on postmarketOS, depending on your targeted enviroment install
-either `mepo-wayland`, `mepo-xorg`, or `mepo-framebuffer`. For Sxmo or desktop
-X use mepo-xorg,  for Phosh, Swmo, sway, or desktop wayland use mepo-wayland, 
-or for framebuffer use `mepo-framebuffer`
-
-Examples install command:
-```sh
-apk add mepo-wayland
-```
-
-On Phosh, a new icon will appear for Mepo, and in S{x,w}mo, mepo will
-appear in the applications menu. To launch on desktop, you can directly
-run the command `mepo`.
-
-## **Basic Interface Overview**
+## Basic Interface Overview
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5 etc.) and both environment's
@@ -60,7 +42,7 @@ done no customization; but its important to realize there is a hard
 disticntion between the core SDL application, Mepo, and its default
 configuration and scripts which are bundled by default.
 
-## **Touch & Mobile support**
+## Touch & Mobile support
 
 Using Mepo on mobile linux devices such as the Pinephone, Librem 5, and postmarketOS
 devices and similar is a primary usecase. Take note of the following shortcuts:
@@ -74,8 +56,7 @@ devices and similar is a primary usecase. Take note of the following shortcuts:
 - **Three fingers rotate gesture counterclockwise**: Decrease UI fontsize (in testing)
 - **One finger hold:** Launch the [central menu](#the-central-menu)
 
-
-## **Keyboard & Desktop support**
+## Keyboard & Desktop support
 
 Ordinary desktop usage is supported. Ordinary one finger hotkeys reference in
 the mobile section also apply on the desktop; and in addition numerous hotkeys
@@ -83,12 +64,12 @@ exist such as panning with vim-style keys and direct hotkeys to launch
 various scripts. You can reference the default [hotkeys](../src/config.zig#L18) 
 by studying the default configuration.
 
-## **Visual UI Overview**
+## Visual UI Overview
 
 **TODO** Add visual diagram explaining difference components of UI
 (buttonbar, bottom bar, pin overlay, pins, etc.)
 
-## **The UI Button Bar**
+## The UI Button Bar
 
 The UI feature a bar of buttons in the default configuration indicated
 as text aligned in a bar on the bottom of the screen. Under the hood this is
@@ -104,7 +85,7 @@ bar in the default config:
 - **Overpass**: Overpass POI Search script
 - **Download**: Download current viewport (all tiles in current/higher zoom levels)
 
-## **The Central Menu**
+## The Central Menu
 
 Since most auxillary features such as routing, POI searches, etc. are
 built out in shellscripts (which utilize dmenu, rofi etc.); the
@@ -159,7 +140,7 @@ Here's an explation of the options are available in the central menu:
   - Change the zoom level by specifying the number manually.
 
 
-## **POI Searches**
+## POI Searches
 
 Points of intrest within the current viewport (bounding-box) can
 be searched both via [Nominatim](https://nominatim.org/) or via
@@ -185,13 +166,13 @@ are available within the provided Overpass script; however if you want
 to search any custom OSM tag, simply enter it and this will work just
 the same.
 
-## **Routing**
+## Routing
 
 **TODO**
 Routing placeholder.
 Explain graphhopper & OSM relation scripts here.
 
-## **Repositioning the map**
+## Repositioning the map
 
 The map view will start wherever is set in the default configuration or
 optionally you can overload this default location (see the next section
@@ -204,7 +185,7 @@ script simply enter the name of a region (city, state, country, etc.) and
 Nominatim will be queried for matching targets. Select a target to
 reposition the map accordingly.
 
-## **Autoloading preferences**
+## Autoloading preferences
 
 Within the default config, the file located at `~/.mepo/config` is loaded
 from the filesystem by default when starting mepo. You can put user-specific
@@ -222,7 +203,7 @@ prefset_n zoom 15;
 In the above example, the map is repositioned to Boson, MA, US and an
 arbitrary bookmark pin named foopin is placed on the map.
 
-## **Offline Usage**
+## Offline Usage
 
 ## Using the `tile_cache_network` parameter
 
@@ -273,7 +254,7 @@ mepo_dl.sh
 See below section for information about offline usage.
 
 
-## **Mepolang**
+## Mepolang
 
 Mepolang is Mepo's command language API for IPC that can be sent to its
 process via STDIN continually. Through this mechanism you can control
