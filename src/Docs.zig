@@ -20,6 +20,13 @@ pub const CliFlags = &[_]struct{
     .{ .flag = "-d", .desc = "Non-interactively download tiles for given range", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
 };
 
+const PrefsIntro = 
+  \\Internally mepo keeps track of a number of preferences which control all
+  \\state for the application. These preferences can all be set with the commands
+  \\`preset_n` for numerical prerefences and `prefset_t` for textual preferences.
+  \\You can also use `filedump` to examine the current values of all preferences.
+  ;
+
 pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, MarkdownPrefs, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
 
@@ -42,7 +49,8 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
             }
         },
         .MarkdownPrefs => {
-            try stdout.print("# Mepolang Preferences ({s})\n\n", .{config.Version});
+            try stdout.print("# Mepolang Preferences ({s})\n\n{s}\n\n", .{config.Version, PrefsIntro});
+            
             try stdout.print(
                 \\| **Name** | **Description** | **Datatype** | **Min** | **Max** | **Default Value** |
                 \\| -------- | --------------- | ------------ | ------- | ------- | ----------------- |
@@ -164,6 +172,57 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                 }
                 try stdout.print("\n", .{});
             }
+
+            try stdout.print(".SH PREFERENCES\n", .{});
+            try stdout.print("{s}\n", .{PrefsIntro});
+            for (utilprefs.prefs_mapping) |pref| {
+                const datatype = switch(pref.value) {
+                    .b =>    "Bool (0/1)",
+                    .t =>    "Text      ",
+                    .f =>    "Float     ",
+                    .u =>    "Uint8     ",
+                    .u24 =>  "Uint24    ",
+                };
+
+                var min : []const u8 = "";
+                var max : []const u8 = "";
+
+                if (pref.bounds) |bounds| {
+                    min = try std.fmt.allocPrint(allocator, "{d}", .{bounds.min});
+                    max = try std.fmt.allocPrint(allocator, "{d}", .{bounds.max});
+                    defer allocator.free(min);
+                    defer allocator.free(max);
+                }
+
+                var value : []const u8 = "";
+                switch(pref.value) {
+                    .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
+                    .b =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.b}); },
+                    .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
+                    .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
+                    .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
+                }
+                defer allocator.free(value);
+
+                try stdout.print(
+                    \\.B {s} ({s})
+                    \\ Default: {s} / Min: {s} / Max: {s}
+                    \\ {s}
+                    \\
+                    \\
+                    ,
+                    .{
+                        pref.name,
+                        datatype,
+                        value,
+                        min,
+                        max,
+                        pref.desc,
+                    }
+                );
+            }
+
+
 
             try stdout.print(
                 \\
