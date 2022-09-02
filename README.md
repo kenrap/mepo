@@ -226,7 +226,6 @@ bookmarks, and more.
       bind_interval command or continously running async_shellpipe script.
 - **Milestone 6: Documentation & Packaging** (In-progress)
   - **Todo:**
-    - Add prefs documentation to manpage
     - Document existing scripts used for search, routing, etc. and add notes
       about how these scripts could be used offline by running Nominatim,
       Overpass, GraphHopper, etc. locally.
@@ -243,6 +242,7 @@ bookmarks, and more.
     - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
       in parity with man page.
+    - Add prefs documentation to manpage
     - Modify internals of prefset / preferences table to automatically generate
       documentation directly from code / structs.
     - Modify internals of Mepolang to include documentation directly in

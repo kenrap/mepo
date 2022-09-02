@@ -25,6 +25,8 @@ const PrefsIntro =
   \\state for the application. These preferences can all be set with the commands
   \\`preset_n` for numerical prerefences and `prefset_t` for textual preferences.
   \\You can also use `filedump` to examine the current values of all preferences.
+  \\
+  \\Below is an exhaustive list of all available preferences:
   ;
 
 pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, MarkdownPrefs, Manpage}) !void {
@@ -60,11 +62,11 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
             );
             for (utilprefs.prefs_mapping) |pref| {
                 const datatype = switch(pref.value) {
-                    .b =>    "Bool (0/1)",
-                    .t =>    "Text      ",
-                    .f =>    "Float     ",
-                    .u =>    "Uint8     ",
-                    .u24 =>  "Uint24    ",
+                    .b =>    "Number (bool)",
+                    .t =>    "Text",
+                    .f =>    "Number (float)",
+                    .u =>    "Number (u8)",
+                    .u24 =>  "Number (u24)",
                 };
 
                 var min : []const u8 = "";
@@ -80,7 +82,13 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                 var value : []const u8 = "";
                 switch(pref.value) {
                     .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
-                    .b =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.b}); },
+                    .b =>    { 
+                        if (pref.value.b) {
+                            value = try std.fmt.allocPrint(allocator, "{d}", .{1});
+                        } else {
+                            value = try std.fmt.allocPrint(allocator, "{d}", .{0});
+                        }
+                    },
                     .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
                     .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
                     .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
@@ -164,11 +172,21 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
 
             try stdout.print(".SH MEPOLANG\n", .{});
             for (FnTable.fn_specs) |fnc| {
-                try stdout.print(".B {s}\n", .{fnc.name});
-                try stdout.print("{s}\n\nArguments:\n", .{fnc.desc});
-                for (fnc.args) |arg| {
-                    const tag = if (arg.tag == .Number) "Number" else "Text  ";
-                    try stdout.print("  {s} ({s}): {s}\n", .{ arg.name, tag, arg.desc });
+                try stdout.print(
+                    \\.PP
+                    \\.B {s}
+                    \\.br
+                    \\{s}
+                    \\
+                    ,
+                    .{fnc.name, fnc.desc}
+                );
+                if (fnc.args.len > 0) {
+                    try stdout.print(".br\n.br\nArguments:\n", .{});
+                    for (fnc.args) |arg| {
+                        const tag = if (arg.tag == .Number) "Number" else "Text";
+                        try stdout.print("  {s} ({s}): {s}\n", .{ arg.name, tag, arg.desc });
+                    }
                 }
                 try stdout.print("\n", .{});
             }
@@ -177,57 +195,70 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
             try stdout.print("{s}\n", .{PrefsIntro});
             for (utilprefs.prefs_mapping) |pref| {
                 const datatype = switch(pref.value) {
-                    .b =>    "Bool (0/1)",
-                    .t =>    "Text      ",
-                    .f =>    "Float     ",
-                    .u =>    "Uint8     ",
-                    .u24 =>  "Uint24    ",
+                    .b =>    "Number (bool)",
+                    .t =>    "Text",
+                    .f =>    "Number (float)",
+                    .u =>    "Number (u8)",
+                    .u24 =>  "Number (u24)",
                 };
 
-                var min : []const u8 = "";
-                var max : []const u8 = "";
-
-                if (pref.bounds) |bounds| {
-                    min = try std.fmt.allocPrint(allocator, "{d}", .{bounds.min});
-                    max = try std.fmt.allocPrint(allocator, "{d}", .{bounds.max});
-                    defer allocator.free(min);
-                    defer allocator.free(max);
-                }
-
                 var value : []const u8 = "";
+                
                 switch(pref.value) {
                     .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
-                    .b =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.b}); },
+                    .b =>    { 
+                        if (pref.value.b) {
+                            value = try std.fmt.allocPrint(allocator, "{d}", .{1});
+                        } else {
+                            value = try std.fmt.allocPrint(allocator, "{d}", .{0});
+                        }
+                    },
                     .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
                     .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
                     .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
                 }
                 defer allocator.free(value);
 
-                try stdout.print(
-                    \\.B {s} ({s})
-                    \\ Default: {s} / Min: {s} / Max: {s}
-                    \\ {s}
-                    \\
-                    \\
-                    ,
-                    .{
-                        pref.name,
-                        datatype,
-                        value,
-                        min,
-                        max,
-                        pref.desc,
-                    }
-                );
+                if (pref.bounds) |bounds| {
+                    try stdout.print(
+                        \\.PP
+                        \\.B {s}
+                        \\.br
+                        \\Datatype: {s}
+                        \\.br
+                        \\Default: {s} / Min: {d} / Max: {d}
+                        \\.br
+                        \\{s}
+                        \\
+                        \\
+                        ,
+                        .{ pref.name, datatype, value, bounds.min, bounds.max, pref.desc }
+                    );
+                } else {
+                    try stdout.print(
+                        \\.PP
+                        \\.B {s}
+                        \\.br
+                        \\Datatype: {s}
+                        \\.br
+                        \\Default: {s}
+                        \\.br
+                        \\{s}
+                        \\
+                        \\
+                        ,
+                        .{ pref.name, datatype, value, pref.desc }
+                    );
+
+                }
+
+
             }
-
-
 
             try stdout.print(
                 \\
                 \\.SH VERSION
-                \\Manual page generated against mepo version {s}
+                \\Manual page has been generated against mepo version {s}
                 \\
                 \\.SH AUTHORS
                 \\Mepo is written by Miles Alan <m@milesalan.com>. Full list 
