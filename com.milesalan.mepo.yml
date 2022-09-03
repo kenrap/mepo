@@ -86,7 +86,14 @@ modules:
         url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-1.6.tar.gz
         sha256: "5de8c8e29aaa3fb9cc6b47bb27299f271354ebb72514e3accadc7d38b5bbaa72"
 
-  # TODO: xdotool
+  - name: xdotool
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX="" DESTDIR=/app
+    sources:
+      - type: archive
+        url: "https://github.com/jordansissel/xdotool/archive/refs/tags/v3.20211022.1.tar.gz"
+        sha256: "82b15a944a5e82fee15e0f6116bd9f642bc3d0bb6989fc0ca5ad9dfe35de0847"
 
   # TODO:
   #- name: busybox
