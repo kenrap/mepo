@@ -69,16 +69,6 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                     .u24 =>  "Number (u24)",
                 };
 
-                var min : []const u8 = "";
-                var max : []const u8 = "";
-
-                if (pref.bounds) |bounds| {
-                    min = try std.fmt.allocPrint(allocator, "{d}", .{bounds.min});
-                    max = try std.fmt.allocPrint(allocator, "{d}", .{bounds.max});
-                    defer allocator.free(min);
-                    defer allocator.free(max);
-                }
-
                 var value : []const u8 = "";
                 switch(pref.value) {
                     .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
@@ -95,17 +85,19 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                 }
                 defer allocator.free(value);
 
-                try stdout.print(
-                    "| {s} | {s} | {s} | {s} | {s} | {s} |\n",
-                    .{
-                        pref.name,
-                        pref.desc,
-                        datatype,
-                        min,
-                        max,
-                        value
-                    }
-                );
+
+                if (pref.bounds) |bounds| {
+                    try stdout.print(
+                        "| {s} | {s} | {s} | {d} | {d} | {s} |\n",
+                        .{ pref.name, pref.desc, datatype, bounds.min, bounds.max, value }
+                    );
+                } else {
+                    try stdout.print(
+                        "| {s} | {s} | {s} |  |  | {s} |\n",
+                        .{ pref.name, pref.desc, datatype, value }
+                    );
+                }
+
             }
         },
         .Manpage => {
