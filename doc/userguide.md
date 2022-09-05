@@ -96,48 +96,40 @@ rember numerous hotkeys.
 
 Here's an explation of the options are available in the central menu:
 
-- **Debug: API**
-  - Allow you to enter custom [Mepolang](#strongmepolangstrong) commands to execute.
-- **Download: clear download queue**
-  - If you had previously started a region for download queueing, this will
-    cancel that operation.
-- **Download: current bounding-box (non-interactive)**
-  - Automatically queue whatever you're viewing currently on the map to
-    download all tiles.
-  - All zoom levels higher then whatever the current viewport is showing
-    will be downloaded.
-- **Download: custom region (interactive)**
-  - Search nominatim for a custom region to download and allows the user
-    specify zoom levels as well.
-- **POI Search: via Nominatim**
-  - Search for POIs via a nominatim search query and drop pins on the
-    map. Pins will be fed into pin group 1 (thus showing as blue dots
-    on the map).
-  - See [POI Searches](#strongpoi-searchesstrong) for more info.
-- **POI Search: via Overpass**
-  - Search for POIs via an [overpass query]() and drop pins on the
-    map. Pins will be fed into pin group 1 (thus showing as blue dots
-    on the map).
-  - See [POI Searches](#strongpoi-searchesstrong) for more info.
-- **Relocate map: via search**
-  - Update the map's location by searching for a [Nominatim](https://nominatim.org/) query.
-- **Route: via GraphHopper**
-  - Route via graphopper. Pins will be fed into pin group 2 (thus showing as
-    green dots on the map).
-  - See [routing](#routing) for more info.
-- **Route: via Public Transit**
-  - Route via public transit / a specific OSM relation id.
-  - See [routing](#routing) for more info.
-- **Update: Online/Offline toggle**
-  - If you're offline, switch to being online and visa-versa.
-  - If offline bottom bar will be red; if online bottom bar will be white.
-- **Route: via Public Transit**
-  - Route via public transit / a specific OSM relation id.
-  - See [routing](#routing) for more info.
-- **Update: Tilesource**
-  - Change the tilesource for the OSM tiles to download.
-- **Update: Zoom**
-  - Change the zoom level by specifying the number manually.
+- **Debug: API**: Allow you to enter custom
+  [Mepolang](#strongmepolangstrong) commands to execute.
+- **Download: clear download queue**: If you had previously started a
+  region for download queueing, this will cancel that operation.
+- **Download: current bounding-box (non-interactive)** :Automatically
+  queue whatever you're viewing currently on the map to download all
+  tiles. All zoom levels higher then whatever the current viewport is
+  showing will be downloaded.
+- **Download: custom region (interactive)**: Search nominatim for a
+  custom region to download and allows the user specify zoom levels as well.
+- **POI Search: via Nominatim**: Search for POIs via a nominatim
+  search query and drop pins on the map. Pins will be fed into
+  pin group 1 (thus showing as blue dots on the map). See [POI
+  Searches](#strongpoi-searchesstrong) for more info.
+- **POI Search: via Overpass**: Search for POIs via an [overpass query]()
+  and drop pins on the map. Pins will be fed into pin group 1 (thus showing
+  as blue dots on the map). See [POI Searches](#strongpoi-searchesstrong)
+  for more info.
+- **Relocate map: via search**: Update the map's location by searching
+  for a [Nominatim](https://nominatim.org/) query.
+- **Route: via GraphHopper**: Route via graphopper. Pins will be
+  fed into pin group 2 (thus showing as green dots on the map). See
+  [routing](#routing) for more info.
+- **Route: via Public Transit**: Route via public transit / a specific
+  OSM relation id. See [routing](#routing) for more info.
+- **Update: Online/Offline toggle**: If you're offline, switch to being
+  online and visa-versa. If offline bottom bar will be red; if online
+  bottom bar will be white.
+- **Route: via Public Transit**: Route via public transit / a specific
+  OSM relation id. See [routing](#routing) for more info.
+- **Update: Tilesource**: Change the tilesource for the OSM tiles to
+  download.
+- **Update: Zoom**: Change the zoom level by specifying the number
+  manually.
 
 
 ## POI Searches
