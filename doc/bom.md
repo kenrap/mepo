@@ -14,5 +14,4 @@
 - Bemenu: Used for menuing system (Wayland)
 - Busybox: Used for base shell & provide tools for scripts
 - Jq: Used for parsing JSON data structures from external sources
-- Xmllint: Used for extracting XML from OSM API via XPath
 - Ncurses: Use for tput/colorizing scripts
