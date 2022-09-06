@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Generated via mepo's development script mepo_generateosmtags.sh
+# Generated via mepo's development script mepo_dev_generateosmtags.sh
 # This script just prints a list of the top amenity tags from OSM's taginfo db
 # Regenerated at development time / per-release
 echo "
