@@ -2,6 +2,12 @@
 DISPLAYNAME="⊕ Pin editor: Edit, save, and restore pin metadata"
 HOTKEY=f
 ASYNC=1
+DOC='
+  Provides comprehensive pin editing via interactive menuing, allowing the
+  user to add and remove pins,as well as edit pin metadata. Uses the
+  `filedump` command functionality to extract pin data. Script is designed
+  to be used asychronously via `shellpipe_async`.
+'
 
 mainloop() {
   # E.g. dump pin data to file & wait for complete

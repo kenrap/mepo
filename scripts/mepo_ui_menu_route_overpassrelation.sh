@@ -1,6 +1,12 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Route: via OSM Relation / Public Transit"
 HOTKEY=R
+DOC='
+  Drops pins on the map in pin group 1 for the given OSM relation ID. This
+  can be used for general routing for any OSM relation (such as a subway,
+  bus route, or similar). Presents menuing to prompt for the input OSM
+  relation ID.
+'
 
 RELATIONS="
   NYC Subway A: 9727210

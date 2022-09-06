@@ -1,4 +1,9 @@
 #!/usr/bin/env sh
+DOC='
+  Generates listing central menu for mobile usage. Essentially just greps all
+  scripts named mepo_* and any resulting script that has DISPLAYNAME variable
+  is shown in the menu.
+'
 
 menuoptions() {
   echo "$PATH" | tr : '\n' | xargs ls -1 2>/dev/null | grep mepo_ | while read -r SCRIPT; do

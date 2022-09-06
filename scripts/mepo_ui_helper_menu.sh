@@ -1,6 +1,12 @@
 #!/usr/bin/env sh
 N_LINES=17
 FONT="Inconsolata"
+DOC='
+  Primary menuing script which uses bemenu, dmenu, sxmo-dmenu, or vis-menu
+  to display menuing respectivly. The env variable PROMPT determines prompt
+  label and interface is otherwise is a passthrough to dmenu/bemenu in
+  taking list items as STDIN and printing picked or typed item as STDOUT.
+'
 
 main() {
   [ -z "$PROMPT" ] && PROMPT="Mepo menu"

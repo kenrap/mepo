@@ -1,4 +1,10 @@
 #!/usr/bin/env sh
+DOC='
+  Interactive downloading script which uses mepo with its -d commandline
+  argument to download tiles without launching the UI (e.g. just from
+  non-graphical environment). Prompts user for target area and looks up
+  resulting bbox lat/lon to download via Nominatim.
+'
 
 errdie() {
   echo "$1" >&2

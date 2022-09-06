@@ -1,6 +1,15 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Location Pin: Center on user location"
 HOTKEY=x
+DOC='
+  Determinines the user's location via GPSD, Geoclue, or Mozilla
+  Location services. When provided with no argument runs the function
+  `droppinactivateandcenter` which both drops a pin on the map and
+  centers the map. Meanwhile the function `droppin` can be used in
+  isolation to only drop a pin on the map. This script may be used
+  synchronously or asynchronoulsly; within the default config `droppin`
+  is used asynchronounously via `shellpipe_async`.
+'
 
 coordsviamls() {
   MLSKEY=9a418f3c-364a-418a-85e8-1bde733f0c88

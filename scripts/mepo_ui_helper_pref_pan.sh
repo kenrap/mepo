@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
+DOC='
+  Given param DIM uses MEPO_WIN_W/H to pan screenwise vertically or
+  horizontally. Used to mimic C-f/C-b vim-like behavior.
+'
 
 main() {
   # TODO: -z check DIM/MULT

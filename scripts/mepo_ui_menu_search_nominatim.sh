@@ -1,6 +1,12 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" POI Search: via Nominatim"
 HOTKEY=G
+DOC='
+  Searches for points of intrest via the publically accessible Nominatim
+  API based on the current viewport.  Presents menuing to prompt for input
+  overass query. Drops pins on the map for the resulting found points
+  of intrest in pin group 0; purging any previous pins in in group 0.
+'
 
 nominatimspecialphrasesfromwiki() {
   curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |

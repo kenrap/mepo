@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Download: custom region (interactive)"
 HOTKEY=q
+DOC='
+  Queues the current bounding box / viewport of the map to be downloaded
+  in the background. Interactive, in that user is prompted for the
+  minimum and maximum zoom-level to be downloaded.
+'
 BOUND_LOWER=1
 BOUND_UPPER=19
 

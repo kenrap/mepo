@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 DISPLAYNAME="漣 Update: Tilesource"
 HOTKEY=u
+DOC='
+  Updates the tilesource for the map to pull from. Note %1$d, %2$d, and %3$d
+  are used to indicate X, Y, and Z variables respectively. Presents menuing
+  with presets for OSM Maps, Stamen, OpenCycleMap etc.
+'
 
 main() {
   # Note X, Y, Z provided as %1$d, %2$d, %3$d respectively

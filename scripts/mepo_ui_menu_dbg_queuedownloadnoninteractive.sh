@@ -1,8 +1,12 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Download: current bounding-box (non-interactive)"
 HOTKEY=Q
-BOUND_LOWER=1
-BOUND_UPPER=19
+DOC='
+  Queues the current bounding box / viewport of the map to be downloaded
+  in the background. Non-interactive, in that user is not prompted for
+  zoom-level etc. All zoomlevels equal to and higher then the current
+  zoom level are downloaded.
+'
 
 main() {
   ZOOM_MIN=$MEPO_ZOOM
