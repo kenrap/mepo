@@ -8,8 +8,7 @@ pub const CliFlags = &[_]struct{
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmdapi", .desc = "Print markdown documentation for mepolang API to STDOUT" },
-    .{ .flag = "-docmdprefs", .desc = "Print markdown documentation for prefs to STDOUT" },
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for Mepolang to STDOUT" },
     .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT" },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually" },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
@@ -21,22 +20,50 @@ pub const CliFlags = &[_]struct{
 };
 
 const PrefsIntro = 
-  \\Internally mepo keeps track of a number of preferences which control all
-  \\state for the application. These preferences can all be set with the commands
-  \\`preset_n` for numerical prerefences and `prefset_t` for textual preferences.
-  \\You can also use `filedump` to examine the current values of all preferences.
-  \\
-  \\Below is an exhaustive list of all available preferences:
+    \\Internally mepo keeps track of a number of preferences which control all
+    \\state for the application. These preferences can all be set with the commands
+    \\`preset_n` for numerical prerefences and `prefset_t` for textual preferences.
+    \\You can also use `filedump` to examine the current values of all preferences.
+    \\
+    \\Below is an exhaustive list of all available preferences:
   ;
 
-pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, MarkdownPrefs, Manpage}) !void {
+const MepolangIntro =
+    \\Mepolang is Mepo's command language API for IPC that can be sent to its
+    \\process via STDIN continually. Through this mechanism you can control
+    \\Mepo: using an external script, by simply piping in a configuration
+    \\on boot, or by using a FIFO (eventually). Upon the 1.0 release it is
+    \\planned that there will be two commands included to run Mepo: `mepo`
+    \\and `mepo_run.sh` wherein `mepo_run.sh` will just be a script that runs
+    \\`cat default_config | mepo`.
+    \\
+    \\Many of Mepo's commands play nice together. A good place to look to
+    \\understand Mepolang's utilization is the [default config](../src/config.zig). For
+    \\example `bind_key` actually also takes Mepolang text to run as an
+    \\argument. Similarly the result of `shellpipe`, runs Mepolang text given
+    \\the STDOUT result of a (user) [shellscript](../scripts).
+    ;
+
+
+pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
 
     switch (format) {
-        .MarkdownAPI => {
-            try stdout.print("# Mepolang API ({s})\n", .{config.Version});
+        .Markdown => {
+            try stdout.print(
+                \\# Mepolang
+                \\
+                \\{s}
+                \\
+                \\## API
+                \\
+                ,
+                .{MepolangIntro}
+            );
+
+            // API Section
             for (FnTable.fn_specs) |fnc| {
-                try stdout.print("## **{s}**\n", .{fnc.name});
+                try stdout.print("### **{s}**\n", .{fnc.name});
                 try stdout.print("{s}\n\n", .{fnc.desc});
                 if (fnc.args.len > 0) {
                     try stdout.print("**Arguments**:\n\n", .{});
@@ -49,10 +76,16 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{MarkdownAPI, Markdown
                 }
                 try stdout.print("\n---\n\n", .{});
             }
-        },
-        .MarkdownPrefs => {
-            try stdout.print("# Mepolang Preferences ({s})\n\n{s}\n\n", .{config.Version, PrefsIntro});
-            
+
+
+            // Prefs Section
+            try stdout.print(
+                \\# Preferences
+                \\
+                \\ {s}
+                ,
+                .{ PrefsIntro },
+            );
             try stdout.print(
                 \\| **Name** | **Description** | **Datatype** | **Min** | **Max** | **Default Value** |
                 \\| -------- | --------------- | ------------ | ------- | ------- | ----------------- |
