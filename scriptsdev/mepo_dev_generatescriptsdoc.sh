@@ -5,6 +5,7 @@ SCRIPTS="$(ls -1 scripts/ | grep mepo_ui_menu_)"
 
 for SCRIPT in $SCRIPTS; do
   source scripts/"$SCRIPT" nonexistingfn
+  DISPLAYNAMECLEAN="$(echo "$DISPLAYNAME" | tr -cd '[:print:]' | sed 's/^ *//g')"
   DOCCLEAN="$(echo "$DOC" | sed 's/^ *//g' | tr '\n' ' ')"
-  echo "- **$DISPLAYNAME** ($HOTKEY): $DOCCLEAN"
+  echo "- **${DISPLAYNAMECLEAN}** ($HOTKEY): $DOCCLEAN"
 done
