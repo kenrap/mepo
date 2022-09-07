@@ -4,19 +4,20 @@
 
 ## Table of contents:
 - [Basic Interface Overview](#basic-interface-overview)
-- [Touch & Mobile Support](#touch-amp-mobile-support)
-- [Keyboard & Desktop Support](#keyboard-amp-desktop-support)
-- [Visual UI Overview](##visual-ui-overview)
-- [The UI Buttonbar](##the-ui-button-bar)
-- [The Central Menu](##the-central-menu)
+- [Touch & Mobile support](#touch-mobile-support)
+- [Keyboard & Desktop support](#keyboard-desktop-support)
+- [Visual UI Overview](#visual-ui-overview)
+- [The UI Button Bar](#the-ui-button-bar)
+- [The Central Menu](#the-central-menu)
 - [POI Searches](#poi-searches)
 - [Routing](#routing)
 - [Repositioning the map](#repositioning-the-map)
 - [Autoloading preferences](#autoloading-preferences)
 - [Offline Usage](#offline-usage)
+- [Using the `tile_cache_network` parameter](#using-the-`tile_cache_network`-parameter)
 - [Mepolang](#mepolang)
+- [CLI Options](#cli-options)
 - [Debugging](#debugging)
-- [CLI Options](#cli-options#)
 
 ## Basic Interface Overview
 
@@ -264,7 +265,7 @@ commandname textarg [multi word arg] 2;
 commandname2 arg 8.373 anothertextarg;
 ```
 
-### Debugging
+## Debugging
 
 By default debug messages are disabled. To start mepo with debugging via
 STDERR use the CLI flag `-e`. E.g. as:
@@ -273,7 +274,7 @@ STDERR use the CLI flag `-e`. E.g. as:
 mepo -e
 ```
 
-### CLI Options
+## CLI Options
 
 - `mepo -doc`
   - Generate documentation for mepolang API
