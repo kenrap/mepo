@@ -8,7 +8,7 @@ DOC='
   mobile the last clicked point - e.g. in case of click-hold functionality)
   and the centerpoint (where the crosshair is) may be used as origin or
   destination points as an alternative to named entries. Named entry searches
-  use Nominatim to lookup the user's input query. Resulting route is placed
+  use Nominatim to lookup the user input query. Resulting route is placed
   into pin group 1 as an ordered pin group wherein instructional pins show
   each direction in the route.
 '

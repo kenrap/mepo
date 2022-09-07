@@ -2,7 +2,7 @@
 DISPLAYNAME=" Relocate map: via search"
 HOTKEY=g
 DOC='
-  Repositions the map's latitude and longitude based on a Nominatim search
+  Repositions the map latitude and longitude based on a Nominatim search
   query. Presents menuing to prompt user for input location and pick from
   Nominatim results.
 '

@@ -2,7 +2,7 @@
 DISPLAYNAME="漣 Update: Zoom"
 HOTKEY=z
 DOC='
-  Updates the zoom level based on user's input. Presents menuing to 
+  Updates the zoom level based on users input. Presents menuing to 
   pick from zoom levels between 1 and 16.
 '
 

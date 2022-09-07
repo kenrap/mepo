@@ -96,40 +96,20 @@ rember numerous hotkeys.
 
 Here's an explation of the options are available in the central menu:
 
-- **Debug: API**: Allow you to enter custom
-  [Mepolang](#strongmepolangstrong) commands to execute.
-- **Download: clear download queue**: If you had previously started a
-  region for download queueing, this will cancel that operation.
-- **Download: current bounding-box (non-interactive)** :Automatically
-  queue whatever you're viewing currently on the map to download all
-  tiles. All zoom levels higher then whatever the current viewport is
-  showing will be downloaded.
-- **Download: custom region (interactive)**: Search nominatim for a
-  custom region to download and allows the user specify zoom levels as well.
-- **POI Search: via Nominatim**: Search for POIs via a nominatim
-  search query and drop pins on the map. Pins will be fed into
-  pin group 1 (thus showing as blue dots on the map). See [POI
-  Searches](#strongpoi-searchesstrong) for more info.
-- **POI Search: via Overpass**: Search for POIs via an [overpass query]()
-  and drop pins on the map. Pins will be fed into pin group 1 (thus showing
-  as blue dots on the map). See [POI Searches](#strongpoi-searchesstrong)
-  for more info.
-- **Relocate map: via search**: Update the map's location by searching
-  for a [Nominatim](https://nominatim.org/) query.
-- **Route: via GraphHopper**: Route via graphopper. Pins will be
-  fed into pin group 2 (thus showing as green dots on the map). See
-  [routing](#routing) for more info.
-- **Route: via Public Transit**: Route via public transit / a specific
-  OSM relation id. See [routing](#routing) for more info.
-- **Update: Online/Offline toggle**: If you're offline, switch to being
-  online and visa-versa. If offline bottom bar will be red; if online
-  bottom bar will be white.
-- **Route: via Public Transit**: Route via public transit / a specific
-  OSM relation id. See [routing](#routing) for more info.
-- **Update: Tilesource**: Change the tilesource for the OSM tiles to
-  download.
-- **Update: Zoom**: Change the zoom level by specifying the number
-  manually.
+- **⊗ Download: clear download queue** (w):  Clears the current download cache (background downloading of tiles).  
+- ** Download: custom region (interactive)** (q):  Queues the current bounding box / viewport of the map to be downloaded in the background. Interactive, in that user is prompted for the minimum and maximum zoom-level to be downloaded.  
+- ** Download: current bounding-box (non-interactive)** (Q):  Queues the current bounding box / viewport of the map to be downloaded in the background. Non-interactive, in that user is not prompted for zoom-level etc. All zoomlevels equal to and higher then the current zoom level are downloaded.  
+- **⊕ Pin editor: Edit, save, and restore pin metadata** (f):  Provides comprehensive pin editing via interactive menuing, allowing the user to add and remove pins,as well as edit pin metadata. Uses the `filedump` command functionality to extract pin data. Script is designed to be used asychronously via `shellpipe_async`.  
+- **漣 Update: Fontsize** (Z):  Updates the fontsize of the UI prompting the user for the input size. Presents menuing prefilled between sizes 12 and 30.  
+- **痢 Update: Online/Offline toggle** (m):  Toggles the UI between offline and online mode (e.g. flipping the preference tile_cache_network).  
+- **漣 Update: Tilesource** (u):  Updates the tilesource for the map to pull from. Note %1$d, %2$d, and %3$d are used to indicate X, Y, and Z variables respectively. Presents menuing with presets for OSM Maps, Stamen, OpenCycleMap etc.  
+- **漣 Update: Zoom** (z):  Updates the zoom level based on users input. Presents menuing to  pick from zoom levels between 1 and 16.  
+- ** Relocate map: via search** (g):  Repositions the map latitude and longitude based on a Nominatim search query. Presents menuing to prompt user for input location and pick from Nominatim results.  
+- ** Route: via GraphHopper** (r):  Allows user to determine a route between two points via the publically accessible GraphHopper instance. Presents menuing to prompt user for origin and destination points. The cursor (e.g. the position of the mouse or on mobile the last clicked point - e.g. in case of click-hold functionality) and the centerpoint (where the crosshair is) may be used as origin or destination points as an alternative to named entries. Named entry searches use Nominatim to lookup the user input query. Resulting route is placed into pin group 1 as an ordered pin group wherein instructional pins show each direction in the route.  
+- ** Route: via OSM Relation / Public Transit** (R):  Drops pins on the map in pin group 1 for the given OSM relation ID. This can be used for general routing for any OSM relation (such as a subway, bus route, or similar). Presents menuing to prompt for the input OSM relation ID.  
+- ** POI Search: via Nominatim** (G):  Searches for points of intrest via the publically accessible Nominatim API based on the current viewport.  Presents menuing to prompt for input overass query. Drops pins on the map for the resulting found points of intrest in pin group 0; purging any previous pins in in group 0.  
+- ** POI Search: via Overpass** (b):  Searches for points of intrest via the publically accessible Overpass API based on the current viewport.  Presents menuing to prompt for input overass query. Drops pins on the map for the resulting found points of intrest in pin group 0; purging any previous pins in in group 0.  
+- ** Location Pin: Center on user location** (x):  Determinines the user location via GPSD, Geoclue, or Mozilla Location services. When provided with no argument runs the function `droppinactivateandcenter` which both drops a pin on the map and centers the map. Meanwhile the function `droppin` can be used in isolation to only drop a pin on the map. This script may be used synchronously or asynchronoulsly; within the default config `droppin` is used asynchronounously via `shellpipe_async`.  
 
 
 ## POI Searches

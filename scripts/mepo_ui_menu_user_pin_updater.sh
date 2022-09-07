@@ -2,7 +2,7 @@
 DISPLAYNAME=" Location Pin: Center on user location"
 HOTKEY=x
 DOC='
-  Determinines the user's location via GPSD, Geoclue, or Mozilla
+  Determinines the user location via GPSD, Geoclue, or Mozilla
   Location services. When provided with no argument runs the function
   `droppinactivateandcenter` which both drops a pin on the map and
   centers the map. Meanwhile the function `droppin` can be used in
