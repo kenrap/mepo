@@ -17,7 +17,6 @@
 - [Using the `tile_cache_network` parameter](#using-the-`tile_cache_network`-parameter)
 - [Mepolang](#mepolang)
 - [CLI Options](#cli-options)
-- [Debugging](#debugging)
 
 ## Basic Interface Overview
 
@@ -230,49 +229,8 @@ See below section for information about offline usage.
 ## Mepolang
 
 Mepolang is Mepo's command language API for IPC that can be sent to its
-process via STDIN continually. Through this mechanism you can control
-Mepo: using an external script, by simply piping in a configuration
-on boot, or by using a FIFO (eventually). Upon the 1.0 release it is
-planned that there will be two commands included to run Mepo: `mepo`
-and `mepo_run.sh` wherein `mepo_run.sh` will just be a script that runs
-`cat default_config | mepo`.
-
-Many of Mepo's commands play nice together. A good place to look to
-understand Mepolang's utilization is the [default config](../src/config.zig). For
-example `bind_key` actually also takes Mepolang text to run as an
-argument. Similarly the result of `shellpipe`, runs Mepolang text given
-the STDOUT result of a (user) [shellscript](../scripts).
-
-### Mepolang syntax rules
-
-- Each statement is made up of multiple tokens.
-- Each Mepolang command should be terminated by a semicolon.
-- The first token in a statement is always the command name.
-- Tokens should be separated by whitespace.
-- Each token is either:
-  - Text
-    - Just plain text, by default assumed to be a single word.
-    - If you want to use a space within an argument use `[ square brackets ]` to create a multiword token.
-    - If you want to have a text token that looks like a number, use square brackets like `[-3]`
-  - Number
-    - A floating point number, either decimal (e.g. `3.77`) or whole (e.g. `3`).
-    - Can be negative like `-22.22` or positive like `22.22`
-
-### Mepolang syntax example
-
-```sh
-commandname textarg [multi word arg] 2;
-commandname2 arg 8.373 anothertextarg;
-```
-
-## Debugging
-
-By default debug messages are disabled. To start mepo with debugging via
-STDERR use the CLI flag `-e`. E.g. as:
-
-```
-mepo -e
-```
+process via STDIN continually. See the [Mepolang]() page and [scriting
+guide]() for more information on mepolang usage.
 
 ## CLI Options
 

@@ -44,6 +44,32 @@ const MepolangIntro =
     \\the STDOUT result of a (user) [shellscript](../scripts).
     ;
 
+const MepolangSyntax = 
+    \\**Syntax rules are as follows:**
+    \\
+    \\- Each statement is made up of multiple tokens.
+    \\- Each Mepolang command should be terminated by a semicolon.
+    \\- The first token in a statement is always the command name.
+    \\- Tokens should be separated by whitespace.
+    \\- Each token is either:
+    \\  - Text
+    \\    - Just plain text, by default assumed to be a single word.
+    \\    - If you want to use a space within an argument use `[ square brackets ]` to create a multiword token.
+    \\    - If you want to have a text token that looks like a number, use square brackets like `[-3]`
+    \\  - Number
+    \\    - A floating point number, either decimal (e.g. `3.77`) or whole (e.g. `3`).
+    \\    - Can be negative like `-22.22` or positive like `22.22`
+    \\
+    \\
+    \\**Example mepolang text:**
+    \\
+    \\```sh
+    \\commandname textarg [multi word arg] 2;
+    \\commandname2 arg 8.373 anothertextarg;
+    \\```
+    \\
+    ;
+
 
 pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
@@ -55,10 +81,13 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\{s}
                 \\
+                \\## Syntax
+                \\{s}
+                \\
                 \\## API
                 \\
                 ,
-                .{MepolangIntro}
+                .{MepolangIntro, MepolangSyntax}
             );
 
             // API Section
