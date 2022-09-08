@@ -112,6 +112,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\# Preferences
                 \\
                 \\ {s}
+                \\
                 ,
                 .{ PrefsIntro },
             );
