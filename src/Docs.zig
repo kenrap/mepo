@@ -46,7 +46,7 @@ const MepolangIntro =
     ;
 
 const MepolangSyntax = 
-    \\**Syntax rules are as follows:**
+    \\Syntax rules are as follows:
     \\
     \\- Each statement is made up of multiple tokens.
     \\- Each Mepolang command should be terminated by a semicolon.
@@ -62,7 +62,7 @@ const MepolangSyntax =
     \\    - Can be negative like `-22.22` or positive like `22.22`
     \\
     \\
-    \\**Example mepolang text:**
+    \\Example mepolang text:
     \\
     \\```sh
     \\commandname textarg [multi word arg] 2;
@@ -86,7 +86,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\<li><a href="#syntax">Syntax</a></li>
                 \\<li>
                 \\  <a href="#api">API</a>
-                \\  <ul>
+                \\  <ul class='flex-list'>
                 ,
                 .{},
             );
