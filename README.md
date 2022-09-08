@@ -1,4 +1,4 @@
-# [**Mepo**](https://sr.ht/mil/Mepo/)
+# [**Mepo**](https://sr.ht/~mil/Mepo/)
 
 > **Note:** Mepo is currently in active development and while functional,
 > largely intended currently for early adopters (prior to the 1.0 release).
