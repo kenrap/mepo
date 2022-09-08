@@ -145,7 +145,7 @@ pub const DefaultBaseConfig =
     \\ prefset_n pingroup_4_ordered 0;
     \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
-    \\ fileload $XDG_CONFIG_HOME/mepo/config;
     \\ fileload $XDG_CACHE_HOME/mepo/savestate;
+    \\ fileload $XDG_CONFIG_HOME/mepo/config;
     \\ fileload $XDG_CONFIG_HOME/mepo/bookmarks;
 ;
