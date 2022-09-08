@@ -234,14 +234,12 @@ guide]() for more information on mepolang usage.
 
 ## CLI Options
 
-- `mepo -doc`
-  - Generate documentation for mepolang API
-- `mepo -d`
-  - Non-interactive downloader mode, see above for usage
-  - Ex: `mepo -d40.74946,-74.04673,40.818358,-73.88211,3,16`
-- `mepo -e`
-  - Enable debugging to STDERR
-- `mepo -sw`
-  - Use SDL Software renderer instead of GPU renderer used by default
-- `mepo -v`
-  - Print version number and exit
+- `mepo -docmd`: Print markdown documentation for Mepolang to STDOUT
+- `mepo -docman`: Print manpage documentation for mepolang API to STDOUT
+- `mepo -i`: Read mepolang from STDIN continually
+- `mepo -e`: Enable debug mode to log messages to STDERR
+- `mepo -ndc`: Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`
+- `mepo -sw`: Use software renderer rather then default GPU/hardware based renderer
+- `mepo -v`: Print version number
+- `mepo -h`: Print this help text
+- `mepo -d`: Non-interactively download tiles for given range
