@@ -26,6 +26,7 @@ const PrefsIntro =
     \\You can also use `filedump` to examine the current values of all preferences.
     \\
     \\Below is an exhaustive list of all available preferences:
+    \\
   ;
 
 const MepolangIntro =
@@ -79,6 +80,27 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
             try stdout.print(
                 \\# Mepolang
                 \\
+                \\<div class='toc'>
+                \\<ul>
+                \\<li><a href="#overview">Overview</a></li>
+                \\<li><a href="#syntax">Syntax</a></li>
+                \\<li>
+                \\  <a href="#api">API</a>
+                \\  <ul>
+                ,
+                .{},
+            );
+            for (FnTable.fn_specs) |fnc| {
+                try stdout.print("<li><a href='#{s}'>{s}</a></li>\n", .{fnc.name, fnc.name});
+            }
+            try stdout.print(
+                \\</ul>
+                \\</li>
+                \\<li><a href="#preferences">Preferences</a></li>
+                \\</ul>
+                \\</div>
+                \\
+                \\## Overview
                 \\{s}
                 \\
                 \\## Syntax
@@ -109,7 +131,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
 
             // Prefs Section
             try stdout.print(
-                \\# Preferences
+                \\## Preferences
                 \\
                 \\ {s}
                 \\
