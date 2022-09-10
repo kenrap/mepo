@@ -71,6 +71,26 @@ const MepolangSyntax =
     \\
     ;
 
+const DocEnvVarsShellpipe = 
+    \\Both `shellpipe_sync` and `shellpipe_async` expose a number of ENV
+    \\variables to the target script called. See below for the accessible
+    \\ENV variables exposed.
+    \\
+    \\- `MEPO_WIN_W`: Width of the UI window
+    \\- `MEPO_WIN_H`: Height of the UI window
+    \\- `MEPO_ZOOM`: Curent zoom level
+    \\- `MEPO_CENTER_LAT`: Latitude of the center point of the screen
+    \\- `MEPO_CENTER_LON`: Longitude of the center point of the screen
+    \\- `MEPO_TL_LAT`: Latitude of the top left point on the screen
+    \\- `MEPO_TL_LON`: Longitude of the top left point on the screen
+    \\- `MEPO_BR_LAT`: Latitude of the bottom right point on the screen
+    \\- `MEPO_BR_LON`: Longitude of the bottom right point on the screen
+    \\- `MEPO_CURSOR_LAT`: Latitude of the cursor position
+    \\- `MEPO_CURSOR_LON`: Lontitude of the cursor position
+    ;
+
+
+
 
 pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !void {
     const stdout = std.io.getStdOut().writer();
@@ -97,6 +117,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\</ul>
                 \\</li>
                 \\<li><a href="#preferences">Preferences</a></li>
+                \\<li><a href="#shellpipe-env-vars">Shellpipe ENV Variables</a></li>
                 \\</ul>
                 \\</div>
                 \\
@@ -184,6 +205,17 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 }
 
             }
+
+            try stdout.print(
+                \\
+                \\
+                \\## Shellpipe ENV Variables
+                \\
+                \\{s}
+                \\
+                ,
+                .{DocEnvVarsShellpipe},
+            );
         },
         .Manpage => {
             try stdout.print(
