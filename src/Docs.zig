@@ -53,13 +53,13 @@ const MepolangSyntax =
     \\- The first token in a statement is always the command name.
     \\- Tokens should be separated by whitespace.
     \\- Each token is either:
-    \\  - Text
-    \\    - Just plain text, by default assumed to be a single word.
-    \\    - If you want to use a space within an argument use `[ square brackets ]` to create a multiword token.
-    \\    - If you want to have a text token that looks like a number, use square brackets like `[-3]`
-    \\  - Number
-    \\    - A floating point number, either decimal (e.g. `3.77`) or whole (e.g. `3`).
-    \\    - Can be negative like `-22.22` or positive like `22.22`
+    \\  - **Text:** Just plain text, by default assumed to be a single word.
+    \\    If you want to use a space within an argument use `[ square brackets ]`
+    \\    to create a multiword token. If you want to have a text token that
+    \\    looks like a number, use square brackets like `[-3]`
+    \\  - **Number:** A floating point number, either decimal (e.g. `3.77`)
+    \\    or whole (e.g. `3`). Can be negative like `-22.22` or positive
+    \\    like `22.22`
     \\
     \\
     \\Example mepolang text:
