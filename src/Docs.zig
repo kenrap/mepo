@@ -124,8 +124,12 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\## Overview
                 \\{s}
                 \\
+                \\---
+                \\
                 \\## Syntax
                 \\{s}
+                \\
+                \\---
                 \\
                 \\## API
                 \\
@@ -208,6 +212,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
 
             try stdout.print(
                 \\
+                \\---
                 \\
                 \\## Shellpipe ENV Variables
                 \\
