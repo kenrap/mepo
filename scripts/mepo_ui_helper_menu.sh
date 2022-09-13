@@ -8,23 +8,32 @@ DOC='
   taking list items as STDIN and printing picked or typed item as STDOUT.
 '
 
+bemenuinput() {
+  bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
+}
+
 main() {
   [ -z "$PROMPT" ] && PROMPT="Mepo menu"
 
   if [ -n "$MEPO_MENU" ]; then
     # Custom menu support
     "$MEPO_MENU" "$PROMPT"
+  elif pidof plasmashell >/dev/null; then
+    # Plasma Mobile support
+    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active true
+    bemenuinput
+    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active false
   elif pidof squeekboard >/dev/null; then
     # Phosh support
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
-    bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
+    bemenuinput
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
   elif command -v sxmo_dmenu_with_kb.sh > /dev/null; then
     # Sxmo support
     sxmo_dmenu_with_kb.sh -p "$PROMPT"
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Generic Wayland enviroment support
-    bemenu --fn "$FONT" --scrollbar autohide -s -n -c -l $N_LINES -i -p "$PROMPT"
+    bemenuinput
   elif [ -n "$DISPLAY" ]; then
     # Generic X enviroment support
     dmenu -fn "$FONT" -i -l $N_LINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
