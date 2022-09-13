@@ -9,6 +9,8 @@ DOC='
 '
 
 main() {
+  [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
+
   OPTIONS="$(mepo_generated_osmtags.sh)"
   SCOPE="$(
     printf %b "Cancel\n$OPTIONS" |
@@ -26,7 +28,7 @@ main() {
   SCOPE="$(echo "$SCOPE" | cut -d: -f1 | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
   JSON_RESULTS="$(
-    curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
+    curl  "$MEPO_ENDPOINT_OVERPASS" --data-raw "data=$(
       echo '
         [out:json][timeout:25];
         (

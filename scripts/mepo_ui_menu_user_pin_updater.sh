@@ -12,10 +12,9 @@ DOC='
 '
 
 coordsviamls() {
-  MLSKEY=9a418f3c-364a-418a-85e8-1bde733f0c88
   MLSRESULT="$(
     # TODO: MLS supports POST buffer with network names -- scrape from nmcli
-    curl "https://location.services.mozilla.com/v1/geolocate?key=$MLSKEY"
+    curl "${MEPO_ENDPOINT_MLS}?key=$MEPO_APIKEY_MLS"
   )"
   LAT="$(echo "$MLSRESULT" | jq '.location.lat')"
   LON="$(echo "$MLSRESULT" | jq '.location.lng')"
@@ -91,7 +90,13 @@ droppinactivateandcenter() {
 }
 
 main() {
-  droppinactivateandcenter
+  [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
+  [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
+  [ -z "$MEPO_APIKEY_MLS" ] && MEPO_APIKEY_MLS="9a418f3c-364a-418a-85e8-1bde733f0c88"
+
+  if [ "$MEPO_USERPIN_ENABLED" = 1 ]; then
+    droppinactivateandcenter
+  fi
 }
 
 if [ -n "$1" ]; then "$@"; else main "$@"; fi

@@ -21,6 +21,8 @@ RELATIONS="
 "
 
 main() {
+  [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
+
   RELATIONID="$(
     echo "$RELATIONS" |
       awk '{$1=$1};1' | 
@@ -30,7 +32,7 @@ main() {
   )"
 
   JSON_RESULTS="$(
-    curl  "https://lz4.overpass-api.de/api/interpreter" --data-raw "data=$(
+    curl  "${MEPO_ENDPOINT_OVERPASS}" --data-raw "data=$(
       echo '
         [out:json][timeout:25];
         rel(RELATIONID);

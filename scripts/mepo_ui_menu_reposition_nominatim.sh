@@ -13,6 +13,8 @@ err() {
 }
 
 main() {
+  [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
+
   OPTIONS='
     Cancel
     Amsterdam
@@ -36,7 +38,7 @@ main() {
   echo "$QUERY" | grep -q . || err "Blank search query"
 
   RESULT="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY" |
+    curl "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY" |
       jq '.[] | "\(.display_name) \(.lat) \(.lon)" ' |
       PROMPT="Pick result" mepo_ui_helper_menu.sh 
   )"

@@ -9,7 +9,7 @@ DOC='
 '
 
 nominatimspecialphrasesfromwiki() {
-  curl 'https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN' |
+  curl "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" |
     grep '^| ' |
     grep -v '| -' |
     sed -E 's/\|\|.+$//g' |
@@ -18,6 +18,9 @@ nominatimspecialphrasesfromwiki() {
 }
 
 main() {
+  [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
+  [ -z "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" ] && MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES='https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN'
+
   QUERY="$(
       printf %b "Cancel\nEnter specific POI name" |
       PROMPT="Nominatim Search" mepo_ui_helper_menu.sh |
@@ -31,7 +34,7 @@ main() {
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
   JSONRESULTS="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
+    curl "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
   )"
 
   echo "
