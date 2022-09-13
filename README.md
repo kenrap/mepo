@@ -238,7 +238,7 @@ bookmarks, and more.
     - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
     - Tag 1.0 release.
-  - **Todo:**
+  - **Done:**
     - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
       in parity with man page.
