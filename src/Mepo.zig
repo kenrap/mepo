@@ -1372,7 +1372,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
 
         // E.g. Phosh sometimes doesn't use all space, e.g. strange bar
         // on bottom; so fullscreen & defullscreen to trigger window resize
-        if (utilplatform.is_phosh()) {
+        if (utilplatform.xdg_session_desktop() == .Phosh) {
             _ = sdl.SDL_SetWindowFullscreen(w, sdl.SDL_WINDOW_FULLSCREEN);
             _ = sdl.SDL_SetWindowFullscreen(w, 0);
         }
