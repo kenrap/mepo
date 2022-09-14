@@ -7,10 +7,9 @@ DOC='
   overass query. Drops pins on the map for the resulting found points
   of intrest in pin group 0; purging any previous pins in in group 0.
 '
+[ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
 
 main() {
-  [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
-
   OPTIONS="$(mepo_generated_osmtags.sh)"
   SCOPE="$(
     printf %b "Cancel\n$OPTIONS" |

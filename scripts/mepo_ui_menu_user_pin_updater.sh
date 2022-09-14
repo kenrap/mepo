@@ -90,10 +90,6 @@ droppinactivateandcenter() {
 }
 
 main() {
-  [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
-  [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
-  [ -z "$MEPO_APIKEY_MLS" ] && MEPO_APIKEY_MLS="9a418f3c-364a-418a-85e8-1bde733f0c88"
-
   if [ "$MEPO_USERPIN_ENABLED" = 1 ]; then
     droppinactivateandcenter
   fi

@@ -12,6 +12,9 @@ DOC='
   into pin group 1 as an ordered pin group wherein instructional pins show
   each direction in the route.
 '
+[ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
+[ -z "$MEPO_ENDPOINT_GRAPHHOPPER_ROUTE" ] && MEPO_ENDPOINT_GRAPHHOPPER_ROUTE="https://graphhopper.com/api/1/route"
+[ -z "$MEPO_APIKEY_GRAPHHOPPER" ] && MEPO_APIKEY_GRAPHHOPPER="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
 
 errexit() {
   echo "$1" >&2
@@ -112,10 +115,6 @@ printpins() {
 }
 
 main() {
-  [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
-  [ -z "$MEPO_ENDPOINT_GRAPHHOPPER_ROUTE" ] && MEPO_ENDPOINT_GRAPHHOPPER_ROUTE="https://graphhopper.com/api/1/route"
-  [ -z "$MEPO_APIKEY_GRAPHHOPPER" ] && MEPO_APIKEY_GRAPHHOPPER="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
-
   MODE="$(
     printf %b "car\nbike\nfoot" |
     PROMPT="Route mode" mepo_ui_helper_menu.sh

@@ -6,6 +6,7 @@ DOC='
   query. Presents menuing to prompt user for input location and pick from
   Nominatim results.
 '
+[ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
 
 err() {
   echo "$@" >&2
@@ -13,8 +14,6 @@ err() {
 }
 
 main() {
-  [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
-
   OPTIONS='
     Cancel
     Amsterdam

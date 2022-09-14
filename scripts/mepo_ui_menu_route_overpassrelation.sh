@@ -7,6 +7,7 @@ DOC='
   bus route, or similar). Presents menuing to prompt for the input OSM
   relation ID.
 '
+[ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
 
 RELATIONS="
   NYC Subway A: 9727210
@@ -21,8 +22,6 @@ RELATIONS="
 "
 
 main() {
-  [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
-
   RELATIONID="$(
     echo "$RELATIONS" |
       awk '{$1=$1};1' | 

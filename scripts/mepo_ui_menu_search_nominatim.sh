@@ -7,6 +7,8 @@ DOC='
   overass query. Drops pins on the map for the resulting found points
   of intrest in pin group 0; purging any previous pins in in group 0.
 '
+[ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
+[ -z "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" ] && MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES='https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN'
 
 nominatimspecialphrasesfromwiki() {
   curl "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" |
@@ -18,9 +20,6 @@ nominatimspecialphrasesfromwiki() {
 }
 
 main() {
-  [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
-  [ -z "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" ] && MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES='https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN'
-
   QUERY="$(
       printf %b "Cancel\nEnter specific POI name" |
       PROMPT="Nominatim Search" mepo_ui_helper_menu.sh |
