@@ -226,11 +226,6 @@ bookmarks, and more.
       bind_interval command or continously running async_shellpipe script.
 - **Milestone 6: Documentation & Packaging** (In-progress)
   - **Todo:**
-    - Document existing scripts used for search, routing, etc. and add notes
-      about how these scripts could be used offline by running Nominatim,
-      Overpass, GraphHopper, etc. locally.
-    - Document examples on how to write custom scripts interfacing with
-      mepolang.
     - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
     - Package-split current `scripts/` directory to allow separate packages
       for mepo and mepo-scripts. The former only will contain the base
@@ -248,6 +243,11 @@ bookmarks, and more.
     - Modify internals of Mepolang to include documentation directly in
       structs so that Mepolang API documentation can be automatically generated
       as a webpage for end-users.
+    - Document existing scripts used for search, routing, etc. and add notes
+      about how these scripts could be used offline by running Nominatim,
+      Overpass, GraphHopper, etc. locally.
+    - Document examples on how to write custom scripts interfacing with
+      mepolang.
 - **Milestone 7: Documentation Website** (In-progress)
   - **Todo:**
     - Development of a documentation website
