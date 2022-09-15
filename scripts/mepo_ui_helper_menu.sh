@@ -1,6 +1,4 @@
 #!/usr/bin/env sh
-N_LINES=17
-FONT="Inconsolata"
 DOC='
   Primary menuing script which uses bemenu, dmenu, sxmo-dmenu, or vis-menu
   to display menuing respectivly. The env variable PROMPT determines prompt
@@ -8,9 +6,11 @@ DOC='
   taking list items as STDIN and printing picked or typed item as STDOUT.
 '
 [ -z "$MEPO_MENUING" ] && MEPO_MENUING=auto
+[ -z "$MEPO_MENUING_FONT" ] && MEPO_MENUING_FONT=Inconsolata
+[ -z "$MEPO_MENUING_NLINES" ] && MEPO_MENUING_NLINES=17
 
 inputbemenu() {
-  bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
+  bemenu --fn "$MEPO_MENUING_FONT" --scrollbar autohide -s -n -l $MEPO_MENUING_NLINES -i -p "$PROMPT"
 }
 
 inputkdialog() {
@@ -58,7 +58,7 @@ inputbemenuphosh() {
 }
 
 inputdmenu() {
-  dmenu -fn "$FONT" -i -l $N_LINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
+  dmenu -fn "$MEPO_MENUING_FONT" -i -l $MEPO_MENUING_NLINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
 }
 
 inputsxmodmenu() {
