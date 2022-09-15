@@ -45,7 +45,7 @@ mainloop() {
     printf %b "filedump p $FILEPATH;"
   elif [ "$CHOICE" = "Load pins from file" ]; then
     FILEPATH="$(
-      PROMPT="Filepath" mepo_ui_helper_menu.sh
+      TEXTINPUT=1 PROMPT="Filepath" mepo_ui_helper_menu.sh
     )"
     printf %b "fileload $FILEPATH;"
   elif echo "$CHOICE" | grep -q "Change Group"; then
@@ -55,7 +55,7 @@ mainloop() {
     printf %b "pin_groupactivate $GROUP;"
   elif echo "$CHOICE" | grep -q "Add Pin"; then
     PIN_TO_ADD="$(
-      PROMPT="Pin handle" mepo_ui_helper_menu.sh
+      TEXTINPUT=1 PROMPT="Pin handle" mepo_ui_helper_menu.sh
     )"
     printf %b "
       pin_add -1 0 $LAT $LON [$PIN_TO_ADD];
@@ -85,8 +85,8 @@ mainloop() {
         pin_meta $PINGROUP [$PINHANDLE] lon [$LON];
       "
     elif [ "$EDITCHOICE" = "Update metadata" ]; then
-      METAKEY="$(PROMPT="($PINHANDLE): Metadata key" mepo_ui_helper_menu.sh)"
-      METAVALUE="$(PROMPT="($PINHANDLE): Metadata value" mepo_ui_helper_menu.sh)"
+      METAKEY="$(TEXTINPUT=1 PROMPT="($PINHANDLE): Metadata key" mepo_ui_helper_menu.sh)"
+      METAVALUE="$(TEXTINPUT=1 PROMPT="($PINHANDLE): Metadata value" mepo_ui_helper_menu.sh)"
       echo "
         pin_activate $PINGROUP [$PINHANDLE];
         pin_meta $PINGROUP [$PINHANDLE] [$METAKEY] [$METAVALUE];

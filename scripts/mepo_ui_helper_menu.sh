@@ -8,8 +8,28 @@ DOC='
   taking list items as STDIN and printing picked or typed item as STDOUT.
 '
 
-bemenuinput() {
+inputbemenu() {
   bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
+}
+
+inputkdialog() {
+  if [ "$TEXTINPUT" = 1 ]; then
+    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active true
+    kdialog --inputbox "$PROMPT"
+    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active false
+  else
+    OPTS="$(cat)\nType Custom"
+    OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF | sed 'p;')"
+    RESULT="$(
+      echo "$OPTS" |
+      xargs -d$'\n' kdialog --menu "$PROMPT"
+    )"
+    if [ "$RESULT" = "Type Custom" ]; then
+      TEXTINPUT=1 inputkdialog 
+    else
+      echo "$RESULT"
+    fi
+  fi
 }
 
 main() {
@@ -20,20 +40,18 @@ main() {
     "$MEPO_MENU" "$PROMPT"
   elif pidof plasmashell >/dev/null; then
     # Plasma Mobile support
-    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active true
-    bemenuinput
-    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active false
+    inputkdialog
   elif pidof squeekboard >/dev/null; then
     # Phosh support
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
-    bemenuinput
+    inputbemenu
     busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
   elif command -v sxmo_dmenu_with_kb.sh > /dev/null; then
     # Sxmo support
     sxmo_dmenu_with_kb.sh -p "$PROMPT"
   elif [ -n "$WAYLAND_DISPLAY" ]; then
     # Generic Wayland enviroment support
-    bemenuinput
+    inputbemenu
   elif [ -n "$DISPLAY" ]; then
     # Generic X enviroment support
     dmenu -fn "$FONT" -i -l $N_LINES -w "$(xdotool getactivewindow)" -p "$PROMPT"

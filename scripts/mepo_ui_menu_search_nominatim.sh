@@ -21,8 +21,8 @@ nominatimspecialphrasesfromwiki() {
 
 main() {
   QUERY="$(
-      printf %b "Cancel\nEnter specific POI name" |
-      PROMPT="Nominatim Search" mepo_ui_helper_menu.sh |
+      printf %b "Enter specific POI name" |
+      TEXTINPUT=1 PROMPT="Nominatim Search" mepo_ui_helper_menu.sh |
       sed 's/ /%20/g'
   )"
   [ "$QUERY" = "Cancel" ] && exit
