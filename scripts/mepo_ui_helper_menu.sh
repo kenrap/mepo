@@ -7,6 +7,7 @@ DOC='
   label and interface is otherwise is a passthrough to dmenu/bemenu in
   taking list items as STDIN and printing picked or typed item as STDOUT.
 '
+[ -z "$MEPO_MENUING" ] && MEPO_MENUING=auto
 
 inputbemenu() {
   bemenu --fn "$FONT" --scrollbar autohide -s -n -l $N_LINES -i -p "$PROMPT"
@@ -32,45 +33,61 @@ inputkdialog() {
   fi
 }
 
+inputframebuffer() {
+  # Framebuffer enviroment support
+  RESULTFILE="$(mktemp)"
+  OPTSFILE="$(mktemp)"
+  cat > "$OPTSFILE"
+  OLDVT=1
+  busybox openvt -c 11 -s -w sh -c "
+    clear;
+    echo Mepo terminal VT menu;
+    [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b \"\a\" > /tmp/fbp.fifo; }
+    cat \"$OPTSFILE\" | vis-menu -p \"$PROMPT\" -l 50 > $RESULTFILE
+  " > /dev/null
+  cat "$RESULTFILE" | tr -d "\n"
+  busybox chvt "$OLDVT" > /dev/null
+  rm "$RESULTFILE" "$OPTSFILE"
+  [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b "\b" > /tmp/fbp.fifo; }
+}
+
+inputbemenuphosh() {
+  busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
+  inputbemenu
+  busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
+}
+
+inputdmenu() {
+  dmenu -fn "$FONT" -i -l $N_LINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
+}
+
+inputsxmodmenu() {
+  sxmo_dmenu_with_kb.sh -p "$PROMPT"
+}
+
+hascommand() {
+  command -v "$1" > /dev/null
+}
+
 main() {
   [ -z "$PROMPT" ] && PROMPT="Mepo menu"
 
-  if [ -n "$MEPO_MENU" ]; then
-    # Custom menu support
-    "$MEPO_MENU" "$PROMPT"
-  elif pidof plasmashell >/dev/null; then
-    # Plasma Mobile support
+  if [ "$MEPO_MENUING" != "auto" ]; then # Custom override
+    "$MEPO_MENUING"
+  elif hascommand kdialog && pidof plasmashell >/dev/null; then # Plasma Mobile support
     inputkdialog
-  elif pidof squeekboard >/dev/null; then
-    # Phosh support
-    busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
+  elif hascommand bemenu && pidof squeekboard >/dev/null; then # Phosh support
+    inputbemenuphosh
+  elif hascommand sxmo_dmenu_with_kb.sh; then # Sxmo support
+    inputsxmodmenu
+  elif hascommand bemenu && [ -n "$WAYLAND_DISPLAY" ]; then # Generic Wayland enviroment support
     inputbemenu
-    busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
-  elif command -v sxmo_dmenu_with_kb.sh > /dev/null; then
-    # Sxmo support
-    sxmo_dmenu_with_kb.sh -p "$PROMPT"
-  elif [ -n "$WAYLAND_DISPLAY" ]; then
-    # Generic Wayland enviroment support
-    inputbemenu
-  elif [ -n "$DISPLAY" ]; then
-    # Generic X enviroment support
-    dmenu -fn "$FONT" -i -l $N_LINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
+  elif hascommand dmenu && [ -n "$DISPLAY" ]; then # Generic X enviroment support
+    inputdmenu
+  elif hascommand vis-menu; then # Framebuffer support
+    inputframebuffer
   else
-    # Framebuffer enviroment support
-    RESULTFILE="$(mktemp)"
-    OPTSFILE="$(mktemp)"
-    cat > "$OPTSFILE"
-    OLDVT=1
-    busybox openvt -c 11 -s -w sh -c "
-      clear;
-      echo Mepo terminal VT menu;
-      [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b \"\a\" > /tmp/fbp.fifo; }
-      cat \"$OPTSFILE\" | vis-menu -p \"$PROMPT\" -l 50 > $RESULTFILE
-    " > /dev/null
-    cat "$RESULTFILE" | tr -d "\n"
-    busybox chvt "$OLDVT" > /dev/null
-    rm "$RESULTFILE" "$OPTSFILE"
-    [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b "\b" > /tmp/fbp.fifo; }
+    echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, kdialog, or dmenu" >&2
   fi
 }
 
