@@ -104,20 +104,10 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\<ul>
                 \\<li><a href="#overview">Overview</a></li>
                 \\<li><a href="#syntax">Syntax</a></li>
-                \\<li>
-                \\  <a href="#api">API</a>
-                \\  <ul class='flex-list'>
-                ,
-                .{},
-            );
-            for (FnTable.fn_specs) |fnc| {
-                try stdout.print("<li><a href='#{s}'>{s}</a></li>\n", .{fnc.name, fnc.name});
-            }
-            try stdout.print(
-                \\</ul>
-                \\</li>
+                \\<li><a href="#api">API</a></li>
                 \\<li><a href="#preferences">Preferences</a></li>
                 \\<li><a href="#shellpipe-env-vars">Shellpipe ENV Variables</a></li>
+                \\<li><a href="#base-configuration">Base Configuration</a></li>
                 \\</ul>
                 \\</div>
                 \\
@@ -218,8 +208,19 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\{s}
                 \\
+                \\## Base Configuration
+                \\The following base configuration was built into Mepo as of
+                \\the current release version. Note these preferences can
+                \\be overriden directly for example with `prefset_n` and
+                \\`prefset_t`. While there are not unbinding commands currently
+                \\supported, you can forgo the default configuration by using
+                \\the `-ndc` commandline flag.
+                \\
+                \\```
+                \\{s}
+                \\```
                 ,
-                .{DocEnvVarsShellpipe},
+                .{DocEnvVarsShellpipe, config.DefaultBaseConfig},
             );
         },
         .Manpage => {
