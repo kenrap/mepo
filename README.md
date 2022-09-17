@@ -260,16 +260,21 @@ bookmarks, and more.
       hack on mepo (e.g. examples of showing editing mepolang configuration
       and showing the end result; rather then just 'end-user' functionality
       as was the target with the 0.4 demo video).
+  - **Done:**
     - Contribute section: information on how to contribute,
       links to repository, bug tracker, mailing list, IRC, and details on
       how to get involved.
 - **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
   - **Todo:**
-    - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
-      like zenity or another window-based input method may be used).
     - Add support for Lomiri.
+  - **Done:**
+    - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
+      like zenity or another window-based input method may be used). Note: integrated
+      via kdialog
     - Investigate & possibly add Flatpak compatability as this will likely
-      be the simplest packaging route for Ubuntu Touch etc.
+      be the simplest packaging route for Ubuntu Touch etc. Note: Flatpak created
+      and added to Flathub.
+    
 
 ## **Funding**
 [NLnet](https://nlnet.nl) has kindly awarded a grant to support Mepo's
