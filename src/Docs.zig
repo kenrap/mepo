@@ -208,6 +208,8 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\{s}
                 \\
+                \\---
+                \\
                 \\## Base Configuration
                 \\The following base configuration was built into Mepo as of
                 \\the current release version. Note these preferences can
@@ -216,7 +218,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\supported, you can forgo the default configuration by using
                 \\the `-ndc` commandline flag.
                 \\
-                \\```
+                \\```sh
                 \\{s}
                 \\```
                 ,
