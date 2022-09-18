@@ -270,7 +270,7 @@ bookmarks, and more.
   - **Done:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
       like zenity or another window-based input method may be used). Note: integrated
-      via kdialog
+      via zenity
     - Investigate & possibly add Flatpak compatability as this will likely
       be the simplest packaging route for Ubuntu Touch etc. Note: Flatpak created
       and added to Flathub.

@@ -13,20 +13,18 @@ inputbemenu() {
   bemenu --fn "$MEPO_MENUING_FONT" --scrollbar autohide -s -n -l $MEPO_MENUING_NLINES -i -p "$PROMPT"
 }
 
-inputkdialog() {
+inputzenity() {
   if [ "$TEXTINPUT" = 1 ]; then
-    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active true
-    kdialog --inputbox "$PROMPT"
-    qdbus org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard.active false
+    zenity --entry --text "$PROMPT"
   else
     OPTS="$(cat)\nType Custom"
-    OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF | sed 'p;')"
+    OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF)"
     RESULT="$(
       echo "$OPTS" |
-      xargs -d$'\n' kdialog --menu "$PROMPT"
+      xargs -d$'\n' zenity --list --column=Selection --text "$PROMPT"
     )"
     if [ "$RESULT" = "Type Custom" ]; then
-      TEXTINPUT=1 inputkdialog 
+      TEXTINPUT=1 inputzenity
     else
       echo "$RESULT"
     fi
@@ -74,8 +72,8 @@ main() {
 
   if [ "$MEPO_MENUING" != "auto" ]; then # Custom override
     "$MEPO_MENUING"
-  elif hascommand kdialog && pidof plasmashell >/dev/null; then # Plasma Mobile support
-    inputkdialog
+  elif hascommand zenity && pidof plasmashell >/dev/null; then # Plasma Mobile support
+    inputzenity
   elif hascommand bemenu && pidof squeekboard >/dev/null; then # Phosh support
     inputbemenuphosh
   elif hascommand sxmo_dmenu_with_kb.sh; then # Sxmo support
@@ -86,8 +84,10 @@ main() {
     inputdmenu
   elif hascommand vis-menu; then # Framebuffer support
     inputframebuffer
+  elif hascommand zenity; then
+    inputzenity
   else
-    echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, kdialog, or dmenu" >&2
+    echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, zenity, or dmenu" >&2
   fi
 }
 
