@@ -89,6 +89,16 @@ const DocEnvVarsShellpipe =
     \\- `MEPO_CURSOR_LON`: Lontitude of the cursor position
     ;
 
+const DocBaseConfigIntro =
+    \\The following base configuration was built into Mepo as of
+    \\the current release version. Note these preferences can
+    \\be overriden directly for example with `prefset_n` and
+    \\`prefset_t`. While there are not unbinding commands currently
+    \\supported, you can forgo the default configuration by using
+    \\the `-ndc` commandline flag.
+    ;
+
+
 
 
 
@@ -211,18 +221,14 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\---
                 \\
                 \\## Base Configuration
-                \\The following base configuration was built into Mepo as of
-                \\the current release version. Note these preferences can
-                \\be overriden directly for example with `prefset_n` and
-                \\`prefset_t`. While there are not unbinding commands currently
-                \\supported, you can forgo the default configuration by using
-                \\the `-ndc` commandline flag.
+                \\
+                \\{s}
                 \\
                 \\```sh
                 \\{s}
                 \\```
                 ,
-                .{DocEnvVarsShellpipe, config.DefaultBaseConfig},
+                .{DocEnvVarsShellpipe, DocBaseConfigIntro, config.DefaultBaseConfig},
             );
         },
         .Manpage => {
@@ -374,6 +380,13 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
 
             try stdout.print(
                 \\
+                \\.SH Base Configuration
+                \\.PP
+                \\{s}
+                \\
+                \\.PP
+                \\{s}
+                \\
                 \\.SH VERSION
                 \\Manual page has been generated against mepo version {s}
                 \\
@@ -387,7 +400,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\.SH CONTRIBUTING
                 \\Bugs and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht
                 ,
-                .{config.Version}
+                .{DocBaseConfigIntro, config.DefaultBaseConfig, config.Version}
             );
         },
     }
