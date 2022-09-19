@@ -4,7 +4,7 @@ HOTKEY=b
 DOC='
   Searches for points of intrest via the publically accessible Overpass
   API based on the current viewport.  Presents menuing to prompt for input
-  overass query. Drops pins on the map for the resulting found points
+  overpass query. Drops pins on the map for the resulting found points
   of intrest in pin group 0; purging any previous pins in in group 0.
 '
 [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
