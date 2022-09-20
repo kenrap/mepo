@@ -15,13 +15,13 @@ inputbemenu() {
 
 inputzenity() {
   if [ "$TEXTINPUT" = 1 ]; then
-    zenity --entry --text "$PROMPT"
+    zenity --title "Type input" --entry --text "$PROMPT"
   else
     OPTS="$(cat)\nType Custom"
     OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF)"
     RESULT="$(
       echo "$OPTS" |
-      xargs -d$'\n' zenity --list --column=Selection --text "$PROMPT"
+      xargs -d$'\n' zenity --title "Select an entry" --list --column=Selection --text "$PROMPT"
     )"
     if [ "$RESULT" = "Type Custom" ]; then
       TEXTINPUT=1 inputzenity
