@@ -19,6 +19,8 @@ pub fn build(b: *Builder) void {
     });
     b.installFile("assets/mepo.desktop", "share/applications/mepo.desktop");
     b.installFile("assets/mepo.png", "share/pixmaps/mepo.png");
+    b.installFile("assets/mepo_128x128.png", "share/icons/hicolor/128x128/apps/mepo.png");
+    b.installFile("assets/mepo_512x512.png", "share/icons/hicolor/512x512/apps/mepo.png");
 
     const exe = b.addExecutable("mepo", "src/main.zig");
 
