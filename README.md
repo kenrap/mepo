@@ -47,8 +47,10 @@ bookmarks, and more.
     [GraphHopper](https://www.graphhopper.com/) APIs are integrated through
     [bundled shell scripts](./scripts); customize to your heart's content or
     write your own scripts for custom integrations.
-  - Bundled scripts utilize existing tools like [dmenu](https://tools.suckless.org/dmenu/)
-    for user input and list selection rather then implementing application-specific input logic.
+  - Bundled scripts utilize existing tools like [dmenu](https://tools.suckless.org/dmenu/), 
+    [bemenu](https://github.com/Cloudef/bemenu), or 
+    [zenity](https://help.gnome.org/users/zenity/stable/) for user input and 
+    list selection rather then implementing application-specific input logic.
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
     through a command-line flag.
@@ -221,8 +223,6 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
     - Package-split current `scripts/` directory to allow separate packages
       for mepo and mepo-scripts. The former only will contain the base
       application (Zig) executable; the latter will contain auxiliary scripts.
-    - Work with maintainers of mobile Linux (& PinePhone) UIs to get
-      Mepo integrated properly.
     - Tag 1.0 release.
   - **Done:**
     - Add manpage documenting Mepolang commands and basic usage.
@@ -239,25 +239,30 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       Overpass, GraphHopper, etc. locally.
     - Document examples on how to write custom scripts interfacing with
       mepolang.
+    - Work with maintainers of mobile Linux (& PinePhone) UIs to get
+      Mepo integrated properly.
 - **Milestone 7: Documentation Website** (In-progress)
   - **Todo:**
+    - Screencasts for userconfig/scripts
+    - General QA pass on entire website typos/links/etc
+  - **Done:**
     - Development of a documentation website
     - Docs section: highlighting the various end-user documentation guides &
       tutorials (such as the installation guide, userguide, scripting guide,
       mepolang documentation etc.).
+    - Contribute section: information on how to contribute,
+      links to repository, bug tracker, mailing list, IRC, and details on
+      how to get involved.
     - Videos section: to demonstrate both end-user functionality (such as with
       the [video created for 0.4](https://media.lrdu.org/mepo_demos/mepo_demo_0.4.webm)),
       and additionally this section could host new screencasts showing how to
       hack on mepo (e.g. examples of showing editing mepolang configuration
       and showing the end result; rather then just 'end-user' functionality
       as was the target with the 0.4 demo video).
-  - **Done:**
-    - Contribute section: information on how to contribute,
-      links to repository, bug tracker, mailing list, IRC, and details on
-      how to get involved.
 - **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
   - **Todo:**
     - Add support for Lomiri.
+    - Flatpak segfault on x86_64
   - **Done:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
       like zenity or another window-based input method may be used). Note: integrated
