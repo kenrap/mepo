@@ -32,7 +32,7 @@ bookmarks, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **UNIX-philosophy inspired design - scriptability via [mepolang](doc/userguide.md#strongmepolangstrong)**:
+- **UNIX-philosophy inspired design - scriptability via [mepolang](http://mepo.milesalan.com/mepolang.html)**:
   - Mepo's UI is built **to do one thing well**: download & render maps.
     Extra functionality is enabled via its command language / API (Mepolang).
   - Reduces overall application logic complexity, handing over to
@@ -63,6 +63,9 @@ bookmarks, and more.
   - Provides vi-like (& customizable) keybindings out-of-the-box.
   - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
+  - Compatible across multiple Linux mobile environments including: Phosh,
+    Plasma Mobile, Sxmo, and Swmo. Being written in SDL ensures good support
+    and portability to other future environments as well.
 
 ## **Documentation Website**
 Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
