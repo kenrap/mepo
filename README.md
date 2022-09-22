@@ -64,7 +64,7 @@ bookmarks, and more.
   - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
 
-## Documentation Website
+## **Documentation Website**
 Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
 
 
