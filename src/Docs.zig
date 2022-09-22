@@ -130,6 +130,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\<ul>
                 \\<li><a href="#overview">Overview</a></li>
                 \\<li><a href="#syntax">Syntax</a></li>
+                \\<li><a href="#version">Version</a></li>
                 \\<li><a href="#api">API</a></li>
                 \\<li><a href="#preferences">Preferences</a></li>
                 \\<li><a href="#shellpipe-env-vars">Shellpipe ENV Variables</a></li>
@@ -147,10 +148,22 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\---
                 \\
+                \\## Version
+                \\This document was compiled against mepo version: {s}.
+                \\
+                \\The following sections for [API](#api),
+                \\[preferences](#preferences), [shellpipe
+                \\env vars](#shellpipe-env-vars), and [base
+                \\configuration](#base-configuration) are dependent on / assume
+                \\the above version of mepo this document was compiled against,
+                \\you may check your version of mepo with `mepo -v`.
+                \\
+                \\---
+                \\
                 \\## API
                 \\
                 ,
-                .{MepolangIntro, MepolangSyntax}
+                .{MepolangIntro, MepolangSyntax, config.Version}
             );
 
             // API Section
