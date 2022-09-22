@@ -30,19 +30,32 @@ const PrefsIntro =
   ;
 
 const MepolangIntro =
-    \\Mepolang is Mepo's command language API for IPC that can be sent to its
-    \\process via STDIN continually. Through this mechanism you can control
-    \\Mepo: using an external script, by simply piping in a configuration
-    \\on boot, or by using a FIFO (eventually). Upon the 1.0 release it is
-    \\planned that there will be two commands included to run Mepo: `mepo`
-    \\and `mepo_run.sh` wherein `mepo_run.sh` will just be a script that runs
-    \\`cat default_config | mepo`.
+    \\Mepolang is mepo's comand language for runtime IPC and configuration. It
+    \\takes the form of a plain-text DSL (domain-specific-language) with a
+    \\number of [commands](#api). Mepolang makes configuration, customizing,
+    \\and hacking on mepo simple. To test mepolang simply, you may run mepo
+    \\with the `-i` argument which reads mepolang from STDIN. The most basic
+    \\example might look like:
     \\
-    \\Many of Mepo's commands play nice together. A good place to look to
-    \\understand Mepolang's utilization is the [default config](../src/config.zig). For
-    \\example `bind_key` actually also takes Mepolang text to run as an
-    \\argument. Similarly the result of `shellpipe`, runs Mepolang text given
-    \\the STDOUT result of a (user) [shellscript](../scripts).
+    \\```sh
+    \\# Set the crosshair size to 200
+    \\echo "prefset_n crosshair_size 200;" | mepo -i
+    \\
+    \\# Or load a custom mepolang file from the filesystem
+    \\echo "fileload /home/foo/my_mepolang_file" | mepo -i
+    \\```
+    \\
+    \\Within the filesystem, based on the [default
+    \\base configuration](#base-configuration), the paths
+    \\`$XDG_CONFIG_HOME/mepo/config` and `$XDG_CONFIG_HOME/mepo/bookmarks`
+    \\are automatically loaded on boot; as such, for most end configuration
+    \\can be placed in `~/.config/mepo/config`.
+    \\
+    \\The rest of this document describes the syntax rules, API commands, and
+    \\base configuration based on mepolang. Advanced details on scripting may
+    \\be viewed in the [scripting guide](/scriptingguide.html) which should be
+    \\seen as a supplement to this document which is automatically generated
+    \\from the project's source
     ;
 
 const MepolangSyntax = 
