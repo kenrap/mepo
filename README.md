@@ -23,8 +23,6 @@ bookmarks, and more.
 - [Install Guide](http://mepo.milesalan.com/installguide.html)
 - [User Guide](http://mepo.milesalan.com/userguide.html)
 
----
-
 ## **Features**
 
 - **Fast & usable in resource-constrained environments**:
@@ -66,12 +64,9 @@ bookmarks, and more.
   - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
 
----
-
 ## **Documentation Website**
 Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
 
----
 
 ## **Roadmap to 1.0 release**
 
@@ -267,8 +262,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
     - Investigate & possibly add Flatpak compatability as this will likely
       be the simplest packaging route for Ubuntu Touch etc. Note: Flatpak created
       and added to Flathub.
-
----
+    
 
 ## **Funding**
 [NLnet](https://nlnet.nl) has kindly awarded a grant to support Mepo's
@@ -278,13 +272,9 @@ for implementing of the roadmap to reach 1.0 as seen above. We are
 very thankful to NLnet for accepting our application and making this
 development possible!
 
----
-
 ## **Icon**
 The app icon used in Phosh and by the `.desktop` file was designed by
 [iccqton](https://www.twitter.com/iccqton).
-
----
 
 ## **Contributing**
 
