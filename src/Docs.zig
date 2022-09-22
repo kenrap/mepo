@@ -48,14 +48,17 @@ const MepolangIntro =
     \\Within the filesystem, based on the [default
     \\base configuration](#base-configuration), the paths
     \\`$XDG_CONFIG_HOME/mepo/config` and `$XDG_CONFIG_HOME/mepo/bookmarks`
-    \\are automatically loaded on boot; as such, for most end configuration
-    \\can be placed in `~/.config/mepo/config`.
+    \\are automatically loaded on boot; as such, for most end users, 
+    \\configuration simply be placed in `~/.config/mepo/config`.
     \\
-    \\The rest of this document describes the syntax rules, API commands, and
-    \\base configuration based on mepolang. Advanced details on scripting may
-    \\be viewed in the [scripting guide](/scriptingguide.html) which should be
-    \\seen as a supplement to this document which is automatically generated
-    \\from the project's source
+    \\The rest of this document describes the [syntax rules](#syntax),
+    \\[API commands](#api), and [preferences](#preferences) of mepolang.
+    \\Note also that mepo by default runs with certain mepolang
+    \\statement's applied by default, this is known as the [base
+    \\configuration](#base-configuration).  Advanced details on scripting
+    \\and detailed practical examples of using mepolang may be viewed in
+    \\the [scripting guide](/scriptingguide.html) which should be seen as
+    \\a supplement to this document.
     ;
 
 const MepolangSyntax = 
