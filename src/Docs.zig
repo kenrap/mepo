@@ -149,7 +149,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\---
                 \\
                 \\## Version
-                \\This document was compiled against mepo version: {s}.
+                \\This document was compiled against mepo version: **{s}**.
                 \\
                 \\The following sections for [API](#api),
                 \\[preferences](#preferences), [shellpipe
