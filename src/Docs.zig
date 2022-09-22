@@ -147,10 +147,10 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\---
                 \\
-                \\## API ({s})
+                \\## API
                 \\
                 ,
-                .{MepolangIntro, MepolangSyntax, config.Version}
+                .{MepolangIntro, MepolangSyntax}
             );
 
             // API Section
@@ -172,12 +172,12 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
 
             // Prefs Section
             try stdout.print(
-                \\## Preferences ({s})
+                \\## Preferences
                 \\
                 \\ {s}
                 \\
                 ,
-                .{ config.Version, PrefsIntro },
+                .{ PrefsIntro },
             );
             try stdout.print(
                 \\| **Name** | **Description** | **Datatype** | **Min** | **Max** | **Default Value** |
@@ -230,13 +230,13 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\---
                 \\
-                \\## Shellpipe ENV Variables ({s})
+                \\## Shellpipe ENV Variables
                 \\
                 \\{s}
                 \\
                 \\---
                 \\
-                \\## Base Configuration ({s})
+                \\## Base Configuration
                 \\
                 \\{s}
                 \\
@@ -244,7 +244,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\{s}
                 \\```
                 ,
-                .{config.Version, DocEnvVarsShellpipe, config.Version, DocBaseConfigIntro, config.DefaultBaseConfig},
+                .{DocEnvVarsShellpipe, DocBaseConfigIntro, config.DefaultBaseConfig},
             );
         },
         .Manpage => {
