@@ -17,12 +17,13 @@ inspired underlying design, exposing a powerful command language called
 scripted to provide things like custom bounding-box search scripts,
 bookmarks, and more.
 
+- [Documentation Website](http://mepo.milesalan.com)
 - [Demo Video on Phone](https://media.lrdu.org/mepo_demos/mepo_demo_0.4.webm)
 - [Videos of User Interface](http://media.lrdu.org/mepo_demos)
-- [User Guide](doc/userguide.md)
-- [Development Guide](doc/developguide.md)
+- [Install Guide](http://mepo.milesalan.com/installguide.html)
+- [User Guide](http://mepo.milesalan.com/userguide.html)
 
-## **Goals**
+## **Features**
 
 - **Fast & usable in resource-constrained environments**:
   - Mepo **launches quickly and runs quickly** on the PinePhone and other
@@ -63,22 +64,9 @@ bookmarks, and more.
   - Should be usable in touch-oriented environments like the PinePhone and
     similar where a physical keyboard isn't present.
 
-## **High-level overview of currently implemented features**
+## Documentation Website
+Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
 
-- Fast SDL-based rendering of OSM map tiles
-- Downloading of OSM map tiles from user-specified source (default: OSM Maps)
-- Minimal command-language for Mepolang in which all core-functionality built out
-- Pan via mouse, double tap to zoom, right click or triple left click to zoom out
-- Vi-like keys (though customizable) for panning, zooming, center on mouse, etc.
-- Navigate to regions or addresses via shell-script (Nominatim API based)
-- Drop pins / search for POI via shell-script (Overpass API based)
-- Cycle through pins using hotkeys (vim-like n/p, though customizable)
-- Switch tile URL source via shell-script (toggle between OSM, Bike maps, Google)
-- Dynamic tile caching to filesystem / offline-maps once downloaded
-- Run API commands (Mepolang) via command prompt (dmenu) or via STDIN (non-continual)
-- Basic pinch-to-zoom via SDL multitouch API on PinePhone / mobile
-- Piping of current state (lat/lon & bbox) to scripts in shellpipe command
-- Basic non-interactive tile downloading based on viewport bounding-box
 
 ## **Roadmap to 1.0 release**
 
