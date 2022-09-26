@@ -243,7 +243,6 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       Mepo integrated properly.
 - **Milestone 7: Documentation Website** (In-progress)
   - **Todo:**
-    - Screencasts for userconfig/scripts
     - General QA pass on entire website typos/links/etc
   - **Done:**
     - Development of a documentation website
@@ -259,6 +258,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       hack on mepo (e.g. examples of showing editing mepolang configuration
       and showing the end result; rather then just 'end-user' functionality
       as was the target with the 0.4 demo video).
+    - Screencasts for userconfig/scripts
 - **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
   - **Todo:**
     - Add support for Lomiri.
