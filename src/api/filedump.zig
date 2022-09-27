@@ -11,7 +11,7 @@ pub const spec = .{
     .name = "filedump",
     .desc = "Save the current state of all preferences to a file.",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (p = pins, r = preferences, b = bindings); ex. 'pr' would save both pins and preferences but not bindings" },
+        .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = preferences, `b` = bindings); ex. `pr` would save both pins and preferences but not bindings" },
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to save state to" },
     })[0..],
     .execute = execute,
