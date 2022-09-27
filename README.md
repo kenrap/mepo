@@ -219,11 +219,10 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       bind_interval command or continously running async_shellpipe script.
 - **Milestone 6: Documentation & Packaging** (In-progress)
   - **Todo:**
-    - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
+    - Tag 1.0 release.
     - Package-split current `scripts/` directory to allow separate packages
       for mepo and mepo-scripts. The former only will contain the base
       application (Zig) executable; the latter will contain auxiliary scripts.
-    - Tag 1.0 release.
   - **Done:**
     - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
@@ -239,6 +238,9 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       Overpass, GraphHopper, etc. locally.
     - Document examples on how to write custom scripts interfacing with
       mepolang.
+    - Create Alpine package and add to pmOS postmarketos-ui-* frontends.
+      (Note: depends on zig which is in testing , so cannot be directly
+      added at the moment and is more of a pmOS admin decision)
     - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
 - **Milestone 7: Documentation Website** (In-progress)
@@ -262,7 +264,6 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
 - **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
   - **Todo:**
     - Add support for Lomiri.
-    - Flatpak segfault on x86_64
   - **Done:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
       like zenity or another window-based input method may be used). Note: integrated
