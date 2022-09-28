@@ -54,11 +54,11 @@ main() {
   # E.g. get all nodes with tags
   NODES="$(
     echo "$JSON_RESULTS" |
-      jq '.elements | .[] | "\(.lat) \(.lon) \(.id)" ' |
+      jq '.elements | .[] | "\(.lat) \(.lon) \(.id) \(.tags.name)" ' |
       tr -d \" |
       grep -vE 'null$' |
       grep -vE '^null' |
-      awk -F' ' '{lat=$1; lon=$2; id=$3; $1=""; $2=""; $3=""; gsub(/^[ \t]+/,"",$0); print id " " lat " " lon " [] [" $0 "]"}'
+      awk -F' ' '{lat=$1; lon=$2; id=$3; $1=""; $2=""; $3=""; gsub(/^[ \t]+/,"",$0); print id " " lat " " lon " [" $0 "]"}'
   )"
   FILENODES="$(mktemp)"
   echo "$NODES" > "$FILENODES"
