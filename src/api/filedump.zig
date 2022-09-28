@@ -9,7 +9,7 @@ const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "filedump",
-    .desc = "Save the current state of all preferences to a file.",
+    .desc = "Save the current state of pins, preference, and/or bindings to a file as mepolang.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = preferences, `b` = bindings); ex. `pr` would save both pins and preferences but not bindings" },
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to save state to" },

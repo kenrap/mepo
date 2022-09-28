@@ -5,7 +5,7 @@ const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "zoom_relative",
-    .desc = "Update the map's zoom level by a relative delta",
+    .desc = "Update the map's zoom level by a relative delta.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "zoom_delta", .desc = "Zoom level relative delta" },
     })[0..],

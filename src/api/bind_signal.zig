@@ -7,7 +7,7 @@ const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "bind_signal",
-    .desc = "Bind a signal to execute a mepolang action",
+    .desc = "Bind a signal to execute a mepolang action.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "signal_name", .desc = "Signal name; can be `USR1`, `USR2`, `TERM`, or `INT`" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },

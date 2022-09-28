@@ -6,8 +6,7 @@ const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "prefset_n",
-    .desc = "Set a preference number value",
-    // TODO: document preference mapping table
+    .desc = "Set a preference number value.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
         .{ .tag = .Number, .name = "prefvalue", .desc = "Preference number value" },

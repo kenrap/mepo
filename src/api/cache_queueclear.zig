@@ -7,7 +7,7 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_queueclear",
-    .desc = "Clear any queued background downloading process",
+    .desc = "Clear any queued background downloading process queued with `cache_dlbbox` or `cache_dlradius`. Note this does not remove filesystem tiles, but simply stops in-progress downloading.",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

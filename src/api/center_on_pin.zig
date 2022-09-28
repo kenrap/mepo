@@ -5,7 +5,7 @@ const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "center_on_pin",
-    .desc = "Center the map on the currently active pin",
+    .desc = "Center the map on the currently active pin.",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

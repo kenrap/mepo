@@ -4,7 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_add",
-    .desc = "Add a pin to the map",
+    .desc = "Add a pin to the map.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
         .{ .tag = .Number, .name = "is_structural", .desc = "If set to `1`, will be a 'structural' pin which is useful for curved paths and similar" },

@@ -8,7 +8,7 @@ const config = @import("../config.zig");
 
 pub const spec = .{
     .name = "cache_dlradius",
-    .desc = "Queue tiles for a bounding box to download to the cache in the background for the given zoom levels",
+    .desc = "Queue tiles for a bounding box to download to the cache in the background for the given zoom levels. Writes directly to filesystem cache (path deteremined by `tile_cache_dir` preference) as tiles are downloaded.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "lat", .desc = "Centerpoint latitude" },
         .{ .tag = .Number, .name = "lon", .desc = "Centerpoint longitude" },

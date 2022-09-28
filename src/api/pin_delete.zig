@@ -4,7 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_delete",
-    .desc = "Delete a pin by its handle",
+    .desc = "Delete a pin by its handle.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
         .{ .tag = .Text, .name = "pin_handle", .desc = "Pin's handle to delete" },

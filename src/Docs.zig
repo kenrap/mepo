@@ -42,14 +42,14 @@ const MepolangIntro =
     \\echo "prefset_n crosshair_size 200;" | mepo -i
     \\
     \\# Or load a custom mepolang file from the filesystem
-    \\echo "fileload /home/foo/my_mepolang_file" | mepo -i
+    \\echo "fileload /home/foo/my_mepolang_file;" | mepo -i
     \\```
     \\
     \\Within the filesystem, based on the [default
     \\base configuration](#base-configuration), the paths
     \\`$XDG_CONFIG_HOME/mepo/config` and `$XDG_CONFIG_HOME/mepo/bookmarks`
     \\are automatically loaded on boot; as such, for most end users, 
-    \\configuration simply be placed in `~/.config/mepo/config`.
+    \\configuration simply may be placed in `~/.config/mepo/config`.
     \\
     \\The rest of this document describes the [syntax rules](#syntax),
     \\[API commands](#api), and [preferences](#preferences) of mepolang.
@@ -70,7 +70,7 @@ const MepolangSyntax =
     \\- The first token in a statement is always the command name.
     \\- Each token is either:
     \\  - **Text:** Just plain text, by default assumed to be a single word.
-    \\    If you want to use a space within an argument use `[ square brackets ]`
+    \\    If you want to use a space within a token use `[ square brackets ]`
     \\    to create a multiword token. If you want to have a text token that
     \\    looks like a number, use square brackets like `[-3]`.
     \\  - **Number:** A floating point number, either decimal (e.g. `3.77`)
@@ -153,7 +153,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\The following sections for [API](#api),
                 \\[preferences](#preferences), [shellpipe
-                \\env vars](#shellpipe-env-variables), and [base
+                \\env variables](#shellpipe-env-variables), and [base
                 \\configuration](#base-configuration) are dependent on / assume
                 \\the above version of mepo this document was compiled against,
                 \\you may check your version of mepo with `mepo -v`.

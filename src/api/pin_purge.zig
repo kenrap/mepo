@@ -4,7 +4,7 @@ const std = @import("std");
 
 pub const spec = .{
     .name = "pin_purge",
-    .desc = "Purge all pins in the current pin group",
+    .desc = "Purge all pins in the currently active pin group.",
     .args = (&[_]types.MepoFnSpecArg{})[0..],
     .execute = execute,
 };

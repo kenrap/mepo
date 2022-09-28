@@ -5,7 +5,7 @@ const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "pin_cycle",
-    .desc = "Cycle the currently focused pin",
+    .desc = "Cycle the currently focused pin group pin.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "viewport_only", .desc = "Use `1` to only cycle between pins in viewport" },
         .{ .tag = .Number, .name = "delta", .desc = "Delta amount (positive or negative) for number of pins to skip" },

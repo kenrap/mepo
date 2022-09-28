@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_quit",
-    .desc = "Bind a mepolang expression to run on quitting the application",
+    .desc = "Bind a mepolang expression to run on quitting the application.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     })[0..],

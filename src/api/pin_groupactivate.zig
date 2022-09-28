@@ -5,7 +5,7 @@ const pin_cycle = @import("pin_cycle.zig").pin_cycle;
 
 pub const spec = .{
     .name = "pin_groupactivate",
-    .desc = "Activate the pin group specified",
+    .desc = "Activate the pin group specified.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
     })[0..],
