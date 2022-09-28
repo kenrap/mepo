@@ -22,7 +22,7 @@ pub const CliFlags = &[_]struct{
 const PrefsIntro = 
     \\Internally mepo keeps track of a number of preferences which control all
     \\state for the application. These preferences can all be set with the commands
-    \\`preset_n` for numerical prerefences and `prefset_t` for textual preferences.
+    \\`preset_n` for numerical preferences and `prefset_t` for textual preferences.
     \\You can also use `filedump` to examine the current values of all preferences.
     \\
     \\Below is an exhaustive list of all available preferences:
