@@ -8,9 +8,9 @@ pub const CliFlags = &[_]struct{
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmd", .desc = "Print markdown documentation for Mepolang to STDOUT" },
-    .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT" },
-    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually" },
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for Mepolang to STDOUT." },
+    .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT.  Can be used to view manpage like: `mepo -docman | man -l`." },
+    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Could be used for interactive debugging such as `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
     .{ .flag = "-ndc", .desc = "Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`" },
     .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer" },
@@ -291,9 +291,14 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\works both offline and online, features a minimalist both touch/mouse
                 \\and keyboard compatible interface, and offers a UNIX-philosophy
                 \\inspired underlying design, exposing a powerful command language called
-                \\[Mepolang](doc/userguide.md#strongmepolangstrong) capable of being
-                \\scripted to provide things like custom bounding-box search scripts,
-                \\bookmarks, and more.
+                \\Mepolang capable of being scripted to provide things like custom
+                \\bounding-box search scripts, bookmarks, and more.
+                \\
+                \\This document describes usage of mepo, commandline flags,
+                \\usage of mepolang (mepo's configuration and IPC language),
+                \\and the default configuration. For more in-depth documentation
+                \\covering UI usage, guides, scripting, and demo videos
+                \\visit mepo's documentation website at http://mepo.milesalan.com
                 \\
                 \\.SH OPTIONS
                 \\
@@ -322,7 +327,78 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 }
             }
 
-            try stdout.print(".SH MEPOLANG\n", .{});
+            try stdout.print(
+                \\
+                \\.SH FILES
+                \\
+                \\The directory
+                \\.B
+                \\$XDG_CACHE_HOME/mepo
+                \\is used to store tiledata
+                \\and savestate. If $XDG_CACHE_HOME is unset you can assume
+                \\this to be
+                \\.B
+                \\~/.cache/mepo/
+                \\
+                \\The file
+                \\.B
+                \\$XDG_CONFIG_HOME/mepo/config
+                \\may be used for end-user
+                \\configuration and is assumed to be a file with valid mepolang
+                \\syntax. If $XDG_CONFIG_HOME is unset you can assume this
+                \\to be
+                \\.B
+                \\~/.config/mepo/config
+                \\.
+                ,
+                .{}
+            );
+
+            try stdout.print(
+                \\
+                \\.SH MEPOLANG
+                \\
+                \\Mepolang is mepo's comand language for runtime IPC and configuration. It
+                \\takes the form of a plain-text DSL (domain-specific-language) with a
+                \\number of commands. Mepolang makes configuration, customizing,
+                \\and hacking on mepo simple. To test mepolang simply, you may run mepo
+                \\with the `-i` argument which reads mepolang from STDIN. A most basic
+                \\example might look like:
+                \\
+                \\echo "prefset_n crosshair_size 200;" | mepo -i
+                \\
+                \\.SH MEPOLANG SYNTAX
+                \\
+                \\Syntax rules are as follows:
+                \\
+                \\1. Mepolang syntax is composed of statements.
+                \\
+                \\2. Each statement is made up of multiple tokens and terminated by a semicolon.
+                \\
+                \\3. Tokens are separated by whitespace.
+                \\
+                \\4. The first token in a statement is always the command name.
+                \\
+                \\5. Each token is either:
+                \\
+                \\5A. **Text:** Just plain text, by default assumed to be a single word.
+                \\If you want to use a space within an argument use `[ square brackets ]`
+                \\to create a multiword token. If you want to have a text token that
+                \\looks like a number, use square brackets like `[-3]`.
+                \\
+                \\5B. **Number:** A floating point number, either decimal (e.g. `3.77`)
+                \\or whole (e.g. `3`). Can be negative like `-22.22` or positive
+                \\like `22.22`.
+                \\
+                \\Example mepolang text:
+                \\  commandname textarg [multi word arg] 2;
+                \\  commandname2 arg 8.373 anothertextarg;
+                \\
+                ,
+                .{}
+            );
+
+            try stdout.print(".SH MEPOLANG COMMANDS\n", .{});
             for (FnTable.fn_specs) |fnc| {
                 try stdout.print(
                     \\.PP
@@ -417,17 +493,20 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\{s}
                 \\
                 \\.SH VERSION
-                \\Manual page has been generated against mepo version {s}
+                \\This manual page has been generated against mepo version {s}
                 \\
                 \\.SH AUTHORS
-                \\Mepo is written by Miles Alan <m@milesalan.com>. Full list 
-                \\of contributors can be seen in git shortlog
+                \\Mepo is written by Miles Alan <m@milesalan.com>.
                 \\
-                \\.SH SEE ALSO
-                \\TODO
+                \\A full list of contributors can be seen in git shortlog.
                 \\
                 \\.SH CONTRIBUTING
-                \\Bugs and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht
+                \\Bugs and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht.
+                \\
+                \\For more information on Mepo and contributing view mepo's
+                \\website at http://mepo.milesalan.com or mepo's project page
+                \\on srht at http://sr.ht/~mil/mepo
+                \\
                 ,
                 .{DocBaseConfigIntro, config.DefaultBaseConfig, config.Version}
             );
