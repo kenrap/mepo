@@ -12,7 +12,7 @@ pub const CliFlags = &[_]struct{
     .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT.  Can be used to view manpage like: `mepo -docman | man -l`." },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Could be used for interactive debugging such as `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
-    .{ .flag = "-ndc", .desc = "Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc`" },
+    .{ .flag = "-ndc", .desc = "Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc -i`" },
     .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer" },
     .{ .flag = "-v", .desc = "Print version number" },
     .{ .flag = "-h", .desc = "Print this help text" },

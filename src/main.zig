@@ -101,10 +101,11 @@ pub fn main() !void {
                 .{config.Version},
             );
             for (Docs.CliFlags) |flag_spec| {
-                std.debug.print(
-                    "{s}: {s}\n",
-                    .{flag_spec.flag, flag_spec.desc},
-                );
+                if (flag_spec.param) |arg| {
+                    std.debug.print("{s}{s}: {s}\n", .{flag_spec.flag, arg, flag_spec.desc});
+                } else {
+                    std.debug.print("{s}: {s}\n", .{flag_spec.flag, flag_spec.desc});
+                }
             }
             std.debug.print(
                 \\===============================================
