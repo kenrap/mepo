@@ -8,11 +8,11 @@ pub const CliFlags = &[_]struct{
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmd", .desc = "Print markdown documentation for mepolang to STDOUT." },
-    .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT.  Can be used to view manpage like: `mepo -docman | man -l`." },
-    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Could be used for interactive debugging such as `tee | mepo -i` or `./myscript | mepo -i`." },
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for the mepolang API to STDOUT." },
+    .{ .flag = "-docman", .desc = "Print manpage documentation for the mepolang API to STDOUT.  Can be viewed with man via: `mepo -docman | man -l`." },
+    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Can be used for interactive debugging or scripting via: `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR." },
-    .{ .flag = "-ndc", .desc = "Disable default config, this is useful if you have a custom config and don't wish to use the default bindings, etc.. for examle like `cat my_config | mepo -ndc -i`." },
+    .{ .flag = "-ndc", .desc = "Disable default/base config, this is useful if you have a custom config and don't wish to use the default bindings, etc.. for example: `cat my_config | mepo -ndc -i`." },
     .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer." },
     .{ .flag = "-v", .desc = "Print version number." },
     .{ .flag = "-h", .desc = "Print this help text." },
@@ -21,7 +21,7 @@ pub const CliFlags = &[_]struct{
 
 const PrefsIntro = 
     \\Internally mepo keeps track of a number of preferences which control all
-    \\state for the application. These preferences can all be set with the commands
+    \\state for the application. These preferences can be set with the commands
     \\`preset_n` for numerical preferences and `prefset_t` for textual preferences.
     \\You can also use `filedump` to examine the current values of all preferences.
     \\
@@ -107,7 +107,7 @@ const DocEnvVarsShellpipe =
 
 const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
-    \\the current release version. Note preferences can
+    \\the current release version. Note, preferences can
     \\be overriden directly for example with `prefset_n` and
     \\`prefset_t`. While there are not unbinding commands currently
     \\supported, you can forgo the default configuration by using
@@ -291,7 +291,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\works both offline and online, features a minimalist both touch/mouse
                 \\and keyboard compatible interface, and offers a UNIX-philosophy
                 \\inspired underlying design, exposing a powerful command language called
-                \\Mepolang capable of being scripted to provide things like custom
+                \\mepolang capable of being scripted to provide things like custom
                 \\bounding-box search scripts, bookmarks, and more.
                 \\
                 \\This document describes usage of mepo, commandline flags,
@@ -501,9 +501,9 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\A full list of contributors can be seen in git shortlog.
                 \\
                 \\.SH CONTRIBUTING
-                \\Bugs, patches, and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht.
+                \\Bugs, patches, and feature discussions can be sent to ~mil/mepo-devel@lists.sr.ht.
                 \\
-                \\For more information on Mepo and contributing view mepo's
+                \\For more information on Mepo and contributing, view mepo's
                 \\website at http://mepo.milesalan.com or mepo's project page
                 \\on srht at http://sr.ht/~mil/mepo
                 \\
