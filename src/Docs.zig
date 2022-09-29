@@ -11,12 +11,12 @@ pub const CliFlags = &[_]struct{
     .{ .flag = "-docmd", .desc = "Print markdown documentation for mepolang to STDOUT." },
     .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT.  Can be used to view manpage like: `mepo -docman | man -l`." },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Could be used for interactive debugging such as `tee | mepo -i` or `./myscript | mepo -i`." },
-    .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
-    .{ .flag = "-ndc", .desc = "Disable default config, e.g. not wanting defaults bindings etc.. like `cat my_config | mepo -ndc -i`" },
-    .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer" },
-    .{ .flag = "-v", .desc = "Print version number" },
-    .{ .flag = "-h", .desc = "Print this help text" },
-    .{ .flag = "-d", .desc = "Non-interactively download tiles for given range", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
+    .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR." },
+    .{ .flag = "-ndc", .desc = "Disable default config, this is useful if you have a custom config and don't wish to use the default bindings, etc.. for examle like `cat my_config | mepo -ndc -i`." },
+    .{ .flag = "-sw", .desc = "Use software renderer rather then default GPU/hardware based renderer." },
+    .{ .flag = "-v", .desc = "Print version number." },
+    .{ .flag = "-h", .desc = "Print this help text." },
+    .{ .flag = "-d", .desc = "Non-interactively download tiles for given range.", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
 };
 
 const PrefsIntro = 
@@ -362,7 +362,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\takes the form of a plain-text DSL (domain-specific-language) with a
                 \\number of commands. Mepolang makes configuration, customizing,
                 \\and hacking on mepo simple. To test mepolang simply, you may run mepo
-                \\with the `-i` argument which reads mepolang from STDIN. A most basic
+                \\with the `-i` argument which reads mepolang from STDIN. A basic
                 \\example might look like:
                 \\
                 \\echo "prefset_n crosshair_size 200;" | mepo -i
@@ -382,7 +382,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\5. Each token is either:
                 \\
                 \\5A. **Text:** Just plain text, by default assumed to be a single word.
-                \\If you want to use a space within an argument use `[ square brackets ]`
+                \\If you want to use a space within an token use `[ square brackets ]`
                 \\to create a multiword token. If you want to have a text token that
                 \\looks like a number, use square brackets like `[-3]`.
                 \\
@@ -501,7 +501,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\A full list of contributors can be seen in git shortlog.
                 \\
                 \\.SH CONTRIBUTING
-                \\Bugs and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht.
+                \\Bugs, patches, and feature dicussions can be sent to ~mil/mepo-devel@lists.sr.ht.
                 \\
                 \\For more information on Mepo and contributing view mepo's
                 \\website at http://mepo.milesalan.com or mepo's project page
