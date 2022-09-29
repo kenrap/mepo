@@ -8,7 +8,7 @@ pub const CliFlags = &[_]struct{
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmd", .desc = "Print markdown documentation for Mepolang to STDOUT." },
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for mepolang to STDOUT." },
     .{ .flag = "-docman", .desc = "Print manpage documentation for mepolang API to STDOUT.  Can be used to view manpage like: `mepo -docman | man -l`." },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Could be used for interactive debugging such as `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR" },
@@ -107,7 +107,7 @@ const DocEnvVarsShellpipe =
 
 const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
-    \\the current release version. Note these preferences can
+    \\the current release version. Note preferences can
     \\be overriden directly for example with `prefset_n` and
     \\`prefset_t`. While there are not unbinding commands currently
     \\supported, you can forgo the default configuration by using
