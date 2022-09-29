@@ -8,7 +8,7 @@ pub const spec = .{
     .name = "bind_button",
     .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen in the button bar.",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "visible_only_when_has_pins", .desc = "Set to `1` to only show buton *if* there are visible pins" },
+        .{ .tag = .Number, .name = "visible_only_when_has_pins", .desc = "Set to `1` to only show button *if* there are visible pins" },
         .{ .tag = .Text, .name = "button_text", .desc = "Text that will be shown on the button" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run on clicking the button" },
     })[0..],

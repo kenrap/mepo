@@ -70,7 +70,7 @@ pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     mapping[@enumToInt(pref.debug_stderr)] = .{ .name = "debug_stderr", .value = .{ .b = false }, .desc = "Send debug information to STDERR (note the commandline flag `-e` overrides this setting)" };
     mapping[@enumToInt(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 9999 }, .desc = "Maximum number of concurrent transfers for curl" };
     mapping[@enumToInt(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .bounds = .{ .min = -1, .max = 99999999 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };
-    mapping[@enumToInt(pref.tile_cache_network)] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "Whether to donwload new tiledata from external servers; if 0 that means you're offline" };
+    mapping[@enumToInt(pref.tile_cache_network)] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "Whether to download new tiledata from external servers; if 0 that means you're offline" };
     mapping[@enumToInt(pref.tile_cache_dir)] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "Path of directory to store the downloaded tiles" };
     mapping[@enumToInt(pref.tile_cache_url)] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "URL source for the tiles, uses %1/%2/%3 to represent X/Y/Z" };
 

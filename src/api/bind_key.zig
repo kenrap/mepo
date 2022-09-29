@@ -9,7 +9,7 @@ pub const spec = .{
     .desc = "Bind a key combination to execute a mepolang action.",
     .args = (&[_]types.MepoFnSpecArg{
         .{ .tag = .Text, .name = "modifier", .desc = "Modifier combination (`c`=control, `s`=shift, `a`=alt); ex. `cs` would mean control and shift" },
-        .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indescriminate since modifier handled by modifier argument" },
+        .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indiscriminate since modifier handled by modifier argument" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     })[0..],
     .execute = execute,

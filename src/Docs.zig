@@ -30,7 +30,7 @@ const PrefsIntro =
   ;
 
 const MepolangIntro =
-    \\Mepolang is mepo's comand language for runtime IPC and configuration. It
+    \\Mepolang is mepo's command language for runtime IPC and configuration. It
     \\takes the form of a plain-text DSL (domain-specific-language) with a
     \\number of [commands](#api). Mepolang makes configuration, customizing,
     \\and hacking on mepo simple. To test mepolang simply, you may run mepo
@@ -94,7 +94,7 @@ const DocEnvVarsShellpipe =
     \\
     \\- `MEPO_WIN_W`: Width of the UI window
     \\- `MEPO_WIN_H`: Height of the UI window
-    \\- `MEPO_ZOOM`: Curent zoom level
+    \\- `MEPO_ZOOM`: Current zoom level
     \\- `MEPO_CENTER_LAT`: Latitude of the center point of the screen
     \\- `MEPO_CENTER_LON`: Longitude of the center point of the screen
     \\- `MEPO_TL_LAT`: Latitude of the top left point on the screen
@@ -102,13 +102,13 @@ const DocEnvVarsShellpipe =
     \\- `MEPO_BR_LAT`: Latitude of the bottom right point on the screen
     \\- `MEPO_BR_LON`: Longitude of the bottom right point on the screen
     \\- `MEPO_CURSOR_LAT`: Latitude of the cursor position
-    \\- `MEPO_CURSOR_LON`: Lontitude of the cursor position
+    \\- `MEPO_CURSOR_LON`: Longitude of the cursor position
     ;
 
 const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
     \\the current release version. Note, preferences can
-    \\be overriden directly for example with `prefset_n` and
+    \\be overridden directly for example with `prefset_n` and
     \\`prefset_t`. While there are not unbinding commands currently
     \\supported, you can forgo the default configuration by using
     \\the `-ndc` commandline flag.
@@ -358,7 +358,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\.SH MEPOLANG
                 \\
-                \\Mepolang is mepo's comand language for runtime IPC and configuration. It
+                \\Mepolang is mepo's command language for runtime IPC and configuration. It
                 \\takes the form of a plain-text DSL (domain-specific-language) with a
                 \\number of commands. Mepolang makes configuration, customizing,
                 \\and hacking on mepo simple. To test mepolang simply, you may run mepo
