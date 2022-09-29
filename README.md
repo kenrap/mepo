@@ -1,10 +1,5 @@
 # [**Mepo**](https://sr.ht/~mil/Mepo/)
 
-> **Note:** Mepo is currently in active development and while functional,
-> largely intended currently for early adopters (prior to the 1.0 release).
-> See below for the high-level goals, current state of Mepo, the path to
-> 1.0, and information on contributing!
-
 [![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
@@ -13,7 +8,7 @@ environment's various user interfaces (Wayland & X inclusive). Mepo
 works both offline and online, features a minimalist both touch/mouse
 and keyboard compatible interface, and offers a UNIX-philosophy
 inspired underlying design, exposing a powerful command language called
-[Mepolang](doc/userguide.md#strongmepolangstrong) capable of being
+[Mepolang](http://mepo.milesalan.com/mepolang.html) capable of being
 scripted to provide things like custom bounding-box search scripts,
 bookmarks, and more.
 
@@ -186,7 +181,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       mobile/desktop & X/Wayland that should all have first-class support.
     - Rework SDL defaults (window expose, winch, default sizing etc.) to ensure
       greatest cross-compatibility between environments.
-- **Milestone 5: UI Niceties** (Complete: 8/15/2022, tag 0.5)
+- **Milestone 5: UI Niceties** (Complete: 8/15/2022, tag: 0.5)
   - **Done:**
     - Add visual per-tile-downloading progress-indicators.
     - Add support for pasting / copying current coordinates from the system
@@ -217,12 +212,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       fallback to geoclue2 as needed.
     - Autoupdate user current location either through introducing
       bind_interval command or continously running async_shellpipe script.
-- **Milestone 6: Documentation & Packaging** (In-progress)
-  - **Todo:**
-    - Tag 1.0 release.
-    - Package-split current `scripts/` directory to allow separate packages
-      for mepo and mepo-scripts. The former only will contain the base
-      application (Zig) executable; the latter will contain auxiliary scripts.
+- **Milestone 6: Documentation & Packaging** (Complete: 9/29/2022, tag: 1.0)
   - **Done:**
     - Add manpage documenting Mepolang commands and basic usage.
     - Add markdown-based documentation to explain mepolang commands, usage
@@ -243,6 +233,10 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       added at the moment and is more of a pmOS admin decision)
     - Work with maintainers of mobile Linux (& PinePhone) UIs to get
       Mepo integrated properly.
+    - Tag 1.0 release.
+    - Package-split current `scripts/` directory to allow separate packages
+      for mepo and mepo-scripts. The former only will contain the base
+      application (Zig) executable; the latter will contain auxiliary scripts.
 - **Milestone 7: Documentation Website** (In-progress)
   - **Todo:**
     - General QA pass on entire website typos/links/etc
@@ -261,9 +255,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       and showing the end result; rather then just 'end-user' functionality
       as was the target with the 0.4 demo video).
     - Screencasts for userconfig/scripts
-- **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (In-progress)
-  - **Todo:**
-    - Add support for Lomiri.
+- **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (Complete: 9/29/2022)
   - **Done:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
       like zenity or another window-based input method may be used). Note: integrated
@@ -271,6 +263,8 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
     - Investigate & possibly add Flatpak compatability as this will likely
       be the simplest packaging route for Ubuntu Touch etc. Note: Flatpak created
       and added to Flathub.
+    - Add support for Lomiri (Note: cut support due to incompatbilites with Mir, see mailing list note
+      for more details)
     
 
 ## **Funding**
