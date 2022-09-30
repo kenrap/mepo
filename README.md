@@ -13,10 +13,11 @@ scripted to provide things like custom bounding-box search scripts,
 bookmarks, and more.
 
 - [Documentation Website](http://mepo.milesalan.com)
-- [Demo Video](http://mepo.milesalan.com/demos.html#mobile-demo-major-features)
+- [Demo Video on postmarketOS phone](http://mepo.milesalan.com/demos.html#mobile-demo-major-features)
 - [Videos of User Interface](http://mepo.milesalan.com/demos.html)
 - [Install Guide](http://mepo.milesalan.com/installguide.html)
 - [User Guide](http://mepo.milesalan.com/userguide.html)
+- [Mepolang](http://mepo.milesalan.com/mepolang.html)
 
 ## **Features**
 
