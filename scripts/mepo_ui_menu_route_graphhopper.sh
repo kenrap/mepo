@@ -2,7 +2,7 @@
 DISPLAYNAME=" Route: via GraphHopper"
 HOTKEY=r
 DOC='
-  Allows user to determine a route between two points via the publically
+  Allows user to determine a route between two points via the publicly
   accessible GraphHopper instance. Presents menuing to prompt user for origin
   and destination points. The cursor (e.g. the position of the mouse or on
   mobile the last clicked point - e.g. in case of click-hold functionality)

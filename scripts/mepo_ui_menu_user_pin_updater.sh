@@ -2,13 +2,13 @@
 DISPLAYNAME=" Location Pin: Center on user location"
 HOTKEY=x
 DOC='
-  Determinines the user location via GPSD, Geoclue, or Mozilla
+  Determines the user location via GPSD, Geoclue, or Mozilla
   Location services. When provided with no argument runs the function
   `droppinactivateandcenter` which both drops a pin on the map and
   centers the map. Meanwhile the function `droppin` can be used in
   isolation to only drop a pin on the map. This script may be used
-  synchronously or asynchronoulsly; within the default config `droppin`
-  is used asynchronounously via `shellpipe_async`.
+  synchronously or asynchronously; within the default config `droppin`
+  is used asynchronously via `shellpipe_async`.
 '
 [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
 [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"

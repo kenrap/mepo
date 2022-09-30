@@ -2,10 +2,10 @@
 DISPLAYNAME=" POI Search: via Overpass"
 HOTKEY=b
 DOC='
-  Searches for points of intrest via the publically accessible Overpass
+  Searches for points of interest via the publicly accessible Overpass
   API based on the current viewport.  Presents menuing to prompt for input
   overpass query. Drops pins on the map for the resulting found points
-  of intrest in pin group 0; purging any previous pins in in group 0.
+  of interest in pin group 0; purging any previous pins in in group 0.
 '
 [ -z "$MEPO_ENDPOINT_OVERPASS" ] && MEPO_ENDPOINT_OVERPASS="https://lz4.overpass-api.de/api/interpreter"
 

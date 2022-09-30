@@ -2,10 +2,10 @@
 DISPLAYNAME=" POI Search: via Nominatim"
 HOTKEY=G
 DOC='
-  Searches for points of intrest via the publically accessible Nominatim
+  Searches for points of interest via the publicly accessible Nominatim
   API based on the current viewport.  Presents menuing to prompt for input
   overpass query. Drops pins on the map for the resulting found points
-  of intrest in pin group 0; purging any previous pins in in group 0.
+  of interest in pin group 0; purging any previous pins in in group 0.
 '
 [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
 [ -z "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" ] && MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES='https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN'
