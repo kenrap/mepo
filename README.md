@@ -1,6 +1,6 @@
 # [**Mepo**](https://sr.ht/~mil/Mepo/)
 
-[![mepo_demo.gif](mepo_demo.gif)](http://media.lrdu.org/mepo_demos)
+[![mepo_demo.gif](https://media.lrdu.org/mepo_demos/mepo_demo_1.0_search.gif)](http://mepo.milesalan.com/demos.html)
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5, pmOS devices etc.) and both
@@ -13,8 +13,8 @@ scripted to provide things like custom bounding-box search scripts,
 bookmarks, and more.
 
 - [Documentation Website](http://mepo.milesalan.com)
-- [Demo Video on Phone](https://media.lrdu.org/mepo_demos/mepo_demo_0.4.webm)
-- [Videos of User Interface](http://media.lrdu.org/mepo_demos)
+- [Demo Video](http://mepo.milesalan.com/demos.html#mobile-demo-major-features)
+- [Videos of User Interface](http://mepo.milesalan.com/demos.html)
 - [Install Guide](http://mepo.milesalan.com/installguide.html)
 - [User Guide](http://mepo.milesalan.com/userguide.html)
 
