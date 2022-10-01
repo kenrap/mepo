@@ -238,9 +238,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
     - Package-split current `scripts/` directory to allow separate packages
       for mepo and mepo-scripts. The former only will contain the base
       application (Zig) executable; the latter will contain auxiliary scripts.
-- **Milestone 7: Documentation Website** (In-progress)
-  - **Todo:**
-    - General QA pass on entire website typos/links/etc
+- **Milestone 7: Documentation Website** (Complete: 9/30/2022)
   - **Done:**
     - Development of a documentation website
     - Docs section: highlighting the various end-user documentation guides &
@@ -256,6 +254,7 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
       and showing the end result; rather then just 'end-user' functionality
       as was the target with the 0.4 demo video).
     - Screencasts for userconfig/scripts
+    - General QA pass on entire website typos/links/etc
 - **Milestone 8: Additional Mobile Enviroments Compatibility - PlaMo & Lomiri** (Complete: 9/29/2022)
   - **Done:**
     - Add support for PlaMo (investigate bemenu compatbility, if unavailable something.
