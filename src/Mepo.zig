@@ -880,13 +880,19 @@ fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg)
         switch (expect_spec_arg.tag) {
             .Number => {
                 switch (args[expect_spec_arg_i]) {
-                    .Text => return error.ExpectNumberGotText,
+                    .Text => {
+                        utildbg.log("Expected number, got text in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        return error.ExpectNumberGotText;
+                    },
                     .Number => continue,
                 }
             },
             .Text => {
                 switch (args[expect_spec_arg_i]) {
-                    .Number => return error.ExpectTextGotNumber,
+                    .Number => {
+                        utildbg.log("Expected text , got number in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        return error.ExpectTextGotNumber;
+                    },
                     .Text => continue,
                 }
             },
