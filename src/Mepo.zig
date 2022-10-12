@@ -250,7 +250,7 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, pin_label_bg: types.Color) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, is_active: bool) !void {
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
@@ -262,16 +262,26 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
         (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) return;
 
     // Draw Pin
-    if (pin.category == .Instructive)
+    if (pin.category == .Instructive) {
         try utilsdl.sdl_renderer_rect(mepo.renderer, pin_color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
         }, .Fill);
+        if (is_active) {
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, sdl.SDL_Rect{
+                .x = x - @divTrunc(size, 2),
+                .y = y - @divTrunc(size, 2),
+                .w = size,
+                .h = size,
+            }, .Draw);
+        }
+    }
 
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
+        const pin_label_bg = .{ .value = 0xffffff, .opacity = 255 };
         const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
         const label = if (pin.metadata.get("name")) |name| name else pin.handle;
         try mepo.blit_multiline_text(
@@ -309,9 +319,9 @@ fn blit_pins(mepo: *@This()) !void {
 
             const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
             const pg_color = p.get(p.pingroup_prop(pin_group_i, .Color)).u24;
-            const color = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+            const is_active = (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
                 ((is_ordered and ordered_group_active_path) or
-                (!is_ordered and mepo.pin_group_active_item.? == pin_i))) 0xff0000 else pg_color;
+                (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
 
             // E.g. ordered_group_active_path just tracks every time
             // an instructive pin is hit so subsequent structural pins
@@ -325,8 +335,8 @@ fn blit_pins(mepo: *@This()) !void {
                 pin.*,
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
-                .{ .value = color },
-                .{ .value = 0xffffff, .opacity = 100 },
+                .{ .value = pg_color },
+                is_active,
             );
         }
     }
@@ -336,8 +346,8 @@ fn blit_pins(mepo: *@This()) !void {
             mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
             null,
             mepo.pin_group_active,
-            .{ .value = 0xff0000 },
-            .{ .value = 0xffffff, .opacity = 255 },
+            .{ .value = p.get(p.pingroup_prop(mepo.pin_group_active, .Color)).u24 },
+            true,
         );
     }
 }
