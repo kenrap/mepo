@@ -454,6 +454,7 @@ fn blit_help(mepo: *@This()) !void {
 fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
+    var pad_left: c_int = 10;
     var pad_right: c_int = 10;
     const pad_bottom: c_int = p.get(p.pref.fontsize_ui).u + 10;
 
@@ -470,16 +471,28 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
         defer sdl.SDL_FreeSurface(surf);
 
         const target = target: {
-            const bg_w = surf.w + pad * 2;
-            const bg_h = surf.h + pad * 2;
-            defer pad_right += bg_w;
+            if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins) {
+                const bg_w = surf.w + pad * 2;
+                const bg_h = surf.h + pad * 2;
+                defer pad_left += bg_w;
+                break :target sdl.SDL_Rect{
+                    .x = pad_left,
+                    .y = 10,
+                    .w = bg_w + 1,
+                    .h = bg_h + 1,
+                };
+            } else {
+                const bg_w = surf.w + pad * 2;
+                const bg_h = surf.h + pad * 2;
+                defer pad_right += bg_w;
 
-            break :target sdl.SDL_Rect{
-                .x = @intCast(c_int, mepo.win_w) - pad_right - bg_w,
-                .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
-                .w = bg_w + 1,
-                .h = bg_h + 1,
-            };
+                break :target sdl.SDL_Rect{
+                    .x = @intCast(c_int, mepo.win_w) - pad_right - bg_w,
+                    .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
+                    .w = bg_w + 1,
+                    .h = bg_h + 1,
+                };
+            }
         };
 
         if (determine_click_target) |want_target| {
