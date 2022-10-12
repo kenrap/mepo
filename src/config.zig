@@ -21,15 +21,27 @@ pub const MaxTextures = 50;
 
 pub const DefaultBaseConfig =
     \\ # UI Buttons;
-    \\ bind_button 1 [Purge] [pin_purge];
-    \\ bind_button 1 [<] [pin_cycle 0 -1; center_on_pin];
-    \\ bind_button 1 [>] [pin_cycle 0 1; center_on_pin];
     \\ bind_button 0 [Menu] [shellpipe_sync mepo_ui_central_menu.sh];
     \\ bind_button 0 [Center] [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
     \\ bind_button 0 [Relocate] [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
     \\ bind_button 0 [Nm] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
     \\ bind_button 0 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
     \\ bind_button 0 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
+
+    \\ bind_button 1 [Purge] [pin_purge];
+    \\ bind_button 1 [Del] [pin_delete -1 []];
+    \\ bind_button 1 [>] [pin_cycle 0 1; center_on_pin];
+    \\ bind_button 1 [<] [pin_cycle 0 -1; center_on_pin];
+    \\ bind_button 1 [9] [pin_transfer -1 [] 9];
+    \\ bind_button 1 [8] [pin_transfer -1 [] 8];
+    \\ bind_button 1 [7] [pin_transfer -1 [] 7];
+    \\ bind_button 1 [6] [pin_transfer -1 [] 6];
+    \\ bind_button 1 [5] [pin_transfer -1 [] 5];
+    \\ bind_button 1 [4] [pin_transfer -1 [] 4];
+    \\ bind_button 1 [3] [pin_transfer -1 [] 3];
+    \\ bind_button 1 [2] [pin_transfer -1 [] 2];
+    \\ bind_button 1 [1] [pin_transfer -1 [] 1];
+    \\ bind_button 1 [0] [pin_transfer -1 [] 0];
     \\
     \\ # Gestures;
     \\ bind_gesture pan 2 1 [zoom_relative 1];
