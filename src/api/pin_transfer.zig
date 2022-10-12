@@ -39,6 +39,18 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
         return;
     };
 
+
     try mepo.pin_groups[to_group].append(mepo.pin_groups[from_group].items[from_pin_i]);
     _ = mepo.pin_groups[from_group].orderedRemove(from_pin_i);
+
+    // If pin to transfer is the currently active pin we
+    // re-activate it afterward (switch group and current pin index)
+    if (
+        from_group == mepo.pin_group_active and
+        mepo.pin_group_active_item != null and
+        mepo.pin_group_active_item.? == from_pin_i
+    ) {
+        mepo.pin_group_active = @intCast(u8, to_group);
+        mepo.pin_group_active_item = @intCast(u32, mepo.pin_groups[mepo.pin_group_active].items.len - 1);
+    }
 }
