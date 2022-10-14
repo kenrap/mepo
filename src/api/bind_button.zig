@@ -18,7 +18,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const visible_only_when_has_pins = args[0].Number == 1;
-    const group_number = if (args[1].Number < 1) null else @floatToInt(u8, args[1].Number);
+    const group_number = if (args[1].Number < 0) null else @floatToInt(u8, args[1].Number);
     const text = args[2].Text;
     const expression = args[3].Text;
     try bind_button(mepo, visible_only_when_has_pins, group_number, text, expression);
