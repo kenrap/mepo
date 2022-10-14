@@ -229,7 +229,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        try mepo.blit_table(5, 5, 5, al.items);
+        try mepo.blit_table(5, 40, 5, al.items);
     }
 }
 
@@ -454,7 +454,7 @@ fn blit_help(mepo: *@This()) !void {
 fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
-    var pad_left: c_int = 10;
+    var pad_left: c_int = 5;
     var pad_right: c_int = 10;
     const pad_bottom: c_int = p.get(p.pref.fontsize_ui).u + 10;
 
