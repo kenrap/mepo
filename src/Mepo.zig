@@ -229,7 +229,7 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
             try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
         }
-        try mepo.blit_table(5, 5, 5, al.items);
+        try mepo.blit_table(5, 40, 5, al.items);
     }
 }
 
@@ -250,7 +250,7 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, pin_label_bg: types.Color) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, is_active: bool) !void {
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
@@ -262,16 +262,26 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
         (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) return;
 
     // Draw Pin
-    if (pin.category == .Instructive)
+    if (pin.category == .Instructive) {
         try utilsdl.sdl_renderer_rect(mepo.renderer, pin_color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
             .h = size,
         }, .Fill);
+        if (is_active) {
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, sdl.SDL_Rect{
+                .x = x - @divTrunc(size, 2),
+                .y = y - @divTrunc(size, 2),
+                .w = size,
+                .h = size,
+            }, .Draw);
+        }
+    }
 
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
+        const pin_label_bg = .{ .value = 0xffffff, .opacity = 255 };
         const pin_label_border = .{ .value = 0xe8e8e8, .opacity = 255 };
         const label = if (pin.metadata.get("name")) |name| name else pin.handle;
         try mepo.blit_multiline_text(
@@ -309,9 +319,9 @@ fn blit_pins(mepo: *@This()) !void {
 
             const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
             const pg_color = p.get(p.pingroup_prop(pin_group_i, .Color)).u24;
-            const color = if (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+            const is_active = (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
                 ((is_ordered and ordered_group_active_path) or
-                (!is_ordered and mepo.pin_group_active_item.? == pin_i))) 0xff0000 else pg_color;
+                (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
 
             // E.g. ordered_group_active_path just tracks every time
             // an instructive pin is hit so subsequent structural pins
@@ -325,8 +335,8 @@ fn blit_pins(mepo: *@This()) !void {
                 pin.*,
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
-                .{ .value = color },
-                .{ .value = 0xffffff, .opacity = 100 },
+                .{ .value = pg_color },
+                is_active,
             );
         }
     }
@@ -336,8 +346,8 @@ fn blit_pins(mepo: *@This()) !void {
             mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
             null,
             mepo.pin_group_active,
-            .{ .value = 0xff0000 },
-            .{ .value = 0xffffff, .opacity = 255 },
+            .{ .value = p.get(p.pingroup_prop(mepo.pin_group_active, .Color)).u24 },
+            true,
         );
     }
 }
@@ -444,7 +454,8 @@ fn blit_help(mepo: *@This()) !void {
 fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
-    var right_pad: c_int = 10;
+    var pad_left: c_int = 5;
+    var pad_right: c_int = 10;
     const pad_bottom: c_int = p.get(p.pref.fontsize_ui).u + 10;
 
     while (btn_i > 0) {
@@ -459,15 +470,29 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
         );
         defer sdl.SDL_FreeSurface(surf);
 
-        const bg_w = surf.w + pad * 2;
-        const bg_h = surf.h + pad * 2;
-        defer right_pad += bg_w;
+        const target = target: {
+            if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins) {
+                const bg_w = surf.w + pad * 2;
+                const bg_h = surf.h + pad * 2;
+                defer pad_left += bg_w;
+                break :target sdl.SDL_Rect{
+                    .x = pad_left,
+                    .y = 10,
+                    .w = bg_w + 1,
+                    .h = bg_h + 1,
+                };
+            } else {
+                const bg_w = surf.w + pad * 2;
+                const bg_h = surf.h + pad * 2;
+                defer pad_right += bg_w;
 
-        const target = sdl.SDL_Rect{
-            .x = @intCast(c_int, mepo.win_w) - right_pad - bg_w,
-            .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
-            .w = bg_w + 1,
-            .h = bg_h + 1,
+                break :target sdl.SDL_Rect{
+                    .x = @intCast(c_int, mepo.win_w) - pad_right - bg_w,
+                    .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
+                    .w = bg_w + 1,
+                    .h = bg_h + 1,
+                };
+            }
         };
 
         if (determine_click_target) |want_target| {
@@ -477,7 +502,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
             }
         } else {
             // Rendering
-            const dest_rect_lab = sdl.SDL_Rect{
+            const dest_rect_text_lab = sdl.SDL_Rect{
                 .x = target.x + pad,
                 .y = target.y + pad,
                 .w = surf.w,
@@ -485,7 +510,9 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
             };
 
             const bg_color = bg_color: {
-                if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_lab)) {
+                if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_text_lab)) {
+                    break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
+                } else if (mepo.uibuttons.items[btn_i].group_number == mepo.pin_group_active) {
                     break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
                 } else {
                     break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
@@ -494,9 +521,18 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
 
             try utilsdl.sdl_renderer_rect(mepo.renderer, bg_color, target, .Fill);
             try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            if (mepo.uibuttons.items[btn_i].group_number) |group_number| {
+                var highlight_rect = target;
+                highlight_rect.h = 3;
+                highlight_rect.x += 2;
+                highlight_rect.y += 2;
+                highlight_rect.w -= 4;
+                const color = types.Color{ .value = p.get(p.pingroup_prop(group_number, .Color)).u24, .opacity = 255 };
+                try utilsdl.sdl_renderer_rect(mepo.renderer, color, highlight_rect, .Fill);
+            }
             const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
             defer sdl.SDL_DestroyTexture(text);
-            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_text_lab));
         }
     }
 
@@ -880,13 +916,19 @@ fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg)
         switch (expect_spec_arg.tag) {
             .Number => {
                 switch (args[expect_spec_arg_i]) {
-                    .Text => return error.ExpectNumberGotText,
+                    .Text => {
+                        utildbg.log("Expected number, got text in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        return error.ExpectNumberGotText;
+                    },
                     .Number => continue,
                 }
             },
             .Text => {
                 switch (args[expect_spec_arg_i]) {
-                    .Number => return error.ExpectTextGotNumber,
+                    .Number => {
+                        utildbg.log("Expected text , got number in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        return error.ExpectTextGotNumber;
+                    },
                     .Text => continue,
                 }
             },

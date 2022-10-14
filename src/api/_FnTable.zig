@@ -26,6 +26,7 @@ pub const fn_specs = &[_]types.MepoFnSpec{
     @import("pin_groupactivate.zig").spec,
     @import("pin_delete.zig").spec,
     @import("pin_meta.zig").spec,
+    @import("pin_transfer.zig").spec,
     @import("pin_purge.zig").spec,
     @import("prefinc.zig").spec,
     @import("prefset_n.zig").spec,
