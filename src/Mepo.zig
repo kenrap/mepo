@@ -502,7 +502,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
             }
         } else {
             // Rendering
-            const dest_rect_lab = sdl.SDL_Rect{
+            const dest_rect_text_lab = sdl.SDL_Rect{
                 .x = target.x + pad,
                 .y = target.y + pad,
                 .w = surf.w,
@@ -510,7 +510,9 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
             };
 
             const bg_color = bg_color: {
-                if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_lab)) {
+                if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_text_lab)) {
+                    break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
+                } else if (mepo.uibuttons.items[btn_i].group_number == mepo.pin_group_active) {
                     break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
                 } else {
                     break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
@@ -519,9 +521,18 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
 
             try utilsdl.sdl_renderer_rect(mepo.renderer, bg_color, target, .Fill);
             try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            if (mepo.uibuttons.items[btn_i].group_number) |group_number| {
+                var highlight_rect = target;
+                highlight_rect.h = 3;
+                highlight_rect.x += 2;
+                highlight_rect.y += 2;
+                highlight_rect.w -= 4;
+                const color = types.Color{ .value = p.get(p.pingroup_prop(group_number, .Color)).u24, .opacity = 255 };
+                try utilsdl.sdl_renderer_rect(mepo.renderer, color, highlight_rect, .Fill);
+            }
             const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
             defer sdl.SDL_DestroyTexture(text);
-            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_lab));
+            try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, null, &dest_rect_text_lab));
         }
     }
 

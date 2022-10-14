@@ -18,7 +18,12 @@ pub const PinGroup = struct {
     color: u24 = 0x000000,
 };
 
-pub const UIButton = struct { text: [:0]const u8, mepolang: [:0]const u8, only_visible_when_has_pins: bool };
+pub const UIButton = struct {
+    text: [:0]const u8,
+    mepolang: [:0]const u8,
+    only_visible_when_has_pins: bool,
+    group_number: ?u8,
+};
 
 pub const MepoArgTag = enum { Text, Number };
 pub const MepoArg = union(MepoArgTag) { Text: [:0]const u8, Number: f64 };

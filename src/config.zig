@@ -21,27 +21,27 @@ pub const MaxTextures = 50;
 
 pub const DefaultBaseConfig =
     \\ # UI Buttons;
-    \\ bind_button 0 [Menu] [shellpipe_sync mepo_ui_central_menu.sh];
-    \\ bind_button 0 [Center] [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
-    \\ bind_button 0 [Relocate] [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
-    \\ bind_button 0 [Nm] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
-    \\ bind_button 0 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
-    \\ bind_button 0 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
+    \\ bind_button 0 -1 [Menu] [shellpipe_sync mepo_ui_central_menu.sh];
+    \\ bind_button 0 -1 [Center] [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
+    \\ bind_button 0 -1 [Relocate] [shellpipe_sync mepo_ui_menu_reposition_nominatim.sh];
+    \\ bind_button 0 -1 [Nm] [shellpipe_sync mepo_ui_menu_search_nominatim.sh];
+    \\ bind_button 0 -1 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh];
+    \\ bind_button 0 -1 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
 
-    \\ bind_button 1 [Purge] [pin_purge];
-    \\ bind_button 1 [Del] [pin_delete -1 []];
-    \\ bind_button 1 [>] [pin_cycle 0 1; center_on_pin];
-    \\ bind_button 1 [<] [pin_cycle 0 -1; center_on_pin];
-    \\ bind_button 1 [9] [pin_transfer -1 [] 9];
-    \\ bind_button 1 [8] [pin_transfer -1 [] 8];
-    \\ bind_button 1 [7] [pin_transfer -1 [] 7];
-    \\ bind_button 1 [6] [pin_transfer -1 [] 6];
-    \\ bind_button 1 [5] [pin_transfer -1 [] 5];
-    \\ bind_button 1 [4] [pin_transfer -1 [] 4];
-    \\ bind_button 1 [3] [pin_transfer -1 [] 3];
-    \\ bind_button 1 [2] [pin_transfer -1 [] 2];
-    \\ bind_button 1 [1] [pin_transfer -1 [] 1];
-    \\ bind_button 1 [0] [pin_transfer -1 [] 0];
+    \\ bind_button 1 -1 [Purge] [pin_purge];
+    \\ bind_button 1 -1 [Del] [pin_delete -1 []];
+    \\ bind_button 1 -1 [>] [pin_cycle 0 1; center_on_pin];
+    \\ bind_button 1 -1 [<] [pin_cycle 0 -1; center_on_pin];
+    \\ bind_button 1 9 [9] [pin_transfer -1 [] 9];
+    \\ bind_button 1 8 [8] [pin_transfer -1 [] 8];
+    \\ bind_button 1 7 [7] [pin_transfer -1 [] 7];
+    \\ bind_button 1 6 [6] [pin_transfer -1 [] 6];
+    \\ bind_button 1 5 [5] [pin_transfer -1 [] 5];
+    \\ bind_button 1 4 [4] [pin_transfer -1 [] 4];
+    \\ bind_button 1 3 [3] [pin_transfer -1 [] 3];
+    \\ bind_button 1 2 [2] [pin_transfer -1 [] 2];
+    \\ bind_button 1 1 [1] [pin_transfer -1 [] 1];
+    \\ bind_button 1 0 [0] [pin_transfer -1 [] 0];
     \\
     \\ # Gestures;
     \\ bind_gesture pan 2 1 [zoom_relative 1];
@@ -149,12 +149,22 @@ pub const DefaultBaseConfig =
     \\ prefset_t pingroup_2_color #7502ab;
     \\ prefset_t pingroup_3_color #cf0064;
     \\ prefset_t pingroup_4_color #b89600;
+    \\ prefset_t pingroup_5_color #b8f3ff;
+    \\ prefset_t pingroup_6_color #fff673;
     \\ prefset_t pingroup_7_color #004a0c;
+    \\ prefset_t pingroup_8_color #fdcfff;
+    \\ prefset_t pingroup_9_color #ff8308;
+
     \\ prefset_n pingroup_0_ordered 0;
     \\ prefset_n pingroup_1_ordered 0;
     \\ prefset_n pingroup_2_ordered 0;
     \\ prefset_n pingroup_3_ordered 0;
     \\ prefset_n pingroup_4_ordered 0;
+    \\ prefset_n pingroup_5_ordered 0;
+    \\ prefset_n pingroup_6_ordered 0;
+    \\ prefset_n pingroup_7_ordered 0;
+    \\ prefset_n pingroup_8_ordered 0;
+    \\ prefset_n pingroup_9_ordered 0;
     \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CACHE_HOME/mepo/savestate;
