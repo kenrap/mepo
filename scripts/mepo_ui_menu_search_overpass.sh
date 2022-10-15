@@ -27,19 +27,17 @@ main() {
   SCOPE="$(echo "$SCOPE" | cut -d: -f1 | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
   JSON_RESULTS="$(
-    curl  "$MEPO_ENDPOINT_OVERPASS" --data-raw "data=$(
-      echo '
+    curl "$MEPO_ENDPOINT_OVERPASS" --data-raw "data=
         [out:json][timeout:25];
         (
-          nodeSCOPE(BBOX);
-          waySCOPE(BBOX);
-          relationSCOPE(BBOX);
+          node${SCOPE}(${BBOX});
+          way${SCOPE}(${BBOX});
+          relation${SCOPE}(${BBOX});
         );
         out+body 100;
         >;
         out+skel+qt;
-      ' | sed "s/BBOX/$BBOX/g" | sed "s/SCOPE/$SCOPE/g"
-    )"
+    "
   )"
 
   echo "

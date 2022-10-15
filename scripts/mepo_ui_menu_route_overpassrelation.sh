@@ -31,16 +31,14 @@ main() {
   )"
 
   JSON_RESULTS="$(
-    curl  "${MEPO_ENDPOINT_OVERPASS}" --data-raw "data=$(
-      echo '
-        [out:json][timeout:25];
-        rel(RELATIONID);
-        (._;>>;);
-        out+body;
-        >;
-        out+skel+qt;
-      ' | sed "s/RELATIONID/$RELATIONID/g"
-    )"
+    curl "${MEPO_ENDPOINT_OVERPASS}" --data-raw "data=
+      [out:json][timeout:25];
+      rel(${RELATIONID});
+      (._;>>;);
+      out+body;
+      >;
+      out+skel+qt;
+    "
   )"
 
   # E.g. get order of reference ids in relation
