@@ -687,8 +687,13 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     //    these actions take preference *over* bind_click actions
     if (mepo.blit_uibuttons(cursor) catch null) |clicked_btn| {
         // Click on UI button check
-        utildbg.log("Clicked on button: {}\n", .{clicked_btn});
-        mepo.mepolang_execute(clicked_btn.mepolang) catch unreachable;
+        utildbg.log("Clicked on button: {} with clicks {}\n", .{clicked_btn, e.button.clicks});
+        if (e.button.clicks == 1) {
+            mepo.mepolang_execute(clicked_btn.mepolang_click_single) catch unreachable;
+        } else if (e.button.clicks == 2) {
+            mepo.mepolang_execute(clicked_btn.mepolang_click_double) catch unreachable;
+        }
+        
         return .Redraw;
     }
 
