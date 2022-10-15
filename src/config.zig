@@ -29,7 +29,7 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 -1 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh];
 
     \\ bind_button 1 -1 [Purge] [pin_purge];
-    \\ bind_button 1 -1 [Del] [pin_delete -1 []];
+    \\ bind_button 1 -1 [Del] [pin_delete -1 []; pin_cycle 0 1];
     \\ bind_button 1 -1 [>] [pin_cycle 0 1; center_on_pin];
     \\ bind_button 1 -1 [<] [pin_cycle 0 -1; center_on_pin];
     \\ bind_button 1 9 [9] [pin_transfer -1 [] 9];
