@@ -72,22 +72,28 @@ main() {
 
   if [ "$MEPO_MENUING" != "auto" ]; then # Custom override
     "$MEPO_MENUING"
-  elif hascommand zenity && pidof plasmashell >/dev/null; then # Plasma Mobile support
-    inputzenity
-  elif hascommand bemenu && pidof squeekboard >/dev/null; then # Phosh support
-    inputbemenuphosh
-  elif hascommand sxmo_dmenu_with_kb.sh; then # Sxmo support
-    inputsxmodmenu
-  elif hascommand bemenu && [ -n "$WAYLAND_DISPLAY" ]; then # Generic Wayland enviroment support
-    inputbemenu
-  elif hascommand dmenu && [ -n "$DISPLAY" ]; then # Generic X enviroment support
-    inputdmenu
-  elif hascommand vis-menu; then # Framebuffer support
-    inputframebuffer
-  elif hascommand zenity; then
+  elif hascommand zenity; then # Use Zenity by default
     inputzenity
   else
-    echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, zenity, or dmenu" >&2
+    # Note: The following menuing methods have been deprecated, zenity
+    #       is expected by default and the only officially supported 
+    #       menuing method, this logic will likely be removed in
+    #       a future release of mepo.
+    if hascommand bemenu && pidof squeekboard >/dev/null; then # Phosh support
+      inputbemenuphosh
+    elif hascommand sxmo_dmenu_with_kb.sh; then # Sxmo support
+      inputsxmodmenu
+    elif hascommand bemenu && [ -n "$WAYLAND_DISPLAY" ]; then # Generic Wayland enviroment support
+      inputbemenu
+    elif hascommand dmenu && [ -n "$DISPLAY" ]; then # Generic X enviroment support
+      inputdmenu
+    elif hascommand vis-menu; then # Framebuffer support
+      inputframebuffer
+    elif hascommand zenity; then
+      inputzenity
+    else
+      echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, zenity, or dmenu" >&2
+    fi
   fi
 }
 
