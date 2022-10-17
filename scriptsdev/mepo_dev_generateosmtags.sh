@@ -3,7 +3,7 @@
 # and generates a script that just dumps that list
 #
 # Regeneration example: 
-# ./scriptsdev/mepo_generateosmtags.sh > scripts/mepo_generated_osmtags.sh
+# ./scriptsdev/mepo_dev_generateosmtags.sh > scripts/mepo_generated_osmtags.sh
 
 generate() {
   KEY="$1"
@@ -33,9 +33,9 @@ generatescript() {
   echo "# This script just prints a list of the top amenity tags from OSM's taginfo db"
   echo "# Regenerated at development time / per-release"
   echo 'echo "'
-  generate amenity 999
-  generate cuisine 999
-  generate shop 999
+  generate amenity 800
+  generate cuisine 800
+  generate shop 800
   echo '"'
 }
 
