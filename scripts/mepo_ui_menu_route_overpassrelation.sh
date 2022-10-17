@@ -2,7 +2,7 @@
 DISPLAYNAME=" Route: via OSM Relation / Public Transit"
 HOTKEY=R
 DOC='
-  Drops pins on the map in pin group 1 for the given OSM relation ID. This
+  Drops pins on the map in pin group 7 for the given OSM relation ID. This
   can be used for general routing for any OSM relation (such as a subway,
   bus route, or similar). Presents menuing to prompt for the input OSM
   relation ID.
@@ -62,8 +62,8 @@ main() {
   echo "$NODES" > "$FILENODES"
 
   echo "
-    prefset_n pingroup_1_ordered 1;
-    pin_groupactivate 1;
+    prefset_n pingroup_7_ordered 1;
+    pin_groupactivate 7;
     pin_purge;
   "
 

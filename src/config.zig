@@ -162,9 +162,9 @@ pub const DefaultBaseConfig =
     \\ prefset_n pingroup_4_ordered 0;
     \\ prefset_n pingroup_5_ordered 0;
     \\ prefset_n pingroup_6_ordered 0;
-    \\ prefset_n pingroup_7_ordered 0;
-    \\ prefset_n pingroup_8_ordered 0;
-    \\ prefset_n pingroup_9_ordered 0;
+    \\ prefset_n pingroup_7_ordered 1;
+    \\ prefset_n pingroup_8_ordered 1;
+    \\ prefset_n pingroup_9_ordered 1;
     \\ 
     \\ # User-customizable bookmarks / arbitrary mepolang file;
     \\ fileload $XDG_CACHE_HOME/mepo/savestate;

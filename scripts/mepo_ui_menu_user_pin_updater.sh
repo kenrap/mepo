@@ -6,9 +6,9 @@ DOC='
   Location services. When provided with no argument runs the function
   `droppinactivateandcenter` which both drops a pin on the map and
   centers the map. Meanwhile the function `droppin` can be used in
-  isolation to only drop a pin on the map. This script may be used
-  synchronously or asynchronously; within the default config `droppin`
-  is used asynchronously via `shellpipe_async`.
+  isolation to only drop a pin on the map in pingroup 6. This script 
+  may be used synchronously or asynchronously; within the 
+  default config `droppin` is used asynchronously via `shellpipe_async`.
 '
 [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
 [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
@@ -79,16 +79,16 @@ droppin() {
   LAT="$(echo $SOURCE | cut -d " " -f1)"
   LON="$(echo $SOURCE | cut -d " " -f2)"
 
-  echo "pin_add 7 0 $COORDS user_location;"
-  echo "pin_meta 7 user_location lat $LAT;"
-  echo "pin_meta 7 user_location lat $LON;"
-  echo "pin_meta 7 user_location source $SOURCE;"
-  echo "pin_meta 7 user_location updated_at [$(date)];"
+  echo "pin_add 6 0 $COORDS user_location;"
+  echo "pin_meta 6 user_location lat $LAT;"
+  echo "pin_meta 6 user_location lat $LON;"
+  echo "pin_meta 6 user_location source $SOURCE;"
+  echo "pin_meta 6 user_location updated_at [$(date)];"
 }
 
 droppinactivateandcenter() {
   droppin
-  echo "pin_activate 7 user_location;"
+  echo "pin_activate 6 user_location;"
   echo "center_on_pin;"
 }
 

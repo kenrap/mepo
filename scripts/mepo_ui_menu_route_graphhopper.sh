@@ -9,7 +9,7 @@ DOC='
   and the centerpoint (where the crosshair is) may be used as origin or
   destination points as an alternative to named entries. Named entry searches
   use Nominatim to lookup the user input query. Resulting route is placed
-  into pin group 1 as an ordered pin group wherein instructional pins show
+  into pin group 7 as an ordered pin group wherein instructional pins show
   each direction in the route.
 '
 [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
@@ -88,8 +88,8 @@ printpins() {
   RESPONSE="$1"
 
   echo "
-    prefset_n pingroup_1_ordered 1;
-    pin_groupactivate 1;
+    prefset_n pingroup_7_ordered 1;
+    pin_groupactivate 7;
     pin_purge;
   "
 
