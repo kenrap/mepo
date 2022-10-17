@@ -13,6 +13,7 @@ DOC='
 [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
 [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
 [ -z "$MEPO_APIKEY_MLS" ] && MEPO_APIKEY_MLS="9a418f3c-364a-418a-85e8-1bde733f0c88"
+[ -z "$MEPO_TIMEOUT_GEOCLUE" ] && MEPO_TIMEOUT_GEOCLUE="10"
 
 coordsviamls() {
   MLSRESULT="$(
@@ -29,16 +30,12 @@ coordsviageoclue() {
 
   /usr/libexec/geoclue-2.0/demos/agent > /dev/null &
   AGENTPID=$!
-  LATLON="$(
-          ( /usr/libexec/geoclue-2.0/demos/where-am-i -t 10 & ) |
-          grep -E "Latitude|Longitude:" -m2 |
-          cut -d: -f2 |
-          tr -d "° " |
-          tr "\n" " "
-  )"
+  /usr/libexec/geoclue-2.0/demos/where-am-i -t $MEPO_TIMEOUT_GEOCLUE |
+    grep -E "Latitude|Longitude:" -m2 |
+    cut -d: -f2 |
+    tr -d "° " |
+    tr "\n" " "
   kill -9 $AGENTPID
-  pkill -9 -f where-am-i
-  echo "$LATLON"
 }
 
 supportsgeoclue() {
