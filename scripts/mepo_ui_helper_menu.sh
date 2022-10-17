@@ -9,19 +9,33 @@ DOC='
 [ -z "$MEPO_MENUING_FONT" ] && MEPO_MENUING_FONT=Inconsolata
 [ -z "$MEPO_MENUING_NLINES" ] && MEPO_MENUING_NLINES=17
 
-inputbemenu() {
-  bemenu --fn "$MEPO_MENUING_FONT" --scrollbar autohide -s -n -l $MEPO_MENUING_NLINES -i -p "$PROMPT"
+zenitydims() {
+  DIMS="$(
+    xwininfo -tree -root |
+      grep '("mepo" "mepo")' |
+      awk '{$1=$1};1' |
+      cut -d' ' -f1 |
+      xargs xwininfo -id |
+      grep -- -geometry |
+      grep -oE '[0-9]+x[0-9]+'
+  )"
+  DIMW="$(echo $DIMS | cut -dx -f1 | xargs echo "0.8 *" | bc | cut -d. -f1)"
+  DIMH="$(echo $DIMS | cut -dx -f2 | xargs echo "0.8 *" | bc | cut -d. -f1)"
+
+  if echo "$DIMW" | grep -Eq '[0-9]+' && echo "$DIMH" | grep -Eq '[0-9]+'; then
+    echo "--width $DIMW --height $DIMH"
+  fi
 }
 
 inputzenity() {
   if [ "$TEXTINPUT" = 1 ]; then
-    zenity --title "Type input" --entry --text "$PROMPT"
+    zenity $(zenitydims) --title "Type input" --entry --text "$PROMPT"
   else
     OPTS="$(cat)\nType Custom"
     OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF)"
     RESULT="$(
       echo "$OPTS" |
-      xargs -d$'\n' zenity --title "Select an entry" --list --column=Selection --text "$PROMPT"
+      xargs -d$'\n' zenity $(zenitydims) --title "Select an entry" --list --column=Selection --text "$PROMPT"
     )"
     if [ "$RESULT" = "Type Custom" ]; then
       TEXTINPUT=1 inputzenity
@@ -29,6 +43,10 @@ inputzenity() {
       echo "$RESULT"
     fi
   fi
+}
+
+inputbemenu() {
+  bemenu --fn "$MEPO_MENUING_FONT" --scrollbar autohide -s -n -l $MEPO_MENUING_NLINES -i -p "$PROMPT"
 }
 
 inputframebuffer() {
