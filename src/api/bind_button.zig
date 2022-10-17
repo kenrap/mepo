@@ -22,19 +22,19 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const group_number = if (args[1].Number < 0) null else @floatToInt(u8, args[1].Number);
     const text = args[2].Text;
     const expression_click_single = args[3].Text;
-    const expression_click_double = args[4].Text;
-    try bind_button(mepo, visible_only_when_has_pins, group_number, text, expression_click_single, expression_click_double);
+    const expression_click_hold = args[4].Text;
+    try bind_button(mepo, visible_only_when_has_pins, group_number, text, expression_click_single, expression_click_hold);
 }
 
-fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8, text: []const u8, expression_click_single: []const u8, expression_click_double: []const u8) !void {
-    utildbg.log("Binding button: text=<{s}> 1 click=<{s}> 2 clicks=<{s}>\n", .{ text, expression_click_single, expression_click_double });
+fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8, text: []const u8, expression_click_single: []const u8, expression_click_hold: []const u8) !void {
+    utildbg.log("Binding button: text=<{s}> 1 click=<{s}> 2 clicks=<{s}>\n", .{ text, expression_click_single, expression_click_hold });
 
     for (mepo.uibuttons.items) |*btn| {
         if (std.mem.eql(u8, text, btn.text)) {
             mepo.allocator.free(btn.mepolang_click_single);
-            mepo.allocator.free(btn.mepolang_click_double);
+            mepo.allocator.free(btn.mepolang_click_hold);
             btn.mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
-            btn.mepolang_click_double = try mepo.allocator.dupeZ(u8, expression_click_double);
+            btn.mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
             btn.only_visible_when_has_pins = visible_only_when_has_pins;
             return;
         }
@@ -44,7 +44,7 @@ fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8,
         .text = try mepo.allocator.dupeZ(u8, text),
         .group_number = group_number,
         .mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
-        .mepolang_click_double = try mepo.allocator.dupeZ(u8, expression_click_double),
+        .mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
         .only_visible_when_has_pins = visible_only_when_has_pins,
     });
 }

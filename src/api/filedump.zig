@@ -148,7 +148,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} {d} [{s}] [{s}] [{s}];",
-                .{ pins_only_btn, btn.group_number, btn.text, btn.mepolang_click_single, btn.mepolang_click_double },
+                .{ pins_only_btn, btn.group_number, btn.text, btn.mepolang_click_single, btn.mepolang_click_hold },
             );
             try lines.append(statement_button);
         }

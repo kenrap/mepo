@@ -21,7 +21,7 @@ pub const PinGroup = struct {
 pub const UIButton = struct {
     text: [:0]const u8,
     mepolang_click_single: [:0]const u8,
-    mepolang_click_double: [:0]const u8,
+    mepolang_click_hold: [:0]const u8,
     only_visible_when_has_pins: bool,
     group_number: ?u8,
 };

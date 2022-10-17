@@ -32,16 +32,16 @@ pub const DefaultBaseConfig =
     \\ bind_button 1 -1 [Del] [pin_delete -1 []; pin_cycle 0 1; center_on_pin] [];
     \\ bind_button 1 -1 [>] [pin_cycle 0 1; center_on_pin] [];
     \\ bind_button 1 -1 [<] [pin_cycle 0 -1; center_on_pin] [];
-    \\ bind_button 1 9 [9] [pin_transfer -1 [] 9] [];
-    \\ bind_button 1 8 [8] [pin_transfer -1 [] 8] [];
-    \\ bind_button 1 7 [7] [pin_transfer -1 [] 7] [];
-    \\ bind_button 1 6 [6] [pin_transfer -1 [] 6] [];
-    \\ bind_button 1 5 [5] [pin_transfer -1 [] 5] [];
-    \\ bind_button 1 4 [4] [pin_transfer -1 [] 4] [];
-    \\ bind_button 1 3 [3] [pin_transfer -1 [] 3] [];
-    \\ bind_button 1 2 [2] [pin_transfer -1 [] 2] [];
-    \\ bind_button 1 1 [1] [pin_transfer -1 [] 1] [];
-    \\ bind_button 1 0 [0] [pin_transfer -1 [] 0] [];
+    \\ bind_button 1 9 [9] [pin_transfer -1 [] 9] [pin_transfer -1 [all] 9];
+    \\ bind_button 1 8 [8] [pin_transfer -1 [] 8] [pin_transfer -1 [all] 8];
+    \\ bind_button 1 7 [7] [pin_transfer -1 [] 7] [pin_transfer -1 [all] 7];
+    \\ bind_button 1 6 [6] [pin_transfer -1 [] 6] [pin_transfer -1 [all] 6];
+    \\ bind_button 1 5 [5] [pin_transfer -1 [] 5] [pin_transfer -1 [all] 5];
+    \\ bind_button 1 4 [4] [pin_transfer -1 [] 4] [pin_transfer -1 [all] 4];
+    \\ bind_button 1 3 [3] [pin_transfer -1 [] 3] [pin_transfer -1 [all] 3];
+    \\ bind_button 1 2 [2] [pin_transfer -1 [] 2] [pin_transfer -1 [all] 2];
+    \\ bind_button 1 1 [1] [pin_transfer -1 [] 1] [pin_transfer -1 [all] 1];
+    \\ bind_button 1 0 [0] [pin_transfer -1 [] 0] [pin_transfer -1 [all] 0];
     \\
     \\ # Gestures;
     \\ bind_gesture pan 2 1 [zoom_relative 1];

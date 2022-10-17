@@ -690,8 +690,6 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         utildbg.log("Clicked on button: {} with clicks {}\n", .{clicked_btn, e.button.clicks});
         if (e.button.clicks == 1) {
             mepo.mepolang_execute(clicked_btn.mepolang_click_single) catch unreachable;
-        } else if (e.button.clicks == 2) {
-            mepo.mepolang_execute(clicked_btn.mepolang_click_double) catch unreachable;
         }
         
         return .Redraw;
@@ -951,13 +949,18 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
     const threshold_hit_hold_ms = sdl.SDL_GetTicks() >= mepo.drag.?.begin_ticks + config.DragThresholdTicks;
     const threshold_hit_distance = mepo.drag.?.delta_x + mepo.drag.?.delta_y <= config.DragThresholdDelta;
 
-    // E.g ignore hold on ui buttons
+    // Dispatch held action
     if (threshold_hit_distance) {
-        if (mepo.blit_uibuttons(mepo.drag.?.point) catch null) |_| return;
+        if (mepo.blit_uibuttons(mepo.drag.?.point) catch null) |held_btn| {
+            if (threshold_hit_hold_ms) {
+                utildbg.log("Held on button: {}\n", .{held_btn});
+                mepo.mepolang_execute(held_btn.mepolang_click_hold) catch unreachable;
+            }
+            return;
+        }
     }
 
     if (threshold_hit_hold_ms and threshold_hit_distance) {
-
         mepo.drag = null;
         // TODO: hold support for right click as well?
         if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1 })) |run_expression| {
