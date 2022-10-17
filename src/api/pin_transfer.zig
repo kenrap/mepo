@@ -62,9 +62,8 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
         for (mepo.pin_groups[from_group].items) |_| {
             _ = mepo.pin_groups[from_group].orderedRemove(0);
         }
-
-        //_ = mepo.pin_groups[from_group].clearAndFree;
-        mepo.pin_group_active = @intCast(u8, to_group);
-        mepo.pin_group_active_item = null;
+        if (from_group == mepo.pin_group_active) {
+            mepo.pin_group_active = @intCast(u8, to_group);
+        }
     }
 }

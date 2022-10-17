@@ -955,6 +955,7 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
             if (threshold_hit_hold_ms) {
                 utildbg.log("Held on button: {}\n", .{held_btn});
                 mepo.mepolang_execute(held_btn.mepolang_click_hold) catch unreachable;
+                mepo.drag = null;
             }
             return;
         }
