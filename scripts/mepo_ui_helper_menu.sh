@@ -27,9 +27,16 @@ zenitydims() {
   fi
 }
 
+oskkeyboard() {
+  # Sxmo keyboard open/close support
+  hascommand sxmo_keyboard.sh && sxmo_keyboard.sh $1 > /dev/null
+}
+
 inputzenity() {
   if [ "$TEXTINPUT" = 1 ]; then
+    oskkeyboard open
     zenity $(zenitydims) --title "Type input" --entry --text "$PROMPT"
+    oskkeyboard close
   else
     OPTS="$(cat)\nType Custom"
     OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF)"
