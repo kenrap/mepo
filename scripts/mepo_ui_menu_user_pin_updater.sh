@@ -14,6 +14,7 @@ DOC='
 [ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
 [ -z "$MEPO_APIKEY_MLS" ] && MEPO_APIKEY_MLS="9a418f3c-364a-418a-85e8-1bde733f0c88"
 [ -z "$MEPO_TIMEOUT_GEOCLUE" ] && MEPO_TIMEOUT_GEOCLUE="10"
+[ -z "$MEPO_GEOLOCATE_COORDSVIAMETHOD" ] && MEPO_GEOLOCATE_COORDSVIAMETHOD="coordsviageoclue"
 
 coordsviamls() {
   MLSRESULT="$(
@@ -53,17 +54,21 @@ iscoords() {
 }
 
 getcoords() {
-  # Try to get coords from GPSD first
-  COORDS="$(coordsviagpsd)"
-  iscoords "$COORDS" && echo "gpsd $COORDS" && return 0
+  # Use method set in ENV var MEPO_GEOLOCATE_COORDSVIAMETHOD
+  COORDS="$($MEPO_GEOLOCATE_COORDSVIAMETHOD)"
+  iscoords "$COORDS" && echo "$MEPO_GEOLOCATE_COORDSVIAMETHOD $COORDS" && return 0
 
-  # If gpsd fails use geoclue
+  # Otherwise fallback to use geoclue otherwise
   COORDS="$(coordsviageoclue)"
-  iscoords "$COORDS" && echo "geoclue $COORDS" && return 0
+  iscoords "$COORDS" && echo "coordsviageoclue $COORDS" && return 0
 
-  # If geoclue fails use mls
+  # If geoclue unavailable use MLS
   COORDS="$(coordsviamls)"
-  iscoords "$COORDS" && echo "mls $COORDS" && return 0
+  iscoords "$COORDS" && echo "coordsviamls $COORDS" && return 0
+
+  # If geoclue and MLS unavailable use gpsd
+  COORDS="$(coordsviagpsd)"
+  iscoords "$COORDS" && echo "coordsviagpsd $COORDS" && return 0
 
   return 1
 }
