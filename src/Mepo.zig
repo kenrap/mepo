@@ -212,22 +212,24 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
             try al.append(([_][:0]const u8{ "Handle:", pin.handle.? })[0..].*);
         }
         try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
-        try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
-            arena.allocator(),
-            "Group {d}:",
-            .{mepo.pin_group_active},
-        ), try std.fmt.allocPrintZ(
-            arena.allocator(),
-            "{d} of {d} ",
-            .{
-                mepo.pin_group_active_item.? + 1,
-                mepo.pin_groups[mepo.pin_group_active].items.len,
-            },
-        ) })[0..].*);
-        try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
-        for (pin.metadata.keys()) |k| {
-            const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
-            try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
+        if (!p.get(p.pref.overlay_pindetails_expanded).b) {
+            try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
+                arena.allocator(),
+                "Group {d}:",
+                .{mepo.pin_group_active},
+            ), try std.fmt.allocPrintZ(
+                arena.allocator(),
+                "{d} of {d} ",
+                .{
+                    mepo.pin_group_active_item.? + 1,
+                    mepo.pin_groups[mepo.pin_group_active].items.len,
+                },
+            ) })[0..].*);
+            try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
+            for (pin.metadata.keys()) |k| {
+                const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
+                try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
+            }
         }
         try mepo.blit_table(5, 40, 5, al.items);
     }

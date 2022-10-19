@@ -28,6 +28,7 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 -1 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh] [];
     \\ bind_button 0 -1 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh] [];
 
+    \\ bind_button 1 -1 [~] [preftoggle overlay_pindetails_expanded] [];
     \\ bind_button 1 -1 [Purge] [pin_purge] [];
     \\ bind_button 1 -1 [Del] [pin_delete -1 []; pin_cycle 0 1; center_on_pin] [];
     \\ bind_button 1 -1 [>] [pin_cycle 0 1; center_on_pin] [];
@@ -137,6 +138,7 @@ pub const DefaultBaseConfig =
     \\ prefset_n debug_stderr 0;
     \\ prefset_n overlay_debugbar 1;
     \\ prefset_n overlay_pindetails 1;
+    \\ prefset_n overlay_pindetails_expanded 1;
     \\ prefset_n zoom 14;
     \\ prefset_n tile_cache_network 1;
     \\ prefset_n tile_cache_max_n_transfers 20;

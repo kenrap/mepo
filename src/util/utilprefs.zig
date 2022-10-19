@@ -12,6 +12,7 @@ pub const pref = enum(u8) {
     overlay_debugbar,
     help,
     overlay_pindetails,
+    overlay_pindetails_expanded,
     crosshair_size,
     drag_scale,
     fontsize_ui,
@@ -53,7 +54,7 @@ const PrefMapping = struct {
     desc: []const u8,
 };
 
-const n_prefs = 37;
+const n_prefs = 38;
 pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
     mapping[@enumToInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
@@ -64,6 +65,7 @@ pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     mapping[@enumToInt(pref.overlay_debugbar)] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "Whether to show the debug bar" };
     mapping[@enumToInt(pref.help)] = .{ .name = "help", .value = .{ .b = false }, .desc = "Whether to show the help overlay" };
     mapping[@enumToInt(pref.overlay_pindetails)] = .{ .name = "overlay_pindetails", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay" };
+    mapping[@enumToInt(pref.overlay_pindetails_expanded)] = .{ .name = "overlay_pindetails_expanded", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay as expanded" };
     mapping[@enumToInt(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .bounds = .{ .min = 0, .max = 300 }, .desc = "Pixel size of the crosshairs" };
     mapping[@enumToInt(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Scale for dragging" };
     mapping[@enumToInt(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Size of the font in the UI" };
