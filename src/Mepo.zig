@@ -231,7 +231,8 @@ fn blit_overlay_pindetails(mepo: *@This()) !void {
                 try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
             }
         }
-        try mepo.blit_table(5, 40, 5, al.items);
+        const off_y = p.get(p.pref.fontsize_ui).u + 26;
+        try mepo.blit_table(5, off_y, 5, al.items);
     }
 }
 
