@@ -55,42 +55,6 @@ inputzenity() {
   fi
 }
 
-inputbemenu() {
-  bemenu --fn "$MEPO_MENUING_FONT" --scrollbar autohide -s -n -l $MEPO_MENUING_NLINES -i -p "$PROMPT"
-}
-
-inputframebuffer() {
-  # Framebuffer enviroment support
-  RESULTFILE="$(mktemp)"
-  OPTSFILE="$(mktemp)"
-  cat > "$OPTSFILE"
-  OLDVT=1
-  busybox openvt -c 11 -s -w sh -c "
-    clear;
-    echo Mepo terminal VT menu;
-    [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b \"\a\" > /tmp/fbp.fifo; }
-    cat \"$OPTSFILE\" | vis-menu -p \"$PROMPT\" -l 50 > $RESULTFILE
-  " > /dev/null
-  cat "$RESULTFILE" | tr -d "\n"
-  busybox chvt "$OLDVT" > /dev/null
-  rm "$RESULTFILE" "$OPTSFILE"
-  [ -p /tmp/fbp.fifo ] && { sleep .2; printf %b "\b" > /tmp/fbp.fifo; }
-}
-
-inputbemenuphosh() {
-  busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b true
-  inputbemenu
-  busctl call --user sm.puri.OSK0 /sm/puri/OSK0 sm.puri.OSK0 SetVisible b false
-}
-
-inputdmenu() {
-  dmenu -fn "$MEPO_MENUING_FONT" -i -l $MEPO_MENUING_NLINES -w "$(xdotool getactivewindow)" -p "$PROMPT"
-}
-
-inputsxmodmenu() {
-  sxmo_dmenu_with_kb.sh -p "$PROMPT"
-}
-
 hascommand() {
   command -v "$1" > /dev/null
 }
@@ -103,25 +67,7 @@ main() {
   elif hascommand zenity; then # Use Zenity by default
     inputzenity
   else
-    # Note: The following menuing methods have been deprecated, zenity
-    #       is expected by default and the only officially supported 
-    #       menuing method, this logic will likely be removed in
-    #       a future release of mepo.
-    if hascommand bemenu && pidof squeekboard >/dev/null; then # Phosh support
-      inputbemenuphosh
-    elif hascommand sxmo_dmenu_with_kb.sh; then # Sxmo support
-      inputsxmodmenu
-    elif hascommand bemenu && [ -n "$WAYLAND_DISPLAY" ]; then # Generic Wayland enviroment support
-      inputbemenu
-    elif hascommand dmenu && [ -n "$DISPLAY" ]; then # Generic X enviroment support
-      inputdmenu
-    elif hascommand vis-menu; then # Framebuffer support
-      inputframebuffer
-    elif hascommand zenity; then
-      inputzenity
-    else
-      echo "Error determining MEPO_MENUING; no menuing system installed? Install bemenu, zenity, or dmenu" >&2
-    fi
+    echo "Error determining MEPO_MENUING & zenity dependency not installed." >&2
   fi
 }
 
