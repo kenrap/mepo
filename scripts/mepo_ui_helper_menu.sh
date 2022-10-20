@@ -10,6 +10,9 @@ DOC='
 [ -z "$MEPO_MENUING_NLINES" ] && MEPO_MENUING_NLINES=17
 
 zenitydims() {
+  PROPWIDTH=$1
+  PROPHEIGHT=$2
+
   DIMS="$(
     xwininfo -tree -root |
       grep '("mepo" "mepo")' |
@@ -19,8 +22,8 @@ zenitydims() {
       grep -- -geometry |
       grep -oE '[0-9]+x[0-9]+'
   )"
-  DIMW="$(echo $DIMS | cut -dx -f1 | xargs echo "0.8 *" | bc | cut -d. -f1)"
-  DIMH="$(echo $DIMS | cut -dx -f2 | xargs echo "0.8 *" | bc | cut -d. -f1)"
+  DIMW="$(echo $DIMS | cut -dx -f1 | xargs echo "$PROPWIDTH *" | bc | cut -d. -f1)"
+  DIMH="$(echo $DIMS | cut -dx -f2 | xargs echo "$PROPHEIGHT *" | bc | cut -d. -f1)"
 
   if echo "$DIMW" | grep -Eq '[0-9]+' && echo "$DIMH" | grep -Eq '[0-9]+'; then
     echo "--width $DIMW --height $DIMH"
@@ -35,14 +38,14 @@ oskkeyboard() {
 inputzenity() {
   if [ "$TEXTINPUT" = 1 ]; then
     oskkeyboard open
-    zenity $(zenitydims) --title "Type input" --entry --text "$PROMPT"
+    zenity $(zenitydims 0.8 0.333) --title "Type input" --entry --text "$PROMPT"
     oskkeyboard close
   else
     OPTS="$(cat)\nType Custom"
     OPTS="$(printf %b "$OPTS" | tr -d \" | awk NF)"
     RESULT="$(
       echo "$OPTS" |
-      xargs -d$'\n' zenity $(zenitydims) --title "Select an entry" --list --column=Selection --text "$PROMPT"
+      xargs -d$'\n' zenity $(zenitydims 0.8 0.8) --title "Select an entry" --list --column=Selection --text "$PROMPT"
     )"
     if [ "$RESULT" = "Type Custom" ]; then
       TEXTINPUT=1 inputzenity
