@@ -79,6 +79,8 @@ pub const DefaultBaseConfig =
     \\ bind_key s y [clippaste];
     \\ bind_key c s [filedump rp $XDG_CACHE_HOME/mepo/savestate];
     \\ bind_key cs s [fileload $XDG_CACHE_HOME/mepo/savestate];
+    \\ bind_key s = [prefinc fontsize_ui 1];
+    \\ bind_key s - [prefinc fontsize_ui -1];
     \\
     \\ # Timers;
     \\ bind_timer 20 [shellpipe_async 1 [mepo_ui_menu_user_pin_updater.sh droppin]];
