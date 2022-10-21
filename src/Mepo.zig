@@ -484,7 +484,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
     while (btn_i > 0) {
         btn_i -= 1;
 
-        if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_groups[mepo.pin_group_active].items.len == 0)
+        if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_group_active_item == null)
             continue;
 
         const surf = try utilsdl.errorcheck_ptr(
