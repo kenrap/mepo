@@ -8,25 +8,25 @@ pub const spec = .{
     .name = "bind_button",
     .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen in the button bar.",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "visible_only_when_has_pins", .desc = "Set to `1` to only show button *if* there are visible pins" },
+        .{ .tag = .Number, .name = "visible_only_when_pin_active", .desc = "Set to `1` to only show button *if* there is a currently activated pin" },
         .{ .tag = .Number, .name = "group_number", .desc = "Group number (0-9) to associate with button. Background will match group and button will highlight when group active. Use -1 for no associated group." },
         .{ .tag = .Text, .name = "button_text", .desc = "Text that will be shown on the button" },
-        .{ .tag = .Text, .name = "mepolang_expression_single_click", .desc = "Mepolang expression to run on single clicking the button" },
-        .{ .tag = .Text, .name = "mepolang_expression_double_click", .desc = "Mepolang expression to run on double clicking the button" },
+        .{ .tag = .Text, .name = "mepolang_expression_click_single", .desc = "Mepolang expression to run on single clicking the button" },
+        .{ .tag = .Text, .name = "mepolang_expression_click_hold", .desc = "Mepolang expression to run on holding the button" },
     })[0..],
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const visible_only_when_has_pins = args[0].Number == 1;
+    const visible_only_when_pin_active = args[0].Number == 1;
     const group_number = if (args[1].Number < 0) null else @floatToInt(u8, args[1].Number);
     const text = args[2].Text;
     const expression_click_single = args[3].Text;
     const expression_click_hold = args[4].Text;
-    try bind_button(mepo, visible_only_when_has_pins, group_number, text, expression_click_single, expression_click_hold);
+    try bind_button(mepo, visible_only_when_pin_active, group_number, text, expression_click_single, expression_click_hold);
 }
 
-fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8, text: []const u8, expression_click_single: []const u8, expression_click_hold: []const u8) !void {
+fn bind_button(mepo: *Mepo, visible_only_when_pin_active: bool, group_number: ?u8, text: []const u8, expression_click_single: []const u8, expression_click_hold: []const u8) !void {
     utildbg.log("Binding button: text=<{s}> 1 click=<{s}> 2 clicks=<{s}>\n", .{ text, expression_click_single, expression_click_hold });
 
     for (mepo.uibuttons.items) |*btn| {
@@ -35,7 +35,7 @@ fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8,
             mepo.allocator.free(btn.mepolang_click_hold);
             btn.mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
             btn.mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
-            btn.only_visible_when_pin_active = visible_only_when_has_pins;
+            btn.only_visible_when_pin_active = visible_only_when_pin_active;
             return;
         }
     }
@@ -45,6 +45,6 @@ fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8,
         .group_number = group_number,
         .mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
         .mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
-        .only_visible_when_pin_active = visible_only_when_has_pins,
+        .only_visible_when_pin_active = visible_only_when_pin_active,
     });
 }
