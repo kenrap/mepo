@@ -115,6 +115,28 @@ pub const DefaultBaseConfig =
     \\ bind_key _ [8] [pin_groupactivate 7];
     \\ bind_key _ [9] [pin_groupactivate 8];
     \\ bind_key _ [0] [pin_groupactivate 9];
+    \\ bind_key s [1] [pin_transfer -1 [] 0];
+    \\ bind_key s [2] [pin_transfer -1 [] 1];
+    \\ bind_key s [3] [pin_transfer -1 [] 2];
+    \\ bind_key s [4] [pin_transfer -1 [] 3];
+    \\ bind_key s [5] [pin_transfer -1 [] 4];
+    \\ bind_key s [6] [pin_transfer -1 [] 5];
+    \\ bind_key s [7] [pin_transfer -1 [] 6];
+    \\ bind_key s [8] [pin_transfer -1 [] 7];
+    \\ bind_key s [9] [pin_transfer -1 [] 8];
+    \\ bind_key s [0] [pin_transfer -1 [] 9];
+    \\ bind_key cs [1] [pin_transfer -1 [all] 0];
+    \\ bind_key cs [2] [pin_transfer -1 [all] 1];
+    \\ bind_key cs [3] [pin_transfer -1 [all] 2];
+    \\ bind_key cs [4] [pin_transfer -1 [all] 3];
+    \\ bind_key cs [5] [pin_transfer -1 [all] 4];
+    \\ bind_key cs [6] [pin_transfer -1 [all] 5];
+    \\ bind_key cs [7] [pin_transfer -1 [all] 6];
+    \\ bind_key cs [8] [pin_transfer -1 [all] 7];
+    \\ bind_key cs [9] [pin_transfer -1 [all] 8];
+    \\ bind_key cs [0] [pin_transfer -1 [all] 9];
+
+
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ e [preftoggle overlay_pindetails];
     \\ bind_key _ s [preftoggle overlay_debugbar];
