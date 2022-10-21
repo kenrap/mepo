@@ -136,6 +136,8 @@ pub const DefaultBaseConfig =
     \\ bind_key cs [9] [pin_transfer -1 [all] 8];
     \\ bind_key cs [0] [pin_transfer -1 [all] 9];
 
+    \\ bind_key _ d [pin_delete -1 []; pin_cycle 0 1];
+    \\ bind_key s d [pin_purge];
 
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ e [preftoggle overlay_pindetails];
