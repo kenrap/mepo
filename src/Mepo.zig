@@ -484,7 +484,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
     while (btn_i > 0) {
         btn_i -= 1;
 
-        if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins and mepo.pin_groups[mepo.pin_group_active].items.len == 0)
+        if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_groups[mepo.pin_group_active].items.len == 0)
             continue;
 
         const surf = try utilsdl.errorcheck_ptr(
@@ -494,7 +494,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
         defer sdl.SDL_FreeSurface(surf);
 
         const target = target: {
-            if (mepo.uibuttons.items[btn_i].only_visible_when_has_pins) {
+            if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active) {
                 const bg_w = surf.w + pad * 2;
                 const bg_h = surf.h + pad * 2;
                 defer pad_left += bg_w;

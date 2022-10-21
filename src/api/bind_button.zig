@@ -35,7 +35,7 @@ fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8,
             mepo.allocator.free(btn.mepolang_click_hold);
             btn.mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
             btn.mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
-            btn.only_visible_when_has_pins = visible_only_when_has_pins;
+            btn.only_visible_when_pin_active = visible_only_when_has_pins;
             return;
         }
     }
@@ -45,6 +45,6 @@ fn bind_button(mepo: *Mepo, visible_only_when_has_pins: bool, group_number: ?u8,
         .group_number = group_number,
         .mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
         .mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
-        .only_visible_when_has_pins = visible_only_when_has_pins,
+        .only_visible_when_pin_active = visible_only_when_has_pins,
     });
 }
