@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" Relocate map: via search"
+DISPLAYNAME="⊡ Relocate map: via search"
 HOTKEY=g
 DOC='
   Repositions the map latitude and longitude based on a Nominatim search

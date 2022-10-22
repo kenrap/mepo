@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" POI Search: via Overpass"
+DISPLAYNAME="∴ POI Search: via Overpass"
 HOTKEY=b
 DOC='
   Searches for points of interest via the publicly accessible Overpass

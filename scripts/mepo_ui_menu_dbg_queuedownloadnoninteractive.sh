@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" Download: current bounding-box (non-interactive)"
+DISPLAYNAME="  Download: current bounding-box (non-interactive)"
 HOTKEY=Q
 DOC='
   Queues the current bounding box / viewport of the map to be downloaded

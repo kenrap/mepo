@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="漣 Update: Tilesource"
+DISPLAYNAME="⚙ Update: Tilesource"
 HOTKEY=u
 DOC='
   Updates the tilesource for the map to pull from. Note %1$d, %2$d, and %3$d

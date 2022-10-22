@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="⊗ Download: clear download queue"
+DISPLAYNAME="⊗ Download: purge download queue"
 HOTKEY=w
 DOC='
   Clears the current download cache (background downloading of tiles).

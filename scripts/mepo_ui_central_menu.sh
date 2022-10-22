@@ -19,7 +19,7 @@ main() {
   OPTIONS="$(menuoptions)"
   PRETTYNAMES="$(echo "$OPTIONS" | cut -d^ -f1 | uniq)"
   PICKED="$(
-    printf %b "$PRETTYNAMES\n Close Menu" |
+    printf %b "$PRETTYNAMES\n↰ Close Menu" |
     PROMPT="Run Script" mepo_ui_helper_menu.sh
   )"
   [ -z "$PICKED" ] && return

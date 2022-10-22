@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME="漣 Update: Zoom"
+DISPLAYNAME="⚙ Update: Zoom"
 HOTKEY=z
 DOC='
   Updates the zoom level based on users input. Presents menuing to 

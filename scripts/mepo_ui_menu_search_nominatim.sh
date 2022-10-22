@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" POI Search: via Nominatim"
+DISPLAYNAME="∴ POI Search: via Nominatim"
 HOTKEY=G
 DOC='
   Searches for points of interest via the publicly accessible Nominatim

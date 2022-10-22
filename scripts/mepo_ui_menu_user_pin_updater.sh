@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-DISPLAYNAME=" Location Pin: Center on user location"
+DISPLAYNAME="⊙ Location Pin: Center on user location"
 HOTKEY=x
 DOC='
   Determines the user location via GPSD, Geoclue, or Mozilla
