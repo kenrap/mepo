@@ -1433,13 +1433,17 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     return window: {
         const w = try utilsdl.errorcheck_ptr(sdl.SDL_Window, sdl.SDL_CreateWindow(
             "mepo",
-            config.InitWindowX,
-            config.InitWindowY,
+            sdl.SDL_WINDOWPOS_UNDEFINED,
+            sdl.SDL_WINDOWPOS_UNDEFINED,
             config.InitWindowW,
             config.InitWindowH,
             sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         ));
-        sdl.SDL_SetWindowPosition(w, config.InitWindowX, config.InitWindowY);
+        if (std.os.getenv("MEPO_WINDOW_REPOSITION")) |reposition| {
+            if (reposition.len == 1 and reposition[0] == '1') {
+                sdl.SDL_SetWindowPosition(w, 0, 0);
+            }
+        }
 
         // E.g. Phosh sometimes doesn't use all space, e.g. strange bar
         // on bottom; so fullscreen & defullscreen to trigger window resize
