@@ -41,8 +41,9 @@ bookmarks, and more.
   - Existing OSM tools for search & routing like the [Nominatim](https://nominatim.org/),
     [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API), and
     [GraphHopper](https://www.graphhopper.com/) APIs are integrated through
-    [bundled shell scripts](./scripts); customize to your heart's content or
-    write your own scripts for custom integrations.
+    [bundled shell scripts](https://git.sr.ht/~mil/mepo/tree/master/item/scripts); 
+    customize to your heart's content or write your own scripts for
+    custom integrations.
   - Bundled scripts utilize menuing and user input functionality via
     [zenity](https://help.gnome.org/users/zenity/stable/) rather then
     implementing application-specific input logic.
