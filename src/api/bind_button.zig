@@ -6,10 +6,10 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_button",
-    .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen in the button bar.",
+    .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "visible_only_when_pin_active", .desc = "Set to `1` to only show button *if* there is a currently activated pin" },
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number (0-9) to associate with button. Background will match group and button will highlight when group active. Use -1 for no associated group." },
+        .{ .tag = .Number, .name = "visible_only_when_pin_active", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin." },
+        .{ .tag = .Number, .name = "group_number", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group." },
         .{ .tag = .Text, .name = "button_text", .desc = "Text that will be shown on the button" },
         .{ .tag = .Text, .name = "mepolang_expression_click_single", .desc = "Mepolang expression to run on single clicking the button" },
         .{ .tag = .Text, .name = "mepolang_expression_click_hold", .desc = "Mepolang expression to run on holding the button" },
