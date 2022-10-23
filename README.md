@@ -43,10 +43,9 @@ bookmarks, and more.
     [GraphHopper](https://www.graphhopper.com/) APIs are integrated through
     [bundled shell scripts](./scripts); customize to your heart's content or
     write your own scripts for custom integrations.
-  - Bundled scripts utilize existing tools like [dmenu](https://tools.suckless.org/dmenu/), 
-    [bemenu](https://github.com/Cloudef/bemenu), or 
-    [zenity](https://help.gnome.org/users/zenity/stable/) for user input and 
-    list selection rather then implementing application-specific input logic.
+  - Bundled scripts utilize menuing and user input functionality via
+    [zenity](https://help.gnome.org/users/zenity/stable/) rather then
+    implementing application-specific input logic.
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
     through a command-line flag.

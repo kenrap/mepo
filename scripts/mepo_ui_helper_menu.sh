@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 DOC='
-  Primary menuing script which uses bemenu, dmenu, sxmo-dmenu, or vis-menu
-  to display menuing respectivly. The env variable PROMPT determines prompt
-  label and interface is otherwise is a passthrough to dmenu/bemenu in
-  taking list items as STDIN and printing picked or typed item as STDOUT.
+  Primary menuing script which uses zenity to display menuing. The env variable
+  PROMPT determines prompt label and interface is each newline item is a menu
+  entry. If the TEXTINPUT env var is set to 1, the entry is assumed to be
+  text input. Mening uses zenity by default; a custom menuing function / script
+  may be used by using the MEPO_MENUING env var.
 '
 [ -z "$MEPO_MENUING" ] && MEPO_MENUING=auto
 [ -z "$MEPO_MENUING_FONT" ] && MEPO_MENUING_FONT=Inconsolata
