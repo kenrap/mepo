@@ -253,7 +253,7 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool) !void {
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
@@ -267,7 +267,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 
     // Draw connecting line for ordered pin group
     if (p.get(p.pingroup_prop(pin_group, .Ordered)).b and prev_pin != null) {
-        const connecting_line_color = if (is_active) 0xff0000ff else pg_color.to_u32();
+        const connecting_line_color = if (is_active_path) 0xff0000ff else pg_color.to_u32();
         try utilsdl.errorcheck(sdl.aalineColor(
             mepo.renderer,
             @intCast(i16, prev_pin_x),
@@ -349,27 +349,28 @@ fn blit_pins(mepo: *@This()) !void {
         for (pin_group.items) |*pin, pin_i| {
             defer prev_pin = pin;
 
-            const is_active = is_active: {
+            const is_active = mepo.pin_group_active_item.? == pin_i;
+            const is_active_path = is_active_path: {
                 const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
-
-                // E.g. ordered_group_active_path just tracks every time
-                // an instructive pin is hit so subsequent structural pins
-                // highlighted in "active"/red color until next structural pin
-                // hit and full "path" of the active segment of an ordered pin
-                // group shows continuously as the active color
-                if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
-                    ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
-
-                break :is_active (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+                break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
                     ((is_ordered and ordered_group_active_path) or
                     (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
             };
+
+            // E.g. ordered_group_active_path just tracks every time
+            // an instructive pin is hit so subsequent structural pins
+            // highlighted in "active"/red color until next structural pin
+            // hit and full "path" of the active segment of an ordered pin
+            // group shows continuously as the active color
+            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
+                ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
 
             try mepo.blit_pin(
                 pin.*,
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
                 is_active,
+                is_active_path,
             );
         }
     }
@@ -380,6 +381,7 @@ fn blit_pins(mepo: *@This()) !void {
             null,
             mepo.pin_group_active,
             true,
+            false,
         );
     }
 }
