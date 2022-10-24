@@ -298,21 +298,21 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
 
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
-        const pin_label_bg : types.Color = bg: {
+        const pin_label_bg: types.Color = bg: {
             if (is_active) {
                 break :bg .{ .value = 0xe8e8e8, .opacity = 255 };
             } else {
                 break :bg .{ .value = 0xffffff, .opacity = 255 };
             }
         };
-        const pin_label_border : types.Color = border: {
+        const pin_label_border: types.Color = border: {
             if (is_active) {
                 break :border .{ .value = 0x000000, .opacity = 255 };
             } else {
                 break :border .{ .value = 0xe8e8e8, .opacity = 255 };
             }
         };
-        const label_color : u24 = 0x000000;
+        const label_color: u24 = 0x000000;
 
         const label = if (pin.metadata.get("name")) |name| name else pin.handle;
         try mepo.blit_multiline_text(
@@ -327,11 +327,23 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
             .{label},
         );
     }
-
 }
 
 fn blit_pins(mepo: *@This()) !void {
-    for (mepo.pin_groups) |pin_group, pin_group_i| {
+    for (order: {
+        // E.g. place active pingroup last so its always ontop in rendering order
+        var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var target_order: [10]u8 = undefined;
+        var index: u8 = 0;
+        for (groups) |i| {
+            if (i == mepo.pin_group_active) continue;
+            target_order[index] = i;
+            index += 1;
+        }
+        target_order[9] = mepo.pin_group_active;
+        break :order target_order;
+    }) |pin_group_i| {
+        const pin_group = mepo.pin_groups[pin_group_i];
         var ordered_group_active_path = false;
         var prev_pin: ?*types.Pin = null;
         for (pin_group.items) |*pin, pin_i| {
@@ -707,7 +719,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     //    these actions take preference *over* bind_click actions
     if (mepo.blit_uibuttons(cursor) catch null) |clicked_btn| {
         // Click on UI button check
-        utildbg.log("Clicked on button: {} with clicks {}\n", .{clicked_btn, e.button.clicks});
+        utildbg.log("Clicked on button: {} with clicks {}\n", .{ clicked_btn, e.button.clicks });
         mepo.mepolang_execute(clicked_btn.mepolang_click_single) catch unreachable;
         return .Redraw;
     }
@@ -937,7 +949,7 @@ fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg)
             .Number => {
                 switch (args[expect_spec_arg_i]) {
                     .Text => {
-                        utildbg.log("Expected number, got text in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        utildbg.log("Expected number, got text in position {} (value={})\n", .{ expect_spec_arg_i, args[expect_spec_arg_i] });
                         return error.ExpectNumberGotText;
                     },
                     .Number => continue,
@@ -946,7 +958,7 @@ fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg)
             .Text => {
                 switch (args[expect_spec_arg_i]) {
                     .Number => {
-                        utildbg.log("Expected text , got number in position {} (value={})\n", .{expect_spec_arg_i, args[expect_spec_arg_i]});
+                        utildbg.log("Expected text , got number in position {} (value={})\n", .{ expect_spec_arg_i, args[expect_spec_arg_i] });
                         return error.ExpectTextGotNumber;
                     },
                     .Text => continue,
@@ -1275,7 +1287,6 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
     utilsdl.sdl_push_event_resize();
 }
 
-
 // Returns the scaled mouse position based on the gl_drawablesize which
 // is also set on resizes rather then the raw position which comes in
 // from GetMouseState
@@ -1297,7 +1308,7 @@ pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
     const scale_y = @divTrunc(gl_h, win_h);
     const scaled_x = cursor_x * scale_x;
     const scaled_y = cursor_y * scale_y;
-    return .{.x = scaled_x, .y = scaled_y};
+    return .{ .x = scaled_x, .y = scaled_y };
 }
 
 pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
