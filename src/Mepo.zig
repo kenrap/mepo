@@ -336,18 +336,22 @@ fn blit_pins(mepo: *@This()) !void {
         var prev_pin: ?*types.Pin = null;
         for (pin_group.items) |*pin, pin_i| {
             defer prev_pin = pin;
-            const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
-            const is_active = (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
-                ((is_ordered and ordered_group_active_path) or
-                (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
 
-            // E.g. ordered_group_active_path just tracks every time
-            // an instructive pin is hit so subsequent structural pins
-            // highlighted in "active"/red color until next structural pin
-            // hit and full "path" of the active segment of an ordered pin
-            // group shows continuously as the active color
-            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
-                ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
+            const is_active = is_active: {
+                const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
+
+                // E.g. ordered_group_active_path just tracks every time
+                // an instructive pin is hit so subsequent structural pins
+                // highlighted in "active"/red color until next structural pin
+                // hit and full "path" of the active segment of an ordered pin
+                // group shows continuously as the active color
+                if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
+                    ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
+
+                break :is_active (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+                    ((is_ordered and ordered_group_active_path) or
+                    (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
+            };
 
             try mepo.blit_pin(
                 pin.*,
