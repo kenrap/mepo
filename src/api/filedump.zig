@@ -164,10 +164,14 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
                     if (pin.category == .Structural) break :b 1;
                     break :b 0;
                 };
+                const handle : [:0]const u8 = handle: {
+                    if (pin.handle) |h| break :handle h;
+                    break :handle "";
+                };
                 const statement_pin_add = try std.fmt.allocPrint(
                     arena.allocator(),
                     "pin_add {d} {d} {d:.4} {d:.4} [{s}];",
-                    .{ pg_i, is_structural, pin.lat, pin.lon, pin.handle },
+                    .{ pg_i, is_structural, pin.lat, pin.lon, handle },
                 );
                 try lines.append(statement_pin_add);
 
