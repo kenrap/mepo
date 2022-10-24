@@ -253,20 +253,34 @@ fn blit_debugmessage(mepo: *@This()) !void {
     }
 }
 
-fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, pin_color: types.Color, is_active: bool) !void {
+fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool) !void {
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
     const prev_pin_x = if (prev_pin != null) mepo.convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
     const prev_pin_y = if (prev_pin != null) mepo.convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+    const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
 
     // Optimization to never drawoff-screen pins
     if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
         (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) return;
 
+    // Draw connecting line for ordered pin group
+    if (p.get(p.pingroup_prop(pin_group, .Ordered)).b and prev_pin != null) {
+        const connecting_line_color = if (is_active) 0xff0000ff else pg_color.to_u32();
+        try utilsdl.errorcheck(sdl.aalineColor(
+            mepo.renderer,
+            @intCast(i16, prev_pin_x),
+            @intCast(i16, prev_pin_y),
+            @intCast(i16, x),
+            @intCast(i16, y),
+            connecting_line_color,
+        ));
+    }
+
     // Draw Pin
     if (pin.category == .Instructive) {
-        try utilsdl.sdl_renderer_rect(mepo.renderer, pin_color, sdl.SDL_Rect{
+        try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, sdl.SDL_Rect{
             .x = x - @divTrunc(size, 2),
             .y = y - @divTrunc(size, 2),
             .w = size,
@@ -298,13 +312,7 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
                 break :border .{ .value = 0xe8e8e8, .opacity = 255 };
             }
         };
-        const label_color : u24 = color: {
-            if (is_active) {
-                break :color 0x000000;
-            } else {
-                break :color 0x000000;
-            }
-        };
+        const label_color : u24 = 0x000000;
 
         const label = if (pin.metadata.get("name")) |name| name else pin.handle;
         try mepo.blit_multiline_text(
@@ -320,17 +328,6 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
         );
     }
 
-    // Draw connecting line for ordered pin group
-    if (p.get(p.pingroup_prop(pin_group, .Ordered)).b and prev_pin != null) {
-        try utilsdl.errorcheck(sdl.aalineColor(
-            mepo.renderer,
-            @intCast(i16, prev_pin_x),
-            @intCast(i16, prev_pin_y),
-            @intCast(i16, x),
-            @intCast(i16, y),
-            pin_color.to_u32(),
-        ));
-    }
 }
 
 fn blit_pins(mepo: *@This()) !void {
@@ -339,9 +336,7 @@ fn blit_pins(mepo: *@This()) !void {
         var prev_pin: ?*types.Pin = null;
         for (pin_group.items) |*pin, pin_i| {
             defer prev_pin = pin;
-
             const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
-            const pg_color = p.get(p.pingroup_prop(pin_group_i, .Color)).u24;
             const is_active = (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
                 ((is_ordered and ordered_group_active_path) or
                 (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
@@ -358,7 +353,6 @@ fn blit_pins(mepo: *@This()) !void {
                 pin.*,
                 if (prev_pin != null) prev_pin.?.* else null,
                 @intCast(u8, pin_group_i),
-                .{ .value = pg_color },
                 is_active,
             );
         }
@@ -369,7 +363,6 @@ fn blit_pins(mepo: *@This()) !void {
             mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
             null,
             mepo.pin_group_active,
-            .{ .value = p.get(p.pingroup_prop(mepo.pin_group_active, .Color)).u24 },
             true,
         );
     }
