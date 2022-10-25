@@ -349,7 +349,7 @@ fn blit_pins(mepo: *@This()) !void {
         for (pin_group.items) |*pin, pin_i| {
             defer prev_pin = pin;
 
-            const is_active = mepo.pin_group_active_item.? == pin_i;
+            const is_active = mepo.pin_group_active_item != null and mepo.pin_group_active_item.? == pin_i;
             const is_active_path = is_active_path: {
                 const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
                 break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
