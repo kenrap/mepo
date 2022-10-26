@@ -6,8 +6,8 @@ pub const spec = .{
     .name = "pin_transfer",
     .desc = "Transfer a pin from one group to another.",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "from_group_number", .desc = "Group number, or -1 for the current group number" },
-        .{ .tag = .Text, .name = "pin_handle", .desc = "Handle of the pin to transfer; if empty will transfer the current pin; or all for all pins in group." },
+        .{ .tag = .Number, .name = "from_group_number", .desc = "Group number, or `-1` for the current group number." },
+        .{ .tag = .Text, .name = "pin_handle", .desc = "Handle of the pin to transfer; or empty string `[]` will transfer the current pin. Use the string `all` for all pins in group." },
         .{ .tag = .Number, .name = "to_group_number", .desc = "Group number" },
     })[0..],
     .execute = execute,

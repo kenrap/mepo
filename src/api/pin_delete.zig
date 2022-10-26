@@ -6,8 +6,8 @@ pub const spec = .{
     .name = "pin_delete",
     .desc = "Delete a pin by its handle.",
     .args = (&[_]types.MepoFnSpecArg{
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number or -1 to use the current pin group." },
-        .{ .tag = .Text, .name = "pin_handle", .desc = "Pin's handle to delete, or empty quote to use the current pin handle" },
+        .{ .tag = .Number, .name = "group_number", .desc = "Group number or `-1` to use the current pin group." },
+        .{ .tag = .Text, .name = "pin_handle", .desc = "Pin's handle to delete, or empty string `[]` to use the current pin handle" },
     })[0..],
     .execute = execute,
 };
