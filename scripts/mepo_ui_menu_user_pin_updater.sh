@@ -37,13 +37,13 @@ coordsviageoclue() {
 }
 
 supportsgeoclue() {
-  stat /usr/libexec/geoclue-2.0/demos/agent > /dev/null &&
-  stat /usr/libexec/geoclue-2.0/demos/where-am-i > /dev/null
+  stat /usr/libexec/geoclue-2.0/demos/agent > /dev/null 2> /dev/null &&
+  stat /usr/libexec/geoclue-2.0/demos/where-am-i > /dev/null 2> /dev/null
 }
 
 coordsviagpsd() {
   # On pmOS: sudo /etc/gpsd/device-hook "" ACTIVATE
-  gpspipe -w -n 10 | grep -m 1 TPV | jq '.lat, .lon' | tr '\n' ' '
+  gpspipe -w -n 10 2> /dev/null | grep -m 1 TPV | jq '.lat, .lon' | tr '\n' ' '
 }
 
 iscoords() {
