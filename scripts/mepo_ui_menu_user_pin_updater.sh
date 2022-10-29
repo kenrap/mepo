@@ -28,7 +28,7 @@ coordsviageoclue() {
 
   /usr/libexec/geoclue-2.0/demos/agent > /dev/null &
   AGENTPID=$!
-  /usr/libexec/geoclue-2.0/demos/where-am-i -t $MEPO_TIMEOUT_GEOCLUE |
+  LC_NUMERIC=en_US.UTF-8 /usr/libexec/geoclue-2.0/demos/where-am-i -t $MEPO_TIMEOUT_GEOCLUE |
     grep -E "Latitude|Longitude:" -m2 |
     cut -d: -f2 |
     tr -d "° " |
