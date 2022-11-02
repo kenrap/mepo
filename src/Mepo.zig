@@ -500,7 +500,7 @@ fn blit_uibuttons(mepo: *@This(), determine_click_target: ?sdl.SDL_Point) !?type
 
         const surf = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf);
 
@@ -1103,12 +1103,12 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_val);
         width_label = std.math.max(width_label, surf_lab.w);
@@ -1142,7 +1142,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Label
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
@@ -1157,7 +1157,7 @@ fn blit_table(mepo: *@This(), x: i32, y: i32, padding: c_int, rows: []const [2][
         // Value
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderText_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
@@ -1219,7 +1219,7 @@ pub fn blit_multiline_text(
 
             const text_surf = try utilsdl.errorcheck_ptr(
                 sdl.SDL_Surface,
-                sdl.TTF_RenderText_Blended(mepo.fonts_normal[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).to_sdl()),
+                sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).to_sdl()),
             );
             defer sdl.SDL_FreeSurface(text_surf);
 
