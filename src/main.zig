@@ -11,8 +11,8 @@ const utildbg = @import("./util/utildbg.zig");
 pub fn main() !void {
     comptime {
         const v = builtin.zig_version;
-        if (v.major != 0 or v.minor != 9 or v.patch != 1)
-            @panic("Must be built against Zig 0.9.1");
+        if (v.major != 0 or v.minor != 10 or v.patch != 0)
+            @panic("Must be built against Zig 0.10.0");
     }
 
     const allocator = std.heap.c_allocator;
@@ -24,9 +24,9 @@ pub fn main() !void {
     var use_sw_renderer = false;
 
     var args_it = std.process.args();
-    var arg_w = args_it.next(allocator);
-    while (arg_w != null) : (arg_w = args_it.next(allocator)) {
-        const arg = try arg_w.?;
+    var arg_w = args_it.next();
+    while (arg_w != null) : (arg_w = args_it.next()) {
+        const arg = arg_w.?;
         if (std.mem.eql(u8, arg, "-docmd")) {
             // -docmdapi: Documentation mode, generates markdown docs for mepolang API
             mode = .DocsMarkdown;

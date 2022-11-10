@@ -38,7 +38,7 @@ pub const fn_specs = &[_]types.MepoFnSpec{
     @import("zoom_relative.zig").spec,
 };
 
-pub fn get(get_fn: []const u8) ?types.MepoFnSpec {
+pub fn get(comptime get_fn: []const u8) ?types.MepoFnSpec {
     for (fn_specs) |f| {
         if (std.mem.eql(u8, f.name, get_fn)) return f;
     }

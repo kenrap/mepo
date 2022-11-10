@@ -607,7 +607,7 @@ pub fn blit(mepo: *@This()) !void {
         mepo.title_update_ms = sdl.SDL_GetTicks();
         const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ p.get(p.pref.lat).f, p.get(p.pref.lon).f });
         defer mepo.allocator.free(title);
-        _ = sdl.SDL_SetWindowTitle(mepo.window, title);
+        _ = sdl.SDL_SetWindowTitle(mepo.window, &title[0]);
     }
 }
 
@@ -1400,7 +1400,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
             const env_videodriver_z = try allocator.dupeZ(u8, env_videodriver);
             defer allocator.free(env_videodriver_z);
             utildbg.log("SDL_VIDEODRIVER env var set to {s}, attempting initialize\n", .{env_videodriver});
-            utilsdl.errorcheck(sdl.SDL_VideoInit(env_videodriver_z)) catch |e| {
+            utilsdl.errorcheck(sdl.SDL_VideoInit(&env_videodriver_z[0])) catch |e| {
                 utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ env_videodriver, e });
                 break :env_videoinit;
             };
@@ -1411,7 +1411,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
         const prefered_sdl_videodrivers_order = &[_][:0]const u8{ "wayland", "x11", "directfb", "kmsdrm" };
         for (prefered_sdl_videodrivers_order) |driver| {
             utildbg.log("SDL Videodriver {s} attempting to initialize\n", .{driver});
-            utilsdl.errorcheck(sdl.SDL_VideoInit(driver)) catch |e| {
+            utilsdl.errorcheck(sdl.SDL_VideoInit(&driver[0])) catch |e| {
                 utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ driver, e });
                 continue;
             };
@@ -1481,7 +1481,7 @@ pub fn video_init(mepo: *@This()) !void {
 
 fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
     try utilsdl.errorcheck(sdl.TTF_Init());
-    const font_dat = @embedFile("../assets/inconsolata.ttf");
+    const font_dat = @embedFile("embed_assets/inconsolata.ttf");
     var fonts: [50]*sdl.TTF_Font = undefined;
     var font_size: usize = 0;
     while (font_size < fonts.len) : (font_size += 1) {
