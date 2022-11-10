@@ -59,8 +59,9 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
     // More or less from zig 0.9 stdlib child process's spawnPosix
     const argv = [_][]const u8{ "sh", "-c", cmd };
     const max_output_bytes: usize = 50 * 1024;
-    const child = try std.ChildProcess.init(argv[0..], mepo.allocator);
-    defer child.deinit();
+    var arena = std.heap.ArenaAllocator.init(mepo.allocator);
+    defer arena.deinit();
+    var child = std.ChildProcess.init(argv[0..], arena.allocator());
     child.stdin_behavior = .Ignore;
     child.stdout_behavior = .Pipe;
     const env = try get_env_vars(mepo, mepo.allocator);
