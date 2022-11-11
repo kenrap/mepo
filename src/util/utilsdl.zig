@@ -28,7 +28,7 @@ pub fn sdl_push_event_resize() void {
     sdlevent.type = sdl.SDL_WINDOWEVENT;
     sdlevent.window.event = sdl.SDL_WINDOWEVENT_EXPOSED;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
-        utildbg.log("Error pushing resize event to SDL queue: {s}\n", .{err});
+        utildbg.log("Error pushing resize event to SDL queue: {any}\n", .{err});
     };
 }
 
@@ -40,7 +40,7 @@ pub fn sdl_push_event_mepolang_execution(mepolang_text: [:0]const u8) void {
     sdlevent.user.data1 = @intToPtr([*c]u8, @ptrToInt(str_ptr));
     sdlevent.user.data2 = null;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
-        utildbg.log("Error pushing mepolang event to SDL queue: {s}\n", .{err});
+        utildbg.log("Error pushing mepolang event to SDL queue: {any}\n", .{err});
     };
 }
 

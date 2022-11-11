@@ -58,7 +58,8 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             };
             const prefset_statement = statement: {
                 if (format_as == .Text) {
-                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{ pref.name, pref.value.t });
+                    const text = if (pref.value.t) |t| t else "";
+                    break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_t {s} [{s}];", .{ pref.name, text });
                 } else if (format_as == .Number) {
                     break :statement try std.fmt.allocPrint(arena.allocator(), "prefset_n {s} {d:0.04};", .{ pref.name, numerical_val });
                 } else if (format_as == .HexText) {
@@ -145,10 +146,11 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // UI Buttons
         for (mepo.uibuttons.items) |btn| {
             const pins_only_btn: u8 = if (btn.only_visible_when_pin_active) 1 else 0;
+            const group_number : i8 = if (btn.group_number) |g| @intCast(i8, g) else -1;
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} {d} [{s}] [{s}] [{s}];",
-                .{ pins_only_btn, btn.group_number, btn.text, btn.mepolang_click_single, btn.mepolang_click_hold },
+                .{ pins_only_btn, group_number, btn.text, btn.mepolang_click_single, btn.mepolang_click_hold },
             );
             try lines.append(statement_button);
         }
@@ -180,7 +182,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
                     const statement_meta = try std.fmt.allocPrint(
                         arena.allocator(),
                         "pin_meta {d} [{s}] [{s}] [{s}];",
-                        .{ pg_i, pin.handle, kv.key_ptr.*, kv.value_ptr.* },
+                        .{ pg_i, handle, kv.key_ptr.*, kv.value_ptr.* },
                     );
                     try lines.append(statement_meta);
                 }
