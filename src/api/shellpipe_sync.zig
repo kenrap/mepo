@@ -54,7 +54,7 @@ fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
 
 // TODO: perhaps this should be moved to Mepo.zig ? used by both shellpipe_{,a}sync
 // TODO: document ENV vars usable in shell scripts context
-pub fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.BufMap {
+pub fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {
     var v = try std.process.getEnvMap(allocator);
 
     // Window and zoom info

@@ -20,5 +20,5 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
         .{ p.get(p.pref.lat).f, p.get(p.pref.lon).f },
     );
     defer mepo.allocator.free(copy_text);
-    try utilsdl.errorcheck(sdl.SDL_SetClipboardText(copy_text));
+    try utilsdl.errorcheck(sdl.SDL_SetClipboardText(&copy_text[0]));
 }

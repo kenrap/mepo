@@ -33,7 +33,7 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
         if (std.os.getenv("HOME")) |home_dir| {
             const value = try std.fmt.allocPrintZ(allocator, "{s}/{s}", .{ home_dir, default_mapping.default_home_path });
             defer allocator.free(value);
-            _ = cstdlib.setenv(default_mapping.env_var, value, 1);
+            _ = cstdlib.setenv(&default_mapping.env_var[0], &value[0], 1);
         }
     }
 

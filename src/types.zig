@@ -40,7 +40,7 @@ pub const MepoFnSpec = struct {
     name: []const u8,
     desc: []const u8,
     args: []const MepoFnSpecArg,
-    execute: fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void,
+    execute: *const fn (mepo: *Mepo, args: [MepoFnNargs]MepoArg) anyerror!void,
 };
 
 pub const KeyInput = struct { key: u8, keymod: sdl.SDL_Keymod };

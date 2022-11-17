@@ -143,7 +143,7 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
     const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, p.get(p.pref.tile_cache_dir).t.?);
     defer tile_cache.allocator.free(expanded_path);
     try std.fs.cwd().makePath(expanded_path);
-    tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .iterate = true });
+    tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .access_sub_paths = true });
 }
 
 /// E.g. esentially the one function responsibel for launching/termination
@@ -310,7 +310,7 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
         var url = try tile_cache.allocator.alloc(u8, p.get(p.pref.tile_cache_url).t.?.len + (3 * 10));
         if (cstdio.sprintf(
             &url[0],
-            p.get(p.pref.tile_cache_url).t.?,
+            &p.get(p.pref.tile_cache_url).t.?[0],
             @intCast(c_int, coords.x),
             @intCast(c_int, coords.y),
             @intCast(c_int, coords.z),

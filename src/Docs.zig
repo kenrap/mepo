@@ -210,7 +210,10 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
 
                 var value : []const u8 = "";
                 switch(pref.value) {
-                    .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
+                    .t =>    {
+                        const text = if (pref.value.t) |t| t else "";
+                        value = try std.fmt.allocPrint(allocator, "{s}", .{text});
+                     },
                     .b =>    { 
                         if (pref.value.b) {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{1});
@@ -433,7 +436,10 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 var value : []const u8 = "";
                 
                 switch(pref.value) {
-                    .t =>    { value = try std.fmt.allocPrint(allocator, "{s}", .{pref.value.t}); },
+                    .t =>    { 
+                        const text = if (pref.value.t) |t| t else "";
+                        value = try std.fmt.allocPrint(allocator, "{s}", .{text});
+                    },
                     .b =>    { 
                         if (pref.value.b) {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{1});

@@ -14,7 +14,7 @@ fn setDependencies(step: *std.build.LibExeObjStep) void {
 pub fn build(b: *Builder) void {
     b.installDirectory(.{
         .source_dir = "scripts",
-        .install_dir = .{ .bin = .{} },
+        .install_dir = .{ .bin = {} },
         .install_subdir = "",
     });
     b.installFile("assets/mepo.desktop", "share/applications/mepo.desktop");

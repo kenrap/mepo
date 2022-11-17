@@ -314,7 +314,12 @@ fn blit_pin(mepo: *@This(), pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8,
         };
         const label_color: u24 = 0x000000;
 
-        const label = if (pin.metadata.get("name")) |name| name else pin.handle;
+        const label = lab: {
+            if (pin.metadata.get("name")) |name| break :lab name;
+            if (pin.handle) |h| break :lab h;
+            break :lab "";
+        };
+
         try mepo.blit_multiline_text(
             label_color,
             pin_label_border,
@@ -607,7 +612,7 @@ pub fn blit(mepo: *@This()) !void {
         mepo.title_update_ms = sdl.SDL_GetTicks();
         const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ p.get(p.pref.lat).f, p.get(p.pref.lon).f });
         defer mepo.allocator.free(title);
-        _ = sdl.SDL_SetWindowTitle(mepo.window, title);
+        _ = sdl.SDL_SetWindowTitle(mepo.window, &title[0]);
     }
 }
 
@@ -1067,27 +1072,29 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
-            pending = switch (e.type) {
-                sdl.SDL_FINGERDOWN => event_fingerdown,
-                sdl.SDL_FINGERUP => event_fingerup,
-                sdl.SDL_KEYUP => event_keyup,
-                sdl.SDL_MOUSEBUTTONDOWN => event_mousebuttondown,
-                sdl.SDL_MOUSEBUTTONUP => event_mousebuttonup,
-                sdl.SDL_MOUSEMOTION => event_mousemotion,
-                sdl.SDL_MOUSEWHEEL => event_mousewheel,
-                sdl.SDL_MULTIGESTURE => event_multigesture,
-                sdl.SDL_TEXTINPUT => event_textinput,
-                sdl.SDL_QUIT => event_quit,
-                sdl.SDL_WINDOWEVENT => event_windowevent,
+            var pending_fn = switch (e.type) {
+                sdl.SDL_FINGERDOWN => &event_fingerdown,
+                sdl.SDL_FINGERUP => &event_fingerup,
+                sdl.SDL_KEYUP => &event_keyup,
+                sdl.SDL_MOUSEBUTTONDOWN => &event_mousebuttondown,
+                sdl.SDL_MOUSEBUTTONUP => &event_mousebuttonup,
+                sdl.SDL_MOUSEMOTION => &event_mousemotion,
+                sdl.SDL_MOUSEWHEEL => &event_mousewheel,
+                sdl.SDL_MULTIGESTURE => &event_multigesture,
+                sdl.SDL_TEXTINPUT => &event_textinput,
+                sdl.SDL_QUIT => &event_quit,
+                sdl.SDL_WINDOWEVENT => &event_windowevent,
                 else => b: {
                     // Async events triggered outside of main thread:
                     // 1) signals & 2) mepolang trigged via shellpipe or STDIN
-                    if (e.type == utilsdl.sdl_usereventtype(.Mepolang)) break :b event_mepolangexecution;
-                    if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b event_signal;
+                    if (e.type == utilsdl.sdl_usereventtype(.Mepolang)) break :b &event_mepolangexecution;
+                    if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b &event_signal;
                     // Unhandled case
-                    break :b event_unhandled;
+                    break :b &event_unhandled;
                 },
-            }(mepo, e);
+            };
+            
+            pending = pending_fn(mepo, e);
         }
     }
 }
@@ -1400,8 +1407,8 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
             const env_videodriver_z = try allocator.dupeZ(u8, env_videodriver);
             defer allocator.free(env_videodriver_z);
             utildbg.log("SDL_VIDEODRIVER env var set to {s}, attempting initialize\n", .{env_videodriver});
-            utilsdl.errorcheck(sdl.SDL_VideoInit(env_videodriver_z)) catch |e| {
-                utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ env_videodriver, e });
+            utilsdl.errorcheck(sdl.SDL_VideoInit(&env_videodriver_z[0])) catch |e| {
+                utildbg.log("SDL Videodriver {s} failed to initialized: {any}\n", .{ env_videodriver, e });
                 break :env_videoinit;
             };
             break :video_init;
@@ -1411,8 +1418,8 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
         const prefered_sdl_videodrivers_order = &[_][:0]const u8{ "wayland", "x11", "directfb", "kmsdrm" };
         for (prefered_sdl_videodrivers_order) |driver| {
             utildbg.log("SDL Videodriver {s} attempting to initialize\n", .{driver});
-            utilsdl.errorcheck(sdl.SDL_VideoInit(driver)) catch |e| {
-                utildbg.log("SDL Videodriver {s} failed to initialized: {s}\n", .{ driver, e });
+            utilsdl.errorcheck(sdl.SDL_VideoInit(&driver[0])) catch |e| {
+                utildbg.log("SDL Videodriver {s} failed to initialized: {any}\n", .{ driver, e });
                 continue;
             };
             break :video_init;
@@ -1481,7 +1488,7 @@ pub fn video_init(mepo: *@This()) !void {
 
 fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
     try utilsdl.errorcheck(sdl.TTF_Init());
-    const font_dat = @embedFile("../assets/inconsolata.ttf");
+    const font_dat = @embedFile("embed_assets/inconsolata.ttf");
     var fonts: [50]*sdl.TTF_Font = undefined;
     var font_size: usize = 0;
     while (font_size < fonts.len) : (font_size += 1) {
