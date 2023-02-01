@@ -46,18 +46,21 @@ main() {
     pin_purge;
   "
 
+  # Add pin
+  UNTITLEDPREFIX="$(echo $SCOPE | tr -d '[]')"
   echo "$JSON_RESULTS" | jq '
     .elements |
     .[] |
-    select(.lat != null and .lon != null and .tags.name != null) |
-    "pin_add -1 0 \(.lat) \(.lon) [\(.tags.name)];"
+    select(.lat != null and .lon != null) |
+    "pin_add -1 0 \(.lat) \(.lon) [\(.tags.name // "'${UNTITLEDPREFIX}_'" + (.id|tostring))];"
   ' | tr -d ',"'
+
 
   # Add pin metadata
   echo "$JSON_RESULTS" | jq '
-    [.elements | .[] | .tags | select(. != null and .name != null)] | 
+    [.elements | .[] | .tags ] |
     map(
-      .name as $handle | 
+      (.name // "'${UNTITLEDPREFIX}_'" + (.id|tostring)) as $handle |
       to_entries |  
       map("pin_meta -1 [" + $handle + "] [" + .key + "] [" + .value + "];")
     ) | 
