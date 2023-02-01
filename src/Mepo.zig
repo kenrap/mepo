@@ -1270,7 +1270,7 @@ pub fn blit_multiline_text(
         if (border_opt) |border|
             try utilsdl.sdl_renderer_rect(mepo.renderer, border, sdl.SDL_Rect{ .x = x_off, .y = y_off, .w = textures_width, .h = textures_height }, .Draw);
 
-        // Reder text
+        // Render text
         for (textures) |texture| {
             defer sdl.SDL_DestroyTexture(texture);
             var dest_rect = sdl.SDL_Rect{
