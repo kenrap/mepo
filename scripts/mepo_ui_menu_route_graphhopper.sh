@@ -36,7 +36,7 @@ nominatimquerytargetmenu() {
 
     VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
     RESULT="$(
-      curl "https://nominatim.openstreetmap.org/search?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
+      curl "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
         jq '.[] | "\(.display_name) \(.lat) \(.lon)" '
     )"
 
