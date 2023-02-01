@@ -52,7 +52,7 @@ queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
 surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
-texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures),
+texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, config.MaxTextures),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 
 /// Downloads tiles continuously
@@ -273,8 +273,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         defer sdl.SDL_FreeSurface(surface);
         const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
         _ = tile_cache.surface_map.swapRemove(coords);
-        const evicted_texture_opt = try tile_cache.texture_map.put(coords, texture);
-        if (evicted_texture_opt) |evicted_texture| sdl.SDL_DestroyTexture(evicted_texture);
+        _ = try tile_cache.texture_map.put(coords, texture);
         return TileData{ .texture = texture };
     }
 
@@ -461,6 +460,10 @@ fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !vo
     }
 }
 
+fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
+    sdl.SDL_DestroyTexture(texture);
+}
+
 fn load_data_to_surface(_: *@This(), _: types.XYZ, data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
@@ -522,7 +525,12 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .surface_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface).init(allocator),
-            .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, config.MaxTextures).init(allocator),
+            .texture_map = datastructure.EvictionHashMap(
+                types.XYZ,
+                *sdl.SDL_Texture,
+                evict_texture,
+                config.MaxTextures,
+            ).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
         try tc.set_cache_url(try allocator.dupeZ(u8, "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"));

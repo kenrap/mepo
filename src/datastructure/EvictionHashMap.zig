@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime size: usize) type {
+pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn(key_type, metadata_type) void, comptime size: usize) type {
     return struct {
         array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
         size: usize,
@@ -33,14 +33,18 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, co
         }
 
         fn shift(self: *@This()) !metadata_type {
+            const shifted_key = self.array_hash_map.keys()[0];
             const shifted_val = self.array_hash_map.values()[0];
             self.array_hash_map.orderedRemoveAt(0);
+            eviction_function(shifted_key, shifted_val);
             return shifted_val;
         }
 
         pub fn clearAndFree(self: *@This()) void {
             self.mutex.lock();
             defer self.mutex.unlock();
+            var it = self.array_hash_map.iterator();
+            while (it.next()) |kv| eviction_function(kv.key_ptr.*, kv.value_ptr.*);
             self.array_hash_map.clearAndFree();
         }
 
