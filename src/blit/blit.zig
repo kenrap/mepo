@@ -222,6 +222,17 @@ fn blit_debugmessage(mepo: *Mepo) !void {
 }
 
 fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool) !void {
+    try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, sdl.SDL_BLENDMODE_BLEND));
+    const text = sdl.SDL_CreateTexture(
+        mepo.renderer,
+        sdl.SDL_PIXELFORMAT_UNKNOWN,
+        sdl.SDL_TEXTUREACCESS_TARGET,
+        config.Tsize,
+        config.Tsize,
+    );
+    try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(text, sdl.SDL_BLENDMODE_BLEND));
+    try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, text));
+
     const size: i32 = 10;
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
@@ -301,6 +312,12 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
             .{label},
         );
     }
+
+    const from = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 256, .h = 256 };
+    try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
+    try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &from, &from));
+    try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, sdl.SDL_BLENDMODE_NONE));
+    defer sdl.SDL_DestroyTexture(text);
 }
 
 fn blit_pins(mepo: *Mepo) !void {
