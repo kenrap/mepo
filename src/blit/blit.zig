@@ -53,6 +53,15 @@ fn blit_tiles_all(mepo: *Mepo, bbox: sdl.SDL_Rect, zoom: u8) !void {
                     vpy,
                     bbox,
                 );
+                try blit_tile_pinlayer(
+                    mepo,
+                    @intCast(u32, tilex),
+                    @intCast(u32, tiley),
+                    zoom,
+                    vpx,
+                    vpy,
+                    bbox,
+                );
             }
             y += config.Tsize;
             tiley += 1;
@@ -149,6 +158,52 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
             );
         },
     }
+}
+
+fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32, bbox: sdl.SDL_Rect) !void {
+    const rect_dest = sdl.SDL_Rect{
+        .x = @intCast(i32, tile_x * config.Tsize) - x_off,
+        .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+        .w = config.Tsize,
+        .h = config.Tsize,
+    };
+
+    var rect_intersect: sdl.SDL_Rect = undefined;
+
+    if (sdl.SDL_IntersectRect(&rect_dest, &bbox, &rect_intersect) == sdl.SDL_FALSE) return;
+
+    const rect_src = sdl.SDL_Rect{
+        .x = if (rect_intersect.x > rect_dest.x) rect_dest.w - rect_intersect.w else 0,
+        .y = if (rect_intersect.y > rect_dest.y) rect_dest.h - rect_intersect.h else 0,
+        .w = rect_intersect.w,
+        .h = rect_intersect.h,
+    };
+
+
+    const xyz = .{.x = tile_x, .y = tile_y, .z = zoom};
+    if (mepo.blit_pinlayer_cache.get(xyz)) |text| {
+        std.debug.print("Cache hit {}\n", .{xyz});
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
+    } else {
+        // TODO: is SDL_PIXELFORMAT_UNKNOWN correct or will this create conversions?
+        const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTexture(
+            mepo.renderer,
+            sdl.SDL_PIXELFORMAT_UNKNOWN,
+            sdl.SDL_TEXTUREACCESS_TARGET,
+            config.Tsize,
+            config.Tsize,
+        ));
+        try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(text, sdl.SDL_BLENDMODE_BLEND));
+        try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, text));
+        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x000000 }, sdl.SDL_Rect{
+            .x = 2, .y = 2, .w = 10, .h = 10,
+        }, .Fill);
+        _ = try mepo.blit_pinlayer_cache.put(xyz, text);
+        try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
+    }
+
+    //std.debug.print("Blit pinlayer for {} {} {} {} {}\n", .{tile_x, tile_y, zoom, x_off, y_off});
 }
 
 fn blit_overlay_pindetails(mepo: *Mepo) !void {
@@ -321,6 +376,7 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
 }
 
 fn blit_pins(mepo: *Mepo) !void {
+
     for (order: {
         // E.g. place active pingroup last so its always ontop in rendering order
         var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -775,7 +831,7 @@ pub fn blit(mepo: *Mepo) !void {
         },
         p.get(p.pref.zoom).u,
     );
-    try blit_pins(mepo);
+    //try blit_pins(mepo);
     try blit_crosshair(mepo);
     try blit_overlay_pindetails(mepo);
     try blit_overlay_debugbar(mepo);

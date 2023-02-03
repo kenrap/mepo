@@ -17,6 +17,7 @@ const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
 async_shellpipe_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
+blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, config.MaxTextures),
 config: []const u8,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
@@ -763,6 +764,9 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
 pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, renderer_type: types.RendererType) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
+        .blit_pinlayer_cache = datastructure.EvictionHashMap(
+            types.XYZ, *sdl.SDL_Texture, evict_texture, config.MaxTextures,
+        ).init(allocator),
         .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,
         .fonts_normal = try init_create_fonts_array(false),
@@ -783,3 +787,8 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .renderer_type = renderer_type,
     });
 }
+
+fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
+    sdl.SDL_DestroyTexture(texture);
+}
+
