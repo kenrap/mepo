@@ -37,7 +37,6 @@ fn pin_delete(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
         return;
     };
 
-
     // Free up handle string
     mepo.allocator.free(mepo.pin_groups[pin_group].items[target_pin_i].handle.?);
 

@@ -404,7 +404,7 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
     );
 }
 
-/// Determine whether the download loop should continue based on either 
+/// Determine whether the download loop should continue based on either
 /// if in graphical mode or non-empty queu
 fn download_loop_should_continue(tile_cache: *@This(), graphical_mode: bool) bool {
     const graphical_and_online = (graphical_mode and tile_cache.thread_download != null);

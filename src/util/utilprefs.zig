@@ -59,7 +59,9 @@ pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
     mapping[@enumToInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
     mapping[@enumToInt(pref.lon)] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .bounds = .{ .min = -180, .max = 180 }, .desc = "Longitude of the map" };
-    mapping[@enumToInt(pref.zoom)] = .{ .name = "zoom", .value = .{ .u = 14, }, .bounds = .{ .min = 0, .max = 19 }, .desc = "Zoom level of the map (should be set between 0-19)" };
+    mapping[@enumToInt(pref.zoom)] = .{ .name = "zoom", .value = .{
+        .u = 14,
+    }, .bounds = .{ .min = 0, .max = 19 }, .desc = "Zoom level of the map (should be set between 0-19)" };
     mapping[@enumToInt(pref.debug_message_enabled)] = .{ .name = "debug_message_enabled", .value = .{ .b = true }, .desc = "Whether debug overlay message should be shown in the UI" };
     mapping[@enumToInt(pref.distance_unit_tf_km_mi)] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false }, .desc = "Whether to show distance in km (0) or mi (1)" };
     mapping[@enumToInt(pref.overlay_debugbar)] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "Whether to show the debug bar" };
@@ -106,7 +108,7 @@ pub fn get(prefname: pref) PrefValueUnion {
 }
 
 pub fn set_n(prefname: pref, value: f64) void {
-    var bounded_value : f64 = value;
+    var bounded_value: f64 = value;
     if (prefs_mapping[@enumToInt(prefname)].bounds) |bounds| {
         if (bounded_value > bounds.max) bounded_value = bounds.max;
         if (bounded_value < bounds.min) bounded_value = bounds.min;

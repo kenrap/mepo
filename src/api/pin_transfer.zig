@@ -24,7 +24,6 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
     const from_group = if (from_group_number < 0) mepo.pin_group_active else @intCast(usize, from_group_number);
     if (from_group == to_group) return;
 
-
     const from_pin_i_opt = from_pin_i_opt: {
         if (target_pin_handle.len == 0) {
             if (mepo.pin_group_active_item) |active_item| {
@@ -50,11 +49,10 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
 
         // If pin to transfer is the currently active pin we
         // re-activate it afterward (switch group and current pin index)
-        if (
-            from_group == mepo.pin_group_active and
+        if (from_group == mepo.pin_group_active and
             mepo.pin_group_active_item != null and
-            mepo.pin_group_active_item.? == from_pin_i
-        ) {
+            mepo.pin_group_active_item.? == from_pin_i)
+        {
             mepo.pin_group_active = @intCast(u8, to_group);
             mepo.pin_group_active_item = @intCast(u32, mepo.pin_groups[mepo.pin_group_active].items.len - 1);
         }

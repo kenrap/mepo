@@ -146,7 +146,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // UI Buttons
         for (mepo.uibuttons.items) |btn| {
             const pins_only_btn: u8 = if (btn.only_visible_when_pin_active) 1 else 0;
-            const group_number : i8 = if (btn.group_number) |g| @intCast(i8, g) else -1;
+            const group_number: i8 = if (btn.group_number) |g| @intCast(i8, g) else -1;
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} {d} [{s}] [{s}] [{s}];",
@@ -166,7 +166,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
                     if (pin.category == .Structural) break :b 1;
                     break :b 0;
                 };
-                const handle : [:0]const u8 = handle: {
+                const handle: [:0]const u8 = handle: {
                     if (pin.handle) |h| break :handle h;
                     break :handle "";
                 };
@@ -193,7 +193,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         try lines.append(try std.fmt.allocPrint(
             arena.allocator(),
             "pin_groupactivate {d};",
-            .{ mepo.pin_group_active },
+            .{mepo.pin_group_active},
         ));
     }
 

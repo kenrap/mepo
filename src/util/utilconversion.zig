@@ -7,7 +7,7 @@ pub fn lon_to_px_x(lon: f64, zoom: u32) i32 {
 }
 
 pub fn lat_to_px_y(lat: f64, zoom: u32) i32 {
-    const tiley : f64 = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
+    const tiley: f64 = (1.0 - std.math.asinh(std.math.tan(lat * std.math.pi / 180.0)) / std.math.pi) / 2.0;
     return lossyCastWithNan(i32, tiley * zoom_bit(zoom));
 }
 
@@ -46,7 +46,7 @@ fn zoom_bit(zoom: u32) f32 {
 
 fn lossyCastWithNan(comptime to_type: type, value: anytype) to_type {
     if (std.math.isNan(value)) {
-        const t : to_type = 0;
+        const t: to_type = 0;
         return t;
     } else {
         return std.math.lossyCast(to_type, value);

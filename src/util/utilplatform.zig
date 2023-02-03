@@ -7,7 +7,7 @@ pub fn supports_osk() bool {
     return has_sdl_osk or xdg_desktop == .Phosh or xdg_desktop == .Plamo;
 }
 
-pub fn xdg_session_desktop() enum{Phosh, Plamo, Unknown} {
+pub fn xdg_session_desktop() enum { Phosh, Plamo, Unknown } {
     var env_session_desktop: []const u8 = "unknown";
     if (std.os.getenv("XDG_SESSION_DESKTOP")) |v| {
         env_session_desktop = v;

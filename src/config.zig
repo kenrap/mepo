@@ -25,7 +25,6 @@ pub const DefaultBaseConfig =
     \\ bind_button 0 -1 [Nm] [shellpipe_sync mepo_ui_menu_search_nominatim.sh] [];
     \\ bind_button 0 -1 [Op] [shellpipe_sync mepo_ui_menu_search_overpass.sh] [];
     \\ bind_button 0 -1 [Dl] [shellpipe_sync mepo_ui_menu_dbg_queuedownloadnoninteractive.sh] [];
-
     \\ bind_button 1 -1 [~] [preftoggle overlay_pindetails_expanded] [];
     \\ bind_button 1 -1 [Purge] [pin_purge] [];
     \\ bind_button 1 -1 [Del] [pin_delete -1 []; pin_cycle 0 1; center_on_pin] [];
@@ -102,7 +101,6 @@ pub const DefaultBaseConfig =
     \\ bind_key _ q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
     \\ bind_key s q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
     \\ bind_key _ x [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];
-
     \\ bind_key _ [1] [pin_groupactivate 0];
     \\ bind_key _ [2] [pin_groupactivate 1];
     \\ bind_key _ [3] [pin_groupactivate 2];
@@ -133,10 +131,8 @@ pub const DefaultBaseConfig =
     \\ bind_key cs [8] [pin_transfer -1 [all] 7];
     \\ bind_key cs [9] [pin_transfer -1 [all] 8];
     \\ bind_key cs [0] [pin_transfer -1 [all] 9];
-
     \\ bind_key _ d [pin_delete -1 []; pin_cycle 0 1];
     \\ bind_key s d [pin_purge];
-
     \\ bind_key _ / [preftoggle help];
     \\ bind_key _ e [preftoggle overlay_pindetails];
     \\ bind_key _ s [preftoggle overlay_debugbar];
@@ -180,7 +176,6 @@ pub const DefaultBaseConfig =
     \\ prefset_t pingroup_7_color #004a0c;
     \\ prefset_t pingroup_8_color #ff00a2;
     \\ prefset_t pingroup_9_color #fff673;
-
     \\ prefset_n pingroup_0_ordered 0;
     \\ prefset_n pingroup_1_ordered 0;
     \\ prefset_n pingroup_2_ordered 0;

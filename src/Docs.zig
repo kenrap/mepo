@@ -3,7 +3,7 @@ const FnTable = @import("./api/_FnTable.zig");
 const config = @import("./config.zig");
 const utilprefs = @import("./util/utilprefs.zig");
 
-pub const CliFlags = &[_]struct{
+pub const CliFlags = &[_]struct {
     flag: []const u8,
     param: ?[]const u8 = null,
     desc: []const u8,
@@ -19,7 +19,7 @@ pub const CliFlags = &[_]struct{
     .{ .flag = "-d", .desc = "Non-interactively download tiles for given range.", .param = "lat_a,lon_a,lat_b,lon_b,zoom_min,zoom_max" },
 };
 
-const PrefsIntro = 
+const PrefsIntro =
     \\Internally mepo keeps track of a number of preferences which control all
     \\state for the application. These preferences can be set with the commands
     \\`preset_n` for numerical preferences and `prefset_t` for textual preferences.
@@ -27,7 +27,7 @@ const PrefsIntro =
     \\
     \\Below is an exhaustive list of all available preferences:
     \\
-  ;
+;
 
 const MepolangIntro =
     \\Mepolang is mepo's command language for runtime IPC and configuration. It
@@ -59,9 +59,9 @@ const MepolangIntro =
     \\and detailed practical examples of using mepolang may be viewed in
     \\the [scripting guide](/scriptingguide.html) which should be seen as
     \\a supplement to this document.
-    ;
+;
 
-const MepolangSyntax = 
+const MepolangSyntax =
     \\Syntax rules are as follows:
     \\
     \\- Mepolang syntax is composed of statements.
@@ -85,9 +85,9 @@ const MepolangSyntax =
     \\commandname2 arg 8.373 anothertextarg;
     \\```
     \\
-    ;
+;
 
-const DocEnvVarsShellpipe = 
+const DocEnvVarsShellpipe =
     \\Both `shellpipe_sync` and `shellpipe_async` expose a number of ENV
     \\variables to the target script called. See below for the accessible
     \\ENV variables exposed.
@@ -103,7 +103,7 @@ const DocEnvVarsShellpipe =
     \\- `MEPO_BR_LON`: Longitude of the bottom right point on the screen
     \\- `MEPO_CURSOR_LAT`: Latitude of the cursor position
     \\- `MEPO_CURSOR_LON`: Longitude of the cursor position
-    ;
+;
 
 const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
@@ -112,13 +112,9 @@ const DocBaseConfigIntro =
     \\`prefset_t`. While there are not unbinding commands currently
     \\supported, you can forgo the default configuration by using
     \\the `-ndc` commandline flag.
-    ;
+;
 
-
-
-
-
-pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !void {
+pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }) !void {
     const stdout = std.io.getStdOut().writer();
 
     switch (format) {
@@ -162,9 +158,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\## API
                 \\
-                ,
-                .{MepolangIntro, MepolangSyntax, config.Version}
-            );
+            , .{ MepolangIntro, MepolangSyntax, config.Version });
 
             // API Section
             for (FnTable.fn_specs) |fnc| {
@@ -182,64 +176,59 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 try stdout.print("\n---\n\n", .{});
             }
 
-
             // Prefs Section
             try stdout.print(
                 \\## Preferences
                 \\
                 \\ {s}
                 \\
-                ,
-                .{ PrefsIntro },
+            ,
+                .{PrefsIntro},
             );
             try stdout.print(
                 \\| **Name** | **Description** | **Datatype** | **Min** | **Max** | **Default Value** |
                 \\| -------- | --------------- | ------------ | ------- | ------- | ----------------- |
                 \\
-                , 
-                .{}
-            );
+            , .{});
             for (utilprefs.prefs_mapping) |pref| {
-                const datatype = switch(pref.value) {
-                    .b =>    "Number (bool)",
-                    .t =>    "Text",
-                    .f =>    "Number (float)",
-                    .u =>    "Number (u8)",
-                    .u24 =>  "Number (u24)",
+                const datatype = switch (pref.value) {
+                    .b => "Number (bool)",
+                    .t => "Text",
+                    .f => "Number (float)",
+                    .u => "Number (u8)",
+                    .u24 => "Number (u24)",
                 };
 
-                var value : []const u8 = "";
-                switch(pref.value) {
-                    .t =>    {
+                var value: []const u8 = "";
+                switch (pref.value) {
+                    .t => {
                         const text = if (pref.value.t) |t| t else "";
                         value = try std.fmt.allocPrint(allocator, "{s}", .{text});
-                     },
-                    .b =>    { 
+                    },
+                    .b => {
                         if (pref.value.b) {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{1});
                         } else {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{0});
                         }
                     },
-                    .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
-                    .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
-                    .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
+                    .f => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f});
+                    },
+                    .u => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u});
+                    },
+                    .u24 => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24});
+                    },
                 }
                 defer allocator.free(value);
 
-
                 if (pref.bounds) |bounds| {
-                    try stdout.print(
-                        "| {s} | {s} | {s} | {d} | {d} | {s} |\n",
-                        .{ pref.name, pref.desc, datatype, bounds.min, bounds.max, value }
-                    );
+                    try stdout.print("| {s} | {s} | {s} | {d} | {d} | {s} |\n", .{ pref.name, pref.desc, datatype, bounds.min, bounds.max, value });
                 } else {
-                    try stdout.print(
-                        "| {s} | {s} | {s} |  |  | {s} |\n",
-                        .{ pref.name, pref.desc, datatype, value }
-                    );
+                    try stdout.print("| {s} | {s} | {s} |  |  | {s} |\n", .{ pref.name, pref.desc, datatype, value });
                 }
-
             }
 
             try stdout.print(
@@ -259,26 +248,28 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\```sh
                 \\{s}
                 \\```
-                ,
-                .{DocEnvVarsShellpipe, DocBaseConfigIntro, config.DefaultBaseConfig},
+            ,
+                .{ DocEnvVarsShellpipe, DocBaseConfigIntro, config.DefaultBaseConfig },
             );
         },
         .Manpage => {
             try stdout.print(
-              \\.TH Mepo 1
-              \\
-              \\.SH NAME
-              \\mepo - fast, simple, and hackable OSM map viewer for desktop & mobile Linux
-              \\
-              \\.SH SYNOPSIS
-              \\.B mepo
-              \\[\fB\-i\fR]
-              ,
-              .{},
+                \\.TH Mepo 1
+                \\
+                \\.SH NAME
+                \\mepo - fast, simple, and hackable OSM map viewer for desktop & mobile Linux
+                \\
+                \\.SH SYNOPSIS
+                \\.B mepo
+                \\[\fB\-i\fR]
+            ,
+                .{},
             );
             for (CliFlags) |flag_spec| {
                 if (flag_spec.param) |param| {
-                    try stdout.print("[\\fB\\{s}\\fR \\fI{s}\\fR]", .{flag_spec.flag, param},
+                    try stdout.print(
+                        "[\\fB\\{s}\\fR \\fI{s}\\fR]",
+                        .{ flag_spec.flag, param },
                     );
                 } else {
                     try stdout.print("[\\fB\\{s}]", .{flag_spec.flag});
@@ -305,9 +296,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\
                 \\.SH OPTIONS
                 \\
-                ,
-                .{}
-            );
+            , .{});
             for (CliFlags) |flag_spec| {
                 if (flag_spec.param) |param| {
                     try stdout.print(
@@ -315,8 +304,8 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                         \\.BR \{s} ", " \{s}\ {s}\fR
                         \\{s}
                         \\
-                        , 
-                        .{flag_spec.flag, flag_spec.flag, param, flag_spec.desc},
+                    ,
+                        .{ flag_spec.flag, flag_spec.flag, param, flag_spec.desc },
                     );
                 } else {
                     try stdout.print(
@@ -324,8 +313,8 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                         \\.BR \{s} \fR
                         \\{s}
                         \\
-                        ,
-                        .{flag_spec.flag, flag_spec.desc},
+                    ,
+                        .{ flag_spec.flag, flag_spec.desc },
                     );
                 }
             }
@@ -353,9 +342,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\.B
                 \\~/.config/mepo/config
                 \\.
-                ,
-                .{}
-            );
+            , .{});
 
             try stdout.print(
                 \\
@@ -397,9 +384,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\  commandname textarg [multi word arg] 2;
                 \\  commandname2 arg 8.373 anothertextarg;
                 \\
-                ,
-                .{}
-            );
+            , .{});
 
             try stdout.print(".SH MEPOLANG COMMANDS\n", .{});
             for (FnTable.fn_specs) |fnc| {
@@ -409,9 +394,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                     \\.br
                     \\{s}
                     \\
-                    ,
-                    .{fnc.name, fnc.desc}
-                );
+                , .{ fnc.name, fnc.desc });
                 if (fnc.args.len > 0) {
                     try stdout.print(".br\n.br\nArguments:\n", .{});
                     for (fnc.args) |arg| {
@@ -425,31 +408,37 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
             try stdout.print(".SH PREFERENCES\n", .{});
             try stdout.print("{s}\n", .{PrefsIntro});
             for (utilprefs.prefs_mapping) |pref| {
-                const datatype = switch(pref.value) {
-                    .b =>    "Number (bool)",
-                    .t =>    "Text",
-                    .f =>    "Number (float)",
-                    .u =>    "Number (u8)",
-                    .u24 =>  "Number (u24)",
+                const datatype = switch (pref.value) {
+                    .b => "Number (bool)",
+                    .t => "Text",
+                    .f => "Number (float)",
+                    .u => "Number (u8)",
+                    .u24 => "Number (u24)",
                 };
 
-                var value : []const u8 = "";
-                
-                switch(pref.value) {
-                    .t =>    { 
+                var value: []const u8 = "";
+
+                switch (pref.value) {
+                    .t => {
                         const text = if (pref.value.t) |t| t else "";
                         value = try std.fmt.allocPrint(allocator, "{s}", .{text});
                     },
-                    .b =>    { 
+                    .b => {
                         if (pref.value.b) {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{1});
                         } else {
                             value = try std.fmt.allocPrint(allocator, "{d}", .{0});
                         }
                     },
-                    .f =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f}); },
-                    .u =>    { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u}); },
-                    .u24 =>  { value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24}); },
+                    .f => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.f});
+                    },
+                    .u => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u});
+                    },
+                    .u24 => {
+                        value = try std.fmt.allocPrint(allocator, "{d}", .{pref.value.u24});
+                    },
                 }
                 defer allocator.free(value);
 
@@ -465,9 +454,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                         \\{s}
                         \\
                         \\
-                        ,
-                        .{ pref.name, datatype, value, bounds.min, bounds.max, pref.desc }
-                    );
+                    , .{ pref.name, datatype, value, bounds.min, bounds.max, pref.desc });
                 } else {
                     try stdout.print(
                         \\.PP
@@ -480,13 +467,8 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                         \\{s}
                         \\
                         \\
-                        ,
-                        .{ pref.name, datatype, value, pref.desc }
-                    );
-
+                    , .{ pref.name, datatype, value, pref.desc });
                 }
-
-
             }
 
             try stdout.print(
@@ -513,9 +495,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum{Markdown, Manpage}) !
                 \\website at http://mepo.milesalan.com or mepo's project page
                 \\on srht at http://sr.ht/~mil/mepo
                 \\
-                ,
-                .{DocBaseConfigIntro, config.DefaultBaseConfig, config.Version}
-            );
+            , .{ DocBaseConfigIntro, config.DefaultBaseConfig, config.Version });
         },
     }
 }

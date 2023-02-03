@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn(key_type, metadata_type) void, comptime size: usize) type {
+pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn (key_type, metadata_type) void, comptime size: usize) type {
     return struct {
         array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
         size: usize,
