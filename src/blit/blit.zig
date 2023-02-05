@@ -165,13 +165,9 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         .h = rect_intersect.h,
     };
 
-    const xyz = .{ .x = tile_x, .y = tile_y, .z = zoom };
-
-    //if (mepo.blit_pinlayer_cache.get(xyz)) |text| {
-    //    std.debug.print("Cache hit {}\n", .{xyz});
-    //    try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
-
-    if (false) {
+    if (mepo.blit_pinlayer_cache.get(.{ .x = tile_x, .y = tile_y, .z = zoom })) |text| {
+        std.debug.print("Cache hit {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
+        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
     } else {
         // TODO: is SDL_PIXELFORMAT_UNKNOWN correct or will this create conversions?
         const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTexture(
@@ -186,6 +182,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
 
         // Rendering Logic
         {
+
             const pingroup_order = order: {
                 // E.g. place active pingroup last so its always ontop in rendering order
                 var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -213,7 +210,6 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                     const pintiley = @divFloor(piny, config.Tsize);
                     const pinoffx = @rem(pinx, config.Tsize);
                     const pinoffy = @rem(piny, config.Tsize);
-
                     if (pintilex != tile_x or pintiley != tile_y) continue;
 
                     const is_active = mepo.pin_group_active_item != null and mepo.pin_group_active_item.? == pin_i;
@@ -254,7 +250,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
             .h = 10,
         }, .Fill);
 
-        _ = try mepo.blit_pinlayer_cache.put(xyz, text);
+        _ = try mepo.blit_pinlayer_cache.put(.{ .x = tile_x, .y = tile_y, .z = zoom }, text);
         try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
     }
@@ -388,9 +384,6 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
             .{label},
         );
     }
-
-
-
 }
 
 fn blit_overlay_debugbar(mepo: *Mepo) !void {

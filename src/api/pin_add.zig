@@ -26,6 +26,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, handle: [:0]const u8) !void {
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     // E.g. nop if adding a pin_handle that already exists
     if (handle.len != 0) {

@@ -20,6 +20,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 fn pin_activate(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     for (mepo.pin_groups[pin_group].items) |*pin, pin_i| {
         if (pin.handle == null) continue;

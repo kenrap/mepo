@@ -14,6 +14,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const group_number = @floatToInt(usize, args[0].Number);
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     mepo.pin_group_active_item = null;
     mepo.pin_group_active = @intCast(u8, group_number);

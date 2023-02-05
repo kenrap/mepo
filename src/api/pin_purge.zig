@@ -11,6 +11,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     mepo.pin_group_active_item = null;
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     for (mepo.pin_groups[mepo.pin_group_active].items) |p| {
         if (p.handle != null) {

@@ -23,6 +23,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]const u8, to_group: usize) !void {
     const from_group = if (from_group_number < 0) mepo.pin_group_active else @intCast(usize, from_group_number);
     if (from_group == to_group) return;
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     const from_pin_i_opt = from_pin_i_opt: {
         if (target_pin_handle.len == 0) {

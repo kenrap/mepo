@@ -21,6 +21,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
 pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
     if (mepo.pin_groups[mepo.pin_group_active].items.len == 0) return;
+    defer mepo.blit_pinlayer_cache.clearAndFree();
 
     const add: i32 = if (delta > 0) 1 else -1;
     var delta_current = delta;

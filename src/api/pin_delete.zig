@@ -19,6 +19,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn pin_delete(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
+    defer mepo.blit_pinlayer_cache.clearAndFree();
+
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
     const target_pin_i = target_pin_i: {
         if (handle.len == 0) {

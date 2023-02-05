@@ -189,6 +189,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         if (closest_match_pin) |match| {
             mepo.pin_group_active = match.pin_group_i;
             mepo.pin_group_active_item = match.pin_i;
+            mepo.blit_pinlayer_cache.clearAndFree();
             return .Redraw;
         }
     }
