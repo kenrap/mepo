@@ -179,6 +179,8 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         ));
         try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(text, sdl.SDL_BLENDMODE_BLEND));
         try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, text));
+        try utilsdl.errorcheck(sdl.SDL_SetRenderDrawColor(mepo.renderer, 0, 0, 0, 0));
+        try utilsdl.errorcheck(sdl.SDL_RenderClear(mepo.renderer));
 
         // Rendering Logic
         {
