@@ -44,24 +44,10 @@ fn blit_tiles_all(mepo: *Mepo, bbox: sdl.SDL_Rect, zoom: u8) !void {
         tiley = @intCast(i32, @divFloor(begy, config.Tsize));
         while (y < endy) {
             if (tilex >= 0 and tiley >= 0 and tilex <= std.math.pow(u32, 2, zoom) - 1 and tiley <= std.math.pow(u32, 2, zoom) - 1) {
-                try blit_tile_surface(
-                    mepo,
-                    @intCast(u32, tilex),
-                    @intCast(u32, tiley),
-                    zoom,
-                    vpx,
-                    vpy,
-                    bbox,
-                );
-                try blit_tile_pinlayer(
-                    mepo,
-                    @intCast(u32, tilex),
-                    @intCast(u32, tiley),
-                    zoom,
-                    vpx,
-                    vpy,
-                    bbox,
-                );
+                const tilex_int = @intCast(u32, tilex);
+                const tiley_int = @intCast(u32, tiley);
+                try blit_tile_surface(mepo, tilex_int, tiley_int, zoom, vpx, vpy, bbox);
+                try blit_tile_pinlayer(mepo, tilex_int, tiley_int, zoom, vpx, vpy, bbox);
             }
             y += config.Tsize;
             tiley += 1;
@@ -179,11 +165,13 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         .h = rect_intersect.h,
     };
 
+    const xyz = .{ .x = tile_x, .y = tile_y, .z = zoom };
 
-    const xyz = .{.x = tile_x, .y = tile_y, .z = zoom};
-    if (mepo.blit_pinlayer_cache.get(xyz)) |text| {
-        std.debug.print("Cache hit {}\n", .{xyz});
-        try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
+    //if (mepo.blit_pinlayer_cache.get(xyz)) |text| {
+    //    std.debug.print("Cache hit {}\n", .{xyz});
+    //    try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
+
+    if (false) {
     } else {
         // TODO: is SDL_PIXELFORMAT_UNKNOWN correct or will this create conversions?
         const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTexture(
@@ -195,9 +183,77 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         ));
         try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(text, sdl.SDL_BLENDMODE_BLEND));
         try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, text));
+
+        // Rendering Logic
+        {
+            const pingroup_order = order: {
+                // E.g. place active pingroup last so its always ontop in rendering order
+                var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                var target_order: [10]u8 = undefined;
+                var index: u8 = 0;
+                for (groups) |i| {
+                    if (i == mepo.pin_group_active) continue;
+                    target_order[index] = i;
+                    index += 1;
+                }
+                target_order[9] = mepo.pin_group_active;
+                break :order target_order;
+            };
+
+            for (pingroup_order) |pin_group_i| {
+                const pin_group = mepo.pin_groups[pin_group_i];
+                var ordered_group_active_path = false;
+                var prev_pin: ?*types.Pin = null;
+                for (pin_group.items) |*pin, pin_i| {
+                    defer prev_pin = pin;
+
+                    const pinx = utilconversion.lon_to_px_x(pin.*.lon, zoom);
+                    const piny = utilconversion.lat_to_px_y(pin.*.lat, zoom);
+                    const pintilex = @divFloor(pinx, config.Tsize);
+                    const pintiley = @divFloor(piny, config.Tsize);
+                    const pinoffx = @rem(pinx, config.Tsize);
+                    const pinoffy = @rem(piny, config.Tsize);
+
+                    if (pintilex != tile_x or pintiley != tile_y) continue;
+
+                    const is_active = mepo.pin_group_active_item != null and mepo.pin_group_active_item.? == pin_i;
+                    const is_active_path = is_active_path: {
+                        const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
+                        break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
+                            ((is_ordered and ordered_group_active_path) or
+                            (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
+                    };
+
+                    // E.g. ordered_group_active_path just tracks every time
+                    // an instructive pin is hit so subsequent structural pins
+                    // highlighted in "active"/red color until next structural pin
+                    // hit and full "path" of the active segment of an ordered pin
+                    // group shows continuously as the active color
+                    if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
+                        ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
+
+                    try blit_pin(
+                        mepo,
+                        pin.*,
+                        if (prev_pin != null) prev_pin.?.* else null,
+                        @intCast(u8, pin_group_i),
+                        is_active,
+                        is_active_path,
+                        pinoffx,
+                        pinoffy,
+                    );
+                }
+            }
+        }
+
+        // Filler stub for testing
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x000000 }, sdl.SDL_Rect{
-            .x = 2, .y = 2, .w = 10, .h = 10,
+            .x = 2,
+            .y = 2,
+            .w = 10,
+            .h = 10,
         }, .Fill);
+
         _ = try mepo.blit_pinlayer_cache.put(xyz, text);
         try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
@@ -276,58 +332,23 @@ fn blit_debugmessage(mepo: *Mepo) !void {
     }
 }
 
-fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool) !void {
-    try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, sdl.SDL_BLENDMODE_BLEND));
-    const text = sdl.SDL_CreateTexture(
-        mepo.renderer,
-        sdl.SDL_PIXELFORMAT_UNKNOWN,
-        sdl.SDL_TEXTUREACCESS_TARGET,
-        config.Tsize,
-        config.Tsize,
-    );
-    try utilsdl.errorcheck(sdl.SDL_SetTextureBlendMode(text, sdl.SDL_BLENDMODE_BLEND));
-    try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, text));
-
+fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool, tile_off_x: i32, tile_off_y: i32) !void {
     const size: i32 = 10;
-    const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
-    const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
-    const prev_pin_x = if (prev_pin != null) mepo.convert_latlon_to_xy(.LonToX, prev_pin.?.lon) else undefined;
-    const prev_pin_y = if (prev_pin != null) mepo.convert_latlon_to_xy(.LatToY, prev_pin.?.lat) else undefined;
+
     const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
+    const dest_rect = sdl.SDL_Rect{
+        .x = tile_off_x - @divTrunc(size, 2),
+        .y = tile_off_y - @divTrunc(size, 2),
+        .w = size,
+        .h = size,
+    };
 
-    // Optimization to never drawoff-screen pins
-    if ((x < 0 or x > mepo.win_w or y < 0 or y > mepo.win_h) and
-        (prev_pin == null or (prev_pin_x < 0 or prev_pin_x > mepo.win_w or prev_pin_y < 0 or prev_pin_y > mepo.win_h))) return;
+    _ = is_active_path;
+    _ = prev_pin;
 
-    // Draw connecting line for ordered pin group
-    if (p.get(p.pingroup_prop(pin_group, .Ordered)).b and prev_pin != null) {
-        const connecting_line_color = if (is_active_path) 0xff0000ff else pg_color.to_u32();
-        try utilsdl.errorcheck(sdl.aalineColor(
-            mepo.renderer,
-            @intCast(i16, prev_pin_x),
-            @intCast(i16, prev_pin_y),
-            @intCast(i16, x),
-            @intCast(i16, y),
-            connecting_line_color,
-        ));
-    }
-
-    // Draw Pin
-    if (pin.category == .Instructive) {
-        try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, sdl.SDL_Rect{
-            .x = x - @divTrunc(size, 2),
-            .y = y - @divTrunc(size, 2),
-            .w = size,
-            .h = size,
-        }, .Fill);
-        if (is_active) {
-            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, sdl.SDL_Rect{
-                .x = x - @divTrunc(size, 2),
-                .y = y - @divTrunc(size, 2),
-                .w = size,
-                .h = size,
-            }, .Draw);
-        }
+    try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, dest_rect, .Fill);
+    if (is_active) {
+        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, dest_rect, .Draw);
     }
 
     // Draw Pin label for current pin group
@@ -360,79 +381,16 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
             pin_label_border,
             pin_label_bg,
             .{},
-            x,
-            y,
+            tile_off_x,
+            tile_off_y,
             config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u],
             "{s}",
             .{label},
         );
     }
 
-    const from = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 256, .h = 256 };
-    try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
-    try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &from, &from));
-    try utilsdl.errorcheck(sdl.SDL_SetRenderDrawBlendMode(mepo.renderer, sdl.SDL_BLENDMODE_NONE));
-    defer sdl.SDL_DestroyTexture(text);
-}
 
-fn blit_pins(mepo: *Mepo) !void {
 
-    for (order: {
-        // E.g. place active pingroup last so its always ontop in rendering order
-        var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        var target_order: [10]u8 = undefined;
-        var index: u8 = 0;
-        for (groups) |i| {
-            if (i == mepo.pin_group_active) continue;
-            target_order[index] = i;
-            index += 1;
-        }
-        target_order[9] = mepo.pin_group_active;
-        break :order target_order;
-    }) |pin_group_i| {
-        const pin_group = mepo.pin_groups[pin_group_i];
-        var ordered_group_active_path = false;
-        var prev_pin: ?*types.Pin = null;
-        for (pin_group.items) |*pin, pin_i| {
-            defer prev_pin = pin;
-
-            const is_active = mepo.pin_group_active_item != null and mepo.pin_group_active_item.? == pin_i;
-            const is_active_path = is_active_path: {
-                const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
-                break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
-                    ((is_ordered and ordered_group_active_path) or
-                    (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
-            };
-
-            // E.g. ordered_group_active_path just tracks every time
-            // an instructive pin is hit so subsequent structural pins
-            // highlighted in "active"/red color until next structural pin
-            // hit and full "path" of the active segment of an ordered pin
-            // group shows continuously as the active color
-            if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
-                ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
-
-            try blit_pin(
-                mepo,
-                pin.*,
-                if (prev_pin != null) prev_pin.?.* else null,
-                @intCast(u8, pin_group_i),
-                is_active,
-                is_active_path,
-            );
-        }
-    }
-
-    if (mepo.pin_group_active_item) |active_pin_i| {
-        try blit_pin(
-            mepo,
-            mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
-            null,
-            mepo.pin_group_active,
-            true,
-            false,
-        );
-    }
 }
 
 fn blit_overlay_debugbar(mepo: *Mepo) !void {
@@ -536,7 +494,6 @@ fn blit_help(mepo: *Mepo) !void {
         .{ config.Version, msg },
     );
 }
-
 
 fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]const u8) !void {
     var width_label: c_int = 0;
@@ -831,7 +788,6 @@ pub fn blit(mepo: *Mepo) !void {
         },
         p.get(p.pref.zoom).u,
     );
-    //try blit_pins(mepo);
     try blit_crosshair(mepo);
     try blit_overlay_pindetails(mepo);
     try blit_overlay_debugbar(mepo);
@@ -851,4 +807,3 @@ pub fn blit(mepo: *Mepo) !void {
         _ = sdl.SDL_SetWindowTitle(mepo.window, &title[0]);
     }
 }
-
