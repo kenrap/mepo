@@ -33,7 +33,7 @@ pin_group_active: u8 = 0,
 pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
-renderer_sw: bool,
+renderer_type: types.RendererType = .Auto,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -727,10 +727,17 @@ pub fn video_init(mepo: *@This()) !void {
         var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             mepo.window,
             -1,
-            if (mepo.renderer_sw) sdl.SDL_RENDERER_SOFTWARE else sdl.SDL_RENDERER_ACCELERATED,
+            switch (mepo.renderer_type) {
+                .Auto => 0,
+                .SW => sdl.SDL_RENDERER_SOFTWARE,
+                .HW => sdl.SDL_RENDERER_ACCELERATED,
+            },
         ));
         break :renderer r;
     };
+    var sdl_renderer_info: sdl.SDL_RendererInfo = undefined;
+    try utilsdl.errorcheck(sdl.SDL_GetRendererInfo(mepo.renderer, &sdl_renderer_info));
+    utildbg.log("Requested renderer driver {}, using renderer: {s}\n", .{mepo.renderer_type, sdl_renderer_info.name});
     mepo.tile_cache.renderer = mepo.renderer;
 }
 
@@ -753,7 +760,7 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
     return fonts;
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, use_sw_renderer: bool) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, renderer_type: types.RendererType) anyerror!@This() {
     return @as(@This(), .{
         .allocator = allocator,
         .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
@@ -773,6 +780,6 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         },
         .tile_cache = tile_cache,
         .uibuttons = std.ArrayList(types.UIButton).init(allocator),
-        .renderer_sw = use_sw_renderer,
+        .renderer_type = renderer_type,
     });
 }

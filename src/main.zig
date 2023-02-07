@@ -6,6 +6,7 @@ const Docs = @import("./Docs.zig");
 const Downloader = @import("./Downloader.zig");
 const TileCache = @import("./TileCache.zig");
 const sdl = @import("./sdlshim.zig");
+const types = @import("./types.zig");
 const utildbg = @import("./util/utildbg.zig");
 
 pub fn main() !void {
@@ -21,7 +22,7 @@ pub fn main() !void {
     var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var enable_default_config = true;
-    var use_sw_renderer = false;
+    var renderer_type: types.RendererType = .Auto;
 
     var args_it = std.process.args();
     var arg_w = args_it.next();
@@ -44,8 +45,11 @@ pub fn main() !void {
             // -e: Enable stderr debugging
             stderr_debugging_on = true;
         } else if (std.mem.eql(u8, arg, "-sw")) {
-            // -sw: Use software renderer instead of default HW renderer
-            use_sw_renderer = true;
+            // -sw: Force software renderer instead of default auto renderer
+            renderer_type = .SW;
+        } else if (std.mem.eql(u8, arg, "-hw")) {
+            // -hw: Force hardware renderer instead of default auto renderer
+            renderer_type = .HW;
         } else if (std.mem.eql(u8, arg, "-v")) {
             // -v: Version
             mode = .Version;
@@ -82,7 +86,7 @@ pub fn main() !void {
                 }
                 break :cfg "";
             };
-            var mepo = try Mepo.init(allocator, &tile_cache, base_config, use_sw_renderer);
+            var mepo = try Mepo.init(allocator, &tile_cache, base_config, renderer_type);
             mepo.init_video_and_sdl_stdin_loop(stdin_mepolang_parsing_on) catch Mepo.graceful_terminate_sdl();
         },
         .Download => {
