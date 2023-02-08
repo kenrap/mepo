@@ -206,14 +206,6 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                 for (pin_group.items) |*pin, pin_i| {
                     defer prev_pin = pin;
 
-                    const pinx = utilconversion.lon_to_px_x(pin.*.lon, zoom);
-                    const piny = utilconversion.lat_to_px_y(pin.*.lat, zoom);
-                    const pintilex = @divFloor(pinx, config.Tsize);
-                    const pintiley = @divFloor(piny, config.Tsize);
-                    const pinoffx = @rem(pinx, config.Tsize);
-                    const pinoffy = @rem(piny, config.Tsize);
-                    if (pintilex != tile_x or pintiley != tile_y) continue;
-
                     const is_active = mepo.pin_group_active_item != null and mepo.pin_group_active_item.? == pin_i;
                     const is_active_path = is_active_path: {
                         const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
@@ -237,8 +229,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                         @intCast(u8, pin_group_i),
                         is_active,
                         is_active_path,
-                        pinoffx,
-                        pinoffy,
+                        .{ .x = tile_x, .y = tile_y, .z = zoom }
                     );
                 }
             }
@@ -330,19 +321,41 @@ fn blit_debugmessage(mepo: *Mepo) !void {
     }
 }
 
-fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool, tile_off_x: i32, tile_off_y: i32) !void {
+fn get_pin_xyz_and_offsets(pin: types.Pin, for_zoom: u8) types.XYZAndOffsets {
+    const pinx = utilconversion.lon_to_px_x(pin.lon, for_zoom);
+    const piny = utilconversion.lat_to_px_y(pin.lat, for_zoom);
+    const pintilex = @intCast(u32, @divFloor(pinx, config.Tsize));
+    const pintiley = @intCast(u32, @divFloor(piny, config.Tsize));
+    const tile_off_x = @intCast(u32, @rem(pinx, config.Tsize));
+    const tile_off_y = @intCast(u32, @rem(piny, config.Tsize));
+    return .{
+        .xyz = .{ .x = pintilex, .y = pintiley, .z = for_zoom },
+        .offset = .{ .x = tile_off_x, .y = tile_off_y },
+    };
+}
+
+fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is_active: bool, is_active_path: bool, for_tile: types.XYZ) !void {
     const size: i32 = 10;
+
+    const pindest = get_pin_xyz_and_offsets(pin, for_tile.z);
+
+    if (prev_pin) |pp| {
+        const prevpindest = get_pin_xyz_and_offsets(pp, for_tile.z);
+        _ = prevpindest;
+    }
+
+    const pin_target_x = ((@intCast(c_int, pindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, pindest.offset.x);
+    const pin_target_y = ((@intCast(c_int, pindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, pindest.offset.y);
 
     const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
     const dest_rect = sdl.SDL_Rect{
-        .x = tile_off_x - @divTrunc(size, 2),
-        .y = tile_off_y - @divTrunc(size, 2),
+        .x = pin_target_x - @divTrunc(size, 2),
+        .y = pin_target_y - @divTrunc(size, 2),
         .w = size,
         .h = size,
     };
 
     _ = is_active_path;
-    _ = prev_pin;
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, dest_rect, .Fill);
     if (is_active) {
@@ -379,8 +392,8 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
             pin_label_border,
             pin_label_bg,
             .{},
-            tile_off_x,
-            tile_off_y,
+            pin_target_x,
+            pin_target_y,
             config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u],
             "{s}",
             .{label},

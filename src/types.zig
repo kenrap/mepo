@@ -4,6 +4,10 @@ const sdl = @import("./sdlshim.zig");
 
 pub const Latlon = struct { lat: f64, lon: f64 };
 pub const XYZ = struct { x: u32, y: u32, z: u8 };
+pub const XYZAndOffsets = struct {
+    xyz: XYZ,
+    offset: struct{ x: u32, y: u32 },
+};
 
 pub const RendererType = enum{ Auto, HW, SW };
 
