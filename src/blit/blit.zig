@@ -185,7 +185,6 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
 
         // Rendering Logic
         {
-
             const pingroup_order = order: {
                 // E.g. place active pingroup last so its always ontop in rendering order
                 var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -235,14 +234,6 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                 }
             }
         }
-
-        // Filler stub for testing
-        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x000000 }, sdl.SDL_Rect{
-            .x = 2,
-            .y = 2,
-            .w = 10,
-            .h = 10,
-        }, .Fill);
 
         _ = try mepo.blit_pinlayer_cache.put(.{ .x = tile_x, .y = tile_y, .z = zoom }, text);
         try utilsdl.errorcheck(sdl.SDL_SetRenderTarget(mepo.renderer, null));
@@ -363,7 +354,9 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
     }
 
     // 2. Render the pin square
-    {
+    render_pin_square: {
+        if (pin.category != .Instructive) break :render_pin_square;
+
         const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
         const dest_rect = sdl.SDL_Rect{
             .x = pin_target_x - @divTrunc(size, 2),
@@ -378,9 +371,9 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
     }
 
     // 3. Render the pin label (only applies for the current pin group)
-    pin_label_render: {
+    render_pin_label: {
         if (pin.category != .Instructive or mepo.pin_group_active != pin_group)
-            break :pin_label_render;
+            break :render_pin_label;
 
         const pin_label_bg_value : u24 = if (is_active) 0xe8e8e8 else 0xffffff;
         const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
