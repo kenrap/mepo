@@ -338,24 +338,30 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
     const size: i32 = 10;
 
     const pindest = get_pin_xyz_and_offsets(pin, for_tile.z);
-
-    if (prev_pin) |pp| {
-        const prevpindest = get_pin_xyz_and_offsets(pp, for_tile.z);
-        _ = prevpindest;
-    }
-
     const pin_target_x = ((@intCast(c_int, pindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, pindest.offset.x);
     const pin_target_y = ((@intCast(c_int, pindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, pindest.offset.y);
 
+    // 1. Render the path from the previous pin in ordered pin group
+    render_connecting_line: {
+        if (!p.get(p.pingroup_prop(pin_group, .Ordered)).b or prev_pin == null)
+            break :render_connecting_line;
 
-    // TODO: rendering optimization check to not render offscreen entities
-    // if (!pin_within_tile AND !pin_path_from_previous_pin_within_tile)
-    //  return;
+        const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
+        const prevpin_target_x = ((@intCast(c_int, prevpindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, prevpindest.offset.x);
+        const prevpin_target_y = ((@intCast(c_int, prevpindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, prevpindest.offset.y);
+        const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
+        const connecting_line_color = if (is_active_path) 0xff0000ff else pg_color.to_u32();
+        try utilsdl.errorcheck(sdl.aalineColor(
+            mepo.renderer,
+            @intCast(i16, prevpin_target_x),
+            @intCast(i16, prevpin_target_y),
+            @intCast(i16, pin_target_x),
+            @intCast(i16, pin_target_y),
+            connecting_line_color,
+        ));
+    }
 
-
-    _ = is_active_path;
-
-    // 1. Render the pin square
+    // 2. Render the pin square
     {
         const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
         const dest_rect = sdl.SDL_Rect{
@@ -370,10 +376,10 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
         }
     }
 
-    // 2. Render the pin label (only applies for the current pin group)
-    {
+    // 3. Render the pin label (only applies for the current pin group)
+    pin_label_render: {
         if (pin.category != .Instructive or mepo.pin_group_active != pin_group)
-            return;
+            break :pin_label_render;
 
         const pin_label_bg_value : u24 = if (is_active) 0xe8e8e8 else 0xffffff;
         const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
