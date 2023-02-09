@@ -332,21 +332,41 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
     const pindest = get_pin_xyz_and_offsets(pin, for_tile.z);
     const pin_target_x = ((@intCast(c_int, pindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, pindest.offset.x);
     const pin_target_y = ((@intCast(c_int, pindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, pindest.offset.y);
+    var prevpin_target_x : ?i32 = null;
+    var prevpin_target_y : ?i32 = null;
+    if (prev_pin != null) {
+        const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
+        prevpin_target_x = ((@intCast(c_int, prevpindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, prevpindest.offset.x);
+        prevpin_target_y = ((@intCast(c_int, prevpindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, prevpindest.offset.y);
+    }
+
+    // 0. Nop Check - ensure that rendered pin/connecting line within tile
+    {
+        // TODO: sub out for actual font
+        const font_height = 20;
+        // Label may run given number of tiles over
+        const n_tiles = 2;
+
+        const pin_in_view = (pin_target_x > (-config.Tsize * n_tiles)  and pin_target_x < (config.Tsize * n_tiles)) and
+            (pin_target_y > -font_height and pin_target_y < config.Tsize); 
+
+        const prevpin_in_view = prev_pin != null and (prevpin_target_x.? > (-config.Tsize * n_tiles) and prevpin_target_x.? < config.Tsize * n_tiles) and
+            (prevpin_target_y.? > -font_height and prevpin_target_y.? < config.Tsize); 
+
+        if (!pin_in_view and !prevpin_in_view) return;
+    }
 
     // 1. Render the path from the previous pin in ordered pin group
     render_connecting_line: {
         if (!p.get(p.pingroup_prop(pin_group, .Ordered)).b or prev_pin == null)
             break :render_connecting_line;
 
-        const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
-        const prevpin_target_x = ((@intCast(c_int, prevpindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, prevpindest.offset.x);
-        const prevpin_target_y = ((@intCast(c_int, prevpindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, prevpindest.offset.y);
         const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
         const connecting_line_color = if (is_active_path) 0xff0000ff else pg_color.to_u32();
         try utilsdl.errorcheck(sdl.aalineColor(
             mepo.renderer,
-            @intCast(i16, prevpin_target_x),
-            @intCast(i16, prevpin_target_y),
+            @intCast(i16, prevpin_target_x.?),
+            @intCast(i16, prevpin_target_y.?),
             @intCast(i16, pin_target_x),
             @intCast(i16, pin_target_y),
             connecting_line_color,
