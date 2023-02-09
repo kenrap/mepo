@@ -169,6 +169,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         std.debug.print("Cache hit {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
     } else {
+        std.debug.print("Cache miss {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
         // TODO: is SDL_PIXELFORMAT_UNKNOWN correct or will this create conversions?
         const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTexture(
             mepo.renderer,
