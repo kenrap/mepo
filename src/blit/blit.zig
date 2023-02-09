@@ -347,30 +347,40 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
     const pin_target_x = ((@intCast(c_int, pindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, pindest.offset.x);
     const pin_target_y = ((@intCast(c_int, pindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, pindest.offset.y);
 
-    const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
-    const dest_rect = sdl.SDL_Rect{
-        .x = pin_target_x - @divTrunc(size, 2),
-        .y = pin_target_y - @divTrunc(size, 2),
-        .w = size,
-        .h = size,
-    };
+
+    // TODO: rendering optimization check to not render offscreen entities
+    // if (!pin_within_tile AND !pin_path_from_previous_pin_within_tile)
+    //  return;
+
 
     _ = is_active_path;
 
-    try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, dest_rect, .Fill);
-    if (is_active) {
-        try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, dest_rect, .Draw);
+    // 1. Render the pin square
+    {
+        const pg_color = types.Color{ .value = p.get(p.pingroup_prop(pin_group, .Color)).u24 };
+        const dest_rect = sdl.SDL_Rect{
+            .x = pin_target_x - @divTrunc(size, 2),
+            .y = pin_target_y - @divTrunc(size, 2),
+            .w = size,
+            .h = size,
+        };
+        try utilsdl.sdl_renderer_rect(mepo.renderer, pg_color, dest_rect, .Fill);
+        if (is_active) {
+            try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xff0000 }, dest_rect, .Draw);
+        }
     }
 
-    // Draw Pin label for current pin group
-    if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
+    // 2. Render the pin label (only applies for the current pin group)
+    {
+        if (pin.category != .Instructive or mepo.pin_group_active != pin_group)
+            return;
+
         const pin_label_bg_value : u24 = if (is_active) 0xe8e8e8 else 0xffffff;
         const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
         const pin_label_border_value : u24 = if (is_active) 0x000000 else 0xe8e8e8;
         const pin_label_border = .{ .value = pin_label_border_value, .opacity = 255 };
 
         const label_color: u24 = 0x000000;
-
         const label = lab: {
             if (pin.metadata.get("name")) |name| break :lab name;
             if (pin.handle) |h| break :lab h;
