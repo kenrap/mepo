@@ -364,20 +364,11 @@ fn blit_pin(mepo: *Mepo, pin: types.Pin, prev_pin: ?types.Pin, pin_group: u8, is
 
     // Draw Pin label for current pin group
     if (pin.category == .Instructive and mepo.pin_group_active == pin_group) {
-        const pin_label_bg: types.Color = bg: {
-            if (is_active) {
-                break :bg .{ .value = 0xe8e8e8, .opacity = 255 };
-            } else {
-                break :bg .{ .value = 0xffffff, .opacity = 255 };
-            }
-        };
-        const pin_label_border: types.Color = border: {
-            if (is_active) {
-                break :border .{ .value = 0x000000, .opacity = 255 };
-            } else {
-                break :border .{ .value = 0xe8e8e8, .opacity = 255 };
-            }
-        };
+        const pin_label_bg_value : u24 = if (is_active) 0xe8e8e8 else 0xffffff;
+        const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
+        const pin_label_border_value : u24 = if (is_active) 0x000000 else 0xe8e8e8;
+        const pin_label_border = .{ .value = pin_label_border_value, .opacity = 255 };
+
         const label_color: u24 = 0x000000;
 
         const label = lab: {
