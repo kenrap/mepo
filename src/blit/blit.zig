@@ -200,25 +200,30 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
 
             for (pingroup_order) |pin_group_i| {
                 const pin_group = mepo.pin_groups[pin_group_i];
-                var ordered_group_active_path = false;
+                var is_active_path_track= false;
                 var prev_pin: ?*types.Pin = null;
                 for (pin_group.items) |*pin, pin_i| {
                     defer prev_pin = pin;
 
+                    // is_active_path: Whether path from prevpin to pin red
+                    // is_active_path_track: Track if next pin along instructive
+                    //                       pin highlighted track
                     const is_active_path = is_active_path: {
                         const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
                         break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
-                            ((is_ordered and ordered_group_active_path) or
+                            ((is_ordered and is_active_path_track) or
                             (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
                     };
-
-                    // E.g. ordered_group_active_path just tracks every time
-                    // an instructive pin is hit so subsequent structural pins
-                    // highlighted in "active"/red color until next structural pin
-                    // hit and full "path" of the active segment of an ordered pin
-                    // group shows continuously as the active color
-                    if (mepo.pin_group_active_item != null and mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive)
-                        ordered_group_active_path = mepo.pin_group_active_item.? == pin_i;
+                    is_active_path_track = track: {
+                        const has_active_pg_item = mepo.pin_group_active_item != null;
+                        const is_instructive_pin = mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive;
+                        const is_active_pin = mepo.pin_group_active_item.? == pin_i;
+                        if (has_active_pg_item and is_instructive_pin and is_active_pin) {
+                            break :track true;
+                        } else {
+                            break :track is_active_path_track;
+                        }
+                    };
 
                     try blit_pin(
                         mepo,
