@@ -235,6 +235,17 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                     );
                 }
             }
+
+            if (mepo.pin_group_active_item) |active_pin_i| {
+                try blit_pin(
+                    mepo,
+                    &mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
+                    null,
+                    mepo.pin_group_active,
+                    true,
+                    .{ .x = tile_x, .y = tile_y, .z = zoom }
+                );
+            }
         }
 
         _ = try mepo.blit_pinlayer_cache.put(.{ .x = tile_x, .y = tile_y, .z = zoom }, text);
