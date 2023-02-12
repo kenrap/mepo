@@ -355,15 +355,11 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
 
     // 0. Nop Check - ensure that rendered pin/connecting line within tile
     {
-        // TODO: sub out for actual font
-        const font_height = 20;
-        // Label may run given number of tiles over
-        const n_tiles = 2;
-
-        const pin_in_view = (pin_target_x > (-config.Tsize * n_tiles)  and pin_target_x < (config.Tsize * n_tiles)) and
+        const font_height = @intCast(i8, config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u]);
+        const n_tiles_overlap = 2;
+        const pin_in_view = (pin_target_x > (-config.Tsize * n_tiles_overlap)  and pin_target_x < (config.Tsize * n_tiles_overlap)) and
             (pin_target_y > -font_height and pin_target_y - (pin_rect_size / 2) < config.Tsize); 
-
-        const prevpin_in_view = prev_pin != null and (prevpin_target_x.? > (-config.Tsize * n_tiles) and prevpin_target_x.? < config.Tsize * n_tiles) and
+        const prevpin_in_view = prev_pin != null and (prevpin_target_x.? > (-config.Tsize * n_tiles_overlap) and prevpin_target_x.? < config.Tsize * n_tiles_overlap) and
             (prevpin_target_y.? > -font_height and prevpin_target_y.? - (pin_rect_size / 2) < config.Tsize); 
 
         if (!pin_in_view and !prevpin_in_view) return;
