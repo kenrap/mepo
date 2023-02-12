@@ -8,6 +8,7 @@ const TileCache = @import("../TileCache.zig");
 const utilconversion = @import("../util/utilconversion.zig");
 const p = @import("../util/utilprefs.zig");
 const utilsdl = @import("../util/utilsdl.zig");
+const utildbg = @import("../util/utildbg.zig");
 
 fn blit_crosshair(mepo: *Mepo) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
@@ -166,10 +167,10 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
     };
 
     if (mepo.blit_pinlayer_cache.get(.{ .x = tile_x, .y = tile_y, .z = zoom })) |text| {
-        std.debug.print("Cache hit {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
+        utildbg.log("Pinlayer cache hit {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
     } else {
-        std.debug.print("Cache miss {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
+        utildbg.log("Pinlayer cache miss {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
         const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTexture(
             mepo.renderer,
             sdl.SDL_PIXELFORMAT_UNKNOWN,
