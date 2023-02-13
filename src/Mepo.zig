@@ -648,6 +648,15 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
         _ = sdl.SDL_SetHint("SDL_MOUSE_AUTO_CAPTURE", "0");
     }
 
+    // Initialize SDL Image library
+    {
+
+        try utilsdl.errorcheck(sdl.IMG_Init(
+            sdl.IMG_INIT_JPG | sdl.IMG_INIT_PNG | sdl.IMG_INIT_TIF |
+            sdl.IMG_INIT_WEBP | sdl.IMG_INIT_JXL | sdl.IMG_INIT_AVIF
+        ));
+    }
+
     // Initialize SDL video
     video_init: {
         // Attempt to initialize with whatever is set in SDL_VIDEODRIVER
