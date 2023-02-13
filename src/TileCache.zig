@@ -267,7 +267,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
             defer tile_cache.allocator.free(file_cached_png);
             utildbg.log("Loading surface from cached PNG data\n", .{});
 
-            const surface = tile_cache.load_data_to_surface(coords, file_cached_png) catch |err| {
+            const surface = tile_cache.load_data_to_surface(file_cached_png) catch |err| {
                 utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{coords, png_fs_path, err});
                 break :load_from_fs;
             };
@@ -423,14 +423,24 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                 const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
-                if (tile_cache.cache_dir) |cache_dir| {
+                if (tile_cache.cache_dir) |cache_dir| save_to_fs: {
+
+                    // Validate data downloaded is valid
+                    {
+                        const surf = tile_cache.load_data_to_surface(datum_array) catch |err| {
+                            utildbg.log("Completed tiledata download but invalid image data: {}, datum: <\n{s}\n>\n", .{err, datum_array});
+                            break :save_to_fs;
+                        };
+                        sdl.SDL_FreeSurface(surf);
+                    }
+
                     // Save to FS
                     const path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
                     try cache_dir.writeFile(path, datum_array);
                 }
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
                     // Load to surface
-                    _ = try tile_cache.load_data_to_surface(coords, datum_array);
+                    _ = try tile_cache.load_data_to_surface(datum_array);
                     utilsdl.sdl_push_event_resize();
                 }
             } else {
@@ -464,7 +474,7 @@ fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
     sdl.SDL_DestroyTexture(texture);
 }
 
-fn load_data_to_surface(_: *@This(), _: types.XYZ, data: []u8) !*sdl.SDL_Surface {
+fn load_data_to_surface(_: *@This(), data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
     const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &data[0]), @intCast(c_int, data.len)));
