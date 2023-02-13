@@ -615,6 +615,7 @@ pub fn bounding_box(mepo: *@This()) types.LatLonBox {
 
 pub fn graceful_terminate_sdl() void {
     utildbg.log("Graceful shutdown\n", .{});
+    sdl.IMG_Quit();
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
     std.os.exit(0);
