@@ -249,33 +249,33 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         return TileData{ .texture = texture };
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
-    } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
-        // Check tile exists
-        if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
-
-        // Load tile to surface
-        {
-            const png = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
-            defer tile_cache.allocator.free(png);
-            file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch null;
-            if (file_cached_png_opt) |file_cached_png| {
-                defer tile_cache.allocator.free(file_cached_png);
-                const surface = tile_cache.load_data_to_surface(coords, file_cached_png) catch {
-                    break :load_from_fs;
-                };
-                try tile_cache.surface_map.put(coords, surface);
-            }
-        }
-    }
-
-    // E.g. we found the tile cached in surface map, transfer to texture & return
-    if (tile_cache.surface_map.get(coords)) |surface| {
+    } else if (tile_cache.surface_map.get(coords)) |surface| {
         defer sdl.SDL_FreeSurface(surface);
         const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
         _ = tile_cache.surface_map.swapRemove(coords);
         _ = try tile_cache.texture_map.put(coords, texture);
         return TileData{ .texture = texture };
+    } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
+        if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
+        const png = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
+        defer tile_cache.allocator.free(png);
+        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch |err| b: {
+            utildbg.log("Unable to alloc space for PNG: {}\n", .{err});
+            break :b null;
+        };
+        if (file_cached_png_opt) |file_cached_png| {
+            defer tile_cache.allocator.free(file_cached_png);
+            utildbg.log("Loading surface from cached PNG data\n", .{});
+
+            const surface = tile_cache.load_data_to_surface(coords, file_cached_png) catch |err| {
+                utildbg.log("Errored when loading data to SDL Surface: {}\n", .{err});
+                break :load_from_fs;
+            };
+            utildbg.log("Putting surface from cached PNG data into surface map\n", .{});
+            try tile_cache.surface_map.put(coords, surface);
+        }
     }
+
 
     if (tile_cache.thread_download == null) {
         return TileData{ .error_type = .Offline };
