@@ -257,9 +257,9 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         return TileData{ .texture = texture };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
-        const png = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
-        defer tile_cache.allocator.free(png);
-        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png, 500000) catch |err| b: {
+        const png_fs_path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
+        defer tile_cache.allocator.free(png_fs_path);
+        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png_fs_path, 500000) catch |err| b: {
             utildbg.log("Unable to alloc space for PNG: {}\n", .{err});
             break :b null;
         };
@@ -268,7 +268,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
             utildbg.log("Loading surface from cached PNG data\n", .{});
 
             const surface = tile_cache.load_data_to_surface(coords, file_cached_png) catch |err| {
-                utildbg.log("Errored when loading data to SDL Surface: {}\n", .{err});
+                utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{coords, png_fs_path, err});
                 break :load_from_fs;
             };
             utildbg.log("Putting surface from cached PNG data into surface map\n", .{});
