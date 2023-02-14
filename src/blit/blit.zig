@@ -219,8 +219,9 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                         const has_active_pg_item = mepo.pin_group_active_item != null;
                         const is_instructive_pin = mepo.pin_groups[pin_group_i].items[pin_i].category == .Instructive;
                         const is_active_pin = has_active_pg_item and mepo.pin_group_active_item.? == pin_i;
-                        if (has_active_pg_item and is_instructive_pin and is_active_pin) {
-                            break :track true;
+
+                        if (has_active_pg_item and is_instructive_pin) {
+                            break :track is_active_pin;
                         } else {
                             break :track is_active_path_track;
                         }
