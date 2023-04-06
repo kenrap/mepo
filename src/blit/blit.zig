@@ -357,13 +357,35 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
     // 0. Nop Check - ensure that rendered pin/connecting line within tile
     {
         const font_height = @intCast(i8, config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u]);
-        const n_tiles_overlap = 2;
-        const pin_in_view = (pin_target_x > (-config.Tsize * n_tiles_overlap)  and pin_target_x < (config.Tsize * n_tiles_overlap)) and
-            (pin_target_y > -font_height and pin_target_y - (pin_rect_size / 2) < config.Tsize); 
-        const prevpin_in_view = prev_pin != null and (prevpin_target_x.? > (-config.Tsize * n_tiles_overlap) and prevpin_target_x.? < config.Tsize * n_tiles_overlap) and
-            (prevpin_target_y.? > -font_height and prevpin_target_y.? - (pin_rect_size / 2) < config.Tsize); 
+        const n_tiles_font_overlap = 2;
+        const pin_in_view = r: {
+            const a = pin_target_x > (-config.Tsize * n_tiles_font_overlap)  and pin_target_x < (config.Tsize * n_tiles_font_overlap);
+            const b = pin_target_y > -font_height and pin_target_y - (pin_rect_size / 2) < config.Tsize;
+            break :r a and b;
+        };
+        const prevpin_in_view = r: {
+            if (prev_pin == null) break :r false;
+            const a = prevpin_target_x.? > (-config.Tsize * n_tiles_font_overlap) and prevpin_target_x.? < config.Tsize * n_tiles_font_overlap;
+            const b = prevpin_target_y.? > -font_height and prevpin_target_y.? - (pin_rect_size / 2) < config.Tsize; 
+            break :r a and b;
+        };
+        const connecting_line_in_view = r: {
+            if (prev_pin == null) break :r false;
+            const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
+            var x1 = @intCast(c_int, pindest.xyz.x * config.Tsize + pindest.offset.x);
+            var y1 = @intCast(c_int, pindest.xyz.y * config.Tsize + pindest.offset.y);
+            var x2 = @intCast(c_int, prevpindest.xyz.x * config.Tsize + prevpindest.offset.x);
+            var y2 = @intCast(c_int, prevpindest.xyz.y * config.Tsize + prevpindest.offset.y);
+            const rect = sdl.SDL_Rect{
+                  .x = @intCast(i32, for_tile.x * config.Tsize),
+                  .y = @intCast(i32, for_tile.y * config.Tsize),
+                  .w = config.Tsize,
+                  .h = config.Tsize,
+            };
+            break :r sdl.SDL_IntersectRectAndLine(&rect, &x1, &y1, &x2, &y2) == sdl.SDL_TRUE;
+        };
 
-        if (!pin_in_view and !prevpin_in_view) return;
+        if (!pin_in_view and !prevpin_in_view and !connecting_line_in_view) return;
     }
 
     // 1. Render the path from the previous pin in ordered pin group
