@@ -50,6 +50,9 @@ pub fn main() !void {
         } else if (std.mem.eql(u8, arg, "-hw")) {
             // -hw: Force hardware renderer instead of default auto renderer
             renderer_type = .HW;
+        } else if (std.mem.startsWith(u8, arg, "-tx")) {
+            // -tx: Number of GPU textures to cache for OSM/pin tiles concurrently
+            config.MaxTextures = try std.fmt.parseInt(usize, arg[3..], 10);
         } else if (std.mem.eql(u8, arg, "-v")) {
             // -v: Version
             mode = .Version;

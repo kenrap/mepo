@@ -1,9 +1,9 @@
 const std = @import("std");
 
-pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn (key_type, metadata_type) void, comptime size: usize) type {
+pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn (key_type, metadata_type) void, comptime size: *usize) type {
     return struct {
         array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
-        size: usize,
+        size: *usize,
         mutex: std.Thread.Mutex,
 
         pub fn count(self: *@This()) usize {
@@ -29,7 +29,7 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, co
             defer self.mutex.unlock();
 
             try self.array_hash_map.put(k, v);
-            return if (self.array_hash_map.count() > self.size) return self.shift() else null;
+            return if (self.array_hash_map.count() > self.size.*) return self.shift() else null;
         }
 
         fn shift(self: *@This()) !metadata_type {

@@ -17,7 +17,7 @@ const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
 async_shellpipe_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
-blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, config.MaxTextures),
+blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 config: []const u8,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
@@ -766,7 +766,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
     return @as(@This(), .{
         .allocator = allocator,
         .blit_pinlayer_cache = datastructure.EvictionHashMap(
-            types.XYZ, *sdl.SDL_Texture, evict_texture, config.MaxTextures,
+            types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures,
         ).init(allocator),
         .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,
