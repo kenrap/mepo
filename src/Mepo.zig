@@ -329,6 +329,10 @@ fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
+fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
+    sdl.SDL_DestroyTexture(texture);
+}
+
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
@@ -788,8 +792,3 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .renderer_type = renderer_type,
     });
 }
-
-fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
-    sdl.SDL_DestroyTexture(texture);
-}
-
