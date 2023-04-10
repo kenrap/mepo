@@ -259,19 +259,18 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
         const png_fs_path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
         defer tile_cache.allocator.free(png_fs_path);
+
         file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png_fs_path, 500000) catch |err| b: {
             utildbg.log("Unable to alloc space for PNG: {}\n", .{err});
             break :b null;
         };
+
         if (file_cached_png_opt) |file_cached_png| {
             defer tile_cache.allocator.free(file_cached_png);
-            utildbg.log("Loading surface from cached PNG data\n", .{});
-
             const surface = tile_cache.load_data_to_surface(file_cached_png) catch |err| {
                 utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{coords, png_fs_path, err});
                 break :load_from_fs;
             };
-            utildbg.log("Putting surface from cached PNG data into surface map\n", .{});
             try tile_cache.surface_map.put(coords, surface);
         }
     }
@@ -423,20 +422,19 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                 const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
-                if (tile_cache.cache_dir) |cache_dir| save_to_fs: {
-
-                    // Validate data downloaded is valid
-                    {
-                        const surf = tile_cache.load_data_to_surface(datum_array) catch |err| {
-                            utildbg.log("Completed tiledata download but invalid image data: {}, datum: <\n{s}\n>\n", .{err, datum_array});
-                            break :save_to_fs;
-                        };
-                        sdl.SDL_FreeSurface(surf);
-                    }
+                if (tile_cache.cache_dir) |cache_dir| {
+                    const memory = try utilsdl.errorcheck_ptr(
+                        sdl.SDL_RWops,
+                        sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &datum_array[0]), @intCast(c_int, datum_array.len)),
+                    );
+                    const is_valid_png_data = sdl.SDL_TRUE == sdl.IMG_isPNG(memory);
+                    try utilsdl.errorcheck(sdl.SDL_RWclose(memory));
 
                     // Save to FS
-                    const path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
-                    try cache_dir.writeFile(path, datum_array);
+                    if (is_valid_png_data) {
+                        const path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
+                        try cache_dir.writeFile(path, datum_array);
+                    }
                 }
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
                     // Load to surface
