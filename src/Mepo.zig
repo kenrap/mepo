@@ -650,13 +650,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     }
 
     // Initialize SDL Image library
-    {
-
-        try utilsdl.errorcheck(sdl.IMG_Init(
-            sdl.IMG_INIT_JPG | sdl.IMG_INIT_PNG | sdl.IMG_INIT_TIF |
-            sdl.IMG_INIT_WEBP | sdl.IMG_INIT_JXL | sdl.IMG_INIT_AVIF
-        ));
-    }
+    try utilsdl.errorcheck(sdl.IMG_Init(sdl.IMG_INIT_PNG));
 
     // Initialize SDL video
     video_init: {
