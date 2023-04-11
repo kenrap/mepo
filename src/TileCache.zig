@@ -51,7 +51,6 @@ curl_multi: *curl.CURLM,
 queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
 renderer: ?*sdl.SDL_Renderer = null,
-surface_map: datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface),
 texture_map: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 
@@ -128,9 +127,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
 
     // Empty texture map, surface map, & queues
     for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
-    for (tile_cache.surface_map.values()) |s| sdl.SDL_FreeSurface(s);
     tile_cache.texture_map.clearAndFree();
-    tile_cache.surface_map.clearAndFree();
     tile_cache.queue_lifo_ui.clearAndFree();
     tile_cache.queue_lifo_bg.clearAndFree();
 
@@ -249,12 +246,6 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         return TileData{ .texture = texture };
     } else if (tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
-    } else if (tile_cache.surface_map.get(coords)) |surface| {
-        defer sdl.SDL_FreeSurface(surface);
-        const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
-        _ = tile_cache.surface_map.swapRemove(coords);
-        _ = try tile_cache.texture_map.put(coords, texture);
-        return TileData{ .texture = texture };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
         const png_fs_path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
@@ -271,7 +262,10 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
                 utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{coords, png_fs_path, err});
                 break :load_from_fs;
             };
-            try tile_cache.surface_map.put(coords, surface);
+            defer sdl.SDL_FreeSurface(surface);
+            const texture = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(tile_cache.renderer, surface));
+            _ = try tile_cache.texture_map.put(coords, texture);
+            return TileData{ .texture = texture };
         }
     }
 
@@ -532,7 +526,6 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
             .curl_multi = curl.curl_multi_init().?,
             .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
-            .surface_map = datastructure.QueueHashMap(types.XYZ, *sdl.SDL_Surface).init(allocator),
             .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
         });
