@@ -615,6 +615,7 @@ pub fn bounding_box(mepo: *@This()) types.LatLonBox {
 
 pub fn graceful_terminate_sdl() void {
     utildbg.log("Graceful shutdown\n", .{});
+    sdl.IMG_Quit();
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
     std.os.exit(0);
@@ -647,6 +648,9 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
         // See: https://github.com/libsdl-org/SDL/issues/5652
         _ = sdl.SDL_SetHint("SDL_MOUSE_AUTO_CAPTURE", "0");
     }
+
+    // Initialize SDL Image library
+    try utilsdl.errorcheck(sdl.IMG_Init(sdl.IMG_INIT_PNG));
 
     // Initialize SDL video
     video_init: {
