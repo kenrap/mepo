@@ -72,7 +72,7 @@ getcoords() {
 
 droppin() {
   SOURCEANDCOORDS="$(getcoords)"
-  [ $? == 1 ] && return
+  [ $? = 1 ] && return
   SOURCE="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f1)"
   COORDS="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f2-3)"
   LAT="$(echo $SOURCE | cut -d " " -f1)"
