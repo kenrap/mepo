@@ -563,10 +563,10 @@ pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
     _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
     sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_w, &gl_h);
     sdl.SDL_GetWindowSize(mepo.window, &win_w, &win_h);
-    const scale_x = @divTrunc(gl_w, win_w);
-    const scale_y = @divTrunc(gl_h, win_h);
-    const scaled_x = cursor_x * scale_x;
-    const scaled_y = cursor_y * scale_y;
+    const scale_x = @intToFloat(f64, gl_w) / @intToFloat(f64, win_w);
+    const scale_y = @intToFloat(f64, gl_h) / @intToFloat(f64, win_h);
+    const scaled_x = @floatToInt(c_int, @intToFloat(f64, cursor_x) * scale_x);
+    const scaled_y = @floatToInt(c_int, @intToFloat(f64, cursor_y) * scale_y);
     return .{ .x = scaled_x, .y = scaled_y };
 }
 
