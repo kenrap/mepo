@@ -26,13 +26,13 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
 
     // Signal
     var signal_name: u6 = 0;
-    if (std.cstr.cmp(signo_str, "USR1") == 0) {
+    if (std.mem.orderZ(u8, signo_str, "USR1") == .eq) {
         signal_name = std.os.SIG.USR1;
-    } else if (std.cstr.cmp(signo_str, "USR2") == 0) {
+    } else if (std.mem.orderZ(u8, signo_str, "USR2") == .eq) {
         signal_name = std.os.SIG.USR2;
-    } else if (std.cstr.cmp(signo_str, "TERM") == 0) {
+    } else if (std.mem.orderZ(u8, signo_str, "TERM") == .eq) {
         signal_name = std.os.SIG.TERM;
-    } else if (std.cstr.cmp(signo_str, "INT") == 0) {
+    } else if (std.mem.orderZ(u8, signo_str, "INT") == .eq) {
         signal_name = std.os.SIG.INT;
     } else {
         return error.InvalidSignalName;
