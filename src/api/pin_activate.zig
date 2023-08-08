@@ -22,7 +22,7 @@ fn pin_activate(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
     const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
     defer mepo.blit_pinlayer_cache.clearAndFree();
 
-    for (mepo.pin_groups[pin_group].items) |*pin, pin_i| {
+    for (mepo.pin_groups[pin_group].items, 0..) |*pin, pin_i| {
         if (pin.handle == null) continue;
         if (std.mem.eql(u8, pin.handle.?, handle)) {
             mepo.pin_group_active = @intCast(u8, pin_group);

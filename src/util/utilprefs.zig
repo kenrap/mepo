@@ -165,9 +165,9 @@ pub fn set_t(allocator: std.mem.Allocator, prefname: pref, value: []const u8) !v
 }
 
 pub fn lookup_pref_from_string(prefname: []const u8) ?pref {
-    for (prefs_mapping) |p, i| {
-        if (std.mem.eql(u8, p.name, prefname)) return @intToEnum(pref, i);
-    }
+    for (prefs_mapping, 0..) |p, i|
+        if (std.mem.eql(u8, p.name, prefname))
+            return @enumFromInt(i);
     return null;
 }
 

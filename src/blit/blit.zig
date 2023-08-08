@@ -203,7 +203,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                 const pin_group = mepo.pin_groups[pin_group_i];
                 var is_active_path_track= false;
                 var prev_pin: ?*types.Pin = null;
-                for (pin_group.items) |*pin, pin_i| {
+                for (pin_group.items, 0..) |*pin, pin_i| {
                     defer prev_pin = pin;
 
                     // is_active_path: Whether path from prevpin to pin red
@@ -602,7 +602,7 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
         .h = height_row * @intCast(c_int, rows.len),
     }, .Fill);
 
-    for (rows) |row, row_i| {
+    for (rows, 0..) |row, row_i| {
         // Label
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,

@@ -63,7 +63,7 @@ fn event_fingerdown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    for (mepo.fingers.items) |f, i| {
+    for (mepo.fingers.items, 0..) |f, i| {
         if (e.tfinger.fingerId == f) {
             _ = mepo.fingers.orderedRemove(i);
             break;
@@ -171,8 +171,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             pin_i: u32,
             delta_dist: i32,
         } = null;
-        for (mepo.pin_groups) |pin_group, pin_group_i| {
-            for (pin_group.items) |*item, pin_i| {
+        for (mepo.pin_groups, 0..) |pin_group, pin_group_i| {
+            for (pin_group.items, 0..) |*item, pin_i| {
                 if (item.category == .Structural) continue;
                 const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
@@ -388,7 +388,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
 fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg) !bool {
     if (spec.args.len != args.len) return error.NumberOfArgsInvalid;
 
-    for (spec.args) |expect_spec_arg, expect_spec_arg_i| {
+    for (spec.args, 0..) |expect_spec_arg, expect_spec_arg_i| {
         switch (expect_spec_arg.tag) {
             .Number => {
                 switch (args[expect_spec_arg_i]) {
@@ -788,7 +788,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .table_timers = std.array_hash_map.AutoArrayHashMap(types.TimerInput, []const u8).init(allocator),
         .pin_groups = pin_groups: {
             var pgs: [10]std.ArrayList(types.Pin) = undefined;
-            for (pgs) |_, i| pgs[i] = std.ArrayList(types.Pin).init(allocator);
+            for (pgs, 0..) |_, i| pgs[i] = std.ArrayList(types.Pin).init(allocator);
             break :pin_groups pgs;
         },
         .tile_cache = tile_cache,

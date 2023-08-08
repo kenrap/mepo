@@ -129,8 +129,8 @@ test "statementize" {
         const input = &[_][]const u8{ "foo", "bar", "baz" };
         const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
         var result = try statementize(std.heap.c_allocator, input[0..]);
-        try std.testing.expectEqual(@intCast(usize, 1), result.len);
-        for (result[0]) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(1)), result.len);
+        for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
         }
     }
@@ -141,11 +141,11 @@ test "statementize" {
         const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
         const expect_1 = [_][]const u8{ "bil", "nil" };
         var result = try statementize(std.heap.c_allocator, input[0..]);
-        try std.testing.expectEqual(@intCast(usize, 2), result.len);
-        for (result[0]) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(2)), result.len);
+        for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
         }
-        for (result[1]) |_, idx| {
+        for (result[1], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_1[idx], result[1][idx]));
         }
     }
@@ -156,11 +156,11 @@ test "statementize" {
         const expect_0 = [_][]const u8{ "foo", "[", "bar", "[", "gill", "]", "]", "baz" };
         const expect_1 = [_][]const u8{ "bil", "nil" };
         var result = try statementize(std.heap.c_allocator, input[0..]);
-        try std.testing.expectEqual(@intCast(usize, 2), result.len);
-        for (result[0]) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(2)), result.len);
+        for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
         }
-        for (result[1]) |_, idx| {
+        for (result[1], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_1[idx], result[1][idx]));
         }
     }
@@ -179,8 +179,8 @@ test "tokenize" {
         const input = "foo bar baz";
         var expect = [_][]const u8{ "foo", "bar", "baz" };
         var result = try tokenize(std.heap.c_allocator, input);
-        try std.testing.expectEqual(@intCast(usize, 3), result.len);
-        for (result) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(3)), result.len);
+        for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
         }
     }
@@ -190,8 +190,8 @@ test "tokenize" {
         const input = "foo bar [baz]";
         var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
         var result = try tokenize(std.heap.c_allocator, input);
-        try std.testing.expectEqual(@intCast(usize, 5), result.len);
-        for (result) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(5)), result.len);
+        for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
         }
     }
@@ -201,8 +201,8 @@ test "tokenize" {
         const input = "foo bar [ baz]";
         var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
         var result = try tokenize(std.heap.c_allocator, input);
-        try std.testing.expectEqual(@intCast(usize, 5), result.len);
-        for (result) |_, idx| {
+        try std.testing.expectEqual(@as(usize, @intCast(5)), result.len);
+        for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
         }
     }
@@ -246,7 +246,7 @@ test "argize" {
 
     for (specs) |s| {
         const result = try argize(arena.allocator(), s.input[0..]);
-        for (s.expect) |_, i| {
+        for (s.expect, 0..) |_, i| {
             try std.testing.expectEqual(@TypeOf(s.expect[i]), @TypeOf(result[i]));
             switch (result[i]) {
                 .Number => try std.testing.expectEqual(s.expect[i].Number, result[i].Number),

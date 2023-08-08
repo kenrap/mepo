@@ -33,7 +33,7 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
         } else if (std.mem.eql(u8, target_pin_handle, "all")) {
             break :from_pin_i_opt null;
         } else {
-            for (mepo.pin_groups[from_group].items) |pin, pin_i| {
+            for (mepo.pin_groups[from_group].items, 0..) |pin, pin_i| {
                 if (pin.handle) |handle| {
                     if (std.mem.eql(u8, handle, target_pin_handle)) {
                         break :from_pin_i_opt pin_i;
@@ -58,7 +58,7 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
             mepo.pin_group_active_item = @intCast(u32, mepo.pin_groups[mepo.pin_group_active].items.len - 1);
         }
     } else {
-        for (mepo.pin_groups[from_group].items) |_, pin_i| {
+        for (mepo.pin_groups[from_group].items, 0..) |_, pin_i| {
             try mepo.pin_groups[to_group].append(mepo.pin_groups[from_group].items[pin_i]);
         }
         for (mepo.pin_groups[from_group].items) |_| {

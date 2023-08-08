@@ -28,7 +28,7 @@ fn pin_delete(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
                 break :target_pin_i active_item;
             }
         } else {
-            for (mepo.pin_groups[pin_group].items) |pin, pin_i| {
+            for (mepo.pin_groups[pin_group].items, 0..) |pin, pin_i| {
                 if (pin.handle) |pin_handle| {
                     if (std.mem.eql(u8, handle, pin_handle)) {
                         break :target_pin_i pin_i;

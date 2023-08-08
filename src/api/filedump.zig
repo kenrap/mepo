@@ -160,7 +160,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
     if (std.mem.containsAtLeast(u8, save_types, 1, "p")) {
         try lines.append("\n# Pins;");
 
-        for (mepo.pin_groups) |pg, pg_i| {
+        for (mepo.pin_groups, 0..) |pg, pg_i| {
             for (pg.items) |pin| {
                 const is_structural: u32 = b: {
                     if (pin.category == .Structural) break :b 1;
