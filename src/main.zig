@@ -12,8 +12,8 @@ const utildbg = @import("./util/utildbg.zig");
 pub fn main() !void {
     comptime {
         const v = builtin.zig_version;
-        if (v.major != 0 or v.minor != 10)
-            @panic("Must be built against Zig 0.10.x");
+        if (v.major != 0 or v.minor != 11)
+            @panic("Must be built against Zig 0.11.x");
     }
 
     const allocator = std.heap.c_allocator;

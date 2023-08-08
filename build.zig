@@ -13,7 +13,7 @@ fn setDependencies(step: *std.build.LibExeObjStep) void {
 
 pub fn build(b: *Builder) void {
     b.installDirectory(.{
-        .source_dir = "scripts",
+        .source_dir = .{ .path = "scripts" },
         .install_dir = .{ .bin = {} },
         .install_subdir = "",
     });
@@ -22,26 +22,35 @@ pub fn build(b: *Builder) void {
     b.installFile("assets/mepo_128x128.png", "share/icons/hicolor/128x128/apps/mepo.png");
     b.installFile("assets/mepo_512x512.png", "share/icons/hicolor/512x512/apps/mepo.png");
 
-    const exe = b.addExecutable("mepo", "src/main.zig");
-
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
-
+    const optimize = b.standardOptimizeOption(.{});
+    const exe = b.addExecutable(.{
+        .name = "mepo",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
     setDependencies(exe);
+    b.installArtifact(exe);
 
-    exe.install();
-
-    const run_cmd = exe.run();
+    const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
 
     const run_step = b.step("run", "Run mepo");
     run_step.dependOn(&run_cmd.step);
 
     // Setup test
+    const tests = b.addTest(.{
+        .root_source_file = .{ .path = "./src/test.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    setDependencies(tests);
+
+    const run_tests = b.addRunArtifact(tests);
     const test_all_step = b.step("test", "Run all tests.");
-    const run_tests = b.addTest("./src/test.zig");
-    setDependencies(run_tests);
     test_all_step.dependOn(&run_tests.step);
 }
