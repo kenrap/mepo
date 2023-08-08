@@ -18,7 +18,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const action: types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
-    const fingers: u8 = @floatToInt(u8, args[1].Number);
+    const fingers: u8 = @intFromFloat(args[1].Number);
     const direction: types.GestureInputDirection = if (args[2].Number == 1) .In else .Out;
     const expression = args[3].Text;
     try bind_gesture(mepo, action, fingers, direction, expression);

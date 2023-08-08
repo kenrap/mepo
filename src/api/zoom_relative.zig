@@ -13,10 +13,9 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const relative = @floatToInt(i32, args[0].Number);
-    zoom_relative(mepo, relative);
+    zoom_relative(mepo, @intFromFloat(args[0].Number));
 }
 
 pub fn zoom_relative(_: *Mepo, relative: i32) void {
-    p.set_n(p.pref.zoom, @intToFloat(f64, @intCast(u8, std.math.min(19, std.math.max(0, @intCast(i32, p.get(p.pref.zoom).u) + relative)))));
+    p.set_n(p.pref.zoom, @floatFromInt(@min(19, @max(0, p.get(p.pref.zoom).u)) + relative));
 }

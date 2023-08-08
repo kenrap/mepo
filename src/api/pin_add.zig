@@ -16,16 +16,12 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const group = @floatToInt(i32, args[0].Number);
-    const is_structural = args[1].Number == 1;
-    const lat = args[2].Number;
-    const lon = args[3].Number;
-    const handle = args[4].Text;
-    try pin_add(mepo, group, is_structural, lat, lon, handle);
+    try pin_add(mepo, @intFromFloat(args[0].Number), args[1].Number == 1,
+        args[2].Number, args[3].Number, args[4].Text);
 }
 
 fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, handle: [:0]const u8) !void {
-    const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    const pin_group: usize = if (group < 0) mepo.pin_group_active else @intCast(group);
     defer mepo.blit_pinlayer_cache.clearAndFree();
 
     // E.g. nop if adding a pin_handle that already exists

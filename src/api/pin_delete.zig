@@ -13,15 +13,13 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const group = @floatToInt(i32, args[0].Number);
-    const handle = args[1].Text;
-    try pin_delete(mepo, group, handle);
+    try pin_delete(mepo, @intFromFloat(args[0].Number), args[1].Text);
 }
 
 fn pin_delete(mepo: *Mepo, group: i32, handle: [:0]const u8) !void {
     defer mepo.blit_pinlayer_cache.clearAndFree();
 
-    const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    const pin_group: usize = if (group < 0) mepo.pin_group_active else @intCast(group);
     const target_pin_i = target_pin_i: {
         if (handle.len == 0) {
             if (mepo.pin_group_active_item) |active_item| {

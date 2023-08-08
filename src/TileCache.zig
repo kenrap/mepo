@@ -202,7 +202,7 @@ pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, can
     var n_cached: usize = 0;
     var n_queued: usize = 0;
 
-    var z: u32 = @intCast(u32, dl_req.zoom_min);
+    var z: u32 = @intCast(dl_req.zoom_min);
     while (z <= dl_req.zoom_max) : (z += 1) {
         const x_min = @divFloor(utilconversion.lon_to_px_x(lon_min, z), config.Tsize);
         const x_max = @divFloor(utilconversion.lon_to_px_x(lon_max, z), config.Tsize);
@@ -216,7 +216,7 @@ pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, can
                 if (cancellable and tile_cache.thread_queuebbox == null) return error.EarlyQueueBboxTermination;
 
                 if (x < 0 or y < 0 or z < 0) continue;
-                const coords = .{ .x = @intCast(u32, x), .y = @intCast(u32, y), .z = @intCast(u8, z) };
+                const coords = types.XYZ{ .x = @intCast(x), .y = @intCast(y), .z = @intCast(z) };
                 if (try tile_cache.tile_exists_in_fs_and_non_expired(coords)) {
                     n_cached += 1;
                 } else {
@@ -269,13 +269,12 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         }
     }
 
-
     if (tile_cache.thread_download == null) {
         return TileData{ .error_type = .Offline };
     } else {
         try tile_cache.queue_lifo_ui.put(coords, void{});
         return TileData{
-            .queued_position = @intCast(u32, if (tile_cache.queue_lifo_ui.getIndex(coords)) |index| index else 0),
+            .queued_position = if (tile_cache.queue_lifo_ui.getIndex(coords)) |index| @intCast(index) else 0,
         };
     }
 }
@@ -303,25 +302,25 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
         if (cstdio.sprintf(
             &url[0],
             &p.get(p.pref.tile_cache_url).t.?[0],
-            @intCast(c_int, coords.x),
-            @intCast(c_int, coords.y),
-            @intCast(c_int, coords.z),
+            @as(c_int, @intCast(coords.x)),
+            @as(c_int, @intCast(coords.y)),
+            @as(c_int, @intCast(coords.z)),
         ) < 0) return error.TileURLSprintfFail;
         break :url url;
     };
     defer tile_cache.allocator.free(tile_url);
 
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @intCast(c_long, 0));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOSIGNAL, @intCast(c_long, 1));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_CONNECTTIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_TIMEOUT, @intCast(c_long, config.DownloadTimeoutSeconds));
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @ptrCast(*anyopaque, tile_url));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOPROGRESS, @as(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_NOSIGNAL, @as(c_long, 1));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_CONNECTTIMEOUT, @as(c_long, @intCast(config.DownloadTimeoutSeconds)));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_TIMEOUT, @as(c_long, @intCast(config.DownloadTimeoutSeconds)));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_URL, @as(*anyopaque, @ptrCast(tile_url)));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_USERAGENT, config.DownloadUseragent);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @as(c_long, 0));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEDATA, transfer_datum);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_WRITEFUNCTION, curl_callback_tile_write);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFODATA, transfer_datum);
-    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @intCast(c_long, 0));
+    try curl_setopt(transfer_datum.client, curl.CURLOPT_VERBOSE, @as(c_long, 0));
     try curl_setopt(transfer_datum.client, curl.CURLOPT_STDERR, tile_cache.dev_null_fd);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, curl_callback_tile_xferinfo);
     try curl_errorcheck(curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client));
@@ -338,7 +337,7 @@ fn curl_callback_tile_xferinfo(
     //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
     _ = ul_total;
     _ = ul_now;
-    var tile_data = @intToPtr(*TransferDatum, @ptrToInt(user_data));
+    const tile_data: *TransferDatum = @alignCast(@ptrCast(user_data));
     tile_data.progress_dl_now = dl_now;
     tile_data.progress_dl_total = dl_total;
     return curl.CURL_PROGRESSFUNC_CONTINUE;
@@ -351,8 +350,8 @@ fn curl_callback_tile_write(
     user_data: *anyopaque,
 ) callconv(.C) c_uint {
     //utildbg.log("Write!!: \n", .{});
-    var transfer_datum = @intToPtr(*TransferDatum, @ptrToInt(user_data));
-    var typed_data = @intToPtr([*]u8, @ptrToInt(data));
+    const transfer_datum: *TransferDatum = @alignCast(@ptrCast(user_data));
+    const typed_data: [*]u8 = @ptrCast(data);
     transfer_datum.data_arraylist.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
     return nmemb * size;
 }
@@ -373,7 +372,7 @@ fn curl_client_to_coords(tile_cache: *@This(), client: ?*curl.CURL) ?types.XYZ {
 }
 
 fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
-    if (curl.curl_easy_setopt(client, @intCast(c_uint, opt), value) != curl.CURLE_OK)
+    if (curl.curl_easy_setopt(client, @intCast(opt), value) != curl.CURLE_OK)
         return error.CurlEasySetOptFail;
 }
 
@@ -388,8 +387,8 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
         \\
     ,
         .{
-            100.0 * (@intToFloat(f32, initial_queue_size - tile_cache.queue_lifo_bg.count()) /
-                @intToFloat(f32, initial_queue_size)),
+            100.0 * @as(f32, @floatFromInt(initial_queue_size - tile_cache.queue_lifo_bg.count()))
+                / @as(f32, @floatFromInt(initial_queue_size)),
             initial_queue_size - tile_cache.queue_lifo_bg.count(),
             initial_queue_size,
             tile_cache.byte_counter / 1024 / 1024,
@@ -419,7 +418,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                 if (tile_cache.cache_dir) |cache_dir| {
                     const memory = try utilsdl.errorcheck_ptr(
                         sdl.SDL_RWops,
-                        sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &datum_array[0]), @intCast(c_int, datum_array.len)),
+                        sdl.SDL_RWFromConstMem(@ptrCast(&datum_array[0]), @intCast(datum_array.len)),
                     );
                     const is_valid_png_data = sdl.SDL_TRUE == sdl.IMG_isPNG(memory);
                     try utilsdl.errorcheck(sdl.SDL_RWclose(memory));
@@ -469,7 +468,7 @@ fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
 fn load_data_to_surface(_: *@This(), data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
-    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(*anyopaque, &data[0]), @intCast(c_int, data.len)));
+    const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(&data[0]), @intCast(data.len)));
     return try utilsdl.errorcheck_ptr(sdl.SDL_Surface, sdl.IMG_Load_RW(memory, 1));
 }
 
@@ -491,7 +490,7 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
         defer tile_cache.allocator.free(png);
         const tile_file = cache_dir.openFile(png, .{}) catch return false;
         defer tile_file.close();
-        const expiry_seconds = @floatToInt(i32, p.get(p.pref.tile_cache_expiry_seconds).f);
+        const expiry_seconds: i32 = @intFromFloat(p.get(p.pref.tile_cache_expiry_seconds).f);
         if (expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + expiry_seconds) {
             return true;
         }
@@ -500,7 +499,7 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
 }
 
 fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
-    var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    const tile_cache: *@This() = @alignCast(@ptrCast(userdata.?));
     if (tile_cache.tile_bg_bbox_queue(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
     } else |err| {
@@ -511,7 +510,7 @@ fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
 }
 
 fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.C) c_int {
-    var tile_cache = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    const tile_cache: *@This() = @alignCast(@ptrCast(userdata.?));
     tile_cache.download_loop(true) catch |e| {
         utildbg.log("Error running download loop: {}\n", .{e});
     };

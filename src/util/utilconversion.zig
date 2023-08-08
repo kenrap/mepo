@@ -41,7 +41,7 @@ pub fn distance_haversine(distance_unit: enum { Km, Mi }, lat_a: f64, lon_a: f64
 }
 
 fn zoom_bit(zoom: u32) f32 {
-    return @intToFloat(f32, (lossyCastWithNan(i32, config.Tsize) << lossyCastWithNan(u5, zoom)));
+    return @floatFromInt((lossyCastWithNan(i32, config.Tsize) << lossyCastWithNan(u5, zoom)));
 }
 
 fn lossyCastWithNan(comptime to_type: type, value: anytype) to_type {

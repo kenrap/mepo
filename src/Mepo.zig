@@ -50,8 +50,8 @@ quit_action: ?[]const u8 = null,
 
 pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
     return switch (lat_or_lon) {
-        .LonToX => -1 * (mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) - utilconversion.lon_to_px_x(lat_lon_value, p.get(p.pref.zoom).u)),
-        .LatToY => -1 * (mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) - utilconversion.lat_to_px_y(lat_lon_value, p.get(p.pref.zoom).u)),
+        .LonToX => -1 * (mepo.get_x() - @as(i32, @intCast(mepo.win_w / 2)) - utilconversion.lon_to_px_x(lat_lon_value, p.get(p.pref.zoom).u)),
+        .LatToY => -1 * (mepo.get_y() - @as(i32, @intCast(mepo.win_h / 2)) - utilconversion.lat_to_px_y(lat_lon_value, p.get(p.pref.zoom).u)),
     };
 }
 
@@ -99,13 +99,13 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const delta_max = 2;
     const run_gesture_opt: ?types.GestureInput = run_gesture: {
         if (e.mgesture.dDist > threshold_pan_dist) {
-            break :run_gesture .{ .action = .Pan, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
+            break :run_gesture .{ .action = .Pan, .direction = .In, .n_fingers = @intCast(mepo.fingers.items.len) };
         } else if (e.mgesture.dDist < -threshold_pan_dist) {
-            break :run_gesture .{ .action = .Pan, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
+            break :run_gesture .{ .action = .Pan, .direction = .Out, .n_fingers = @intCast(mepo.fingers.items.len) };
         } else if (e.mgesture.dTheta > threshold_rotate_radians) {
-            break :run_gesture .{ .action = .Rotate, .direction = .In, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
+            break :run_gesture .{ .action = .Rotate, .direction = .In, .n_fingers = @intCast(mepo.fingers.items.len) };
         } else if (e.mgesture.dTheta < -threshold_rotate_radians) {
-            break :run_gesture .{ .action = .Rotate, .direction = .Out, .n_fingers = @intCast(u8, mepo.fingers.items.len) };
+            break :run_gesture .{ .action = .Rotate, .direction = .Out, .n_fingers = @intCast(mepo.fingers.items.len) };
         }
         break :run_gesture null;
     };
@@ -179,8 +179,8 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
                 const delta = (std.math.absInt(pin_x - cursor.x) catch continue) + (std.math.absInt(pin_y - cursor.y) catch continue);
                 if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
                     closest_match_pin = .{
-                        .pin_group_i = @intCast(u8, pin_group_i),
-                        .pin_i = @intCast(u32, pin_i),
+                        .pin_group_i = @intCast(pin_group_i),
+                        .pin_i = @intCast(pin_i),
                         .delta_dist = delta,
                     };
                 }
@@ -195,7 +195,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     }
 
     // 4. Default back to whatever was bound on bind_click by user
-    const key = .{ .button = e.button.button, .clicks = @intCast(i8, e.button.clicks) };
+    const key = types.ClickInput{ .button = e.button.button, .clicks = @intCast(e.button.clicks) };
     if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
         mepo.mepolang_execute(run_expression) catch unreachable;
@@ -269,7 +269,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_signal(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    if (mepo.table_signals.get(@intCast(u6, e.user.code))) |run_expression| {
+    if (mepo.table_signals.get(@intCast(e.user.code))) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.mepolang_execute(run_expression) catch unreachable;
         return .Redraw;
@@ -292,8 +292,8 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
             utilsdl.errorcheck(sdl.SDL_RenderSetLogicalSize(mepo.renderer, gl_width, gl_height)) catch |err| {
                 utildbg.log("Unable to set logical size: {}\n", .{err});
             };
-            mepo.win_w = @intCast(u32, gl_width);
-            mepo.win_h = @intCast(u32, gl_height);
+            mepo.win_w = @intCast(gl_width);
+            mepo.win_h = @intCast(gl_height);
         },
         else => {
             //utildbg.log("Unhandled SDL Window Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_WindowEventID, @intCast(c_int, e.window.event)))});
@@ -304,7 +304,7 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 }
 
 fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
-    const heap_str = std.mem.sliceTo(@ptrCast([*c]u8, @alignCast(@alignOf([*c]u8), e.user.data1)), 0);
+    const heap_str = std.mem.sliceTo(@as([*c]u8, @ptrCast(e.user.data1)), 0);
     utildbg.log("SDL mepolang event proccessing: <{s}>\n", .{heap_str});
     mepo.mepolang_execute(heap_str) catch |err| {
         utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}\n", .{ heap_str, err });
@@ -485,7 +485,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl:
 }
 
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
-    var mepo = @ptrCast(*@This(), @alignCast(@alignOf(*@This()), userdata.?));
+    const mepo: *@This() = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
     mepo.mepolang_execute(mepo.config) catch unreachable;
     sdl_event_loop(mepo) catch unreachable;
@@ -563,22 +563,22 @@ pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
     _ = sdl.SDL_GetMouseState(&cursor_x, &cursor_y);
     sdl.SDL_GL_GetDrawableSize(mepo.window, &gl_w, &gl_h);
     sdl.SDL_GetWindowSize(mepo.window, &win_w, &win_h);
-    const scale_x = @intToFloat(f64, gl_w) / @intToFloat(f64, win_w);
-    const scale_y = @intToFloat(f64, gl_h) / @intToFloat(f64, win_h);
-    const scaled_x = @floatToInt(c_int, @intToFloat(f64, cursor_x) * scale_x);
-    const scaled_y = @floatToInt(c_int, @intToFloat(f64, cursor_y) * scale_y);
-    return .{ .x = scaled_x, .y = scaled_y };
+    const scale_x = @as(f64, @floatFromInt(gl_w)) / @as(f64, @floatFromInt(win_w));
+    const scale_y = @as(f64, @floatFromInt(gl_h)) / @as(f64, @floatFromInt(win_h));
+    const scaled_x = @as(f64, @floatFromInt(cursor_x)) * scale_x;
+    const scaled_y = @as(f64, @floatFromInt(cursor_y)) * scale_y;
+    return .{ .x = @intFromFloat(scaled_x), .y = @intFromFloat(scaled_y) };
 }
 
 pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
     const cursor = mepo.scaled_mouse_position();
 
     const cursor_lat = utilconversion.px_y_to_lat(
-        mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), 2) + cursor.y,
+        mepo.get_y() - @as(i32, @intCast(mepo.win_h / 2)) + cursor.y,
         p.get(p.pref.zoom).u,
     );
     const cursor_lon = utilconversion.px_x_to_lon(
-        mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), 2) + cursor.x,
+        mepo.get_x() - @as(i32, @intCast(mepo.win_w / 2)) + cursor.x,
         p.get(p.pref.zoom).u,
     );
 
@@ -606,10 +606,10 @@ pub fn set_y(_: *@This(), y: i32) void {
 
 pub fn bounding_box(mepo: *@This()) types.LatLonBox {
     return .{
-        .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), p.get(p.pref.zoom).u),
-        .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), p.get(p.pref.zoom).u),
-        .bottomright_lat = utilconversion.px_y_to_lat(mepo.get_y() + @divTrunc(@intCast(i32, mepo.win_h), @intCast(i32, 2)), p.get(p.pref.zoom).u),
-        .bottomright_lon = utilconversion.px_x_to_lon(mepo.get_x() + @divTrunc(@intCast(i32, mepo.win_w), @intCast(i32, 2)), p.get(p.pref.zoom).u),
+        .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @as(i32, @intCast(mepo.win_h / 2)), p.get(p.pref.zoom).u),
+        .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @as(i32, @intCast(mepo.win_w / 2)), p.get(p.pref.zoom).u),
+        .bottomright_lat = utilconversion.px_y_to_lat(mepo.get_y() + @as(i32, @intCast(mepo.win_h / 2)), p.get(p.pref.zoom).u),
+        .bottomright_lon = utilconversion.px_x_to_lon(mepo.get_x() + @as(i32, @intCast(mepo.win_w / 2)), p.get(p.pref.zoom).u),
     };
 }
 
@@ -760,9 +760,9 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
         fonts[font_size] = try utilsdl.errorcheck_ptr(
             sdl.TTF_Font,
             sdl.TTF_OpenFontRW(
-                sdl.SDL_RWFromConstMem(@ptrCast(*const anyopaque, &font_dat[0]), font_dat.len),
+                sdl.SDL_RWFromConstMem(@ptrCast(&font_dat[0]), font_dat.len),
                 1,
-                @intCast(c_int, font_size),
+                @intCast(font_size),
             ),
         );
         if (bold) sdl.TTF_SetFontStyle(fonts[font_size], sdl.TTF_STYLE_BOLD);

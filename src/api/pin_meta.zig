@@ -15,15 +15,12 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const group = @floatToInt(i32, args[0].Number);
-    const handle = args[1].Text;
-    const key = args[2].Text;
-    const value = args[3].Text;
-    try pin_meta(mepo, group, handle, key, value);
+    try pin_meta(mepo, @intFromFloat(args[0].Number),
+        args[1].Text, args[2].Text, args[3].Text);
 }
 
 pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8, value: [:0]const u8) !void {
-    const pin_group = if (group < 0) mepo.pin_group_active else @intCast(usize, group);
+    const pin_group: usize = if (group < 0) mepo.pin_group_active else @intCast(group);
 
     var pin: *types.Pin = pin: {
         for (mepo.pin_groups[pin_group].items) |*pin| {

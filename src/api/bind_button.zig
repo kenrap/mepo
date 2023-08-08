@@ -19,7 +19,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const visible_only_when_pin_active = args[0].Number == 1;
-    const group_number = if (args[1].Number < 0) null else @floatToInt(u8, args[1].Number);
+    const group_number = if (args[1].Number < 0) null else @as(u8, @intFromFloat(args[1].Number));
     const text = args[2].Text;
     const expression_click_single = args[3].Text;
     const expression_click_hold = args[4].Text;

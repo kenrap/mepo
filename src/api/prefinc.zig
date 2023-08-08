@@ -20,6 +20,6 @@ fn execute(_: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 
     if (p.lookup_pref_from_string(name)) |key| {
         const val = p.get(key).u;
-        p.set_n(key, @intToFloat(f64, val) + delta);
+        p.set_n(key, @as(f64, @floatFromInt(val)) + delta);
     }
 }

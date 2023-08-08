@@ -14,14 +14,12 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const from_group = @floatToInt(i32, args[0].Number);
-    const pin_handle = args[1].Text;
-    const to_group = @floatToInt(usize, args[2].Number);
-    try pin_transfer(mepo, from_group, pin_handle, to_group);
+    try pin_transfer(mepo, @intFromFloat(args[0].Number),
+        args[1].Text, @intFromFloat(args[2].Number));
 }
 
 fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]const u8, to_group: usize) !void {
-    const from_group = if (from_group_number < 0) mepo.pin_group_active else @intCast(usize, from_group_number);
+    const from_group: usize = if (from_group_number < 0) mepo.pin_group_active else @intCast(from_group_number);
     if (from_group == to_group) return;
     defer mepo.blit_pinlayer_cache.clearAndFree();
 
@@ -54,8 +52,8 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
             mepo.pin_group_active_item != null and
             mepo.pin_group_active_item.? == from_pin_i)
         {
-            mepo.pin_group_active = @intCast(u8, to_group);
-            mepo.pin_group_active_item = @intCast(u32, mepo.pin_groups[mepo.pin_group_active].items.len - 1);
+            mepo.pin_group_active = @intCast(to_group);
+            mepo.pin_group_active_item = @intCast(mepo.pin_groups[mepo.pin_group_active].items.len - 1);
         }
     } else {
         for (mepo.pin_groups[from_group].items, 0..) |_, pin_i| {
@@ -65,7 +63,7 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
             _ = mepo.pin_groups[from_group].orderedRemove(0);
         }
         if (from_group == mepo.pin_group_active) {
-            mepo.pin_group_active = @intCast(u8, to_group);
+            mepo.pin_group_active = @intCast(to_group);
         }
     }
 }

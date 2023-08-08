@@ -28,7 +28,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         if (value.len < 1 or value[0] != '#') return error.InvalidColor;
         const color = try std.fmt.parseUnsigned(u24, value[1..], 16);
         if (p.lookup_pref_from_string(name)) |prefname| {
-            p.set_n(prefname, @intToFloat(f64, color));
+            p.set_n(prefname, @floatFromInt(color));
         }
     }
 }

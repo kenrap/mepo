@@ -13,8 +13,8 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const rel_x = @floatToInt(i32, args[0].Number);
-    const rel_y = @floatToInt(i32, args[1].Number);
+    const rel_x: i32 = @intFromFloat(args[0].Number);
+    const rel_y: i32 = @intFromFloat(args[1].Number);
     mepo.set_x(mepo.get_x() + rel_x);
     mepo.set_y(mepo.get_y() + rel_y);
 }

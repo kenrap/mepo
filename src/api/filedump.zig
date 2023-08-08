@@ -44,8 +44,8 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
             var format_as: enum { Text, HexText, Number } = .Number;
 
             const numerical_val: f64 = switch (pref.value) {
-                .b => @intToFloat(f64, @boolToInt(pref.value.b)),
-                .u => @intToFloat(f64, pref.value.u),
+                .b => @floatFromInt(@intFromBool(pref.value.b)),
+                .u => @floatFromInt(pref.value.u),
                 .u24 => v: {
                     format_as = .HexText;
                     break :v -1;
@@ -146,7 +146,7 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         // UI Buttons
         for (mepo.uibuttons.items) |btn| {
             const pins_only_btn: u8 = if (btn.only_visible_when_pin_active) 1 else 0;
-            const group_number: i8 = if (btn.group_number) |g| @intCast(i8, g) else -1;
+            const group_number: i8 = if (btn.group_number) |g| @intCast(g) else -1;
             const statement_button = try std.fmt.allocPrint(
                 arena.allocator(),
                 "bind_button {d} {d} [{s}] [{s}] [{s}];",

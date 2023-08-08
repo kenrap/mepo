@@ -37,7 +37,7 @@ pub fn sdl_push_event_mepolang_execution(mepolang_text: [:0]const u8) void {
     const str_ptr = &mepolang_text[0];
     sdlevent.type = sdl_usereventtype(.Mepolang);
     sdlevent.user.code = 0;
-    sdlevent.user.data1 = @intToPtr([*c]u8, @ptrToInt(str_ptr));
+    sdlevent.user.data1 = @ptrFromInt(@intFromPtr(str_ptr));
     sdlevent.user.data2 = null;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
         utildbg.log("Error pushing mepolang event to SDL queue: {any}\n", .{err});
@@ -54,7 +54,7 @@ pub fn sdl_push_event_signal(signal: c_int) callconv(.C) void {
 pub fn sdl_renderer_set_draw_color(renderer: *sdl.SDL_Renderer, color: types.Color) errors.SDLError!void {
     var sdl_color = color.to_sdl();
     const blend_mode = if (sdl_color.a != sdl.SDL_ALPHA_OPAQUE) sdl.SDL_BLENDMODE_ADD else sdl.SDL_BLENDMODE_NONE;
-    try errorcheck(sdl.SDL_SetRenderDrawBlendMode(renderer, @intCast(c_uint, blend_mode)));
+    try errorcheck(sdl.SDL_SetRenderDrawBlendMode(renderer, @intCast(blend_mode)));
     try errorcheck(sdl.SDL_SetRenderDrawColor(renderer, sdl_color.r, sdl_color.g, sdl_color.b, color.opacity));
 }
 

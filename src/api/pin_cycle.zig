@@ -14,9 +14,8 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const viewport_only = @floatToInt(i32, args[0].Number) == 1;
-    const delta = @floatToInt(i32, args[1].Number);
-    try pin_cycle(mepo, viewport_only, delta);
+    try pin_cycle(mepo, @as(i32, @intFromFloat(args[0].Number)) == 1,
+        @intFromFloat(args[1].Number));
 }
 
 pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
@@ -27,7 +26,7 @@ pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
     const group_unordered = !p.get(p.pingroup_prop(mepo.pin_group_active, .Ordered)).b;
     const add: i32 = if (delta > 0) 1 else -1;
     for (0..std.math.absCast(delta)) |_| {
-        var pin_i: i32 = if (mepo.pin_group_active_item) |active_item| @as(i32, @intCast(active_item)) + add else 0;
+        var pin_i = if (mepo.pin_group_active_item) |active_item| @as(i32, @intCast(active_item)) + add else 0;
 
         // E.g. two conditions to skip and continually increase pin_i:
         // 1. Within an ordered group, structural pins should be skipped
@@ -45,7 +44,7 @@ pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
 }
 
 fn pin_in_viewport(mepo: *Mepo, pin_index: i32) bool {
-    const pin = mepo.pin_groups[mepo.pin_group_active].items[@intCast(usize, pin_index)];
+    const pin = mepo.pin_groups[mepo.pin_group_active].items[@intCast(pin_index)];
     const x = mepo.convert_latlon_to_xy(.LonToX, pin.lon);
     const y = mepo.convert_latlon_to_xy(.LatToY, pin.lat);
     return x > 0 and x < mepo.win_w and y > 0 and y < mepo.win_h;

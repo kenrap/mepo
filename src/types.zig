@@ -66,9 +66,9 @@ pub const Color = struct {
 
     fn to_rgba(self: @This()) RGBA {
         return .{
-            .r = @intCast(u8, self.value >> 16),
-            .g = @intCast(u8, self.value >> 8 & 0xff),
-            .b = @intCast(u8, self.value & 0xff),
+            .r = @intCast(self.value >> 16),
+            .g = @intCast(self.value >> 8 & 0xff),
+            .b = @intCast(self.value & 0xff),
             .a = self.opacity,
         };
     }
@@ -79,7 +79,7 @@ pub const Color = struct {
     }
 
     pub fn to_u32(self: @This()) u32 {
-        return @bitCast(u32, self.to_rgba());
+        return @bitCast(self.to_rgba());
     }
 };
 

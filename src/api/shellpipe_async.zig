@@ -26,9 +26,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const unique_handle_id = @floatToInt(i8, args[0].Number);
-    const cmd = args[1].Text;
-    try async_shellpipe(mepo, unique_handle_id, cmd);
+    try async_shellpipe(mepo, @intFromFloat(args[0].Number), args[1].Text);
 }
 
 fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
@@ -40,7 +38,7 @@ fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
 }
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
-    var shellpipe_request: *AsyncShellpipeRequest = @ptrCast(*AsyncShellpipeRequest, @alignCast(@alignOf(*AsyncShellpipeRequest), userdata.?));
+    var shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
     async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
@@ -80,7 +78,7 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
         const events = try std.os.poll(&poll_fds, std.math.maxInt(i32));
         if (events == 0) continue;
         if (poll_fds[0].revents & std.os.POLL.IN != 0) {
-            try stdout.ensureTotalCapacity(std.math.min(stdout.items.len + bump_amt, max_output_bytes));
+            try stdout.ensureTotalCapacity(@min(stdout.items.len + bump_amt, max_output_bytes));
             if (stdout.unusedCapacitySlice().len == 0) return error.StdoutStreamTooLong;
             const nread = try std.os.read(poll_fds[0].fd, stdout.unusedCapacitySlice());
             if (nread == 0) {

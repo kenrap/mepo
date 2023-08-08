@@ -14,39 +14,39 @@ fn blit_crosshair(mepo: *Mepo) errors.SDLError!void {
     try utilsdl.sdl_renderer_set_draw_color(mepo.renderer, .{ .value = 0x000000 });
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
-        @intCast(c_int, mepo.win_w / 2 - (p.get(p.pref.crosshair_size).u / 2)),
-        @intCast(c_int, mepo.win_h / 2),
-        @intCast(c_int, mepo.win_w / 2 + (p.get(p.pref.crosshair_size).u / 2)),
-        @intCast(c_int, mepo.win_h / 2),
+        @intCast(mepo.win_w / 2 - (p.get(p.pref.crosshair_size).u / 2)),
+        @intCast(mepo.win_h / 2),
+        @intCast(mepo.win_w / 2 + (p.get(p.pref.crosshair_size).u / 2)),
+        @intCast(mepo.win_h / 2),
     ));
     try utilsdl.errorcheck(sdl.SDL_RenderDrawLine(
         mepo.renderer,
-        @intCast(c_int, mepo.win_w / 2),
-        @intCast(c_int, mepo.win_h / 2 - (p.get(p.pref.crosshair_size).u / 2)),
-        @intCast(c_int, mepo.win_w / 2),
-        @intCast(c_int, mepo.win_h / 2 + (p.get(p.pref.crosshair_size).u / 2)),
+        @intCast(mepo.win_w / 2),
+        @intCast(mepo.win_h / 2 - (p.get(p.pref.crosshair_size).u / 2)),
+        @intCast(mepo.win_w / 2),
+        @intCast(mepo.win_h / 2 + (p.get(p.pref.crosshair_size).u / 2)),
     ));
 }
 
 fn blit_tiles_all(mepo: *Mepo, bbox: sdl.SDL_Rect, zoom: u8) !void {
-    const vpx = utilconversion.lon_to_px_x(p.get(p.pref.lon).f, zoom) - @divTrunc(@intCast(i32, mepo.win_w), 2);
-    const vpy = utilconversion.lat_to_px_y(p.get(p.pref.lat).f, zoom) - @divTrunc(@intCast(i32, mepo.win_h), 2);
+    const vpx = utilconversion.lon_to_px_x(p.get(p.pref.lon).f, zoom) - @as(i32, @intCast(mepo.win_w / 2));
+    const vpy = utilconversion.lat_to_px_y(p.get(p.pref.lat).f, zoom) - @as(i32, @intCast(mepo.win_h / 2));
     const begx = vpx - config.Tsize;
     const begy = vpy - config.Tsize;
-    const endx = vpx + @intCast(i32, bbox.w) + config.Tsize;
-    const endy = vpy + @intCast(i32, bbox.h) + config.Tsize;
+    const endx = vpx + @as(i32, @intCast(bbox.w)) + config.Tsize;
+    const endy = vpy + @as(i32, @intCast(bbox.h)) + config.Tsize;
 
-    var tilex: i32 = @intCast(i32, @divFloor(begx, config.Tsize));
-    var tiley: i32 = @intCast(i32, @divFloor(begy, config.Tsize));
+    var tilex: i32 = @intCast(@divFloor(begx, config.Tsize));
+    var tiley: i32 = @intCast(@divFloor(begy, config.Tsize));
 
     var x = begx;
     while (x < endx) {
         var y = begy;
-        tiley = @intCast(i32, @divFloor(begy, config.Tsize));
+        tiley = @intCast(@divFloor(begy, config.Tsize));
         while (y < endy) {
             if (tilex >= 0 and tiley >= 0 and tilex <= std.math.pow(u32, 2, zoom) - 1 and tiley <= std.math.pow(u32, 2, zoom) - 1) {
-                const tilex_int = @intCast(u32, tilex);
-                const tiley_int = @intCast(u32, tiley);
+                const tilex_int: u32 = @intCast(tilex);
+                const tiley_int: u32 = @intCast(tiley);
                 try blit_tile_surface(mepo, tilex_int, tiley_int, zoom, vpx, vpy, bbox);
                 try blit_tile_pinlayer(mepo, tilex_int, tiley_int, zoom, vpx, vpy, bbox);
             }
@@ -60,8 +60,8 @@ fn blit_tiles_all(mepo: *Mepo, bbox: sdl.SDL_Rect, zoom: u8) !void {
 
 fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32, bbox: sdl.SDL_Rect) !void {
     const rect_dest = sdl.SDL_Rect{
-        .x = @intCast(i32, tile_x * config.Tsize) - x_off,
-        .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+        .x = @as(i32, @intCast(tile_x * config.Tsize)) - x_off,
+        .y = @as(i32, @intCast(tile_y * config.Tsize)) - y_off,
         .w = config.Tsize,
         .h = config.Tsize,
     };
@@ -90,8 +90,8 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
                 null,
                 null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
-                @intCast(i32, tile_x * config.Tsize) - x_off,
-                @intCast(i32, tile_y * config.Tsize) - y_off,
+                @as(i32, @intCast(tile_x * config.Tsize)) - x_off,
+                @as(i32, @intCast(tile_y * config.Tsize)) - y_off,
                 20,
                 "Queued",
                 .{},
@@ -100,17 +100,17 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
         .transfer_datum => |transfer_datum| {
             var dl_now_kb: f64 = 0;
             var dl_total_kb: f64 = 0;
-            if (transfer_datum.progress_dl_now) |dln| dl_now_kb = @intToFloat(f64, dln) / 1000;
-            if (transfer_datum.progress_dl_total) |dlt| dl_total_kb = @intToFloat(f64, dlt) / 1000;
+            if (transfer_datum.progress_dl_now) |dln| dl_now_kb = @as(f64, @floatFromInt(dln)) / 1000;
+            if (transfer_datum.progress_dl_total) |dlt| dl_total_kb = @as(f64, @floatFromInt(dlt)) / 1000;
             var percent: f64 = 0;
             if (dl_total_kb != 0) {
                 percent = dl_now_kb / dl_total_kb;
             }
 
             const color = c: {
-                const r = @floatToInt(u24, 255 * percent);
-                const g = @floatToInt(u24, 255 * percent);
-                const b = @floatToInt(u24, 255 * percent);
+                const r = @as(u24, @intFromFloat(255 * percent));
+                const g = @as(u24, @intFromFloat(255 * percent));
+                const b = @as(u24, @intFromFloat(255 * percent));
                 const color: u24 = (r << 16) | (g << 8) | (b << 0);
                 break :c color;
             };
@@ -121,8 +121,8 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
                 null,
                 null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
-                @intCast(i32, tile_x * config.Tsize) - x_off,
-                @intCast(i32, tile_y * config.Tsize) - y_off,
+                @as(i32, @intCast(tile_x * config.Tsize)) - x_off,
+                @as(i32, @intCast(tile_y * config.Tsize)) - y_off,
                 null,
                 "{d:0.2}%\n{d:0.1}/{d:0.1}Kb",
                 .{ percent * 100, dl_now_kb, dl_total_kb },
@@ -137,8 +137,8 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
                 null,
                 null,
                 .{ .w = config.Tsize, .h = config.Tsize, .align_x = .Center, .align_y = .Center },
-                @intCast(i32, tile_x * config.Tsize) - x_off,
-                @intCast(i32, tile_y * config.Tsize) - y_off,
+                @as(i32, @intCast(tile_x * config.Tsize)) - x_off,
+                @as(i32, @intCast(tile_y * config.Tsize)) - y_off,
                 20,
                 "Offline",
                 .{},
@@ -149,8 +149,8 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
 
 fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32, y_off: i32, bbox: sdl.SDL_Rect) !void {
     const rect_dest = sdl.SDL_Rect{
-        .x = @intCast(i32, tile_x * config.Tsize) - x_off,
-        .y = @intCast(i32, tile_y * config.Tsize) - y_off,
+        .x = @as(i32, @intCast(tile_x * config.Tsize)) - x_off,
+        .y = @as(i32, @intCast(tile_y * config.Tsize)) - y_off,
         .w = config.Tsize,
         .h = config.Tsize,
     };
@@ -231,7 +231,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                         mepo,
                         pin,
                         if (prev_pin != null) prev_pin else null,
-                        @intCast(u8, pin_group_i),
+                        @intCast(pin_group_i),
                         is_active_path,
                         .{ .x = tile_x, .y = tile_y, .z = zoom }
                     );
@@ -329,13 +329,16 @@ fn blit_debugmessage(mepo: *Mepo) !void {
 fn get_pin_xyz_and_offsets(pin: *types.Pin, for_zoom: u8) types.XYZAndOffsets {
     const pinx = utilconversion.lon_to_px_x(pin.lon, for_zoom);
     const piny = utilconversion.lat_to_px_y(pin.lat, for_zoom);
-    const pintilex = @intCast(u32, @divFloor(pinx, config.Tsize));
-    const pintiley = @intCast(u32, @divFloor(piny, config.Tsize));
-    const tile_off_x = @intCast(u32, @rem(pinx, config.Tsize));
-    const tile_off_y = @intCast(u32, @rem(piny, config.Tsize));
     return .{
-        .xyz = .{ .x = pintilex, .y = pintiley, .z = for_zoom },
-        .offset = .{ .x = tile_off_x, .y = tile_off_y },
+        .xyz = .{
+            .x = @intCast(@divFloor(pinx, config.Tsize)),
+            .y = @intCast(@divFloor(piny, config.Tsize)),
+            .z = for_zoom,
+        },
+        .offset = .{
+            .x = @intCast(@rem(pinx, config.Tsize)),
+            .y = @intCast(@rem(piny, config.Tsize)),
+        },
     };
 }
 
@@ -344,19 +347,19 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
     const is_active = mepo.pin_group_active_item != null and &mepo.pin_groups[mepo.pin_group_active].items[mepo.pin_group_active_item.?] == pin;
 
     const pindest = get_pin_xyz_and_offsets(pin, for_tile.z);
-    const pin_target_x = ((@intCast(c_int, pindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, pindest.offset.x);
-    const pin_target_y = ((@intCast(c_int, pindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, pindest.offset.y);
-    var prevpin_target_x : ?i32 = null;
-    var prevpin_target_y : ?i32 = null;
+    const pin_target_x = ((@as(c_int, @intCast(pindest.xyz.x)) - @as(c_int, @intCast(for_tile.x))) * config.Tsize) + @as(c_int, @intCast(pindest.offset.x));
+    const pin_target_y = ((@as(c_int, @intCast(pindest.xyz.y)) - @as(c_int, @intCast(for_tile.y))) * config.Tsize) + @as(c_int, @intCast(pindest.offset.y));
+    var prevpin_target_x: ?i32 = null;
+    var prevpin_target_y: ?i32 = null;
     if (prev_pin != null) {
         const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
-        prevpin_target_x = ((@intCast(c_int, prevpindest.xyz.x) - @intCast(c_int, for_tile.x)) * config.Tsize) + @intCast(c_int, prevpindest.offset.x);
-        prevpin_target_y = ((@intCast(c_int, prevpindest.xyz.y) - @intCast(c_int, for_tile.y)) * config.Tsize) + @intCast(c_int, prevpindest.offset.y);
+        prevpin_target_x = ((@as(c_int, @intCast(prevpindest.xyz.x)) - @as(c_int, @intCast(for_tile.x))) * config.Tsize) + @as(c_int, @intCast(prevpindest.offset.x));
+        prevpin_target_y = ((@as(c_int, @intCast(prevpindest.xyz.y)) - @as(c_int, @intCast(for_tile.y))) * config.Tsize) + @as(c_int, @intCast(prevpindest.offset.y));
     }
 
     // 0. Nop Check - ensure that rendered pin/connecting line within tile
     {
-        const font_height = @intCast(i8, config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u]);
+        const font_height: i8 = @intCast(config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u]);
         const n_tiles_font_overlap = 2;
         const pin_in_view = r: {
             const a = pin_target_x > (-config.Tsize * n_tiles_font_overlap)  and pin_target_x < (config.Tsize * n_tiles_font_overlap);
@@ -372,15 +375,15 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
         const connecting_line_in_view = r: {
             if (prev_pin == null) break :r false;
             const prevpindest = get_pin_xyz_and_offsets(prev_pin.?, for_tile.z);
-            var x1 = @intCast(c_int, pindest.xyz.x * config.Tsize + pindest.offset.x);
-            var y1 = @intCast(c_int, pindest.xyz.y * config.Tsize + pindest.offset.y);
-            var x2 = @intCast(c_int, prevpindest.xyz.x * config.Tsize + prevpindest.offset.x);
-            var y2 = @intCast(c_int, prevpindest.xyz.y * config.Tsize + prevpindest.offset.y);
+            var x1: c_int = @intCast(pindest.xyz.x * config.Tsize + pindest.offset.x);
+            var y1: c_int = @intCast(pindest.xyz.y * config.Tsize + pindest.offset.y);
+            var x2: c_int = @intCast(prevpindest.xyz.x * config.Tsize + prevpindest.offset.x);
+            var y2: c_int = @intCast(prevpindest.xyz.y * config.Tsize + prevpindest.offset.y);
             const rect = sdl.SDL_Rect{
-                  .x = @intCast(i32, for_tile.x * config.Tsize),
-                  .y = @intCast(i32, for_tile.y * config.Tsize),
-                  .w = config.Tsize,
-                  .h = config.Tsize,
+                .x = @intCast(for_tile.x * config.Tsize),
+                .y = @intCast(for_tile.y * config.Tsize),
+                .w = config.Tsize,
+                .h = config.Tsize,
             };
             break :r sdl.SDL_IntersectRectAndLine(&rect, &x1, &y1, &x2, &y2) == sdl.SDL_TRUE;
         };
@@ -397,10 +400,10 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
         const connecting_line_color = if (is_active_path) 0xff0000ff else pg_color.to_u32();
         try utilsdl.errorcheck(sdl.aalineColor(
             mepo.renderer,
-            @intCast(i16, prevpin_target_x.?),
-            @intCast(i16, prevpin_target_y.?),
-            @intCast(i16, pin_target_x),
-            @intCast(i16, pin_target_y),
+            @intCast(prevpin_target_x.?),
+            @intCast(prevpin_target_y.?),
+            @intCast(pin_target_x),
+            @intCast(pin_target_y),
             connecting_line_color,
         ));
     }
@@ -472,14 +475,14 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
 
     try utilsdl.sdl_renderer_rect(mepo.renderer, bg, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.win_h) - bottombar_height,
-        .w = @intCast(i32, mepo.win_w),
+        .y = @as(i32, @intCast(mepo.win_h)) - bottombar_height,
+        .w = @intCast(mepo.win_w),
         .h = 200,
     }, .Fill);
     try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0x000000 }, sdl.SDL_Rect{
         .x = 0,
-        .y = @intCast(i32, mepo.win_h) - bottombar_height,
-        .w = @intCast(i32, mepo.win_w),
+        .y = @as(i32, @intCast(mepo.win_h)) - bottombar_height,
+        .w = @intCast(mepo.win_w),
         .h = 1,
     }, .Fill);
     try blit_multiline_text(
@@ -489,10 +492,10 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
         null,
         .{ .align_x = .Right },
         0,
-        @intCast(i32, mepo.win_h) - bottombar_height + 3,
+        @as(i32, @intCast(mepo.win_h)) - bottombar_height + 3,
         null,
         "Dl: {d:.2}Mb ",
-        .{@intToFloat(f32, mepo.tile_cache.byte_counter) / 1024 / 1024},
+        .{@as(f32, @floatFromInt(mepo.tile_cache.byte_counter)) / 1024 / 1024},
     );
     try blit_multiline_text(
         mepo,
@@ -501,14 +504,14 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
         null,
         .{},
         5,
-        @intCast(i32, mepo.win_h) - bottombar_height + 3,
+        @as(i32, @intCast(mepo.win_h)) - bottombar_height + 3,
         null,
         "{d:.3} {d:.3} Z{d} O{d} P{d} Q{d} B{d} D{d} M{d} S{d}",
         .{
             p.get(p.pref.lat).f,
             p.get(p.pref.lon).f,
             p.get(p.pref.zoom).u,
-            @boolToInt(mepo.tile_cache.thread_download != null),
+            @intFromBool(mepo.tile_cache.thread_download != null),
             mepo.pin_group_active,
             mepo.tile_cache.queue_lifo_ui.count(),
             mepo.tile_cache.queue_lifo_bg.count(),
@@ -567,16 +570,16 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
     for (rows) |row| {
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast(row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_lab);
         const surf_val = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast(row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf_val);
-        width_label = std.math.max(width_label, surf_lab.w);
-        width_value = std.math.max(width_value, surf_val.w);
+        width_label = @max(width_label, surf_lab.w);
+        width_value = @max(width_value, surf_val.w);
         height_row = surf_lab.h;
     }
 
@@ -585,13 +588,13 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
         .x = x,
         .y = y,
         .w = width_label + width_value + padding * 4,
-        .h = height_row * @intCast(c_int, rows.len),
+        .h = height_row * @as(c_int, @intCast(rows.len)),
     }, .Fill);
     try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
         .x = x,
         .y = y,
         .w = width_label + width_value + padding * 4,
-        .h = height_row * @intCast(c_int, rows.len),
+        .h = height_row * @as(c_int, @intCast(rows.len)),
     }, .Draw);
 
     // Column divider
@@ -599,20 +602,20 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
         .x = x + width_label + padding * 2,
         .y = y,
         .w = 1,
-        .h = height_row * @intCast(c_int, rows.len),
+        .h = height_row * @as(c_int, @intCast(rows.len)),
     }, .Fill);
 
     for (rows, 0..) |row, row_i| {
         // Label
         const surf_lab = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast(row[0]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_lab = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_lab));
         defer sdl.SDL_FreeSurface(surf_lab);
         var dest_rect_lab = sdl.SDL_Rect{
             .x = x + padding,
-            .y = y + @intCast(c_int, row_i) * height_row,
+            .y = y + @as(c_int, @intCast(row_i)) * height_row,
             .w = surf_lab.w,
             .h = surf_lab.h,
         };
@@ -621,13 +624,13 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
         // Value
         const surf_value = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[p.get(p.pref.fontsize_ui).u], @ptrCast(row[1]), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         const text_value = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf_value));
         defer sdl.SDL_FreeSurface(surf_value);
         var dest_rect_val = sdl.SDL_Rect{
             .x = x + width_label + padding * 3,
-            .y = y + @intCast(c_int, row_i) * height_row,
+            .y = y + @as(c_int, @intCast(row_i)) * height_row,
             .w = surf_value.w,
             .h = surf_value.h,
         };
@@ -636,7 +639,7 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
         // Horizontal border between rows
         try utilsdl.sdl_renderer_rect(mepo.renderer, border_color, sdl.SDL_Rect{
             .x = x,
-            .y = y + @intCast(c_int, row_i) * height_row,
+            .y = y + @as(c_int, @intCast(row_i)) * height_row,
             .w = width_label + width_value + padding * 4,
             .h = 1,
         }, .Fill);
@@ -683,13 +686,13 @@ fn blit_multiline_text(
 
             const text_surf = try utilsdl.errorcheck_ptr(
                 sdl.SDL_Surface,
-                sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[font_size], @ptrCast([*c]const u8, line_sentinel_terminated), (types.Color{ .value = color }).to_sdl()),
+                sdl.TTF_RenderUTF8_Blended(mepo.fonts_normal[font_size], @ptrCast(line_sentinel_terminated), (types.Color{ .value = color }).to_sdl()),
             );
             defer sdl.SDL_FreeSurface(text_surf);
 
             const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, text_surf));
             textures_height += text_surf.h;
-            textures_width = std.math.max(textures_width, text_surf.w);
+            textures_width = @max(textures_width, text_surf.w);
             textures_array[textures_array_size] = text;
             textures_array_size += 1;
         }
@@ -701,7 +704,7 @@ fn blit_multiline_text(
     {
         // Calculate X/Y offsets
         const x_off: c_int = x_off: {
-            const bbox_total_w = @intCast(c_int, if (alignment.w) |w| w else mepo.win_w);
+            const bbox_total_w: c_int = @intCast(if (alignment.w) |w| w else mepo.win_w);
             const offset = switch (alignment.align_x) {
                 .Left => 0,
                 .Right => bbox_total_w - textures_width,
@@ -710,7 +713,7 @@ fn blit_multiline_text(
             break :x_off x + offset;
         };
         var y_off: c_int = y_off: {
-            const bbox_total_h = @intCast(c_int, if (alignment.h) |h| h else mepo.win_h);
+            const bbox_total_h: c_int = @intCast(if (alignment.h) |h| h else mepo.win_h);
             const offset = switch (alignment.align_y) {
                 .Top => 0,
                 .Bottom => bbox_total_h - textures_height,
@@ -758,7 +761,7 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
 
         const surf = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,
-            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast([*c]const u8, mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
+            sdl.TTF_RenderUTF8_Blended(mepo.fonts_bold[p.get(p.pref.fontsize_ui).u], @ptrCast(mepo.uibuttons.items[btn_i].text), (types.Color{ .value = 0x000000 }).to_sdl()),
         );
         defer sdl.SDL_FreeSurface(surf);
 
@@ -779,8 +782,8 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
                 defer pad_right += bg_w;
 
                 break :target sdl.SDL_Rect{
-                    .x = @intCast(c_int, mepo.win_w) - pad_right - bg_w,
-                    .y = @intCast(c_int, mepo.win_h) - bg_h - pad_bottom,
+                    .x = @as(c_int, @intCast(mepo.win_w)) - pad_right - bg_w,
+                    .y = @as(c_int, @intCast(mepo.win_h)) - bg_h - pad_bottom,
                     .w = bg_w + 1,
                     .h = bg_h + 1,
                 };
@@ -836,7 +839,7 @@ pub fn blit(mepo: *Mepo) !void {
     try utilsdl.sdl_renderer_rect(
         mepo.renderer,
         .{ .value = 0xffffff },
-        .{ .x = 0, .y = 0, .w = @intCast(c_int, mepo.win_w), .h = @intCast(c_int, mepo.win_h) },
+        .{ .x = 0, .y = 0, .w = @intCast(mepo.win_w), .h = @intCast(mepo.win_h) },
         .Fill,
     );
     try blit_tiles_all(
@@ -844,8 +847,8 @@ pub fn blit(mepo: *Mepo) !void {
         .{
             .x = 0,
             .y = 0,
-            .w = @intCast(c_int, mepo.win_w),
-            .h = @intCast(c_int, mepo.win_h),
+            .w = @intCast(mepo.win_w),
+            .h = @intCast(mepo.win_h),
         },
         p.get(p.pref.zoom).u,
     );

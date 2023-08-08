@@ -16,9 +16,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const interval_seconds = @floatToInt(u32, args[0].Number);
-    const expression = args[1].Text;
-    try bind_timer(mepo, interval_seconds, expression);
+    try bind_timer(mepo, @intFromFloat(args[0].Number), args[1].Text);
 }
 
 fn bind_timer(mepo: *Mepo, interval_seconds: u32, expression: []const u8) !void {
