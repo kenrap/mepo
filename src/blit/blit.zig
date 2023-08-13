@@ -550,7 +550,7 @@ fn blit_help(mepo: *Mepo) !void {
         0,
         0,
         null,
-        \\mepo - Development version ({s})
+        \\mepo - Version ({s})
         \\ 
         \\Keybindings:
         \\{s}
