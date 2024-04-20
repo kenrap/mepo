@@ -1,8 +1,6 @@
 const std = @import("std");
-const Builder = std.build.Builder;
-const LibExeObjStep = std.build.LibExeObjStep;
 
-fn setDependencies(step: *std.build.LibExeObjStep) void {
+fn setDependencies(step: *std.Build.Step.Compile) void {
     step.linkSystemLibrary("c");
     step.linkSystemLibrary("SDL2");
     step.linkSystemLibrary("SDL2_gfx");
@@ -11,7 +9,7 @@ fn setDependencies(step: *std.build.LibExeObjStep) void {
     step.linkSystemLibrary("curl");
 }
 
-pub fn build(b: *Builder) void {
+pub fn build(b: *std.Build) void {
     b.installDirectory(.{
         .source_dir = .{ .path = "scripts" },
         .install_dir = .{ .bin = {} },
