@@ -362,7 +362,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         if (FnTable.get(statement[0])) |fn_spec| {
             const args: []types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
             var caller_args: [types.MepoFnNargs]types.MepoArg = undefined;
-            std.mem.copy(types.MepoArg, caller_args[0..], args);
+            std.mem.copyForwards(types.MepoArg, caller_args[0..], args);
 
             utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
             _ = mepolang_execute_validate_args(fn_spec, args) catch |e| {
