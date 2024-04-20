@@ -27,13 +27,13 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
     // Signal
     var signal_name: u6 = 0;
     if (std.mem.orderZ(u8, signo_str, "USR1") == .eq) {
-        signal_name = std.os.SIG.USR1;
+        signal_name = std.os.linux.SIG.USR1;
     } else if (std.mem.orderZ(u8, signo_str, "USR2") == .eq) {
-        signal_name = std.os.SIG.USR2;
+        signal_name = std.os.linux.SIG.USR2;
     } else if (std.mem.orderZ(u8, signo_str, "TERM") == .eq) {
-        signal_name = std.os.SIG.TERM;
+        signal_name = std.os.linux.SIG.TERM;
     } else if (std.mem.orderZ(u8, signo_str, "INT") == .eq) {
-        signal_name = std.os.SIG.INT;
+        signal_name = std.os.linux.SIG.INT;
     } else {
         return error.InvalidSignalName;
     }
@@ -45,8 +45,7 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
         .flags = 0,
     };
 
-    std.os.sigaction(signal_name, &signal_action, null)
-        catch return error.FailedToSetupSighandler;
+    std.os.sigaction(signal_name, &signal_action, null) catch return error.FailedToSetupSighandler;
 
     if (mepo.table_signals.get(signal_name)) |heap_str| {
         mepo.allocator.free(heap_str);
