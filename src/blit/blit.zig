@@ -187,7 +187,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         {
             const pingroup_order = order: {
                 // E.g. place active pingroup last so its always ontop in rendering order
-                var groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                const groups = [10]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
                 var target_order: [10]u8 = undefined;
                 var index: u8 = 0;
                 for (groups) |i| {
@@ -201,7 +201,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
 
             for (pingroup_order) |pin_group_i| {
                 const pin_group = mepo.pin_groups[pin_group_i];
-                var is_active_path_track= false;
+                var is_active_path_track = false;
                 var prev_pin: ?*types.Pin = null;
                 for (pin_group.items, 0..) |*pin, pin_i| {
                     defer prev_pin = pin;
@@ -227,26 +227,12 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                         }
                     };
 
-                    try blit_pin(
-                        mepo,
-                        pin,
-                        if (prev_pin != null) prev_pin else null,
-                        @intCast(pin_group_i),
-                        is_active_path,
-                        .{ .x = tile_x, .y = tile_y, .z = zoom }
-                    );
+                    try blit_pin(mepo, pin, if (prev_pin != null) prev_pin else null, @intCast(pin_group_i), is_active_path, .{ .x = tile_x, .y = tile_y, .z = zoom });
                 }
             }
 
             if (mepo.pin_group_active_item) |active_pin_i| {
-                try blit_pin(
-                    mepo,
-                    &mepo.pin_groups[mepo.pin_group_active].items[active_pin_i],
-                    null,
-                    mepo.pin_group_active,
-                    true,
-                    .{ .x = tile_x, .y = tile_y, .z = zoom }
-                );
+                try blit_pin(mepo, &mepo.pin_groups[mepo.pin_group_active].items[active_pin_i], null, mepo.pin_group_active, true, .{ .x = tile_x, .y = tile_y, .z = zoom });
             }
         }
 
@@ -362,14 +348,14 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
         const font_height: i8 = @intCast(config.ZoomLevelToPinFontSize[p.get(p.pref.zoom).u]);
         const n_tiles_font_overlap = 2;
         const pin_in_view = r: {
-            const a = pin_target_x > (-config.Tsize * n_tiles_font_overlap)  and pin_target_x < (config.Tsize * n_tiles_font_overlap);
+            const a = pin_target_x > (-config.Tsize * n_tiles_font_overlap) and pin_target_x < (config.Tsize * n_tiles_font_overlap);
             const b = pin_target_y > -font_height and pin_target_y - (pin_rect_size / 2) < config.Tsize;
             break :r a and b;
         };
         const prevpin_in_view = r: {
             if (prev_pin == null) break :r false;
             const a = prevpin_target_x.? > (-config.Tsize * n_tiles_font_overlap) and prevpin_target_x.? < config.Tsize * n_tiles_font_overlap;
-            const b = prevpin_target_y.? > -font_height and prevpin_target_y.? - (pin_rect_size / 2) < config.Tsize; 
+            const b = prevpin_target_y.? > -font_height and prevpin_target_y.? - (pin_rect_size / 2) < config.Tsize;
             break :r a and b;
         };
         const connecting_line_in_view = r: {
@@ -430,9 +416,9 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
         if (pin.category != .Instructive or mepo.pin_group_active != pin_group)
             break :render_pin_label;
 
-        const pin_label_bg_value : u24 = if (is_active) 0xe8e8e8 else 0xffffff;
+        const pin_label_bg_value: u24 = if (is_active) 0xe8e8e8 else 0xffffff;
         const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
-        const pin_label_border_value : u24 = if (is_active) 0x000000 else 0xe8e8e8;
+        const pin_label_border_value: u24 = if (is_active) 0x000000 else 0xe8e8e8;
         const pin_label_border = .{ .value = pin_label_border_value, .opacity = 255 };
 
         const label_color: u24 = 0x000000;
@@ -525,7 +511,7 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
 fn blit_help(mepo: *Mepo) !void {
     if (!p.get(p.pref.help).b) return;
 
-    var msg = msg: {
+    const msg = msg: {
         var acc = std.ArrayList([]const u8).init(mepo.allocator);
         defer acc.deinit();
         defer for (acc.items) |item| mepo.allocator.free(item);
@@ -658,7 +644,7 @@ fn blit_multiline_text(
     comptime fmt_string: [:0]const u8,
     args: anytype,
 ) !void {
-    var msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
+    const msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
     defer mepo.allocator.free(msg);
 
     const font_size = font_size: {
@@ -673,7 +659,7 @@ fn blit_multiline_text(
     var textures_height: c_int = 0;
 
     // Accumulate lines rendered into slice of textures
-    var textures: []*sdl.SDL_Texture = textures: {
+    const textures: []*sdl.SDL_Texture = textures: {
         var textures_array: [50]*sdl.SDL_Texture = undefined;
         var textures_array_size: usize = 0;
 

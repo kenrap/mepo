@@ -38,7 +38,7 @@ fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
 }
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
-    var shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
+    const shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
     async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
@@ -89,7 +89,7 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
             if (std.mem.lastIndexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
                 const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
                 utildbg.log("Running mepolang statement from async shellpipe: {s}\n", .{statement});
-                var heap_statement = try mepo.allocator.dupeZ(u8, statement);
+                const heap_statement = try mepo.allocator.dupeZ(u8, statement);
                 utilsdl.sdl_push_event_mepolang_execution(heap_statement);
                 try stdout.replaceRange(0, mepolang_statement_end_index + 1, &[_]u8{});
             }

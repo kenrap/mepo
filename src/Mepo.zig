@@ -473,7 +473,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl:
 
         while (true) {
             const stdin = &std.io.getStdIn().reader();
-            var read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
+            const read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
             const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
             mepo.allocator.free(read_slice);
             std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
@@ -509,7 +509,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
 
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
-            var pending_fn = switch (e.type) {
+            const pending_fn = switch (e.type) {
                 sdl.SDL_FINGERDOWN => &event_fingerdown,
                 sdl.SDL_FINGERUP => &event_fingerup,
                 sdl.SDL_KEYUP => &event_keyup,
@@ -734,7 +734,7 @@ pub fn blit(mepo: *@This()) !void {
 pub fn video_init(mepo: *@This()) !void {
     mepo.window = try setup_sdl_video_and_window(mepo.allocator);
     mepo.renderer = renderer: {
-        var r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
+        const r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             mepo.window,
             -1,
             switch (mepo.renderer_type) {
@@ -747,7 +747,7 @@ pub fn video_init(mepo: *@This()) !void {
     };
     var sdl_renderer_info: sdl.SDL_RendererInfo = undefined;
     try utilsdl.errorcheck(sdl.SDL_GetRendererInfo(mepo.renderer, &sdl_renderer_info));
-    utildbg.log("Requested renderer driver {}, using renderer: {s}\n", .{mepo.renderer_type, sdl_renderer_info.name});
+    utildbg.log("Requested renderer driver {}, using renderer: {s}\n", .{ mepo.renderer_type, sdl_renderer_info.name });
     mepo.tile_cache.renderer = mepo.renderer;
 }
 
@@ -774,7 +774,10 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
     return @as(@This(), .{
         .allocator = allocator,
         .blit_pinlayer_cache = datastructure.EvictionHashMap(
-            types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures,
+            types.XYZ,
+            *sdl.SDL_Texture,
+            evict_texture,
+            &config.MaxTextures,
         ).init(allocator),
         .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,

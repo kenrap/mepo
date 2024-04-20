@@ -82,13 +82,13 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
 
         // 2. Transfer from UI LIFO into transfers
         while (tile_cache.queue_lifo_ui.count() > 0 and tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            var coords = tile_cache.queue_lifo_ui.pop();
+            const coords = tile_cache.queue_lifo_ui.pop();
             try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
         }
 
         // 3. Transfer from BG LIFO into transfers
         while (tile_cache.queue_lifo_bg.count() > 0 and tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            var coords = tile_cache.queue_lifo_bg.pop();
+            const coords = tile_cache.queue_lifo_bg.pop();
             try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
         }
 
@@ -259,7 +259,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
         if (file_cached_png_opt) |file_cached_png| {
             defer tile_cache.allocator.free(file_cached_png);
             const surface = tile_cache.load_data_to_surface(file_cached_png) catch |err| {
-                utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{coords, png_fs_path, err});
+                utildbg.log("Errored when loading data for tile {} from FS (file: {s}) to SDL Surface: {}\n", .{ coords, png_fs_path, err });
                 break :load_from_fs;
             };
             defer sdl.SDL_FreeSurface(surface);
@@ -285,7 +285,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
 fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.XYZ, load_to_texture: bool) !void {
     if (tile_cache.transfer_map.get(coords)) |_| return;
 
-    var transfer_datum: *TransferDatum = datum: {
+    const transfer_datum: *TransferDatum = datum: {
         var dat = try tile_cache.allocator.create(TransferDatum);
         dat.client = curl.curl_easy_init().?;
         dat.coords = coords;
@@ -297,7 +297,7 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
     };
     try tile_cache.transfer_map.put(coords, transfer_datum);
 
-    var tile_url = url: {
+    const tile_url = url: {
         var url = try tile_cache.allocator.alloc(u8, p.get(p.pref.tile_cache_url).t.?.len + (3 * 10));
         if (cstdio.sprintf(
             &url[0],
@@ -387,8 +387,7 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
         \\
     ,
         .{
-            100.0 * @as(f32, @floatFromInt(initial_queue_size - tile_cache.queue_lifo_bg.count()))
-                / @as(f32, @floatFromInt(initial_queue_size)),
+            100.0 * @as(f32, @floatFromInt(initial_queue_size - tile_cache.queue_lifo_bg.count())) / @as(f32, @floatFromInt(initial_queue_size)),
             initial_queue_size - tile_cache.queue_lifo_bg.count(),
             initial_queue_size,
             tile_cache.byte_counter / 1024 / 1024,

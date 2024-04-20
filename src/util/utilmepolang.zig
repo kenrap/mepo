@@ -128,7 +128,7 @@ test "statementize" {
     {
         const input = &[_][]const u8{ "foo", "bar", "baz" };
         const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
-        var result = try statementize(std.heap.c_allocator, input[0..]);
+        const result = try statementize(std.heap.c_allocator, input[0..]);
         try std.testing.expectEqual(@as(usize, @intCast(1)), result.len);
         for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
@@ -140,7 +140,7 @@ test "statementize" {
         const input = &[_][]const u8{ "foo", "bar", "baz", ";", "bil", "nil", ";" };
         const expect_0 = [_][]const u8{ "foo", "bar", "baz" };
         const expect_1 = [_][]const u8{ "bil", "nil" };
-        var result = try statementize(std.heap.c_allocator, input[0..]);
+        const result = try statementize(std.heap.c_allocator, input[0..]);
         try std.testing.expectEqual(@as(usize, @intCast(2)), result.len);
         for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
@@ -155,7 +155,7 @@ test "statementize" {
         const input = &[_][]const u8{ "foo", "[", "bar", "[", "gill", "]", "]", "baz", ";", "bil", "nil", ";" };
         const expect_0 = [_][]const u8{ "foo", "[", "bar", "[", "gill", "]", "]", "baz" };
         const expect_1 = [_][]const u8{ "bil", "nil" };
-        var result = try statementize(std.heap.c_allocator, input[0..]);
+        const result = try statementize(std.heap.c_allocator, input[0..]);
         try std.testing.expectEqual(@as(usize, @intCast(2)), result.len);
         for (result[0], 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect_0[idx], result[0][idx]));
@@ -168,7 +168,7 @@ test "statementize" {
     // Returns error for unmatched [] inputs
     {
         const input = &[_][]const u8{ "foo", "]", ";" };
-        var result = statementize(std.heap.c_allocator, input[0..]);
+        const result = statementize(std.heap.c_allocator, input[0..]);
         try std.testing.expectEqual(result, error.UnbalancedBrackets);
     }
 }
@@ -177,8 +177,8 @@ test "tokenize" {
     {
         // basic tokenization test based on whitespace
         const input = "foo bar baz";
-        var expect = [_][]const u8{ "foo", "bar", "baz" };
-        var result = try tokenize(std.heap.c_allocator, input);
+        const expect = [_][]const u8{ "foo", "bar", "baz" };
+        const result = try tokenize(std.heap.c_allocator, input);
         try std.testing.expectEqual(@as(usize, @intCast(3)), result.len);
         for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
@@ -188,8 +188,8 @@ test "tokenize" {
     {
         // e.g. treats [] brackets as individual tokens irregardless of whitespace (test [foo])
         const input = "foo bar [baz]";
-        var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
-        var result = try tokenize(std.heap.c_allocator, input);
+        const expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
+        const result = try tokenize(std.heap.c_allocator, input);
         try std.testing.expectEqual(@as(usize, @intCast(5)), result.len);
         for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
@@ -199,8 +199,8 @@ test "tokenize" {
     {
         // e.g. treats [] brackets as individual tokens irregardless of whitespace (test [ foo])
         const input = "foo bar [ baz]";
-        var expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
-        var result = try tokenize(std.heap.c_allocator, input);
+        const expect = [_][]const u8{ "foo", "bar", "[", "baz", "]" };
+        const result = try tokenize(std.heap.c_allocator, input);
         try std.testing.expectEqual(@as(usize, @intCast(5)), result.len);
         for (result, 0..) |_, idx| {
             try std.testing.expect(std.mem.eql(u8, expect[idx], result[idx]));
@@ -217,7 +217,7 @@ test "argize" {
         expect: []const types.MepoArg,
     };
 
-    var specs = [_]spec{
+    const specs = [_]spec{
         .{
             // Standard check to make sure text / numbers argized properly
             .input = &[_][]const u8{ "arga", "22.2" },
