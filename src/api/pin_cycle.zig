@@ -14,8 +14,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try pin_cycle(mepo, @as(i32, @intFromFloat(args[0].Number)) == 1,
-        @intFromFloat(args[1].Number));
+    try pin_cycle(mepo, @as(i32, @intFromFloat(args[0].Number)) == 1, @intFromFloat(args[1].Number));
 }
 
 pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
@@ -25,7 +24,7 @@ pub fn pin_cycle(mepo: *Mepo, viewport_only: bool, delta: i32) !void {
     var target_i = if (mepo.pin_group_active_item) |active_item| @as(i32, @intCast(active_item)) else 0;
     const group_unordered = !p.get(p.pingroup_prop(mepo.pin_group_active, .Ordered)).b;
     const add: i32 = if (delta > 0) 1 else -1;
-    for (0..std.math.absCast(delta)) |_| {
+    for (0..@abs(delta)) |_| {
         var pin_i = target_i + add;
         // E.g. two conditions to skip and continually increase pin_i:
         // 1. Within an ordered group, structural pins should be skipped
