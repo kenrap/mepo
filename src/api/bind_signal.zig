@@ -39,13 +39,13 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
     }
 
     // Register generic signal handler
-    const signal_action = std.os.Sigaction{
+    const signal_action = std.posix.Sigaction{
         .handler = .{ .handler = utilsdl.sdl_push_event_signal },
-        .mask = std.os.empty_sigset,
+        .mask = std.posix.empty_sigset,
         .flags = 0,
     };
 
-    std.os.sigaction(signal_name, &signal_action, null) catch return error.FailedToSetupSighandler;
+    std.posix.sigaction(signal_name, &signal_action, null) catch return error.FailedToSetupSighandler;
 
     if (mepo.table_signals.get(signal_name)) |heap_str| {
         mepo.allocator.free(heap_str);
