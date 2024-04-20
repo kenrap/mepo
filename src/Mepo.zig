@@ -710,7 +710,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
             config.InitWindowH,
             sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         ));
-        if (std.os.getenv("MEPO_WINDOW_REPOSITION")) |reposition| {
+        if (std.posix.getenv("MEPO_WINDOW_REPOSITION")) |reposition| {
             if (reposition.len == 1 and reposition[0] == '1') {
                 sdl.SDL_SetWindowPosition(w, 0, 0);
             }

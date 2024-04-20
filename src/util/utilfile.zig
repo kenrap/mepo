@@ -29,8 +29,8 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
             .default_home_path = ".cache",
         },
     }) |default_mapping| {
-        if (std.os.getenv(default_mapping.env_var) != null) continue;
-        if (std.os.getenv("HOME")) |home_dir| {
+        if (std.posix.getenv(default_mapping.env_var) != null) continue;
+        if (std.posix.getenv("HOME")) |home_dir| {
             const value = try std.fmt.allocPrintZ(allocator, "{s}/{s}", .{ home_dir, default_mapping.default_home_path });
             defer allocator.free(value);
             _ = cstdlib.setenv(&default_mapping.env_var[0], &value[0], 1);
