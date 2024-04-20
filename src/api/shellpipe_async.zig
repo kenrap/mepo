@@ -68,19 +68,19 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
     var stdout = std.ArrayList(u8).init(mepo.allocator);
     errdefer stdout.deinit();
 
-    var poll_fds = [_]std.os.pollfd{
-        .{ .fd = child.stdout.?.handle, .events = std.os.POLL.IN, .revents = undefined },
+    var poll_fds = [_]std.posix.pollfd{
+        .{ .fd = child.stdout.?.handle, .events = std.posix.POLL.IN, .revents = undefined },
     };
     const bump_amt = 512;
 
     var continue_reading = true;
     while (continue_reading) {
-        const events = try std.os.poll(&poll_fds, std.math.maxInt(i32));
+        const events = try std.posix.poll(&poll_fds, std.math.maxInt(i32));
         if (events == 0) continue;
-        if (poll_fds[0].revents & std.os.POLL.IN != 0) {
+        if (poll_fds[0].revents & std.posix.POLL.IN != 0) {
             try stdout.ensureTotalCapacity(@min(stdout.items.len + bump_amt, max_output_bytes));
             if (stdout.unusedCapacitySlice().len == 0) return error.StdoutStreamTooLong;
-            const nread = try std.os.read(poll_fds[0].fd, stdout.unusedCapacitySlice());
+            const nread = try std.posix.read(poll_fds[0].fd, stdout.unusedCapacitySlice());
             if (nread == 0) {
                 continue_reading = false;
                 continue;
@@ -93,7 +93,7 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
                 utilsdl.sdl_push_event_mepolang_execution(heap_statement);
                 try stdout.replaceRange(0, mepolang_statement_end_index + 1, &[_]u8{});
             }
-        } else if (poll_fds[0].revents & (std.os.POLL.ERR | std.os.POLL.NVAL | std.os.POLL.HUP) != 0) {
+        } else if (poll_fds[0].revents & (std.posix.POLL.ERR | std.posix.POLL.NVAL | std.posix.POLL.HUP) != 0) {
             continue_reading = false;
             continue;
         }
