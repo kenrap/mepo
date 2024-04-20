@@ -23,8 +23,8 @@ debug_message: ?[]const u8 = null,
 drag: ?struct {
     begin_ticks: u32,
     point: sdl.SDL_Point,
-    delta_x: i32 = 0,
-    delta_y: i32 = 0,
+    delta_x: u32 = 0,
+    delta_y: u32 = 0,
 } = null,
 fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
@@ -169,14 +169,14 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         var closest_match_pin: ?struct {
             pin_group_i: u8,
             pin_i: u32,
-            delta_dist: i32,
+            delta_dist: u32,
         } = null;
         for (mepo.pin_groups, 0..) |pin_group, pin_group_i| {
             for (pin_group.items, 0..) |*item, pin_i| {
                 if (item.category == .Structural) continue;
                 const pin_x = mepo.convert_latlon_to_xy(.LonToX, item.lon);
                 const pin_y = mepo.convert_latlon_to_xy(.LatToY, item.lat);
-                const delta = (std.math.absInt(pin_x - cursor.x) catch continue) + (std.math.absInt(pin_y - cursor.y) catch continue);
+                const delta = @abs(pin_x - cursor.x) + @abs(pin_y - cursor.y);
                 if (delta < config.ClickPinMaxDelta and (closest_match_pin == null or closest_match_pin.?.delta_dist > delta)) {
                     closest_match_pin = .{
                         .pin_group_i = @intCast(pin_group_i),
@@ -212,8 +212,8 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.drag != null and mepo.within_touch_bounds(cursor.x, cursor.y)) {
         mepo.drag.?.point.x = cursor.x;
         mepo.drag.?.point.y = cursor.y;
-        mepo.drag.?.delta_x += std.math.absInt(e.motion.xrel) catch unreachable;
-        mepo.drag.?.delta_y += std.math.absInt(e.motion.yrel) catch unreachable;
+        mepo.drag.?.delta_x += @abs(e.motion.xrel);
+        mepo.drag.?.delta_y += @abs(e.motion.yrel);
         mepo.set_x(mepo.get_x() - (e.motion.xrel * p.get(p.pref.drag_scale).u));
         mepo.set_y(mepo.get_y() - (e.motion.yrel * p.get(p.pref.drag_scale).u));
         return .Drag;
