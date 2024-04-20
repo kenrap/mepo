@@ -618,7 +618,7 @@ pub fn graceful_terminate_sdl() void {
     sdl.IMG_Quit();
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
-    std.os.exit(0);
+    std.posix.exit(0);
 }
 
 pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
