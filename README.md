@@ -69,7 +69,7 @@ bookmarks, and more.
 Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
 
 ## **Releases**
-The most current release is 1.2.0 which builds against zig 0.11.x.
+The most current release is 1.2.1 which builds against zig 0.12.x.
 
 Details on releases are available at: [releases page](https://git.sr.ht/~mil/mepo/refs).
     
