@@ -14,8 +14,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try pin_transfer(mepo, @intFromFloat(args[0].Number),
-        args[1].Text, @intFromFloat(args[2].Number));
+    try pin_transfer(mepo, @intFromFloat(args[0].Number), args[1].Text, @intFromFloat(args[2].Number));
 }
 
 fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]const u8, to_group: usize) !void {

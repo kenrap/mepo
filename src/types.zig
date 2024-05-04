@@ -6,10 +6,10 @@ pub const Latlon = struct { lat: f64, lon: f64 };
 pub const XYZ = struct { x: u32, y: u32, z: u8 };
 pub const XYZAndOffsets = struct {
     xyz: XYZ,
-    offset: struct{ x: u32, y: u32 },
+    offset: struct { x: u32, y: u32 },
 };
 
-pub const RendererType = enum{ Auto, HW, SW };
+pub const RendererType = enum { Auto, HW, SW };
 
 pub const Pin = struct {
     lat: f64,
@@ -32,8 +32,8 @@ pub const UIButton = struct {
     group_number: ?u8,
 };
 
-pub const MepoArgTag = enum { Text, Number };
-pub const MepoArg = union(MepoArgTag) { Text: [:0]const u8, Number: f64 };
+pub const MepoArgTag = enum { Text, Number, Exps };
+pub const MepoArg = union(MepoArgTag) { Text: [:0]const u8, Number: f64, Exps: []const u8 };
 
 pub const MepoFnNargs = 6;
 

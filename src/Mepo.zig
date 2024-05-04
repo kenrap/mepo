@@ -333,84 +333,112 @@ fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
     sdl.SDL_DestroyTexture(texture);
 }
 
+fn mepolang_execute_parseargs(
+    allocator: std.mem.Allocator,
+    fn_spec_args: []const types.MepoFnSpecArg,
+    map: std.json.ArrayHashMap(std.json.Value),
+) anyerror![types.MepoFnNargs]types.MepoArg {
+    var args: [types.MepoFnNargs]types.MepoArg = undefined;
+    for (fn_spec_args, 0..) |spec_arg, i| {
+        if (map.map.get(spec_arg.name)) |arg| {
+            switch (arg) {
+                .float => |parsedFloat| {
+                    if (spec_arg.tag != .Number) return error.InvalidArgTypeGotFloat;
+                    args[i] = .{ .Number = parsedFloat };
+                },
+                .integer => |parsedInt| {
+                    if (spec_arg.tag != .Number) return error.InvalidArgTypeGotInt;
+                    args[i] = .{ .Number = @floatFromInt(parsedInt) };
+                },
+                .string => |parsedText| {
+                    if (spec_arg.tag != .Text) return error.InvalidArgTypeGotText;
+                    args[i] = .{ .Text = try allocator.dupeZ(u8, parsedText) };
+                },
+                .array => |g| {
+                    if (spec_arg.tag != .Exps) return error.InvalidArgTypeGotExps;
+                    const str = try std.json.stringifyAlloc(allocator, g.items, .{});
+                    args[i] = .{ .Exps = str };
+                },
+                else => return error.InvalidArgsTypeGotUnknown,
+            }
+        } else {
+            utildbg.log("Missing argument {s} for spec\n", .{spec_arg.name});
+            return error.MissingArgForSpec;
+        }
+    }
+    return args;
+}
+
 pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
-    // Fairly clean, mepolang parsing/execution works in essentially 3 steps:
-    //
-    // 1. Tokenize: converts raw text input into tokens so "[];" are always
-    //              treated as seperate tokens
-    //
-    // 2. Statementize: Given tokens, group tokens into statements based on
-    //                  semicolons, thus allowing passing compound code.
-    //                  Ignore nested [] so statemnts are always 'top-level'.
-    //
-    // 3. Argize: Given tokens, convert into union values which are actually
-    //            type-specific args (like numbers, strings, etc.)
-    //
-    // Only question remaining re-refactoring is perhaps maybe through a
-    // wrapper fn, argize should be a part of statementize? Might be a bit
-    // cleaner that way, but either way underlying tests / fn boundaries &
-    // API would stay the same..
+    const Statement = struct {
+        command: []u8,
+        args: std.json.ArrayHashMap(std.json.Value),
+    };
+    const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), mepolang_text, .{}) catch |e| {
+        utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}", .{ e, mepolang_text });
+        return;
+    };
 
-    for (try utilmepolang.statementize(arena.allocator(), try utilmepolang.tokenize(arena.allocator(), mepolang_text))) |statement| {
-        utildbg.log("Executing statment: {s}\n", .{statement});
-        if (statement.len < 1) continue;
-
-        // Lookup and run fn
-        if (FnTable.get(statement[0])) |fn_spec| {
-            const args: []types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
-            var caller_args: [types.MepoFnNargs]types.MepoArg = undefined;
-            std.mem.copyForwards(types.MepoArg, caller_args[0..], args);
-
-            utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
-            _ = mepolang_execute_validate_args(fn_spec, args) catch |e| {
-                utildbg.log("Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
-                const err = try std.fmt.allocPrintZ(mepo.allocator, "Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
-                defer mepo.allocator.free(err);
-                try mepo.update_debug_message(err);
-                return;
-            };
-
-            fn_spec.execute(mepo, caller_args) catch |mepolang_err| {
-                utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
-            };
-            try mepo.update_debug_message(null);
-        } else if (statement[0].len == 1 and statement[0][0] == '#') {
-            // Comment nop
-        } else {
-            utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
-        }
-    }
-}
-
-fn mepolang_execute_validate_args(spec: types.MepoFnSpec, args: []types.MepoArg) !bool {
-    if (spec.args.len != args.len) return error.NumberOfArgsInvalid;
-
-    for (spec.args, 0..) |expect_spec_arg, expect_spec_arg_i| {
-        switch (expect_spec_arg.tag) {
-            .Number => {
-                switch (args[expect_spec_arg_i]) {
-                    .Text => {
-                        utildbg.log("Expected number, got text in position {} (value={})\n", .{ expect_spec_arg_i, args[expect_spec_arg_i] });
-                        return error.ExpectNumberGotText;
-                    },
-                    .Number => continue,
+    switch (parsed.value) {
+        .array => |value| {
+            for (value.items) |v| {
+                const p2 = std.json.parseFromValue(Statement, std.heap.page_allocator, v, .{}) catch |e| {
+                    utildbg.log("JSON Value parse error for mepo statement: {} / {}", .{ e, v });
+                    return;
+                };
+                const command = p2.value.command;
+                if (FnTable.get(command)) |fn_spec| {
+                    const args = mepolang_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
+                        std.debug.print("Error parsing args: {}\n", .{args_error});
+                        return;
+                    };
+                    std.debug.print("Run command: {s} with args: {any}\n", .{ command, args });
+                    fn_spec.execute(mepo, args) catch |mepolang_err| {
+                        utildbg.log("Error running API function for: {s}: {}\n", .{ command, mepolang_err });
+                    };
+                    try mepo.update_debug_message(null);
+                } else {
+                    utildbg.log("Invalid JSON command specified: {s}", .{command});
                 }
-            },
-            .Text => {
-                switch (args[expect_spec_arg_i]) {
-                    .Number => {
-                        utildbg.log("Expected text , got number in position {} (value={})\n", .{ expect_spec_arg_i, args[expect_spec_arg_i] });
-                        return error.ExpectTextGotNumber;
-                    },
-                    .Text => continue,
-                }
-            },
-        }
+            }
+        },
+        else => {
+            utildbg.log("Attempted to parse Mepo JSON API commands but not an array: {s}", .{mepolang_text});
+        },
     }
-    return true;
+
+    //for (try utilmepolang.statementize(arena.allocator(), try utilmepolang.tokenize(arena.allocator(), mepolang_text))) |statement| {
+    //    utildbg.log("Executing statment: {s}\n", .{statement});
+    //    if (statement.len < 1) continue;
+
+    //    // Lookup and run fn
+    //    if (FnTable.get(statement[0])) |fn_spec| {
+    //        const args: []types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
+    //        var caller_args: [types.MepoFnNargs]types.MepoArg = undefined;
+    //        std.mem.copyForwards(types.MepoArg, caller_args[0..], args);
+
+    //        utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
+    //        _ = mepolang_execute_validate_args(fn_spec, args) catch |e| {
+    //            utildbg.log("Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
+    //            const err = try std.fmt.allocPrintZ(mepo.allocator, "Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
+    //            defer mepo.allocator.free(err);
+    //            try mepo.update_debug_message(err);
+    //            return;
+    //        };
+
+    //        fn_spec.execute(mepo, caller_args) catch |mepolang_err| {
+    //            utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
+    //        };
+    //        try mepo.update_debug_message(null);
+    //    } else if (statement[0].len == 1 and statement[0][0] == '#') {
+    //        // Comment nop
+    //    } else {
+    //        utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
+    //    }
+    //}
 }
 
 fn dispatch_check_click_hold(mepo: *@This()) void {

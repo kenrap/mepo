@@ -21,9 +21,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try cache_dlbbox(mepo,
-        args[0].Number, args[1].Number, args[2].Number, args[3].Number,
-        @intFromFloat(args[4].Number), @intFromFloat(args[5].Number));
+    try cache_dlbbox(mepo, args[0].Number, args[1].Number, args[2].Number, args[3].Number, @intFromFloat(args[4].Number), @intFromFloat(args[5].Number));
 }
 
 fn cache_dlbbox(mepo: *Mepo, a_lat: f64, a_lon: f64, b_lat: f64, b_lon: f64, zoom_min: i32, zoom_max: i32) !void {

@@ -1,0 +1,3 @@
+[
+  {"command": "prefset_n", "args": {"prefname": "tile_cache_network", "prefvalue": 1}}
+]

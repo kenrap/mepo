@@ -16,8 +16,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try pin_add(mepo, @intFromFloat(args[0].Number), args[1].Number == 1,
-        args[2].Number, args[3].Number, args[4].Text);
+    try pin_add(mepo, @intFromFloat(args[0].Number), args[1].Number == 1, args[2].Number, args[3].Number, args[4].Text);
 }
 
 fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, handle: [:0]const u8) !void {

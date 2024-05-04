@@ -15,8 +15,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try pin_meta(mepo, @intFromFloat(args[0].Number),
-        args[1].Text, args[2].Text, args[3].Text);
+    try pin_meta(mepo, @intFromFloat(args[0].Number), args[1].Text, args[2].Text, args[3].Text);
 }
 
 pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8, value: [:0]const u8) !void {

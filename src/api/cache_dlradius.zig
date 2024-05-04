@@ -20,9 +20,7 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try cache_dlradius(mepo, args[0].Number, args[1].Number,
-        @intFromFloat(args[2].Number), @intFromFloat(args[3].Number),
-        args[4].Number);
+    try cache_dlradius(mepo, args[0].Number, args[1].Number, @intFromFloat(args[2].Number), @intFromFloat(args[3].Number), args[4].Number);
 }
 
 fn cache_dlradius(mepo: *Mepo, center_lat: f64, center_lon: f64, zoom_min: i32, zoom_max: i32, km_radius: f64) !void {
