@@ -1,3 +1,43 @@
 [
-  {"command": "prefset_n", "args": {"prefname": "tile_cache_network", "prefvalue": 1}}
+  {"command": "prefset_n", "args": {"prefname": "debug_stderr", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "lat", "prefvalue":  40.78392}},
+  {"command": "prefset_n", "args": {"prefname": "lon", "prefvalue":  -73.96442}},
+  {"command": "prefset_n", "args": {"prefname": "fontsize_ui", "prefvalue":  16}},
+  {"command": "prefset_n", "args": {"prefname": "distance_unit_tf_km_mi", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "crosshair_size", "prefvalue":  15}},
+  {"command": "prefset_n", "args": {"prefname": "debug_message_enabled", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "overlay_debugbar", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "overlay_pindetails", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "overlay_pindetails_expanded", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "zoom", "prefvalue":  14}},
+  {"command": "prefset_n", "args": {"prefname": "tile_cache_network", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "tile_cache_max_n_transfers", "prefvalue":  20}},
+  {"command": "prefset_n", "args": {"prefname": "tile_cache_expiry_seconds", "prefvalue":  2592000}},
+
+  {"command": "prefset_t", "args": {"prefname": "tile_cache_dir",   "prefvalue": "$XDG_CACHE_HOME/mepo/tiles"}},
+  {"command": "prefset_t", "args": {"prefname": "tile_cache_url",   "prefvalue": "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_0_color", "prefvalue": "#0000ff"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_1_color", "prefvalue": "#116e0e"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_2_color", "prefvalue": "#7502ab"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_3_color", "prefvalue": "#cf0064"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_4_color", "prefvalue": "#b89600"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_5_color", "prefvalue": "#00b0aa"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_6_color", "prefvalue": "#ff8308"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_7_color", "prefvalue": "#004a0c"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_8_color", "prefvalue": "#ff00a2"}},
+  {"command": "prefset_t", "args": {"prefname": "pingroup_9_color", "prefvalue": "#fff673"}},
+
+  {"command": "prefset_n", "args": {"prefname": "pingroup_0_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_1_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_2_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_3_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_4_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_5_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_6_ordered", "prefvalue":  0}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_7_ordered", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_8_ordered", "prefvalue":  1}},
+  {"command": "prefset_n", "args": {"prefname": "pingroup_9_ordered", "prefvalue":  1}}
+
+
+
 ]
