@@ -4,20 +4,19 @@
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5, pmOS devices etc.) and both
-environment's various user interfaces (Wayland & X inclusive). Mepo
-works both offline and online, features a minimalist both touch/mouse
-and keyboard compatible interface, and offers a UNIX-philosophy
-inspired underlying design, exposing a powerful command language called
-[Mepolang](http://mepo.milesalan.com/mepolang.html) capable of being
-scripted to provide things like custom bounding-box search scripts,
-bookmarks, and more.
+environment's various user interfaces (Wayland & X inclusive). Mepo works
+both offline and online, is fast, features a minimalist both touch/mouse
+and keyboard compatible interface, and offers a simple & powerful JSON
+API to allow the user to change & add functionality such as adding their
+own search & routing scripts, add arbitrary buttons/keybindings to the
+UI, and more.
 
 - [Documentation Website](http://mepo.milesalan.com)
 - [Demo Video on postmarketOS phone](http://mepo.milesalan.com/demos.html#mobile-demo-major-features)
 - [Videos of User Interface](http://mepo.milesalan.com/demos.html)
 - [Install Guide](http://mepo.milesalan.com/installguide.html)
 - [User Guide](http://mepo.milesalan.com/userguide.html)
-- [Mepolang](http://mepo.milesalan.com/mepolang.html)
+- [JSON API](http://mepo.milesalan.com/mepolang.html)
 
 ## **Features**
 
@@ -28,25 +27,20 @@ bookmarks, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **UNIX-philosophy inspired design - scriptability via [mepolang](http://mepo.milesalan.com/mepolang.html)**:
-  - Mepo's UI is built **to do one thing well**: download & render maps.
-    Extra functionality is enabled via its command language / API (Mepolang).
-  - Reduces overall application logic complexity, handing over to
-    shell-scripting integral features like map bounding-box searches,
-    location search lookup, bookmarking, dropping pins, routing,
-    rebinding keys, and more.
-  - Uses single abstraction (central pin API via Mepolang) for indicating
-    and placing user-defined coordinates graphically on the map (e.g. same
-    mechanism used generically between POI searches, bookmarks, routing, etc.)
-  - Existing OSM tools for search & routing like the [Nominatim](https://nominatim.org/),
-    [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API), and
-    [GraphHopper](https://www.graphhopper.com/) APIs are integrated through
-    [bundled shell scripts](https://git.sr.ht/~mil/mepo/tree/master/item/scripts); 
-    customize to your heart's content or write your own scripts for
-    custom integrations.
-  - Bundled scripts utilize menuing and user input functionality via
-    [zenity](https://help.gnome.org/users/zenity/stable/) rather then
-    implementing application-specific input logic.
+- **Simple JSON API for Scripting & Extending](http://mepo.milesalan.com/mepolang.html)**:
+  - Mepos core UI is built out to be as minimal as possible, only handling map rendering,
+    displaying, pins, and simple IO operation (keybinding, mouse callbacks, etc.)
+  - Extendeded functionality such as integrations (via Nominatim, Overpass), 
+    routing (via Mobroute and GraphHopper), and similar are built out utilizing
+    Mepos extensible JSON API
+  - The JSON API allows you to
+    - Reposition the map, change tileserver, etc.
+    - Change preferences
+    - Create arbitrary buttons to run other API commands
+    - Create arbitrary keybindings to run other API commands
+    - Inject pin data onto the map
+    - Modify pin "groups" to collect sets of pins together
+    - And more
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
     through a command-line flag.
