@@ -409,36 +409,6 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
             utildbg.log("Attempted to parse Mepo JSON API commands but not an array: {s}", .{mepolang_text});
         },
     }
-
-    //for (try utilmepolang.statementize(arena.allocator(), try utilmepolang.tokenize(arena.allocator(), mepolang_text))) |statement| {
-    //    utildbg.log("Executing statment: {s}\n", .{statement});
-    //    if (statement.len < 1) continue;
-
-    //    // Lookup and run fn
-    //    if (FnTable.get(statement[0])) |fn_spec| {
-    //        const args: []types.MepoArg = try utilmepolang.argize(arena.allocator(), statement[1..statement.len]);
-    //        var caller_args: [types.MepoFnNargs]types.MepoArg = undefined;
-    //        std.mem.copyForwards(types.MepoArg, caller_args[0..], args);
-
-    //        utildbg.log("Running API function for: {s} requested by mepolang input statement: {s}\n", .{ statement[0], statement });
-    //        _ = mepolang_execute_validate_args(fn_spec, args) catch |e| {
-    //            utildbg.log("Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
-    //            const err = try std.fmt.allocPrintZ(mepo.allocator, "Invalid args provided for ({s}) - {any}: (spec args: {d}, given args: {d}) wanted ({any}) but has {any}\n", .{ statement[0], e, fn_spec.args.len, args.len, fn_spec.args, args });
-    //            defer mepo.allocator.free(err);
-    //            try mepo.update_debug_message(err);
-    //            return;
-    //        };
-
-    //        fn_spec.execute(mepo, caller_args) catch |mepolang_err| {
-    //            utildbg.log("Error running API function for: {s}: {}\n", .{ statement[0], mepolang_err });
-    //        };
-    //        try mepo.update_debug_message(null);
-    //    } else if (statement[0].len == 1 and statement[0][0] == '#') {
-    //        // Comment nop
-    //    } else {
-    //        utildbg.log("Requested API function {s} but that's not registered in ftable\n", .{statement[0]});
-    //    }
-    //}
 }
 
 fn dispatch_check_click_hold(mepo: *@This()) void {
