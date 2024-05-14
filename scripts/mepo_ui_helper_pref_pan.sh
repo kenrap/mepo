@@ -18,13 +18,13 @@ main() {
   fi
 
   echo '
-    {
-      "command": "move_relative",
+    [{
+      "cmd": "move_relative",
       "args": {
         "rel_x": '$PANX',
         "rel_y": '$PANY'
       }
-    }
+    }]
   ';
 }
 
