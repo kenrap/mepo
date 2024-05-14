@@ -7,7 +7,12 @@ DOC='
 '
 
 main() {
-  echo "preftoggle tile_cache_network;"
+  echo '[{
+    "cmd": "preftoggle",
+    "args": {
+      "pref": "tile_cache_network"
+    }
+  }]'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi

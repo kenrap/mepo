@@ -56,8 +56,11 @@ main() {
 
   LAT="$(echo "$COORDS" | cut -d ' ' -f1)"
   LON="$(echo "$COORDS" | cut -d ' ' -f2)"
-  echo "prefset_n lat $LAT;"
-  echo "prefset_n lon $LON;"
+
+  echo '[
+    {"cmd": "prefset_n", "args": {"pref": "lat", "value": '$LAT'}},
+    {"cmd": "prefset_n", "args": {"pref": "lon", "value": '$LON'}}
+  ]'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi

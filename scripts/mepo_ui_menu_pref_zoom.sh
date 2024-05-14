@@ -7,10 +7,18 @@ DOC='
 '
 
 main() {
-  echo prefset_n zoom "$(
-    seq 1 16 |
-    PROMPT="Zoom" mepo_ui_helper_menu.sh
-  );"
+  echo '
+    [{
+      "cmd": "prefset_n",
+      "args": {
+        "pref": "zoom",
+        "value": '$(
+          seq 1 16 |
+          PROMPT="Zoom" mepo_ui_helper_menu.sh
+        )'
+      }
+    }]
+  '
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
