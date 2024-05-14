@@ -12,7 +12,6 @@ pub const CliFlags = &[_]struct {
     .{ .flag = "-docman", .desc = "Print manpage documentation for the mepolang API to STDOUT.  Can be viewed with man via: `mepo -docman | man -l`." },
     .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Can be used for interactive debugging or scripting via: `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR." },
-    .{ .flag = "-ndc", .desc = "Disable default/base config, this is useful if you have a custom config and don't wish to use the default bindings, etc.. for example: `cat my_config | mepo -ndc -i`." },
     .{ .flag = "-hw", .desc = "Force using hardware renderer rather then default auto (HW/SW) renderer." },
     .{ .flag = "-sw", .desc = "Force using software renderer rather then default auto (HW/SW) renderer." },
     .{ .flag = "-tx", .desc = "Number of textures to load to (GPU) memory for both OSM & pile tile layer cache (defaults to 200).", .param = "#" },
@@ -111,9 +110,7 @@ const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
     \\the current release version. Note, preferences can
     \\be overridden directly for example with `prefset_n` and
-    \\`prefset_t`. While there are not unbinding commands currently
-    \\supported, you can forgo the default configuration by using
-    \\the `-ndc` commandline flag.
+    \\`prefset_t`.
 ;
 
 pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }) !void {
