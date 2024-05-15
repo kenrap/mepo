@@ -29,29 +29,50 @@ mapoverpassjsontopins() {
   JSON_RESULTS="$1"
   UNTITLED_LABEL="$2"
 
-  # E.g. label set to 'tags.name (id)'
-  # when tags.name unset; label will appear just as '$UNTITLED_LABEL (id)'
-  PINHANDLEJQ='if .tags.name then .tags.name else "'${UNTITLED_LABEL}'" end + " (" + (.id|tostring) + ")"'
+  PINSETUPCOMMANDS='
+    {"cmd": "prefset_n", "args": { "pref": "pingroup_0_ordered", "value": 0}},
+    {"cmd": "pin_groupactivate", "args": {"group": 0}},
+    {"cmd": "pin_purge", "args": {}}
+  '
 
-  # Add pin
-  echo "$JSON_RESULTS" | jq '
-    .elements | .[] | select(.lat != null and .lon != null) |
-    "pin_add -1 0 \(.lat) \(.lon) [\('"$PINHANDLEJQ"')];"
-  ' | tr -d ',"'
+  PINADDCOMMANDS="$(
+    echo "$JSON_RESULTS" | jq '
+      .elements |
+      map(
+        select(.lat != null and .lon != null) |
+        (
+          if .tags.name then
+            .tags.name
+          else
+            "'${UNTITLED_LABEL}'"
+          end + " (" + (.id|tostring) + ")"
+        ) as $handle |
 
+        # Pin add
+        {
+          "cmd": "pin_add",
+          "args": { "handle": $handle, "lat": .lat, "lon":.lon }
+        } as $pin_add | 
 
-  # Add pin metadata
-  echo "$JSON_RESULTS" | jq '
-    .elements | .[] | select(.lat != null and .lon != null) |
-    ('"$PINHANDLEJQ"') as $handle |
-    [.tags] |
-    map(
-      to_entries |
-      map("pin_meta -1 [" + $handle + "] [" + .key + "] [" + .value + "];")
-    ) |
-    flatten(3) |
-    .[]
-  ' | tr -d ',"'
+        # Pin metadata
+        [
+          if .tags != null then
+            .tags | with_entries(
+              .value={
+                "cmd": "pin_meta", "args": { "handle": $handle, "key": .key, "value": .value }
+              }
+            ) | map(.)
+           else
+             null
+           end
+         ] as $pin_meta  | 
+         
+         [ $pin_add , $pin_meta ]
+      ) | flatten | del(..|nulls)
+    '
+  )"
+
+  echo "[$PINSETUPCOMMANDS, $PINADDCOMMANDS]" | jq flatten
 }
 
 main() {
@@ -70,11 +91,6 @@ main() {
   fi
 
   JSON_RESULTS="$(curloverpass "$SCOPE")"
-  echo "
-    prefset_n pingroup_0_ordered 0;
-    pin_groupactivate 0;
-    pin_purge;
-  "
   mapoverpassjsontopins "$JSON_RESULTS" "$(echo "$SCOPE" | cut -d: -f1 | tr -d '[]')"
 }
 
