@@ -78,17 +78,44 @@ droppin() {
   LAT="$(echo "$COORDS" | cut -d " " -f1)"
   LON="$(echo "$COORDS" | cut -d " " -f2)"
 
-  echo "pin_add 6 0 $COORDS user_location;"
-  echo "pin_meta 6 user_location lat [$LAT];"
-  echo "pin_meta 6 user_location lon [$LON];"
-  echo "pin_meta 6 user_location source $SOURCE;"
-  echo "pin_meta 6 user_location updated_at [$(date)];"
+  echo '[
+    {
+      "cmd": "pin_add",
+      "args": {
+        "group": 6,
+        "lat": '$LAT',
+        "lon": '$LON',
+        "handle": "user_location"
+      }
+    },
+    {
+      "cmd": "pin_meta",
+      "args": {
+        "group": 6,
+        "handle": "user_location",
+        "key": "source",
+        "value": "'$SOURCE'"
+      }
+    },
+    {
+      "cmd": "pin_meta",
+      "args": {
+        "group": 6,
+        "handle": "user_location",
+        "key": "updated_at",
+        "value": "'$(date)'"
+      }
+    }
+  ]'
 }
 
 droppinactivateandcenter() {
-  droppin
-  echo "pin_activate 6 user_location;"
-  echo "center_on_pin;"
+  BASEJSON="$(droppin)"
+  ACTIVATEANDCENTERJSON='[
+    {"cmd": "pin_activate", "args": {"group": 6, "handle": "user_location"}},
+    {"cmd": "center_on_pin", "args": {}}
+  ]'
+  echo '[ '"$BASEJSON"', '"$ACTIVATEANDCENTERJSON"' ]' | jq flatten
 }
 
 main() {
