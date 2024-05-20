@@ -147,7 +147,7 @@
   {"cmd": "bind_gesture", "args": { "action": "pan", "fingers": 2, "direction": 1, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
   {"cmd": "bind_gesture", "args": { "action": "pan", "fingers": 2, "direction": -1, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
   {"cmd": "bind_gesture", "args": { "action": "rotate", "fingers": 3, "direction": 1, "exps": [{"cmd": "prefinc", "args": {"pref": "fontsize_ui", "delta": 1 }}]}},
-  {"cmd": "bind_gesture", "args": { "action": "rotate", "fingers": 3, "direction": -1, "exps": [{"cmd": "prefinc", "args": {"pref": "fontsize_ui", "delta" -1}}]}},
+  {"cmd": "bind_gesture", "args": { "action": "rotate", "fingers": 3, "direction": -1, "exps": [{"cmd": "prefinc", "args": {"pref": "fontsize_ui", "delta": -1}}]}},
 
   {"cmd": "bind_signal", "args": { "sig": "USR1", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
   {"cmd": "bind_signal", "args": { "sig": "USR2", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
