@@ -7,7 +7,7 @@ pub const spec = .{
     .desc = "Transfer a pin from one group to another.",
     .args = &.{
         .{ .tag = .Number, .name = "from_group", .desc = "Group number, or `-1` for the current group number." },
-        .{ .tag = .Text, .name = "handle", .desc = "Handle of the pin to transfer; or empty string `[]` will transfer the current pin. Use the string `all` for all pins in group." },
+        .{ .tag = .Text, .name = "handle", .desc = "Handle of the pin to transfer; or empty string  will transfer the current pin. Use the string `all` for all pins in group." },
         .{ .tag = .Number, .name = "to_group", .desc = "Group number" },
     },
     .execute = execute,
