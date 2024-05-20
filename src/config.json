@@ -155,5 +155,9 @@
   {"cmd": "bind_signal", "args": { "sig": "INT", "exps": [{"cmd": "quit", "args": {}}]}},
 
   {"cmd": "bind_timer", "args": { "secs": 20, "exps": [ {"cmd": "shellpipe_async", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppin"}} ]}},
-  {"cmd": "shellpipe_async", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppin"}} 
+  {"cmd": "shellpipe_async", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppin"}},
+
+  {"cmd": "bind_key", "args": { "mod": "c", "key": "s", "json_exps": [{"cmd": "filedump", "args": {"datatypes": "rp", "filepath": "/home/m/foo.json"}}]}}
+
+
 ]
