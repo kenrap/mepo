@@ -6,9 +6,9 @@ const utilfile = @import("../util/utilfile.zig");
 pub const spec = .{
     .name = "fileload",
     .desc = "Load mepolang from an arbitrary filesystem file.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to load" },
-    })[0..],
+    },
     .execute = execute,
 };
 

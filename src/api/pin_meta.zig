@@ -5,12 +5,12 @@ const std = @import("std");
 pub const spec = .{
     .name = "pin_meta",
     .desc = "Update a pin's metadata.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
         .{ .tag = .Text, .name = "pin_handle", .desc = "Pin handle" },
         .{ .tag = .Text, .name = "key", .desc = "Metadata key to update" },
         .{ .tag = .Text, .name = "value", .desc = "New value for metadata key" },
-    })[0..],
+    },
     .execute = execute,
 };
 

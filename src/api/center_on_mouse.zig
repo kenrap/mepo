@@ -7,7 +7,7 @@ const p = @import("../util/utilprefs.zig");
 pub const spec = .{
     .name = "center_on_mouse",
     .desc = "Center the map on the current position of the mouse.",
-    .args = (&[_]types.MepoFnSpecArg{})[0..],
+    .args = &.{},
     .execute = execute,
 };
 

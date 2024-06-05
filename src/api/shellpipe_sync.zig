@@ -11,9 +11,9 @@ const sdl = @import("../sdlshim.zig");
 pub const spec = .{
     .name = "shellpipe_sync",
     .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a mepolang expression.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
-    })[0..],
+    },
     .execute = execute,
 };
 

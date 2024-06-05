@@ -7,12 +7,12 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "bind_gesture",
     .desc = "Bind a multitouch gesture event to execute a mepolang action.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Text, .name = "action", .desc = "Gesture action (set to either `pan` or `rotate`)" },
         .{ .tag = .Number, .name = "fingers", .desc = "Number of fingers to trigger expression" },
         .{ .tag = .Number, .name = "direction", .desc = "Direction for gesture (e.g. `1` for in or `-1` for out)" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
-    })[0..],
+    },
     .execute = execute,
 };
 

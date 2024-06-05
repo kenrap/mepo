@@ -7,10 +7,10 @@ const p = @import("../util/utilprefs.zig");
 pub const spec = .{
     .name = "prefset_n",
     .desc = "Set a preference number value.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
         .{ .tag = .Number, .name = "prefvalue", .desc = "Preference number value" },
-    })[0..],
+    },
     .execute = execute,
 };
 

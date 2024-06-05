@@ -7,11 +7,11 @@ const utildbg = @import("../util/utildbg.zig");
 pub const spec = .{
     .name = "bind_click",
     .desc = "Bind a particular number of successive clicks to run a mepolang action.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Number, .name = "button", .desc = "Mousebutton to bind (`1` = left, `2` = right, `3` = middle)" },
         .{ .tag = .Number, .name = "clicks", .desc = "Number of successive clicks to trigger action" },
         .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
-    })[0..],
+    },
     .execute = execute,
 };
 

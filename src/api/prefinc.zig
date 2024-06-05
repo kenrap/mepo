@@ -7,10 +7,10 @@ const p = @import("../util/utilprefs.zig");
 pub const spec = .{
     .name = "prefinc",
     .desc = "Increase or decrease a preference by the given delta value.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
         .{ .tag = .Number, .name = "delta", .desc = "Delta value to increment/decrement (positive or negative)" },
-    })[0..],
+    },
     .execute = execute,
 };
 

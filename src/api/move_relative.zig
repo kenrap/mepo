@@ -5,10 +5,10 @@ const std = @import("std");
 pub const spec = .{
     .name = "move_relative",
     .desc = "Move the map by a relative x/y amount.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Number, .name = "rel_x", .desc = "Relative x amount" },
         .{ .tag = .Number, .name = "rel_y", .desc = "Relative y amount" },
-    })[0..],
+    },
     .execute = execute,
 };
 

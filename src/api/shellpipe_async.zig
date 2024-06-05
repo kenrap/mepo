@@ -18,10 +18,10 @@ const AsyncShellpipeRequest = struct {
 pub const spec = .{
     .name = "shellpipe_async",
     .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as a mepolang expression.",
-    .args = (&[_]types.MepoFnSpecArg{
+    .args = &.{
         .{ .tag = .Number, .name = "unique_handle_id", .desc = "Optional id to deduplicate individual async shellpipe requests" },
         .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
-    })[0..],
+    },
     .execute = execute,
 };
 
