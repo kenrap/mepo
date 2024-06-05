@@ -15,15 +15,15 @@ main() {
     PROMPT="Download Zoom Min:" mepo_ui_helper_menu.sh 
   )"
 
-  ZOOM_MAX="$(
-    seq $BOUND_LOWER $BOUND_UPPER |
-    PROMPT="Download Zoom Max:" mepo_ui_helper_menu.sh 
-  )"
-
   if ! { [ -n "$ZOOM_MIN" ] && [ "$ZOOM_MIN" -gt -1 ] && [ "$ZOOM_MIN" -lt 20 ]; }; then
     echo "Invalid minimum zoom level" >&2
     exit 1
   fi
+
+  ZOOM_MAX="$(
+    seq $BOUND_LOWER $BOUND_UPPER |
+    PROMPT="Download Zoom Max:" mepo_ui_helper_menu.sh
+  )"
 
   if ! { [ -n "$ZOOM_MAX" ] && [ "$ZOOM_MAX" -gt -1 ] && [ "$ZOOM_MAX" -lt 20 ]; }; then
     echo "Invalid maximum zoom level" >&2
