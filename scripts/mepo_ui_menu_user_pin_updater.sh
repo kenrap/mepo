@@ -17,7 +17,7 @@ DOC='
 [ -z "$MEPO_GEOLOCATE_COORDSVIAMETHOD" ] && MEPO_GEOLOCATE_COORDSVIAMETHOD="coordsviageoclue"
 
 coordsviamls() {
-  MLSRESULT="$(curl "${MEPO_ENDPOINT_MLS}?key=$MEPO_APIKEY_MLS")"
+  MLSRESULT="$(curl -Ss "${MEPO_ENDPOINT_MLS}?key=$MEPO_APIKEY_MLS")"
   LAT="$(echo "$MLSRESULT" | jq '.location.lat')"
   LON="$(echo "$MLSRESULT" | jq '.location.lng')"
   echo "$LAT $LON"

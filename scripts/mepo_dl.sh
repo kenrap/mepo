@@ -48,7 +48,7 @@ nominatim_spec() {
   LOCATION="$(prompt Location: | sed 's/ /%20/g')"
 
   OPTIONS="$(
-    curl "https://nominatim.openstreetmap.org/search?format=json&q=$LOCATION" |
+    curl -Ss "https://nominatim.openstreetmap.org/search?format=json&q=$LOCATION" |
       jq  '.[] | select(.osm_type == "relation") | "\(.display_name) \(.boundingbox)" ' |
       tr -d '\]\[\\"' |
       sed -E 's/([^ ]+)$/ | \1/g' |

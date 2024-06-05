@@ -31,7 +31,7 @@ main() {
   )"
 
   JSON_RESULTS="$(
-    curl "${MEPO_ENDPOINT_OVERPASS}" --data-raw "data=
+    curl -Ss "${MEPO_ENDPOINT_OVERPASS}" --data-raw "data=
       [out:json][timeout:25];
       rel(${RELATIONID});
       (._;>>;);

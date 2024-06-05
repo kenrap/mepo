@@ -12,7 +12,7 @@ DOC='
 curloverpass() {
   SCOPE="$(echo "$SCOPE" | cut -d: -f1 | tr '\n' ' ')"
   BBOX="$MEPO_BR_LAT,$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON"
-  curl "$MEPO_ENDPOINT_OVERPASS" --data-raw "data=
+  curl -Ss "$MEPO_ENDPOINT_OVERPASS" --data-raw "data=
       [out:json][timeout:25];
       (
         node${SCOPE}(${BBOX});

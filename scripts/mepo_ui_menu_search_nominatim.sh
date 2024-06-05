@@ -11,7 +11,7 @@ DOC='
 [ -z "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" ] && MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES='https://wiki.openstreetmap.org/wiki/Special:Export/Nominatim/Special_Phrases/EN'
 
 nominatimspecialphrasesfromwiki() {
-  curl "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" |
+  curl -Ss "$MEPO_ENDPOINT_OSM_WIKI_SPECIALPHRASES" |
     grep '^| ' |
     grep -v '| -' |
     sed -E 's/\|\|.+$//g' |
@@ -33,7 +33,7 @@ main() {
 
   VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
   JSONRESULTS="$(
-    curl "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
+    curl -Ss "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
   )"
 
   echo "
