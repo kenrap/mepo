@@ -34,11 +34,12 @@ fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     sp_req.unique_handle_id = unique_handle_id;
     sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
     sp_req.mepo = mepo;
-    _ = sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req);
+    sdl.SDL_DetachThread(sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req));
 }
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
     const shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
+    defer shellpipe_request.mepo.allocator.destroy(shellpipe_request);
     async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
