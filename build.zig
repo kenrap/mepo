@@ -11,7 +11,7 @@ fn setDependencies(step: *std.Build.Step.Compile) void {
 
 pub fn build(b: *std.Build) void {
     b.installDirectory(.{
-        .source_dir = .{ .path = "scripts" },
+        .source_dir = b.path("scripts"),
         .install_dir = .{ .bin = {} },
         .install_subdir = "",
     });
@@ -24,7 +24,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const exe = b.addExecutable(.{
         .name = "mepo",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -42,7 +42,7 @@ pub fn build(b: *std.Build) void {
 
     // Setup test
     const tests = b.addTest(.{
-        .root_source_file = .{ .path = "./src/test.zig" },
+        .root_source_file = b.path("./src/test.zig"),
         .target = target,
         .optimize = optimize,
     });
