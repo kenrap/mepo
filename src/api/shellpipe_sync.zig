@@ -32,7 +32,7 @@ fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
     try mepo.blit();
     const env_vars = try get_env_vars(mepo, arena.allocator());
     const args = [_][]const u8{ "sh", "-c", cmd };
-    const process_result = try std.ChildProcess.run(.{
+    const process_result = try std.process.Child.run(.{
         .allocator = arena.allocator(),
         .argv = args[0..],
         .env_map = &env_vars,
