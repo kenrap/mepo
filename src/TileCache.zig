@@ -425,7 +425,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
                     // Save to FS
                     if (is_valid_png_data) {
                         const path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
-                        try cache_dir.writeFile(path, datum_array);
+                        try cache_dir.writeFile(.{ .sub_path = path, .data = datum_array });
                     }
                 }
                 if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
