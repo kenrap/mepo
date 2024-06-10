@@ -71,6 +71,8 @@ Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mep
 ## **Releases**
 The most current release is 1.2.1 which builds against zig 0.12.x.
 
+The master branch currently builds against zig 0.13.x.
+
 Details on releases are available at: [releases page](https://git.sr.ht/~mil/mepo/refs).
     
 
