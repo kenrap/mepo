@@ -19,8 +19,8 @@ pub const spec = .{
     .name = "shellpipe_async",
     .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as a mepolang expression.",
     .args = &.{
-        .{ .tag = .Number, .name = "unique_handle_id", .desc = "Optional id to deduplicate individual async shellpipe requests" },
-        .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
+        .{ .tag = .Number, .name = "unique_handle_id", .desc = "Optional id to deduplicate individual async shellpipe requests", .default_value = .{ .Number = 1} },
+        .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
     },
     .execute = execute,
 };

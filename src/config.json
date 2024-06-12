@@ -178,5 +178,8 @@
   {"cmd": "bind_signal", "args": { "sig": "USR1", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
   {"cmd": "bind_signal", "args": { "sig": "USR2", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
   {"cmd": "bind_signal", "args": { "sig": "TERM", "exps": [{"cmd": "quit", "args": {}}]}},
-  {"cmd": "bind_signal", "args": { "sig": "INT", "exps": [{"cmd": "quit", "args": {}}]}}
+  {"cmd": "bind_signal", "args": { "sig": "INT", "exps": [{"cmd": "quit", "args": {}}]}},
+
+  {"cmd": "bind_timer", "args": { "secs": 20, "exps": [ {"cmd": "shellpipe_async", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppin"}} ]}},
+  {"cmd": "shellpipe_async", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppin"}} 
 ]
