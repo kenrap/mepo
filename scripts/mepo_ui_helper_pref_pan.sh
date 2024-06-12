@@ -17,7 +17,15 @@ main() {
     PANX="$(echo "$MEPO_WIN_W * $MULT" | bc)"
   fi
 
-  echo "move_relative $PANX $PANY";
+  echo '
+    {
+      "command": "move_relative",
+      "args": {
+        "rel_x": '$PANX',
+        "rel_y": '$PANY'
+      }
+    }
+  ';
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi

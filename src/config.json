@@ -45,5 +45,32 @@
   {"command": "bind_key", "args": { "modifier": "_", "key": "l", "json_exps": [{"command": "move_relative", "args": { "rel_x": 10   , "rel_y": 0}}]}},
   {"command": "bind_key", "args": { "modifier": "s", "key": "l", "json_exps": [{"command": "move_relative", "args": { "rel_x": 100  , "rel_y": 0}}]}},
   {"command": "bind_key", "args": { "modifier": "_", "key": "=", "json_exps": [{"command": "zoom_relative", "args": { "zoom_delta": 1}}]}},
-  {"command": "bind_key", "args": { "modifier": "_", "key": "-", "json_exps": [{"command": "zoom_relative", "args": { "zoom_delta": -1}}]}}
+  {"command": "bind_key", "args": { "modifier": "_", "key": "-", "json_exps": [{"command": "zoom_relative", "args": { "zoom_delta": -1}}]}},
+
+  {"command": "bind_key", "args": { "modifier": "_", "key": "n", "json_exps": [{"command": "pin_cycle", "args": { "viewport_only": 1, "delta": 1}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "p", "json_exps": [{"command": "pin_cycle", "args": { "viewport_only": 0, "delta": -1}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "n", "json_exps": [
+    {"command": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}},
+    {"command": "center_on_pin", "args": {}}
+  ]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "p", "json_exps": [
+    {"command": "pin_cycle", "args": { "viewport_only": 0, "delta": -1}},
+    {"command": "center_on_pin", "args": {}}
+  ]}},
+
+
+  {"command": "bind_key", "args": { "modifier": "_", "key": "o", "json_exps": [{"command": "pin_deactivate", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "o", "json_exps": [{"command": "pin_purge", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "w", "json_exps": [{"command": "cache_queueclear", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "c", "key": "c", "json_exps": [{"command": "quit", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "y", "json_exps": [{"command": "clipcopy", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "y", "json_exps": [{"command": "clippaste", "args": {}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "=", "json_exps": [{"command": "prefinc", "args": {"prefname": "fontsize_ui", "delta": 1}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "-", "json_exps": [{"command": "prefinc", "args": {"prefname": "fontsize_ui", "delta": -1}}]}},
+
+
+  {"command": "bind_key", "args": { "modifier": "c", "key": "f", "json_exps": [{"command": "shellpipe_sync", "args": {"shellcode": "DIM=h MULT=1  mepo_ui_helper_pref_pan.sh"}}]}},
+  {"command": "bind_key", "args": { "modifier": "c", "key": "b", "json_exps": [{"command": "shellpipe_sync", "args": {"shellcode": "DIM=h MULT=-1  mepo_ui_helper_pref_pan.sh"}}]}},
+  {"command": "bind_key", "args": { "modifier": "cs", "key": "f", "json_exps": [{"command": "shellpipe_sync", "args": {"shellcode": "DIM=w MULT=1  mepo_ui_helper_pref_pan.sh"}}]}},
+  {"command": "bind_key", "args": { "modifier": "cs", "key": "b", "json_exps": [{"command": "shellpipe_sync", "args": {"shellcode": "DIM=w MULT=-1  mepo_ui_helper_pref_pan.sh"}}]}}
 ]

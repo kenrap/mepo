@@ -134,10 +134,13 @@ pub const DefaultBaseConfig = @embedFile("config.json");
 //    \\ bind_key s z [shellpipe_sync mepo_ui_menu_pref_fontsize.sh];
 //    \\ bind_key _ z [shellpipe_sync mepo_ui_menu_pref_zoom.sh];
 //    \\ bind_key _ u [shellpipe_sync mepo_ui_menu_pref_url.sh];
+
 //    \\ bind_key c f [shellpipe_sync  [DIM=h MULT=1  mepo_ui_helper_pref_pan.sh]];
 //    \\ bind_key c b [shellpipe_sync  [DIM=h MULT=-1 mepo_ui_helper_pref_pan.sh]];
 //    \\ bind_key cs f [shellpipe_sync [DIM=w MULT=1  mepo_ui_helper_pref_pan.sh]];
 //    \\ bind_key cs b [shellpipe_sync [DIM=w MULT=-1 mepo_ui_helper_pref_pan.sh]];
+
+
 //    \\ bind_key _ q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadinteractive.sh]];
 //    \\ bind_key s q [shellpipe_sync [mepo_ui_menu_dbg_queuedownloadnoninteractive.sh]];
 //    \\ bind_key _ x [shellpipe_sync [mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter]];

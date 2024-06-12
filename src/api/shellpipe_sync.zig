@@ -12,7 +12,7 @@ pub const spec = .{
     .name = "shellpipe_sync",
     .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a mepolang expression.",
     .args = &.{
-        .{ .tag = .Text, .name = "shell_statement", .desc = "Shell statement to execute" },
+        .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
     },
     .execute = execute,
 };
