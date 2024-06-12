@@ -6,9 +6,9 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_quit",
-    .desc = "Bind a mepolang expression to run on quitting the application.",
+    .desc = "Bind JSON commands to run on quitting the application.",
     .args = &.{
-        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON commands to run" },
     },
     .execute = execute,
 };

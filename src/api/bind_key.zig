@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_key",
-    .desc = "Bind a key combination to execute a mepolang action.",
+    .desc = "Bind a key combination to execute a JSON commands.",
     .args = &.{
         .{ .tag = .Text, .name = "mod", .desc = "Modifier combination (`c`=control, `s`=shift, `a`=alt); ex. `cs` would mean control and shift" },
         .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indiscriminate since modifier handled by modifier argument" },

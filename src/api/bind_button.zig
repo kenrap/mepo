@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_button",
-    .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
+    .desc = "Create a UI button which executes a JSON commands. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
     .args = &.{
         .{ .tag = .Number, .name = "pin_only", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin.", .default_value = .{ .Number = 0 } },
         .{ .tag = .Number, .name = "group", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group.", .default_value = .{ .Number = -1 } },

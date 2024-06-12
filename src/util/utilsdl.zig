@@ -40,7 +40,7 @@ pub fn sdl_push_event_mepolang_execution(mepolang_text: [:0]const u8) void {
     sdlevent.user.data1 = @ptrFromInt(@intFromPtr(str_ptr));
     sdlevent.user.data2 = null;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
-        utildbg.log("Error pushing mepolang event to SDL queue: {any}\n", .{err});
+        utildbg.log("Error pushing mepolang event ({s}) to SDL queue: {any}\n", .{mepolang_text, err});
     };
 }
 

@@ -10,7 +10,7 @@ pub const CliFlags = &[_]struct {
 }{
     .{ .flag = "-docmd", .desc = "Print markdown documentation for the mepolang API to STDOUT." },
     .{ .flag = "-docman", .desc = "Print manpage documentation for the mepolang API to STDOUT.  Can be viewed with man via: `mepo -docman | man -l`." },
-    .{ .flag = "-i", .desc = "Read mepolang from STDIN continually. Can be used for interactive debugging or scripting via: `tee | mepo -i` or `./myscript | mepo -i`." },
+    .{ .flag = "-i", .desc = "Read JSON commands from STDIN continually (newline seperated). Can be used for interactive debugging or scripting via: `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR." },
     .{ .flag = "-hw", .desc = "Force using hardware renderer rather then default auto (HW/SW) renderer." },
     .{ .flag = "-sw", .desc = "Force using software renderer rather then default auto (HW/SW) renderer." },
@@ -30,27 +30,35 @@ const PrefsIntro =
     \\
 ;
 
-const MepolangIntro =
-    \\Mepolang is mepo's command language for runtime IPC and configuration. It
-    \\takes the form of a plain-text DSL (domain-specific-language) with a
-    \\number of [commands](#api). Mepolang makes configuration, customizing,
-    \\and hacking on mepo simple. To test mepolang simply, you may run mepo
-    \\with the `-i` argument which reads mepolang from STDIN. The most basic
-    \\example might look like:
+const JSONAPIIntro =
+    \\
+    \\Mepo offers an extensive JSON API which is utilized for user
+    \\configuration (via ~/.config/mepo/config.json), savestates (via
+    \\~/.cache/mepo/savestate.json), and can be used for arbitrary scripting
+    \\and end-user customization.
+    \\
+    \\
+    \\The basic syntax for the JSON API is that anywhere JSON API commands
+    \\may be passed, you can define an array of commands as:
     \\
     \\```sh
-    \\# Set the crosshair size to 200
-    \\echo "prefset_n crosshair_size 200;" | mepo -i
+    \\[
+    \\  {"cmd": "command_name", "args": {"arg_name": "arg_value"}},
+    \\  {"cmd": "command_name2", "args": {"arg_name": "arg_value"}}
+    \\]
     \\
-    \\# Or load a custom mepolang file from the filesystem
-    \\echo "fileload /home/foo/my_mepolang_file;" | mepo -i
-    \\```
+    \\The simplest way to get started with the JSON API is to
+    \\experiment with playing with the autoloaded configuration file at
+    \\`~/.config/mepo/config.json`. At it's simplest, you might use the
+    \\`prefset_n` command to change the default loaded location for instance.
+    \\ Add the following to config.mepo/config.json` as such:
     \\
-    \\Within the filesystem, based on the [default
-    \\base configuration](#base-configuration), the paths
-    \\`$XDG_CONFIG_HOME/mepo/config` and `$XDG_CONFIG_HOME/mepo/bookmarks`
-    \\are automatically loaded on boot; as such, for most end users, 
-    \\configuration simply may be placed in `~/.config/mepo/config`.
+    \\
+    \\```sh
+    \\[
+    \\  {"cmd": "prefset_n", "args": {"pref": "lat", "value": 42.3608} },
+    \\  {"cmd": "prefset_n", "args": {"pref": "lon", "value": -71.0573}}
+    \\]
     \\
     \\The rest of this document describes the [syntax rules](#syntax),
     \\[API commands](#api), and [preferences](#preferences) of mepolang.
@@ -62,31 +70,6 @@ const MepolangIntro =
     \\a supplement to this document.
 ;
 
-const MepolangSyntax =
-    \\Syntax rules are as follows:
-    \\
-    \\- Mepolang syntax is composed of statements.
-    \\- Each statement is made up of multiple tokens and terminated by a semicolon.
-    \\- Tokens are separated by whitespace.
-    \\- The first token in a statement is always the command name.
-    \\- Each token is either:
-    \\  - **Text:** Just plain text, by default assumed to be a single word.
-    \\    If you want to use a space within a token use `[ square brackets ]`
-    \\    to create a multiword token. If you want to have a text token that
-    \\    looks like a number, use square brackets like `[-3]`.
-    \\  - **Number:** A floating point number, either decimal (e.g. `3.77`)
-    \\    or whole (e.g. `3`). Can be negative like `-22.22` or positive
-    \\    like `22.22`.
-    \\
-    \\
-    \\Example mepolang text:
-    \\
-    \\```sh
-    \\commandname textarg [multi word arg] 2;
-    \\commandname2 arg 8.373 anothertextarg;
-    \\```
-    \\
-;
 
 const DocEnvVarsShellpipe =
     \\Both `shellpipe_sync` and `shellpipe_async` expose a number of ENV
@@ -124,7 +107,6 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\<div class='toc'>
                 \\<ul>
                 \\<li><a href="#overview">Overview</a></li>
-                \\<li><a href="#syntax">Syntax</a></li>
                 \\<li><a href="#version">Version</a></li>
                 \\<li><a href="#api">API</a></li>
                 \\<li><a href="#preferences">Preferences</a></li>
@@ -134,11 +116,6 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\</div>
                 \\
                 \\## Overview
-                \\{s}
-                \\
-                \\---
-                \\
-                \\## Syntax
                 \\{s}
                 \\
                 \\---
@@ -157,7 +134,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\
                 \\## API
                 \\
-            , .{ MepolangIntro, MepolangSyntax, config.Version });
+            , .{ JSONAPIIntro, config.Version });
 
             // API Section
             for (FnTable.fn_specs) |fnc| {

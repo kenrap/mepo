@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_gesture",
-    .desc = "Bind a multitouch gesture event to execute a mepolang action.",
+    .desc = "Bind a multitouch gesture event to execute JSON commands.",
     .args = &.{
         .{ .tag = .Text, .name = "action", .desc = "Gesture action (set to either `pan` or `rotate`)" },
         .{ .tag = .Number, .name = "fingers", .desc = "Number of fingers to trigger expression" },
