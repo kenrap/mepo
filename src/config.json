@@ -36,6 +36,7 @@
   {"cmd": "prefset_n", "args": {"pref": "pingroup_8_ordered", "value":  1}},
   {"cmd": "prefset_n", "args": {"pref": "pingroup_9_ordered", "value":  1}},
 
+
   {"cmd": "bind_key", "args": { "mod": "_", "key": "j", "exps": [{"cmd": "move_relative", "args": { "rel_y": 10}}]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "j", "exps": [{"cmd": "move_relative", "args": { "rel_y": 100}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "k", "exps": [{"cmd": "move_relative", "args": { "rel_y": -10}}]}},
@@ -95,7 +96,6 @@
   {"cmd": "bind_key", "args": { "mod": "s", "key": "n", "exps": [ {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}}, {"cmd": "center_on_pin", "args": {}} ]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "p", "exps": [ {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": -1}}, {"cmd": "center_on_pin", "args": {}} ]}},
 
-
   {"cmd": "bind_key", "args": { "mod": "_", "key": "o", "exps": [{"cmd": "pin_deactivate", "args": {}}]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "o", "exps": [{"cmd": "pin_purge", "args": {}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "w", "exps": [{"cmd": "cache_queueclear", "args": {}}]}},
@@ -106,6 +106,19 @@
   {"cmd": "bind_key", "args": { "mod": "s", "key": "-", "exps": [{"cmd": "prefinc", "args": {"pref": "fontsize_ui", "delta": -1}}]}},
 
 
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "c", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_central_menu.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "f", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pin_drop.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "g", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_reposition_nominatim.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "g", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_search_nominatim.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "b", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_search_overpass.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_overpassrelation.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_graphhopper.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "z", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_fontsize.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "z", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_zoom.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "u", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_url.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "q", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_dbg_queuedownloadinteractive.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "q", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_dbg_queuedownloadnoninteractive.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "x", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter"}}]}},
   {"cmd": "bind_key", "args": { "mod": "c", "key": "f", "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "DIM=h MULT=1  mepo_ui_helper_pref_pan.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "c", "key": "b", "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "DIM=h MULT=-1  mepo_ui_helper_pref_pan.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "cs", "key": "f", "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "DIM=w MULT=1  mepo_ui_helper_pref_pan.sh"}}]}},
