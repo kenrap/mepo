@@ -182,6 +182,10 @@
     {"cmd": "pin_transfer", "args": {"from_group": -1, "handle": "all", "to_group": 0}}
   ]}},
 
+  {"cmd": "bind_click", "args": { "button": 1, "clicks": -1, "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "mepo_ui_central_menu.sh"}}]}},
+  {"cmd": "bind_click", "args": { "button": 1, "clicks": 2, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
+  {"cmd": "bind_click", "args": { "button": 1, "clicks": 3, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -2}}]}},
+  {"cmd": "bind_click", "args": { "button": 2, "clicks": 1, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
 
   {"cmd": "bind_signal", "args": { "sig": "USR1", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
   {"cmd": "bind_signal", "args": { "sig": "USR2", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},

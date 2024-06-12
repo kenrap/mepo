@@ -21,7 +21,6 @@ pub fn main() !void {
     var stdin_mepolang_parsing_on: bool = false;
     var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
     var download_request: []const u8 = undefined;
-    var enable_default_config = true;
     var renderer_type: types.RendererType = .Auto;
 
     var args_it = std.process.args();
@@ -56,9 +55,6 @@ pub fn main() !void {
         } else if (std.mem.eql(u8, arg, "-v")) {
             // -v: Version
             mode = .Version;
-        } else if (std.mem.eql(u8, arg, "-ndc")) {
-            // -ndc: No default config
-            enable_default_config = false;
         } else if (std.mem.eql(u8, arg, "-h")) {
             // -v: Version
             mode = .Help;
@@ -77,19 +73,12 @@ pub fn main() !void {
         },
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
-            const base_config = cfg: {
-                const dbg = "prefset_n debug_stderr 1;";
-
-                if (stderr_debugging_on and enable_default_config) {
-                    break :cfg config.DefaultBaseConfig ++ dbg;
-                } else if (stderr_debugging_on and !enable_default_config) {
-                    break :cfg dbg;
-                } else if (!stderr_debugging_on and enable_default_config) {
-                    break :cfg config.DefaultBaseConfig;
-                }
-                break :cfg "";
-            };
-            var mepo = try Mepo.init(allocator, &tile_cache, base_config, renderer_type);
+            var mepo = try Mepo.init(allocator, &tile_cache, config.DefaultBaseConfig, renderer_type);
+            if (stderr_debugging_on) {
+                try mepo.mepolang_execute(
+                  \\[{"cmd": "prefset_n", "args": {"debug_stderr": 1}}]
+                );
+            }
             mepo.init_video_and_sdl_stdin_loop(stdin_mepolang_parsing_on) catch Mepo.graceful_terminate_sdl();
         },
         .Download => {

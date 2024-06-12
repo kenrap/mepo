@@ -10,13 +10,13 @@ pub const spec = .{
     .args = &.{
         .{ .tag = .Number, .name = "button", .desc = "Mousebutton to bind (`1` = left, `2` = right, `3` = middle)" },
         .{ .tag = .Number, .name = "clicks", .desc = "Number of successive clicks to trigger action" },
-        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    try bind_click(mepo, @intFromFloat(args[0].Number), @intFromFloat(args[1].Number), args[2].Text);
+    try bind_click(mepo, @intFromFloat(args[0].Number), @intFromFloat(args[1].Number), args[2].Exps);
 }
 
 fn bind_click(mepo: *Mepo, button: u8, clicks: i8, expression: []const u8) !void {

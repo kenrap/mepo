@@ -17,7 +17,7 @@ pub const spec = .{
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const signal_name = args[0].Text;
-    const expression = args[1].Text;
+    const expression = args[1].Exps;
     try bind_signal(mepo, signal_name, expression);
 }
 
