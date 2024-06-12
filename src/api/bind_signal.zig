@@ -10,7 +10,7 @@ pub const spec = .{
     .desc = "Bind a signal to execute a mepolang action.",
     .args = &.{
         .{ .tag = .Text, .name = "signal_name", .desc = "Signal name; can be `USR1`, `USR2`, `TERM`, or `INT`" },
-        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };

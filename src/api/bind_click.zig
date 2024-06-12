@@ -10,7 +10,7 @@ pub const spec = .{
     .args = &.{
         .{ .tag = .Number, .name = "button", .desc = "Mousebutton to bind (`1` = left, `2` = right, `3` = middle)" },
         .{ .tag = .Number, .name = "clicks", .desc = "Number of successive clicks to trigger action" },
-        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };

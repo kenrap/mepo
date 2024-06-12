@@ -13,7 +13,6 @@
   {"command": "prefset_n", "args": {"prefname": "tile_cache_network", "prefvalue":  1}},
   {"command": "prefset_n", "args": {"prefname": "tile_cache_max_n_transfers", "prefvalue":  20}},
   {"command": "prefset_n", "args": {"prefname": "tile_cache_expiry_seconds", "prefvalue":  2592000}},
-
   {"command": "prefset_t", "args": {"prefname": "tile_cache_dir",   "prefvalue": "$XDG_CACHE_HOME/mepo/tiles"}},
   {"command": "prefset_t", "args": {"prefname": "tile_cache_url",   "prefvalue": "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"}},
   {"command": "prefset_t", "args": {"prefname": "pingroup_0_color", "prefvalue": "#0000ff"}},
@@ -26,7 +25,6 @@
   {"command": "prefset_t", "args": {"prefname": "pingroup_7_color", "prefvalue": "#004a0c"}},
   {"command": "prefset_t", "args": {"prefname": "pingroup_8_color", "prefvalue": "#ff00a2"}},
   {"command": "prefset_t", "args": {"prefname": "pingroup_9_color", "prefvalue": "#fff673"}},
-
   {"command": "prefset_n", "args": {"prefname": "pingroup_0_ordered", "prefvalue":  0}},
   {"command": "prefset_n", "args": {"prefname": "pingroup_1_ordered", "prefvalue":  0}},
   {"command": "prefset_n", "args": {"prefname": "pingroup_2_ordered", "prefvalue":  0}},
@@ -36,8 +34,16 @@
   {"command": "prefset_n", "args": {"prefname": "pingroup_6_ordered", "prefvalue":  0}},
   {"command": "prefset_n", "args": {"prefname": "pingroup_7_ordered", "prefvalue":  1}},
   {"command": "prefset_n", "args": {"prefname": "pingroup_8_ordered", "prefvalue":  1}},
-  {"command": "prefset_n", "args": {"prefname": "pingroup_9_ordered", "prefvalue":  1}}
+  {"command": "prefset_n", "args": {"prefname": "pingroup_9_ordered", "prefvalue":  1}},
 
-
-
+  {"command": "bind_key", "args": { "modifier": "_", "key": "j", "json_exps": [{"command": "move_relative", "args": { "rel_x": 0    , "rel_y": 10}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "j", "json_exps": [{"command": "move_relative", "args": { "rel_x": 0    , "rel_y": 100}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "k", "json_exps": [{"command": "move_relative", "args": { "rel_x": 0    , "rel_y": -10}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "k", "json_exps": [{"command": "move_relative", "args": { "rel_x": 0    , "rel_y": -100}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "h", "json_exps": [{"command": "move_relative", "args": { "rel_x": -10  , "rel_y": 0}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "h", "json_exps": [{"command": "move_relative", "args": { "rel_x": -100 , "rel_y": 0}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "l", "json_exps": [{"command": "move_relative", "args": { "rel_x": 10   , "rel_y": 0}}]}},
+  {"command": "bind_key", "args": { "modifier": "s", "key": "l", "json_exps": [{"command": "move_relative", "args": { "rel_x": 100  , "rel_y": 0}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "=", "json_exps": [{"command": "zoom_relative", "args": { "zoom_delta": 1}}]}},
+  {"command": "bind_key", "args": { "modifier": "_", "key": "-", "json_exps": [{"command": "zoom_relative", "args": { "zoom_delta": -1}}]}}
 ]

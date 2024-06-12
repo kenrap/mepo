@@ -10,7 +10,7 @@ pub const spec = .{
     .desc = "Bind a timer to execute a mepolang action at the given interval.",
     .args = &.{
         .{ .tag = .Number, .name = "interval_seconds", .desc = "Number of seconds between successive runs of given mepolang expression" },
-        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };

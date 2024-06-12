@@ -8,7 +8,7 @@ pub const spec = .{
     .name = "bind_quit",
     .desc = "Bind a mepolang expression to run on quitting the application.",
     .args = &.{
-        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };

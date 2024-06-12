@@ -10,7 +10,7 @@ pub const spec = .{
     .args = &.{
         .{ .tag = .Text, .name = "modifier", .desc = "Modifier combination (`c`=control, `s`=shift, `a`=alt); ex. `cs` would mean control and shift" },
         .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indiscriminate since modifier handled by modifier argument" },
-        .{ .tag = .Text, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };
@@ -18,7 +18,7 @@ pub const spec = .{
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const modifier = args[0].Text;
     const key = args[1].Text;
-    const expression = args[2].Text;
+    const expression = args[2].Exps;
     try bind_key(mepo, modifier, key, expression);
 }
 
