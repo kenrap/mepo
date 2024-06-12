@@ -6,7 +6,6 @@ const errors = @import("./errors.zig");
 const TileCache = @import("./TileCache.zig");
 const blitfns = @import("./blit/blit.zig");
 const utilconversion = @import("./util/utilconversion.zig");
-const utilmepolang = @import("util/utilmepolang.zig");
 const utilplatform = @import("util/utilplatform.zig");
 const p = @import("util/utilprefs.zig");
 const utildbg = @import("util/utildbg.zig");
