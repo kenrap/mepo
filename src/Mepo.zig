@@ -380,7 +380,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         args: std.json.ArrayHashMap(std.json.Value),
     };
     const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), mepolang_text, .{}) catch |e| {
-        utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}", .{ e, mepolang_text });
+        utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}\n", .{ e, mepolang_text });
         return;
     };
 
@@ -388,7 +388,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         .array => |value| {
             for (value.items) |v| {
                 const p2 = std.json.parseFromValue(Statement, std.heap.page_allocator, v, .{}) catch |e| {
-                    utildbg.log("JSON Value parse error for mepo statement: {} / {}", .{ e, v });
+                    utildbg.log("JSON Value parse error for mepo statement: {} / {}\n", .{ e, v });
                     return;
                 };
                 const cmd = p2.value.cmd;
