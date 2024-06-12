@@ -9,7 +9,7 @@ const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "filedump",
-    .desc = "Save the current state of pins, preference, and/or bindings to a file as mepolang.",
+    .desc = "Save the current state of pins and/or preferences to a file as JSON.",
     .args = &.{
         .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = prefsets); ex. `pr` would save both pins and preferences" },
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to save state to" },
@@ -81,47 +81,55 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         }
     }
 
+    // 2. Pins
+    if (std.mem.containsAtLeast(u8, save_types, 1, "p")) {
+        for (mepo.pin_groups, 0..) |pg, pg_i| {
+            for (pg.items) |pin| {
+                // Pin add
+                var args_pinadd = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
+                try args_pinadd.put("handle", .{ .string = handle: {
+                    if (pin.handle) |h| break :handle h;
+                    break :handle "";
+                } });
+                try args_pinadd.put("group", .{ .integer = @intCast(pg_i) });
+                try args_pinadd.put("lat", .{ .float = pin.lat });
+                try args_pinadd.put("lon", .{ .float = pin.lon });
+                try args_pinadd.put("is_structural", .{ .integer = b: {
+                    if (pin.category == .Structural) break :b 1;
+                    break :b 0;
+                } });
+                try statements.append(.{
+                  .cmd = "pin_add",
+                  .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pinadd}, .{})
+                });
 
-    // 3. Pins data
-    //if (std.mem.containsAtLeast(u8, save_types, 1, "p")) {
-    //    try lines.append("\n# Pins;");
+                // Pin metadata
+                var it = pin.metadata.iterator();
+                while (it.next()) |kv| {
+                    var args_pinmeta= std.StringArrayHashMap(std.json.Value).init(arena.allocator());
+                    try args_pinmeta.put("handle", .{ .string = handle: {
+                        if (pin.handle) |h| break :handle h;
+                        break :handle "";
+                    } });
+                    try args_pinmeta.put("group", .{ .integer = @intCast(pg_i) });
+                    try args_pinmeta.put("key", .{ .string = kv.key_ptr.* });
+                    try args_pinmeta.put("value", .{ .string = kv.value_ptr.* });
+                    try statements.append(.{
+                      .cmd = "pin_meta",
+                      .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pinmeta}, .{})
+                    });
+                }
+            }
+        }
 
-    //    for (mepo.pin_groups, 0..) |pg, pg_i| {
-    //        for (pg.items) |pin| {
-    //            const is_structural: u32 = b: {
-    //                if (pin.category == .Structural) break :b 1;
-    //                break :b 0;
-    //            };
-    //            const handle: [:0]const u8 = handle: {
-    //                if (pin.handle) |h| break :handle h;
-    //                break :handle "";
-    //            };
-    //            const statement_pin_add = try std.fmt.allocPrint(
-    //                arena.allocator(),
-    //                "pin_add {d} {d} {d:.4} {d:.4} [{s}];",
-    //                .{ pg_i, is_structural, pin.lat, pin.lon, handle },
-    //            );
-    //            try lines.append(statement_pin_add);
-
-    //            var it = pin.metadata.iterator();
-    //            while (it.next()) |kv| {
-    //                const statement_meta = try std.fmt.allocPrint(
-    //                    arena.allocator(),
-    //                    "pin_meta {d} [{s}] [{s}] [{s}];",
-    //                    .{ pg_i, handle, kv.key_ptr.*, kv.value_ptr.* },
-    //                );
-    //                try lines.append(statement_meta);
-    //            }
-    //        }
-    //    }
-
-    //    // Activate current pingroup
-    //    try lines.append(try std.fmt.allocPrint(
-    //        arena.allocator(),
-    //        "pin_groupactivate {d};",
-    //        .{mepo.pin_group_active},
-    //    ));
-    //}
+        // Pin Group activate
+        var args_pingroupactivate= std.StringArrayHashMap(std.json.Value).init(arena.allocator());
+        try args_pingroupactivate.put("group", .{ .integer = mepo.pin_group_active });
+        try statements.append(.{
+          .cmd = "pin_groupactivate",
+          .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pingroupactivate}, .{})
+        });
+    }
 
     const str = try std.json.stringifyAlloc(arena.allocator(), statements.items, .{
         .whitespace = .indent_2,
