@@ -41,6 +41,7 @@ pub const MepoFnSpecArg = struct {
     name: []const u8,
     tag: MepoArgTag,
     desc: []const u8,
+    default_value: ?MepoArg = null,
 };
 pub const MepoFnSpec = struct {
     name: []const u8,

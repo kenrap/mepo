@@ -361,6 +361,8 @@ fn mepolang_execute_parseargs(
                 },
                 else => return error.InvalidArgsTypeGotUnknown,
             }
+        } else if (spec_arg.default_value) |val| {
+            args[i]= val;
         } else {
             utildbg.log("Missing argument {s} for spec\n", .{spec_arg.name});
             return error.MissingArgForSpec;
