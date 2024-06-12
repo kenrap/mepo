@@ -47,6 +47,52 @@
   {"cmd": "bind_key", "args": { "mod": "_", "key": "=", "json_exps": [{"cmd": "zoom_relative", "args": { "zoom_delta": 1}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "-", "json_exps": [{"cmd": "zoom_relative", "args": { "zoom_delta": -1}}]}},
 
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "1", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 0}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "2", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 1}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "3", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 2}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "4", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 3}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "5", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 4}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "6", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 5}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "7", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 6}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "8", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 7}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "9", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 8}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "0", "json_exps": [{"cmd": "pin_groupactivate", "args": { "group": 9}}]}},
+
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "1", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 0}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "2", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 1}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "3", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 2}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "4", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 3}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "5", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 4}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "6", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 5}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "7", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 6}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "8", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 7}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "9", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 8}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "0", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "", "to_group": 9}}]}},
+
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "1", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 0}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "2", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 1}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "3", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 2}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "4", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 3}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "5", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 4}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "6", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 5}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "7", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 6}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "8", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 7}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "9", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 8}}]}},
+  {"cmd": "bind_key", "args": { "mod": "cs", "key": "0", "json_exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 9}}]}},
+
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "d", "json_exps": [
+    {"cmd": "pin_delete", "args": { "group": -1, "handle": 1}},
+    {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}}
+  ]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "d", "json_exps": [{"cmd": "pin_purge", "args": {}}]}},
+
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "/", "json_exps": [{"cmd": "preftoggle", "args": {"pref": "help"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "e", "json_exps": [{"cmd": "preftoggle", "args": {"pref": "overlay_pindetails"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "s", "json_exps": [{"cmd": "preftoggle", "args": {"pref": "overlay_debugbar"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "m", "json_exps": [{"cmd": "preftoggle", "args": {"pref": "tile_cache_network"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "c", "json_exps": [{"cmd": "center_on_mouse", "args": {}}]}},
+
+
   {"cmd": "bind_key", "args": { "mod": "_", "key": "n", "json_exps": [{"cmd": "pin_cycle", "args": { "viewport_only": 1, "delta": 1}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "p", "json_exps": [{"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": -1}}]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "n", "json_exps": [
@@ -134,5 +180,11 @@
   {"cmd": "bind_button", "args": { "pin_only": 1, "group": 0 , "text": "0", "exps_click": [
     {"cmd": "pin_transfer", "args": {"from_group": -1, "handle": "", "to_group": 0}},
     {"cmd": "pin_transfer", "args": {"from_group": -1, "handle": "all", "to_group": 0}}
-  ]}}
+  ]}},
+
+
+  {"cmd": "bind_signal", "args": { "sig": "USR1", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
+  {"cmd": "bind_signal", "args": { "sig": "USR2", "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
+  {"cmd": "bind_signal", "args": { "sig": "TERM", "exps": [{"cmd": "quit", "args": {}}]}},
+  {"cmd": "bind_signal", "args": { "sig": "INT", "exps": [{"cmd": "quit", "args": {}}]}}
 ]

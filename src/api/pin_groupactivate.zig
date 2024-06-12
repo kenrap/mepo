@@ -7,7 +7,7 @@ pub const spec = .{
     .name = "pin_groupactivate",
     .desc = "Activate the pin group specified.",
     .args = &.{
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
+        .{ .tag = .Number, .name = "group", .desc = "Group number" },
     },
     .execute = execute,
 };
