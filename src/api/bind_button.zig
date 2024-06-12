@@ -8,11 +8,11 @@ pub const spec = .{
     .name = "bind_button",
     .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
     .args = &.{
-        .{ .tag = .Number, .name = "visible_only_when_pin_active", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin." },
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group." },
-        .{ .tag = .Text, .name = "button_text", .desc = "Text that will be shown on the button" },
-        .{ .tag = .Exps, .name = "mepolang_expression_click_single", .desc = "Mepolang expression to run on single clicking the button" },
-        .{ .tag = .Exps, .name = "mepolang_expression_click_hold", .desc = "Mepolang expression to run on holding the button" },
+        .{ .tag = .Number, .name = "pin_only", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin." },
+        .{ .tag = .Number, .name = "group", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group." },
+        .{ .tag = .Text, .name = "text", .desc = "Text that will be shown on the button" },
+        .{ .tag = .Exps, .name = "exps_click", .desc = "Mepolang expression to run on single clicking the button" },
+        .{ .tag = .Exps, .name = "exps_hold", .desc = "Mepolang expression to run on holding the button" },
     },
     .execute = execute,
 };
@@ -21,8 +21,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const visible_only_when_pin_active = args[0].Number == 1;
     const group_number = if (args[1].Number < 0) null else @as(u8, @intFromFloat(args[1].Number));
     const text = args[2].Text;
-    const expression_click_single = args[3].Text;
-    const expression_click_hold = args[4].Text;
+    const expression_click_single = args[3].Exps;
+    const expression_click_hold = args[4].Exps;
     try bind_button(mepo, visible_only_when_pin_active, group_number, text, expression_click_single, expression_click_hold);
 }
 
