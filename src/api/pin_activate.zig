@@ -6,8 +6,8 @@ pub const spec = .{
     .name = "pin_activate",
     .desc = "Activate a pin by its handle.",
     .args = &.{
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
-        .{ .tag = .Text, .name = "pin_handle", .desc = "Pin's handle to activate" },
+        .{ .tag = .Number, .name = "group", .desc = "Group number" },
+        .{ .tag = .Text, .name = "handle", .desc = "Pin's handle to activate" },
     },
     .execute = execute,
 };

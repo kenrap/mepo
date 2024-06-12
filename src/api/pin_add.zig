@@ -6,8 +6,8 @@ pub const spec = .{
     .name = "pin_add",
     .desc = "Add a pin to the map.",
     .args = &.{
-        .{ .tag = .Number, .name = "group_number", .desc = "Group number" },
-        .{ .tag = .Number, .name = "is_structural", .desc = "If set to `1`, will be a 'structural' pin which is useful for curved paths and similar" },
+        .{ .tag = .Number, .name = "group", .desc = "Group number (or if -1 add to the current active group)", .default_value = .{ .Number = -1 } },
+        .{ .tag = .Number, .name = "structural", .desc = "If set to `1`, will be a 'structural' pin which is useful for curved paths and similar", .default_value = .{ .Number = 0 } },
         .{ .tag = .Number, .name = "lat", .desc = "Latitude" },
         .{ .tag = .Number, .name = "lon", .desc = "Longitude" },
         .{ .tag = .Text, .name = "handle", .desc = "*Unique* handle to refer to pin; can use this handle subsequently with `pin_meta` to update pin metadata" },

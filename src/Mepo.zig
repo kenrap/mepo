@@ -394,7 +394,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
                 const cmd = p2.value.cmd;
                 if (FnTable.get(cmd)) |fn_spec| {
                     const args = mepolang_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
-                        std.debug.print("Error parsing args: {}\n", .{args_error});
+                        std.debug.print("Error parsing args for {s} ({any}): {}\n", .{cmd, p2.value.args, args_error});
                         return;
                     };
                     std.debug.print("Run cmd: {s} with args: {any}\n", .{ cmd, args });

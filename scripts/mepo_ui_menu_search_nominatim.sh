@@ -36,45 +36,63 @@ main() {
     curl -Ss "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50&extratags=1"
   )"
 
-  echo "
-    prefset_n pingroup_0_ordered 0;
-    pin_groupactivate 0;
-    pin_purge;
-  "
-
-  # Add pin
-  echo "$JSONRESULTS" |
-    jq '
-       map(
-         .osm_id as $osmid |
-         with_entries(
-           if .key=="display_name" then
-             .value = (.value | split(",")[0]) else
-             .value = .value
-           end
-         ) | 
-         "pin_add -1 0 \(.lat) \(.lon) [\($osmid)]; pin_meta -1 [\($osmid)] name [\(.display_name)];"
-       )  | .[]
-    ' |
-    tr -d '"'
-
-  # Add pin metadata
-  echo "$JSONRESULTS" | jq '
+  PINSETUPCOMMANDS='
     [
-      map(
-      .osm_id as $osmid | 
-      with_entries(
-        if .key=="display_name" then 
-          .value = (.value | split(",")[0]) else 
-          .value = .value 
-        end
-      ) |
-      .display_name as $displayname |
-      .extratags | with_entries(.value="pin_meta -1 [\($osmid)] [\(.key)] [\(.value)];") | map(.)
-    ) | .[] ]  | flatten(3) | .[]
-  ' |
-  tr -d '",'
+      {"cmd": "prefset_n", "args": { "pref": "pingroup_0_ordered", "value": 0}},
+      {"cmd": "pin_groupactivate", "args": {"group": 0}},
+      {"cmd": "pin_purge", "args": {}}
+    ]
+  '
+  PINADDCOMMANDS="$(
+    echo "$JSONRESULTS" | jq '
+         map(
+           .osm_id as $osmid |
+           with_entries(
+             if .key=="display_name" then
+               .value = (.value | split(",")[0]) else
+               .value = .value
+             end
+           ) | 
 
+           # pin_add
+           [
+            {
+               "cmd": "pin_add", 
+               "args": {
+                 "handle": $osmid|tostring,
+                 "lat": .lat|tonumber,
+                 "lon": .lon|tonumber
+               }
+            }
+          ] as $pin_add |
+
+          # pin_meta for the display_name
+          {
+             "cmd": "pin_meta", 
+             "args": {
+               "handle": $osmid|tostring,
+               "key": "name",
+               "value": .display_name
+             }
+          } as $pin_meta_displayname |
+
+          # pin_meta for properties
+          [
+            if .extratags != null then
+              .extratags | with_entries(
+                .value={"cmd": "pin_meta", "args": {"handle": $osmid|tostring, "key": .key, "value": .value}}
+              ) | map(.)
+            else
+              null
+            end
+          ] as $pin_meta_tags |
+
+          [ $pin_add, $pin_meta_displayname, $pin_meta_tags ]
+         ) | flatten | del(..|nulls)
+      '
+  )"
+
+  echo "[$PINSETUPCOMMANDS, $PINADDCOMMANDS]" | jq flatten
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
