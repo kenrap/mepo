@@ -11,7 +11,7 @@ pub const spec = .{
     .name = "filedump",
     .desc = "Save the current state of pins, preference, and/or bindings to a file as mepolang.",
     .args = &.{
-        .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = preferences, `b` = bindings); ex. `pr` would save both pins and preferences but not bindings" },
+        .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = prefsets); ex. `pr` would save both pins and preferences" },
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to save state to" },
     },
     .execute = execute,
@@ -81,89 +81,6 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
         }
     }
 
-    // 2. Bindings
-   // if (std.mem.containsAtLeast(u8, save_types, 1, "b")) {
-   //     try lines.append("\n# Bindings;");
-
-   //     // Gestures
-   //     var it_gestures = mepo.table_gestures.iterator();
-   //     while (it_gestures.next()) |gest| {
-   //         const direction: i8 = if (gest.key_ptr.*.direction == .In) 1 else -1;
-   //         const act = if (gest.key_ptr.*.action == .Pan) "pan   " else "rotate";
-   //         const statement_gest = try std.fmt.allocPrint(
-   //             arena.allocator(),
-   //             "bind_gesture {s} {d} {d} [{s}];",
-   //             .{ act, gest.key_ptr.*.n_fingers, direction, gest.value_ptr.* },
-   //         );
-   //         try lines.append(statement_gest);
-   //     }
-
-   //     // Clicks
-   //     var it_clicks = mepo.table_clicks.iterator();
-   //     while (it_clicks.next()) |click| {
-   //         const btn: u8 = if (click.key_ptr.*.button == sdl.SDL_BUTTON_LEFT) 1 else 2;
-   //         const statement_click = try std.fmt.allocPrint(
-   //             arena.allocator(),
-   //             "bind_click {d} {d} [{s}];",
-   //             .{ btn, click.key_ptr.*.clicks, click.value_ptr.* },
-   //         );
-   //         try lines.append(statement_click);
-   //     }
-
-   //     // Signals
-   //     var it_sigs = mepo.table_signals.iterator();
-   //     while (it_sigs.next()) |sig| {
-   //         const signame = switch (sig.key_ptr.*) {
-   //             std.os.linux.SIG.USR1 => "USR1",
-   //             std.os.linux.SIG.USR2 => "USR2",
-   //             std.os.linux.SIG.INT => "INT",
-   //             std.os.linux.SIG.TERM => "TERM",
-   //             else => continue,
-   //         };
-
-   //         const statement_signal = try std.fmt.allocPrint(
-   //             arena.allocator(),
-   //             "bind_signal {s} [{s}];",
-   //             .{ signame, sig.value_ptr.* },
-    //        );
-    //        try lines.append(statement_signal);
-    //    }
-
-    //    // Timers
-    //    var it_timers = mepo.table_timers.iterator();
-    //    while (it_timers.next()) |sig| {
-    //        const statement_timer = try std.fmt.allocPrint(
-    //            arena.allocator(),
-    //            "bind_timer {d} [{s}];",
-    //            .{ sig.key_ptr.*.interval_seconds, sig.value_ptr.* },
-    //        );
-    //        try lines.append(statement_timer);
-    //    }
-
-    //    // Keybindings
-    //    var it_keys = mepo.table_keybindings.iterator();
-    //    while (it_keys.next()) |key| {
-    //        const keymod = utilsdl.sdl_keymod_to_str(key.key_ptr.keymod);
-    //        const statement_signal = try std.fmt.allocPrint(
-    //            arena.allocator(),
-    //            "bind_key [{s}] [{c}] [{s}];",
-    //            .{ keymod, key.key_ptr.*.key, key.value_ptr.* },
-    //        );
-    //        try lines.append(statement_signal);
-    //    }
-
-    //    // UI Buttons
-    //    for (mepo.uibuttons.items) |btn| {
-    //        const pins_only_btn: u8 = if (btn.only_visible_when_pin_active) 1 else 0;
-    //        const group_number: i8 = if (btn.group_number) |g| @intCast(g) else -1;
-    //        const statement_button = try std.fmt.allocPrint(
-    //            arena.allocator(),
-    //            "bind_button {d} {d} [{s}] [{s}] [{s}];",
-    //            .{ pins_only_btn, group_number, btn.text, btn.mepolang_click_single, btn.mepolang_click_hold },
-    //        );
-    //        try lines.append(statement_button);
-    //    }
-    //}
 
     // 3. Pins data
     //if (std.mem.containsAtLeast(u8, save_types, 1, "p")) {
