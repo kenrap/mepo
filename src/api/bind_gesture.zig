@@ -11,7 +11,7 @@ pub const spec = .{
         .{ .tag = .Text, .name = "action", .desc = "Gesture action (set to either `pan` or `rotate`)" },
         .{ .tag = .Number, .name = "fingers", .desc = "Number of fingers to trigger expression" },
         .{ .tag = .Number, .name = "direction", .desc = "Direction for gesture (e.g. `1` for in or `-1` for out)" },
-        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };
@@ -20,7 +20,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const action: types.GestureInputAction = if (std.mem.eql(u8, args[0].Text, "pan")) .Pan else .Rotate;
     const fingers: u8 = @intFromFloat(args[1].Number);
     const direction: types.GestureInputDirection = if (args[2].Number == 1) .In else .Out;
-    const expression = args[3].Text;
+    const expression = args[3].Exps;
     try bind_gesture(mepo, action, fingers, direction, expression);
 }
 
