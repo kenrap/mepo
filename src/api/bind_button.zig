@@ -8,8 +8,8 @@ pub const spec = .{
     .name = "bind_button",
     .desc = "Create a UI button which executes a mepolang action. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
     .args = &.{
-        .{ .tag = .Number, .name = "pin_only", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin." },
-        .{ .tag = .Number, .name = "group", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group." },
+        .{ .tag = .Number, .name = "pin_only", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin.", .default_value = .{ .Number = 0 } },
+        .{ .tag = .Number, .name = "group", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group.", .default_value = .{ .Number = -1 } },
         .{ .tag = .Text, .name = "text", .desc = "Text that will be shown on the button" },
         .{ .tag = .Exps, .name = "exps_click", .desc = "Mepolang expression to run on single clicking the button", .default_value = .{ .Exps = "[]"} },
         .{ .tag = .Exps, .name = "exps_hold", .desc = "Mepolang expression to run on holding the button", .default_value = .{ .Exps = "[]"} },

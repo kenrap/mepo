@@ -121,22 +121,41 @@
   {"cmd": "bind_key", "args": { "mod": "cs", "key": "b", "json_exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "DIM=w MULT=-1  mepo_ui_helper_pref_pan.sh"}}]}},
 
 
-  {"cmd": "bind_button", "args": { "pin_only": 0, "group": -1, "text": "~", "exps_hold": [], "exps_click": [
+  {"cmd": "bind_button", "args": { "text": "Menu", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_central_menu.sh"}}
+  ]}},
+  {"cmd": "bind_button", "args": { "text": "Center", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter"}}
+  ]}},
+  {"cmd": "bind_button", "args": { "text": "Relocate", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_reposition_nominatim.sh"}}
+  ]}},
+  {"cmd": "bind_button", "args": { "text": "Nm", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_search_nominatim.sh"}}
+  ]}},
+  {"cmd": "bind_button", "args": { "text": "Op", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_search_overpass.sh"}}
+  ]}},
+  {"cmd": "bind_button", "args": { "text": "Dl", "exps_click": [
+    {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_dbg_queuedownloadnoninteractive.sh"}}
+  ]}},
+
+  {"cmd": "bind_button", "args": { "text": "~", "pin_only": 1,  "exps_click": [
     {"cmd": "preftoggle", "args": {"pref":  "overlay_pindetails_expanded"}}
   ]}},
-  {"cmd": "bind_button", "args": { "pin_only": 0, "group": -1, "text": "Purge", "exps_hold": [], "exps_click": [
+  {"cmd": "bind_button", "args": { "text": "Purge", "pin_only": 1,  "exps_click": [
     {"cmd": "pin_purge", "args": []}
   ]}},
-  {"cmd": "bind_button", "args": { "pin_only": 0, "group": -1, "text": "Del", "exps_hold": [], "exps_click": [
+  {"cmd": "bind_button", "args": { "text": "Del", "pin_only": 1,  "exps_click": [
     {"cmd": "pin_delete", "args": { "group": -1, "handle": ""}},
     {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}},
     {"cmd": "center_on_pin", "args": {}}
   ]}},
-  {"cmd": "bind_button", "args": { "pin_only": 0, "group": -1, "text": ">", "exps_hold": [], "exps_click": [
+  {"cmd": "bind_button", "args": { "text": ">", "pin_only": 1,  "exps_click": [
     {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}},
     {"cmd": "center_on_pin", "args": {}}
   ]}},
-  {"cmd": "bind_button", "args": { "pin_only": 0, "group": -1, "text": "<", "exps_hold": [], "exps_click": [
+  {"cmd": "bind_button", "args": { "text": "<", "pin_only": 1,  "exps_click": [
     {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": -1}},
     {"cmd": "center_on_pin", "args": {}}
   ]}},
