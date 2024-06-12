@@ -10,7 +10,7 @@ pub const spec = .{
     .args = &.{
         .{ .tag = .Text, .name = "mod", .desc = "Modifier combination (`c`=control, `s`=shift, `a`=alt); ex. `cs` would mean control and shift" },
         .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indiscriminate since modifier handled by modifier argument" },
-        .{ .tag = .Exps, .name = "mepolang_expression", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
     },
     .execute = execute,
 };
