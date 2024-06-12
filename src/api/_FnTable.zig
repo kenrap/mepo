@@ -10,7 +10,6 @@ pub const fn_specs = [_]types.MepoFnSpec{
     @import("bind_timer.zig").spec,
     @import("bind_quit.zig").spec,
     @import("cache_dlbbox.zig").spec,
-    @import("cache_dlradius.zig").spec,
     @import("cache_queueclear.zig").spec,
     @import("center_on_mouse.zig").spec,
     @import("center_on_pin.zig").spec,

@@ -6,7 +6,10 @@ DOC='
 '
 
 main() {
-  echo "cache_queueclear;"
+  echo '[{
+    "cmd": "cache_queueclear", 
+    "args": {}
+  }]'
 }
 
 if [ -n "$1" ]; then "$@"; else main; fi
