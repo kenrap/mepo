@@ -160,6 +160,6 @@
   {"cmd": "bind_key", "args": { "mod": "c", "key": "s", "exps": [{"cmd": "filedump", "args": {"datatypes": "rp", "filepath": "$XDG_CACHE_HOME/mepo/savestate.json"}}]}},
   {"cmd": "bind_key", "args": { "mod": "c", "key": "l", "exps": [{"cmd": "fileload", "args": { "filepath": "$XDG_CACHE_HOME/mepo/savestate.json"}}]}},
 
-  {"cmd": "fileload", "args": { "filepath": "$XDG_CACHE_HOME/mepo/config.json"}},
-  {"cmd": "fileload", "args": { "filepath": "$XDG_CACHE_HOME/mepo/bookmarks.json"}}
+  {"cmd": "fileload", "args": { "filepath": "$XDG_CONFIG_HOME/mepo/config.json"}},
+  {"cmd": "fileload", "args": { "filepath": "$XDG_CONFIG_HOME/mepo/bookmarks.json"}}
 ]
