@@ -120,7 +120,7 @@
   {"cmd": "bind_button", "args": { "text": "Dl", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_dbg_queuedownloadnoninteractive.sh"}} ]}},
 
   {"cmd": "bind_button", "args": { "text": "~", "pin_only": 1,  "exps_click": [ {"cmd": "preftoggle", "args": {"pref":  "overlay_pindetails_expanded"}} ]}},
-  {"cmd": "bind_button", "args": { "text": "Purge", "pin_only": 1,  "exps_click": [ {"cmd": "pin_purge", "args": []} ]}},
+  {"cmd": "bind_button", "args": { "text": "Purge", "pin_only": 1,  "exps_click": [ {"cmd": "pin_purge", "args": {}} ]}},
   {"cmd": "bind_button", "args": { "text": "Del", "pin_only": 1,  "exps_click": [
     {"cmd": "pin_delete", "args": { "group": -1, "handle": ""}},
     {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}},
