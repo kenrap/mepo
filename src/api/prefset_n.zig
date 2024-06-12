@@ -8,8 +8,8 @@ pub const spec = .{
     .name = "prefset_n",
     .desc = "Set a preference number value.",
     .args = &.{
-        .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
-        .{ .tag = .Number, .name = "prefvalue", .desc = "Preference number value" },
+        .{ .tag = .Text, .name = "pref", .desc = "Preference name" },
+        .{ .tag = .Number, .name = "value", .desc = "Preference number value" },
     },
     .execute = execute,
 };

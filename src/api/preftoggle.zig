@@ -8,7 +8,7 @@ pub const spec = .{
     .name = "preftoggle",
     .desc = "Toggle a boolean number preference between `1` and `0`.",
     .args = &.{
-        .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
+        .{ .tag = .Text, .name = "pref", .desc = "Preference name" },
     },
     .execute = execute,
 };

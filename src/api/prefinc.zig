@@ -8,7 +8,7 @@ pub const spec = .{
     .name = "prefinc",
     .desc = "Increase or decrease a preference by the given delta value.",
     .args = &.{
-        .{ .tag = .Text, .name = "prefname", .desc = "Preference name" },
+        .{ .tag = .Text, .name = "pref", .desc = "Preference name" },
         .{ .tag = .Number, .name = "delta", .desc = "Delta value to increment/decrement (positive or negative)" },
     },
     .execute = execute,

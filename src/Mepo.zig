@@ -374,7 +374,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
     defer arena.deinit();
 
     const Statement = struct {
-        command: []u8,
+        cmd: []u8,
         args: std.json.ArrayHashMap(std.json.Value),
     };
     const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), mepolang_text, .{}) catch |e| {
@@ -389,19 +389,19 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
                     utildbg.log("JSON Value parse error for mepo statement: {} / {}", .{ e, v });
                     return;
                 };
-                const command = p2.value.command;
-                if (FnTable.get(command)) |fn_spec| {
+                const cmd = p2.value.cmd;
+                if (FnTable.get(cmd)) |fn_spec| {
                     const args = mepolang_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
                         std.debug.print("Error parsing args: {}\n", .{args_error});
                         return;
                     };
-                    std.debug.print("Run command: {s} with args: {any}\n", .{ command, args });
+                    std.debug.print("Run cmd: {s} with args: {any}\n", .{ cmd, args });
                     fn_spec.execute(mepo, args) catch |mepolang_err| {
-                        utildbg.log("Error running API function for: {s}: {}\n", .{ command, mepolang_err });
+                        utildbg.log("Error running API function for: {s}: {}\n", .{ cmd, mepolang_err });
                     };
                     try mepo.update_debug_message(null);
                 } else {
-                    utildbg.log("Invalid JSON command specified: {s}", .{command});
+                    utildbg.log("Invalid JSON cmd specified: {s}", .{cmd});
                 }
             }
         },
