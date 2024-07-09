@@ -71,6 +71,7 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     child.stdout_behavior = .Pipe;
     const env = try get_env_vars(mepo, mepo.allocator);
     child.env_map = &env;
+    child.pgid = 0; // create new process group
     try child.spawn();
     if (async_id == null)
         mepo.sync_shellpipe_pid = child.id;

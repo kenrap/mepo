@@ -744,6 +744,8 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
 
         if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_group_active_item == null)
             continue;
+        if (mepo.uibuttons.items[btn_i].only_visible_when_sync_shellpipe == (mepo.sync_shellpipe_pid == null))
+            continue;
 
         const surf = try utilsdl.errorcheck_ptr(
             sdl.SDL_Surface,

@@ -11,6 +11,7 @@ const p = @import("util/utilprefs.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
 const datastructure = @import("datastructure/datastructure.zig");
+const shellpipe_sync = @import("api/shellpipe_sync.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
@@ -224,7 +225,7 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
+pub fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
     return x > 0 and y > 0 and x < mepo.win_w and y < mepo.win_h;
 }
 
@@ -531,6 +532,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     sdl.SDL_TEXTINPUT => &event_textinput,
                     else => &event_unhandled,
                 } else switch (e.type) {
+                    sdl.SDL_KEYUP => &shellpipe_sync.event_keyup,
+                    sdl.SDL_MOUSEBUTTONUP => &shellpipe_sync.event_mousebuttonup,
                     else => &event_unhandled,
                 },
             };
@@ -800,7 +803,20 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             break :pin_groups pgs;
         },
         .tile_cache = tile_cache,
-        .uibuttons = std.ArrayList(types.UIButton).init(allocator),
+        .uibuttons = b: {
+            var uibuttons = std.ArrayList(types.UIButton).init(allocator);
+            errdefer uibuttons.deinit();
+            try uibuttons.append(.{
+                .text = try allocator.dupeZ(u8, "Cancel sync shellpipe"),
+                .group_number = null,
+                .only_visible_when_sync_shellpipe = true,
+                .only_visible_when_pin_active = false,
+                // Hardcoded action to kill the current sync shellpipe process
+                .mepolang_click_single = "",
+                .mepolang_click_hold = "",
+            });
+            break :b uibuttons;
+        },
         .renderer_type = renderer_type,
     });
 }

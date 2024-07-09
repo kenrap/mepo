@@ -29,6 +29,7 @@ pub const UIButton = struct {
     jsonapi_click_single: [:0]const u8,
     jsonapi_click_hold: [:0]const u8,
     only_visible_when_pin_active: bool,
+    only_visible_when_sync_shellpipe: bool = false,
     group_number: ?u8,
 };
 

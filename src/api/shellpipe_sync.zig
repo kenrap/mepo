@@ -2,6 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
+const blitfns = @import("../blit/blit.zig");
 const sdl = @import("../sdlshim.zig");
 const filedump = @import("./filedump.zig");
 const run_shellpipe = @import("shellpipe_async.zig").run_shellpipe;
@@ -42,4 +43,41 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
         utildbg.log("Error running sync shellpipe: {}\n", .{err});
     request.mepo.sync_shellpipe_pid = null;
     return 0;
+}
+
+/// Helper function for SDL event handler during sync shellpipe
+/// for killing the spawn processes.
+fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
+    if (mepo.sync_shellpipe_pid) |pid| {
+        // FIXME: SIGHUP, SIGINT, SIGPIPE and SIGTERM are somehow swallowed
+        // by descendent processes, even though no trap relevant trap
+        // is set in the shell scripts or zenity, so we rely on SIGUSR1's
+        // default action (termination).  User scripts must not handle SIGUSR1.
+        if (std.posix.kill(-pid, std.posix.SIG.USR1)) |_|
+            utildbg.log("Killing sync shellpipe process {}\n", .{ pid })
+        else |err|
+            utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
+        // No need to wait for termination as run_shellpipe already handles HUP events.
+        return .Redraw;
+    } else return .None;
+}
+
+pub fn event_keyup(mepo: *Mepo, e: sdl.SDL_Event) types.Pending {
+    return switch (e.key.keysym.sym) {
+        // XXX: Make binding configurable?  Escape key also cancel Zenity.
+        sdl.SDLK_ESCAPE => kill_sync_shellpipe(mepo),
+        else => .None,
+    };
+}
+
+pub fn event_mousebuttonup(mepo: *Mepo, _: sdl.SDL_Event) types.Pending {
+    if (mepo.fingers.items.len > 1) return .None;
+    const cursor = mepo.scaled_mouse_position();
+    if (!mepo.within_touch_bounds(cursor.x, cursor.y)) return .None;
+    mepo.drag = null;
+    return if (blitfns.blit_uibuttons(mepo, cursor) catch null) |clicked_btn|
+        if (clicked_btn.only_visible_when_sync_shellpipe)
+            kill_sync_shellpipe(mepo)
+        else .None
+    else .None;
 }
