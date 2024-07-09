@@ -468,7 +468,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: 
             "Mepo_SDL_Thread",
             mepo,
         );
-        _ = thread;
+        sdl.SDL_DetachThread(thread);
 
         while (true) {
             const stdin = &std.io.getStdIn().reader();
