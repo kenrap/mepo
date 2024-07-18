@@ -49,11 +49,7 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
 /// for killing the spawn processes.
 fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
     if (mepo.sync_shellpipe_pid) |pid| {
-        // FIXME: SIGHUP, SIGINT, SIGPIPE and SIGTERM are somehow swallowed
-        // by descendent processes, even though no trap relevant trap
-        // is set in the shell scripts or zenity, so we rely on SIGUSR1's
-        // default action (termination).  User scripts must not handle SIGUSR1.
-        if (std.posix.kill(-pid, std.posix.SIG.USR1)) |_|
+        if (std.posix.kill(-pid, std.posix.SIG.KILL)) |_|
             utildbg.log("Killing sync shellpipe process {}\n", .{ pid })
         else |err|
             utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
