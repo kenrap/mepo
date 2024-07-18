@@ -73,8 +73,6 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     child.stdout_behavior = .Pipe;
     child.stderr_behavior = .Pipe;
     child.env_map = &env_vars;
-    if (async_id == null)
-        mepo.sync_shellpipe_pid = child.id;
 
     var stdout = std.ArrayList(u8).init(arena.allocator());
     var stderr = std.ArrayList(u8).init(arena.allocator());
@@ -83,6 +81,8 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
         stderr.deinit();
     }
     try child.spawn();
+    if (async_id == null)
+        mepo.sync_shellpipe_pid = child.id;
     try child.collectOutput(&stdout, &stderr, 10000 * 1024);
     const term = try child.wait();
 
