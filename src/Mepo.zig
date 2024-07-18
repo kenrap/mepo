@@ -16,7 +16,6 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
-shellpipe_async_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 config: []const u8,
 debug_message: ?[]const u8 = null,
@@ -36,6 +35,7 @@ pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_type: types.RendererType = .Auto,
+shellpipe_async_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 shellpipe_sync_pid: ?std.process.Child.Id = null,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
