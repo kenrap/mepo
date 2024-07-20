@@ -11,17 +11,8 @@ DOC='
   default config `droppin` is used asynchronously via `shellpipe_async`.
 '
 [ -z "$MEPO_USERPIN_ENABLED" ] && MEPO_USERPIN_ENABLED="1"
-[ -z "$MEPO_ENDPOINT_MLS" ] && MEPO_ENDPOINT_MLS="https://location.services.mozilla.com/v1/geolocate"
-[ -z "$MEPO_APIKEY_MLS" ] && MEPO_APIKEY_MLS="9a418f3c-364a-418a-85e8-1bde733f0c88"
 [ -z "$MEPO_TIMEOUT_GEOCLUE" ] && MEPO_TIMEOUT_GEOCLUE="10"
 [ -z "$MEPO_GEOLOCATE_COORDSVIAMETHOD" ] && MEPO_GEOLOCATE_COORDSVIAMETHOD="coordsviageoclue"
-
-coordsviamls() {
-  MLSRESULT="$(curl -Ss "${MEPO_ENDPOINT_MLS}?key=$MEPO_APIKEY_MLS")"
-  LAT="$(echo "$MLSRESULT" | jq '.location.lat')"
-  LON="$(echo "$MLSRESULT" | jq '.location.lng')"
-  echo "$LAT $LON"
-}
 
 coordsviageoclue() {
   supportsgeoclue || return 1
@@ -59,11 +50,7 @@ getcoords() {
   COORDS="$(coordsviageoclue)"
   iscoords "$COORDS" && echo "coordsviageoclue $COORDS" && return 0
 
-  # If geoclue unavailable use MLS
-  COORDS="$(coordsviamls)"
-  iscoords "$COORDS" && echo "coordsviamls $COORDS" && return 0
-
-  # If geoclue and MLS unavailable use gpsd
+  # If geoclue unavailable use gpsd
   COORDS="$(coordsviagpsd)"
   iscoords "$COORDS" && echo "coordsviagpsd $COORDS" && return 0
 
