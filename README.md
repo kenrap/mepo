@@ -28,11 +28,11 @@ UI, and more.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
 - **Simple [JSON API for Scripting & Extending](http://mepo.milesalan.com/mepolang.html)**:
-  - Mepos core UI is built out to be as minimal as possible, only handling map rendering,
+  - Mepo's core UI is built out to be as minimal as possible, only handling map rendering,
     displaying, pins, and simple IO operation (keybinding, mouse callbacks, etc.)
   - Extendeded functionality such as menus & and search integrations (via Nominatim, Overpass),
     routing (via Mobroute and GraphHopper), and similar are built out utilizing
-    Mepos extensible JSON API
+    Mepo's extensible JSON API
   - The JSON API allows you to
     - Reposition the map, change tileserver, etc.
     - Change preferences
