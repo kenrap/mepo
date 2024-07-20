@@ -27,10 +27,10 @@ UI, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **Simple JSON API for Scripting & Extending](http://mepo.milesalan.com/mepolang.html)**:
+- **Simple [JSON API for Scripting & Extending](http://mepo.milesalan.com/mepolang.html)**:
   - Mepos core UI is built out to be as minimal as possible, only handling map rendering,
     displaying, pins, and simple IO operation (keybinding, mouse callbacks, etc.)
-  - Extendeded functionality such as integrations (via Nominatim, Overpass), 
+  - Extendeded functionality such as menus & and search integrations (via Nominatim, Overpass),
     routing (via Mobroute and GraphHopper), and similar are built out utilizing
     Mepos extensible JSON API
   - The JSON API allows you to
@@ -40,6 +40,7 @@ UI, and more.
     - Create arbitrary keybindings to run other API commands
     - Inject pin data onto the map
     - Modify pin "groups" to collect sets of pins together
+    - Create custom user scripts (in any language of your choosing outputting JSON)
     - And more
 - **Offline operation as a first-class feature**:
   - Downloading of maps for later offline use can be done non-interactively
