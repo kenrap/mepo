@@ -6,11 +6,11 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_key",
-    .desc = "Bind a key combination to execute a JSON commands.",
+    .desc = "Bind a key combination to execute a JSON API expressions.",
     .args = &.{
         .{ .tag = .Text, .name = "mod", .desc = "Modifier combination (`c`=control, `s`=shift, `a`=alt); ex. `cs` would mean control and shift" },
         .{ .tag = .Text, .name = "key", .desc = "Key to bind; note case indiscriminate since modifier handled by modifier argument" },
-        .{ .tag = .Exps, .name = "exps", .desc = "JSON expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON expressions to run" },
     },
     .execute = execute,
 };

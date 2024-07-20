@@ -6,9 +6,9 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_quit",
-    .desc = "Bind JSON commands to run on quitting the application.",
+    .desc = "Bind JSON API expressions to run on quitting the application.",
     .args = &.{
-        .{ .tag = .Exps, .name = "exps", .desc = "JSON commands to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expressions to run" },
     },
     .execute = execute,
 };

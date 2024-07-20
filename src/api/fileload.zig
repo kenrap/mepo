@@ -5,7 +5,7 @@ const utilfile = @import("../util/utilfile.zig");
 
 pub const spec = .{
     .name = "fileload",
-    .desc = "Load json api expression  from an arbitrary filesystem file.",
+    .desc = "Load JSON API expressions from an arbitrary filesystem file.",
     .args = &.{
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to load" },
     },

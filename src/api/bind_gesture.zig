@@ -6,12 +6,12 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_gesture",
-    .desc = "Bind a multitouch gesture event to execute JSON commands.",
+    .desc = "Bind a multitouch gesture event to execute JSON API expressions.",
     .args = &.{
         .{ .tag = .Text, .name = "action", .desc = "Gesture action (set to either `pan` or `rotate`)" },
         .{ .tag = .Number, .name = "fingers", .desc = "Number of fingers to trigger expression" },
         .{ .tag = .Number, .name = "direction", .desc = "Direction for gesture (e.g. `1` for in or `-1` for out)" },
-        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expressions to run" },
     },
     .execute = execute,
 };

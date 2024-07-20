@@ -10,7 +10,7 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .name = "shellpipe_sync",
-    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a JSON API expression.",
+    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a JSON API expressions.",
     .args = &.{
         .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
     },

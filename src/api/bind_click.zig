@@ -6,11 +6,11 @@ const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = .{
     .name = "bind_click",
-    .desc = "Bind a particular number of successive clicks to run a json api expression.",
+    .desc = "Bind a particular number of successive clicks to run a JSON API expressions.",
     .args = &.{
         .{ .tag = .Number, .name = "button", .desc = "Mousebutton to bind (`1` = left, `2` = right, `3` = middle)" },
         .{ .tag = .Number, .name = "clicks", .desc = "Number of successive clicks to trigger action" },
-        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expressions to run" },
     },
     .execute = execute,
 };

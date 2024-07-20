@@ -9,7 +9,7 @@ const utilprefs = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "filedump",
-    .desc = "Save the current state of pins and/or preferences to a file as JSON.",
+    .desc = "Save the current state of pins and/or preferences to a file as JSON API expressions.",
     .args = &.{
         .{ .tag = .Text, .name = "datatypes", .desc = "Types of data to save (`p` = pins, `r` = prefsets); ex. `pr` would save both pins and preferences" },
         .{ .tag = .Text, .name = "filepath", .desc = "Path to file to save state to" },

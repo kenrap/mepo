@@ -7,10 +7,10 @@ const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "bind_signal",
-    .desc = "Bind a signal to execute a JSON API expression.",
+    .desc = "Bind a signal to execute JSON API expressions.",
     .args = &.{
         .{ .tag = .Text, .name = "sig", .desc = "Signal name; can be `USR1`, `USR2`, `TERM`, or `INT`" },
-        .{ .tag = .Exps, .name = "exps", .desc = "JSON commands to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expressions to run" },
     },
     .execute = execute,
 };
