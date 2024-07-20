@@ -18,7 +18,7 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
     var stderr_debugging_on: bool = false;
-    var stdin_mepolang_parsing_on: bool = false;
+    var stdin_jsonapi_parsing_on: bool = false;
     var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var renderer_type: types.RendererType = .Auto;
@@ -28,18 +28,18 @@ pub fn main() !void {
     while (arg_w != null) : (arg_w = args_it.next()) {
         const arg = arg_w.?;
         if (std.mem.eql(u8, arg, "-docmd")) {
-            // -docmdapi: Documentation mode, generates markdown docs for mepolang API
+            // -docmdapi: Documentation mode, generates markdown docs for JSON API
             mode = .DocsMarkdown;
         } else if (std.mem.eql(u8, arg, "-docman")) {
-            // -docman: Documentation mode, generates manpage docs for mepolang
+            // -docman: Documentation mode, generates manpage docs for JSON API
             mode = .DocsManpage;
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
             download_request = arg[2..];
         } else if (std.mem.eql(u8, arg, "-i")) {
-            // -i: Enable STDIN mepolang parsing
-            stdin_mepolang_parsing_on = true;
+            // -i: Enable STDIN JSON API parsing
+            stdin_jsonapi_parsing_on = true;
         } else if (std.mem.eql(u8, arg, "-e")) {
             // -e: Enable stderr debugging
             stderr_debugging_on = true;
@@ -75,11 +75,11 @@ pub fn main() !void {
             var tile_cache = try TileCache.init(allocator);
             var mepo = try Mepo.init(allocator, &tile_cache, config.DefaultBaseConfig, renderer_type);
             if (stderr_debugging_on) {
-                try mepo.mepolang_execute(
+                try mepo.jsonapi_execute(
                   \\[{"cmd": "prefset_n", "args": {"debug_stderr": 1}}]
                 );
             }
-            mepo.init_video_and_sdl_stdin_loop(stdin_mepolang_parsing_on) catch Mepo.graceful_terminate_sdl();
+            mepo.init_video_and_sdl_stdin_loop(stdin_jsonapi_parsing_on) catch Mepo.graceful_terminate_sdl();
         },
         .Download => {
             var tile_cache = try TileCache.init(allocator);

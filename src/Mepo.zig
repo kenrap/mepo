@@ -84,7 +84,7 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         };
         if (mepo.table_keybindings.get(key)) |run_expression| {
             utildbg.log("Got keybindings table function via textinput with run expression: <{s}>\n", .{run_expression});
-            mepo.mepolang_execute(run_expression) catch unreachable;
+            mepo.jsonapi_execute(run_expression) catch unreachable;
             pending = .Redraw;
         }
     }
@@ -115,7 +115,7 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         mepo.fingers_gesture_delta += @as(isize, if (run_gesture.direction == .In) 1 else -1);
         if (mepo.table_gestures.get(run_gesture)) |run_expression| {
             utildbg.log("Got gestures table function with run expression: <{s}>\n", .{run_expression});
-            mepo.mepolang_execute(run_expression) catch unreachable;
+            mepo.jsonapi_execute(run_expression) catch unreachable;
         }
         return .Redraw;
     }
@@ -158,7 +158,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (blitfns.blit_uibuttons(mepo, cursor) catch null) |clicked_btn| {
         // Click on UI button check
         utildbg.log("Clicked on button: {} with clicks {}\n", .{ clicked_btn, e.button.clicks });
-        mepo.mepolang_execute(clicked_btn.mepolang_click_single) catch unreachable;
+        mepo.jsonapi_execute(clicked_btn.jsonapi_click_single) catch unreachable;
         return .Redraw;
     }
 
@@ -197,7 +197,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const key = types.ClickInput{ .button = e.button.button, .clicks = @intCast(e.button.clicks) };
     if (mepo.table_clicks.get(key)) |run_expression| {
         utildbg.log("Got click table function {s} for {}\n", .{ run_expression, key });
-        mepo.mepolang_execute(run_expression) catch unreachable;
+        mepo.jsonapi_execute(run_expression) catch unreachable;
         return .Redraw;
     }
 
@@ -261,7 +261,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
         },
     })) |run_expression| {
         utildbg.log("Got keybindings table function via keyup with run expression: <{s}>\n", .{run_expression});
-        mepo.mepolang_execute(run_expression) catch unreachable;
+        mepo.jsonapi_execute(run_expression) catch unreachable;
         return .Redraw;
     }
     return .None;
@@ -270,7 +270,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 fn event_signal(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     if (mepo.table_signals.get(@intCast(e.user.code))) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
-        mepo.mepolang_execute(run_expression) catch unreachable;
+        mepo.jsonapi_execute(run_expression) catch unreachable;
         return .Redraw;
     }
     return .None;
@@ -302,11 +302,11 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_jsonapiexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     const heap_str = std.mem.sliceTo(@as([*c]u8, @ptrCast(e.user.data1)), 0);
-    utildbg.log("SDL mepolang event proccessing: <{s}>\n", .{heap_str});
-    mepo.mepolang_execute(heap_str) catch |err| {
-        utildbg.log("Error executing mepolang <{s}> caught from SDL event: {}\n", .{ heap_str, err });
+    utildbg.log("SDL jsonapi event proccessing: <{s}>\n", .{heap_str});
+    mepo.jsonapi_execute(heap_str) catch |err| {
+        utildbg.log("Error executing JSON API expression <{s}> caught from SDL event: {}\n", .{ heap_str, err });
     };
     mepo.allocator.free(heap_str);
     return .Redraw;
@@ -314,8 +314,8 @@ fn event_mepolangexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
 
 pub fn event_quit(mepo: *@This(), _: sdl.SDL_Event) types.Pending {
     if (mepo.quit_action) |quit_action| {
-        mepo.mepolang_execute(quit_action) catch |err| {
-            utildbg.log("Error with running mepolang quit action: {}\n", .{err});
+        mepo.jsonapi_execute(quit_action) catch |err| {
+            utildbg.log("Error with running jsonapi quit action: {}\n", .{err});
         };
     }
     graceful_terminate_sdl();
@@ -332,7 +332,7 @@ fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
     sdl.SDL_DestroyTexture(texture);
 }
 
-fn mepolang_execute_parseargs(
+fn jsonapi_execute_parseargs(
     allocator: std.mem.Allocator,
     fn_spec_args: []const types.MepoFnSpecArg,
     map: std.json.ArrayHashMap(std.json.Value),
@@ -370,7 +370,7 @@ fn mepolang_execute_parseargs(
     return args;
 }
 
-pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
+pub fn jsonapi_execute(mepo: *@This(), jsonapi_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
@@ -378,8 +378,8 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
         cmd: []u8,
         args: std.json.ArrayHashMap(std.json.Value),
     };
-    const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), mepolang_text, .{}) catch |e| {
-        utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}\n", .{ e, mepolang_text });
+    const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), jsonapi_text, .{}) catch |e| {
+        utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}\n", .{ e, jsonapi_text });
         return;
     };
 
@@ -392,13 +392,13 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
                 };
                 const cmd = p2.value.cmd;
                 if (FnTable.get(cmd)) |fn_spec| {
-                    const args = mepolang_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
+                    const args = jsonapi_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
                         std.debug.print("Error parsing args for {s} ({any}): {}\n", .{cmd, p2.value.args, args_error});
                         return;
                     };
                     std.debug.print("Run cmd: {s} with args: {any}\n", .{ cmd, args });
-                    fn_spec.execute(mepo, args) catch |mepolang_err| {
-                        utildbg.log("Error running API function for: {s}: {}\n", .{ cmd, mepolang_err });
+                    fn_spec.execute(mepo, args) catch |jsonapi_err| {
+                        utildbg.log("Error running API function for: {s}: {}\n", .{ cmd, jsonapi_err });
                     };
                     try mepo.update_debug_message(null);
                 } else {
@@ -407,7 +407,7 @@ pub fn mepolang_execute(mepo: *@This(), mepolang_text: []const u8) !void {
             }
         },
         else => {
-            utildbg.log("Attempted to parse Mepo JSON API commands but not an array: {s}", .{mepolang_text});
+            utildbg.log("Attempted to parse Mepo JSON API commands but not an array: {s}", .{jsonapi_text});
         },
     }
 }
@@ -426,7 +426,7 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
         if (blitfns.blit_uibuttons(mepo, mepo.drag.?.point) catch null) |held_btn| {
             if (threshold_hit_hold_ms) {
                 utildbg.log("Held on button: {}\n", .{held_btn});
-                mepo.mepolang_execute(held_btn.mepolang_click_hold) catch unreachable;
+                mepo.jsonapi_execute(held_btn.jsonapi_click_hold) catch unreachable;
                 mepo.drag = null;
             }
             return;
@@ -438,7 +438,7 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
         // TODO: hold support for right click as well?
         if (mepo.table_clicks.get(.{ .button = sdl.SDL_BUTTON_LEFT, .clicks = -1 })) |run_expression| {
             utildbg.log("Got hold table function {s} after dispatch time\n", .{run_expression});
-            mepo.mepolang_execute(run_expression) catch unreachable;
+            mepo.jsonapi_execute(run_expression) catch unreachable;
             utilsdl.sdl_push_event_resize();
         }
     }
@@ -448,21 +448,21 @@ fn dispatch_check_timers(mepo: *@This()) !void {
     var it = mepo.table_timers.iterator();
     while (it.next()) |kv| {
         const timer_input = kv.key_ptr.*;
-        const timer_mepolang = kv.value_ptr.*;
+        const timer_jsonapi = kv.value_ptr.*;
         if (sdl.SDL_GetTicks() > timer_input.created_at_ticks + (timer_input.interval_seconds * 1000)) {
-            mepo.mepolang_execute(timer_mepolang) catch unreachable;
+            mepo.jsonapi_execute(timer_jsonapi) catch unreachable;
             const new_timer = .{
                 .created_at_ticks = sdl.SDL_GetTicks(),
                 .interval_seconds = timer_input.interval_seconds,
             };
             _ = mepo.table_timers.swapRemove(timer_input);
-            try mepo.table_timers.put(new_timer, timer_mepolang);
+            try mepo.table_timers.put(new_timer, timer_jsonapi);
         }
     }
 }
 
-pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl: bool) !void {
-    if (enable_stdin_mepolang_repl) {
+pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: bool) !void {
+    if (enable_stdin_jsonapi_repl) {
         const thread = sdl.SDL_CreateThread(
             mepo_sdl_loop_thread_boot,
             "Mepo_SDL_Thread",
@@ -475,8 +475,8 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl:
             const read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
             const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
             mepo.allocator.free(read_slice);
-            std.debug.print("Read {d} bytes, running input as mepolang\n", .{slice_z.len});
-            utilsdl.sdl_push_event_mepolang_execution(slice_z);
+            std.debug.print("Read {d} bytes, running input as jsonapi\n", .{slice_z.len});
+            utilsdl.sdl_push_event_jsonapi_execution(slice_z);
         }
     } else {
         _ = mepo_sdl_loop_thread_boot(mepo);
@@ -486,7 +486,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_mepolang_repl:
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     const mepo: *@This() = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
-    mepo.mepolang_execute(mepo.config) catch unreachable;
+    mepo.jsonapi_execute(mepo.config) catch unreachable;
     sdl_event_loop(mepo) catch unreachable;
     return 0;
 }
@@ -522,8 +522,8 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                 sdl.SDL_WINDOWEVENT => &event_windowevent,
                 else => b: {
                     // Async events triggered outside of main thread:
-                    // 1) signals & 2) mepolang trigged via shellpipe or STDIN
-                    if (e.type == utilsdl.sdl_usereventtype(.Mepolang)) break :b &event_mepolangexecution;
+                    // 1) signals & 2) jsonapi trigged via shellpipe or STDIN
+                    if (e.type == utilsdl.sdl_usereventtype(.JSONAPI)) break :b &event_jsonapiexecution;
                     if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b &event_signal;
                     // Unhandled case
                     break :b &event_unhandled;

@@ -29,8 +29,8 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
 
     const expanded_path = try utilfile.wordexp_filepath(arena.allocator(), filepath);
     try utilfile.mkdirp_folder_basename(expanded_path);
-    const mepolang_file = try std.fs.createFileAbsoluteZ(expanded_path, .{});
-    defer mepolang_file.close();
+    const jsonapi_file = try std.fs.createFileAbsoluteZ(expanded_path, .{});
+    defer jsonapi_file.close();
 
     const Statement = struct {
         cmd: [:0]const u8,
@@ -134,5 +134,5 @@ fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
     const str = try std.json.stringifyAlloc(arena.allocator(), statements.items, .{
         .whitespace = .indent_2,
     });
-    try mepolang_file.writeAll(str);
+    try jsonapi_file.writeAll(str);
 }

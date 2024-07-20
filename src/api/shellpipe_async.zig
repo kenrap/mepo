@@ -17,7 +17,7 @@ const AsyncShellpipeRequest = struct {
 
 pub const spec = .{
     .name = "shellpipe_async",
-    .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as a mepolang expression.",
+    .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as a jsonapi expression.",
     .args = &.{
         .{ .tag = .Number, .name = "unique_handle_id", .desc = "Optional id to deduplicate individual async shellpipe requests", .default_value = .{ .Number = 1} },
         .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
@@ -87,12 +87,17 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
                 continue;
             }
             stdout.items.len += nread;
-            if (std.mem.lastIndexOf(u8, stdout.items, ";")) |mepolang_statement_end_index| {
-                const statement = stdout.items[0 .. mepolang_statement_end_index + 1];
-                utildbg.log("Running mepolang statement from async shellpipe: {s}\n", .{statement});
+
+            // Note: this is defacto broken since update from mepolang to JSON
+            // api since semicolon (;) can no longer be used as delimiter.
+            // TODO - will replace this bit with a single sync/noncontinual
+            // implementation
+            if (std.mem.lastIndexOf(u8, stdout.items, ";")) |jsonapi_statement_end_index| {
+                const statement = stdout.items[0 .. jsonapi_statement_end_index + 1];
+                utildbg.log("Running jsonapi statement from async shellpipe: {s}\n", .{statement});
                 const heap_statement = try mepo.allocator.dupeZ(u8, statement);
-                utilsdl.sdl_push_event_mepolang_execution(heap_statement);
-                try stdout.replaceRange(0, mepolang_statement_end_index + 1, &[_]u8{});
+                utilsdl.sdl_push_event_jsonapi_execution(heap_statement);
+                try stdout.replaceRange(0, jsonapi_statement_end_index + 1, &[_]u8{});
             }
         } else if (poll_fds[0].revents & (std.posix.POLL.ERR | std.posix.POLL.NVAL | std.posix.POLL.HUP) != 0) {
             continue_reading = false;

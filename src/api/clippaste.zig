@@ -8,7 +8,7 @@ const p = @import("../util/utilprefs.zig");
 
 pub const spec = .{
     .name = "clippaste",
-    .desc = "Extract clipboard contents and either center on coordinate (if clipboard content matches `lat lon` format); otherwise run clipboard contents as a mepolang expression.",
+    .desc = "Extract clipboard contents and either center on coordinate (if clipboard content matches `lat lon` format); otherwise run clipboard contents as a jsonapi expression.",
     .args = &.{},
     .execute = execute,
 };
@@ -21,7 +21,7 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
 
     // Try and parse lat lon by looking at first two space seperated tokens
     // trim commas, and see if can parse as floats; if so assume lat/lon
-    // if not - break out and run whatever is in clipboard as mepolang
+    // if not - break out and run whatever is in clipboard as jsonapi
     parse_lat_lon: {
         var it = std.mem.split(u8, text, " ");
         var lat: ?f64 = null;
@@ -44,6 +44,6 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
         return;
     }
 
-    // If not coordinates; run whatever is in clipboards as mepolang
-    try mepo.mepolang_execute(text);
+    // If not coordinates; run whatever is in clipboards as jsonapi expression
+    try mepo.jsonapi_execute(text);
 }

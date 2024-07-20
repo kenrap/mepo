@@ -11,7 +11,7 @@ pub const spec = .{
         .{ .tag = .Text, .name = "action", .desc = "Gesture action (set to either `pan` or `rotate`)" },
         .{ .tag = .Number, .name = "fingers", .desc = "Number of fingers to trigger expression" },
         .{ .tag = .Number, .name = "direction", .desc = "Direction for gesture (e.g. `1` for in or `-1` for out)" },
-        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expression to run" },
     },
     .execute = execute,
 };

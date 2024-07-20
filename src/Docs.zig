@@ -8,8 +8,8 @@ pub const CliFlags = &[_]struct {
     param: ?[]const u8 = null,
     desc: []const u8,
 }{
-    .{ .flag = "-docmd", .desc = "Print markdown documentation for the mepolang API to STDOUT." },
-    .{ .flag = "-docman", .desc = "Print manpage documentation for the mepolang API to STDOUT.  Can be viewed with man via: `mepo -docman | man -l`." },
+    .{ .flag = "-docmd", .desc = "Print markdown documentation for the JSON API to STDOUT." },
+    .{ .flag = "-docman", .desc = "Print manpage documentation for the JSON API to STDOUT.  Can be viewed with man via: `mepo -docman | man -l`." },
     .{ .flag = "-i", .desc = "Read JSON commands from STDIN continually (newline seperated). Can be used for interactive debugging or scripting via: `tee | mepo -i` or `./myscript | mepo -i`." },
     .{ .flag = "-e", .desc = "Enable debug mode to log messages to STDERR." },
     .{ .flag = "-hw", .desc = "Force using hardware renderer rather then default auto (HW/SW) renderer." },
@@ -61,11 +61,11 @@ const JSONAPIIntro =
     \\]
     \\
     \\The rest of this document describes the [syntax rules](#syntax),
-    \\[API commands](#api), and [preferences](#preferences) of mepolang.
-    \\Note also that mepo by default runs with certain mepolang
+    \\[API commands](#api), and [preferences](#preferences) of JSON API.
+    \\Note also that mepo by default runs with certain JSON API
     \\statement's applied by default, this is known as the [base
     \\configuration](#base-configuration).  Advanced details on scripting
-    \\and detailed practical examples of using mepolang may be viewed in
+    \\and detailed practical examples of using JSON API may be viewed in
     \\the [scripting guide](/scriptingguide.html) which should be seen as
     \\a supplement to this document.
 ;
@@ -102,7 +102,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
     switch (format) {
         .Markdown => {
             try stdout.print(
-                \\# Mepolang
+                \\# JSON API
                 \\
                 \\<div class='toc'>
                 \\<ul>
@@ -261,12 +261,11 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\works both offline and online, features a minimalist both touch/mouse
                 \\and keyboard compatible interface, and offers a UNIX-philosophy
                 \\inspired underlying design, exposing a powerful command language called
-                \\mepolang capable of being scripted to provide things like custom
+                \\JSON API capable of being scripted to provide things like custom
                 \\bounding-box search scripts, bookmarks, and more.
                 \\
                 \\This document describes usage of mepo, commandline flags,
-                \\usage of mepolang (mepo's configuration and IPC language),
-                \\and the default configuration. For more in-depth documentation
+                \\usage of JSON API and the default configuration. For more in-depth documentation
                 \\covering UI usage, guides, scripting, and demo videos
                 \\visit mepo's documentation website at http://mepo.milesalan.com
                 \\
@@ -312,7 +311,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\.B
                 \\$XDG_CONFIG_HOME/mepo/config
                 \\may be used for end-user
-                \\configuration and is assumed to be a file with valid mepolang
+                \\configuration and is assumed to be a file with valid JSON API
                 \\syntax. If $XDG_CONFIG_HOME is unset you can assume this
                 \\to be
                 \\.B
@@ -322,13 +321,13 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
 
             try stdout.print(
                 \\
-                \\.SH MEPOLANG
+                \\.SH JSON API
                 \\
                 \\Mepolang is mepo's command language for runtime IPC and configuration. It
                 \\takes the form of a plain-text DSL (domain-specific-language) with a
                 \\number of commands. Mepolang makes configuration, customizing,
-                \\and hacking on mepo simple. To test mepolang simply, you may run mepo
-                \\with the `-i` argument which reads mepolang from STDIN. A basic
+                \\and hacking on mepo simple. To test the JSON API simply, you may run mepo
+                \\with the `-i` argument which reads JSON API expressions from STDIN. A basic
                 \\example might look like:
                 \\
                 \\echo "prefset_n crosshair_size 200;" | mepo -i
@@ -356,7 +355,7 @@ pub fn generate(allocator: std.mem.Allocator, format: enum { Markdown, Manpage }
                 \\or whole (e.g. `3`). Can be negative like `-22.22` or positive
                 \\like `22.22`.
                 \\
-                \\Example mepolang text:
+                \\Example JSON API text: (TODO: FIXME)
                 \\  commandname textarg [multi word arg] 2;
                 \\  commandname2 arg 8.373 anothertextarg;
                 \\

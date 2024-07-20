@@ -4,7 +4,7 @@ const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
 const RectOpt = enum { Draw, Fill };
 
-pub fn sdl_usereventtype(event_type: enum { Mepolang, Signal }) u32 {
+pub fn sdl_usereventtype(event_type: enum { JSONAPI, Signal }) u32 {
     // E.g. static local, via var in struct
     const static_local = struct {
         var sdl_user_event_0: ?u32 = null;
@@ -13,7 +13,7 @@ pub fn sdl_usereventtype(event_type: enum { Mepolang, Signal }) u32 {
     if (static_local.sdl_user_event_0 == null) static_local.sdl_user_event_0 = sdl.SDL_RegisterEvents(1);
     if (static_local.sdl_user_event_1 == null) static_local.sdl_user_event_1 = sdl.SDL_RegisterEvents(1);
     return switch (event_type) {
-        .Mepolang => static_local.sdl_user_event_0.?,
+        .JSONAPI => static_local.sdl_user_event_0.?,
         .Signal => static_local.sdl_user_event_1.?,
     };
 }
@@ -32,15 +32,15 @@ pub fn sdl_push_event_resize() void {
     };
 }
 
-pub fn sdl_push_event_mepolang_execution(mepolang_text: [:0]const u8) void {
+pub fn sdl_push_event_jsonapi_execution(jsonapi_text: [:0]const u8) void {
     var sdlevent: sdl.SDL_Event = undefined;
-    const str_ptr = &mepolang_text[0];
-    sdlevent.type = sdl_usereventtype(.Mepolang);
+    const str_ptr = &jsonapi_text[0];
+    sdlevent.type = sdl_usereventtype(.JSONAPI);
     sdlevent.user.code = 0;
     sdlevent.user.data1 = @ptrFromInt(@intFromPtr(str_ptr));
     sdlevent.user.data2 = null;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
-        utildbg.log("Error pushing mepolang event ({s}) to SDL queue: {any}\n", .{mepolang_text, err});
+        utildbg.log("Error pushing jsonapi event ({s}) to SDL queue: {any}\n", .{jsonapi_text, err});
     };
 }
 

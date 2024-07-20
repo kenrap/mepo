@@ -7,10 +7,10 @@ const utilsdl = @import("../util/utilsdl.zig");
 
 pub const spec = .{
     .name = "bind_timer",
-    .desc = "Bind a timer to execute a mepolang action at the given interval.",
+    .desc = "Bind a timer to execute a JSON API expression at the given interval.",
     .args = &.{
-        .{ .tag = .Number, .name = "secs", .desc = "Number of seconds between successive runs of given mepolang expression" },
-        .{ .tag = .Exps, .name = "exps", .desc = "Mepolang expression to run" },
+        .{ .tag = .Number, .name = "secs", .desc = "Number of seconds between successive runs of given JSON API expression" },
+        .{ .tag = .Exps, .name = "exps", .desc = "JSON API expression to run" },
     },
     .execute = execute,
 };

@@ -10,7 +10,7 @@ const sdl = @import("../sdlshim.zig");
 
 pub const spec = .{
     .name = "shellpipe_sync",
-    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a mepolang expression.",
+    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a JSON API expression.",
     .args = &.{
         .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
     },
@@ -44,7 +44,7 @@ fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
     );
     try mepo.blit();
     if (exitcode == 0) {
-        try mepo.mepolang_execute(process_result.stdout);
+        try mepo.jsonapi_execute(process_result.stdout);
         try mepo.update_debug_message(null);
     } else {
         utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });

@@ -11,8 +11,8 @@ pub const spec = .{
         .{ .tag = .Number, .name = "pin_only", .desc = "Set to `1` to only show button in top bar *if* there is a currently activated pin.", .default_value = .{ .Number = 0 } },
         .{ .tag = .Number, .name = "group", .desc = "Group number (`0`-`9`) to associate with button. A Colorbar will match group # and button will highlight when group active. Use `-1` for no associated group.", .default_value = .{ .Number = -1 } },
         .{ .tag = .Text, .name = "text", .desc = "Text that will be shown on the button" },
-        .{ .tag = .Exps, .name = "exps_click", .desc = "Mepolang expression to run on single clicking the button", .default_value = .{ .Exps = "[]"} },
-        .{ .tag = .Exps, .name = "exps_hold", .desc = "Mepolang expression to run on holding the button", .default_value = .{ .Exps = "[]"} },
+        .{ .tag = .Exps, .name = "exps_click", .desc = "JSON API expression to run on single clicking the button", .default_value = .{ .Exps = "[]"} },
+        .{ .tag = .Exps, .name = "exps_hold", .desc = "JSON API expression to run on holding the button", .default_value = .{ .Exps = "[]"} },
     },
     .execute = execute,
 };
@@ -31,10 +31,10 @@ fn bind_button(mepo: *Mepo, visible_only_when_pin_active: bool, group_number: ?u
 
     for (mepo.uibuttons.items) |*btn| {
         if (std.mem.eql(u8, text, btn.text)) {
-            mepo.allocator.free(btn.mepolang_click_single);
-            mepo.allocator.free(btn.mepolang_click_hold);
-            btn.mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
-            btn.mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
+            mepo.allocator.free(btn.jsonapi_click_single);
+            mepo.allocator.free(btn.jsonapi_click_hold);
+            btn.jsonapi_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
+            btn.jsonapi_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
             btn.only_visible_when_pin_active = visible_only_when_pin_active;
             return;
         }
@@ -43,8 +43,8 @@ fn bind_button(mepo: *Mepo, visible_only_when_pin_active: bool, group_number: ?u
     try mepo.uibuttons.append(.{
         .text = try mepo.allocator.dupeZ(u8, text),
         .group_number = group_number,
-        .mepolang_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
-        .mepolang_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
+        .jsonapi_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
+        .jsonapi_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
         .only_visible_when_pin_active = visible_only_when_pin_active,
     });
 }
