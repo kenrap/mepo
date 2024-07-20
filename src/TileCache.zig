@@ -324,7 +324,7 @@ fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.X
     try curl_setopt(transfer_datum.client, curl.CURLOPT_STDERR, tile_cache.dev_null_fd);
     try curl_setopt(transfer_datum.client, curl.CURLOPT_XFERINFOFUNCTION, curl_callback_tile_xferinfo);
     try curl_errorcheck(curl.curl_multi_add_handle(tile_cache.curl_multi, transfer_datum.client));
-    utildbg.log("Add multi handle {any}\n", .{coords});
+    //utildbg.log("Add multi handle {any}\n", .{coords});
 }
 
 fn curl_callback_tile_xferinfo(
