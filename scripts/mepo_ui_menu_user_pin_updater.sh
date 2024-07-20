@@ -67,12 +67,13 @@ getcoords() {
   COORDS="$(coordsviagpsd)"
   iscoords "$COORDS" && echo "coordsviagpsd $COORDS" && return 0
 
+  echo "Unable to use any avilable method to determine coordinates" >&2
   return 1
 }
 
 droppin() {
   SOURCEANDCOORDS="$(getcoords)"
-  [ $? = 1 ] && return
+  [ $? = 1 ] && return 1
   SOURCE="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f1)"
   COORDS="$(echo "$SOURCEANDCOORDS" | cut -d ' ' -f2-3)"
   LAT="$(echo "$COORDS" | cut -d " " -f1)"
@@ -111,6 +112,7 @@ droppin() {
 
 droppinactivateandcenter() {
   BASEJSON="$(droppin)"
+  [ $? = 1 ] && return 1
   ACTIVATEANDCENTERJSON='[
     {"cmd": "pin_activate", "args": {"group": 6, "handle": "user_location"}},
     {"cmd": "center_on_pin", "args": {}}
