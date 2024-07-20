@@ -90,3 +90,7 @@ in mobile Linux, OSM, and/or Zig.
 - **Mailing List**: [mepo-devel](https://lists.sr.ht/~mil/mepo-devel)
 - **Tickets**: [mepo-tickets](https://todo.sr.ht/~mil/mepo-tickets)
 - **IRC**: #mepo on irc.oftc.net (mla is my nick)
+
+## **Packaging Links**
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/mepo.svg)](https://repology.org/project/mepo/versions)
