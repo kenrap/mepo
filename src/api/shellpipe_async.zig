@@ -44,7 +44,7 @@ fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
     run_shellpipe(mepo, unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
-    _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
+    _ = mepo.shellpipe_async_threads.swapRemove(unique_handle_id);
     return 0;
 }
 
@@ -54,12 +54,12 @@ fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
 pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     defer mepo.allocator.free(cmd);
     if (async_id) |unique_handle_id| {
-        if (mepo.async_shellpipe_threads.get(unique_handle_id)) |thread_id| {
+        if (mepo.shellpipe_async_threads.get(unique_handle_id)) |thread_id| {
             utildbg.log("Async shellpipe id {} already present with thread ID {}\n", .{ unique_handle_id, thread_id });
             return;
         }
-        try mepo.async_shellpipe_threads.put(unique_handle_id, sdl.SDL_GetThreadID(null));
-        defer _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
+        try mepo.shellpipe_async_threads.put(unique_handle_id, sdl.SDL_GetThreadID(null));
+        defer _ = mepo.shellpipe_async_threads.swapRemove(unique_handle_id);
     }
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
@@ -82,7 +82,7 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     }
     try child.spawn();
     if (async_id == null)
-        mepo.sync_shellpipe_pid = child.id;
+        mepo.shellpipe_sync_pid = child.id;
     try child.collectOutput(&stdout, &stderr, 10000 * 1024);
     const term = try child.wait();
 

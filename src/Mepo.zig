@@ -16,7 +16,7 @@ const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
-async_shellpipe_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
+shellpipe_async_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 config: []const u8,
 debug_message: ?[]const u8 = null,
@@ -36,7 +36,7 @@ pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_type: types.RendererType = .Auto,
-sync_shellpipe_pid: ?std.process.Child.Id = null,
+shellpipe_sync_pid: ?std.process.Child.Id = null,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -520,7 +520,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
                     &event_signal
                 else if (e.type == utilsdl.sdl_usereventtype(.JSONAPI))
                     &event_jsonapiexecution // via shellpipe or stdin
-                else if (mepo.sync_shellpipe_pid == null) switch (e.type) {
+                else if (mepo.shellpipe_sync_pid == null) switch (e.type) {
                     sdl.SDL_FINGERDOWN => &event_fingerdown,
                     sdl.SDL_FINGERUP => &event_fingerup,
                     sdl.SDL_KEYUP => &event_keyup,
@@ -786,7 +786,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             evict_texture,
             &config.MaxTextures,
         ).init(allocator),
-        .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
+        .shellpipe_async_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),

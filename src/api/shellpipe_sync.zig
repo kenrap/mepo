@@ -41,14 +41,14 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
     defer request.mepo.allocator.destroy(request);
     run_shellpipe(request.mepo, null, request.cmd) catch |err|
         utildbg.log("Error running sync shellpipe: {}\n", .{err});
-    request.mepo.sync_shellpipe_pid = null;
+    request.mepo.shellpipe_sync_pid = null;
     return 0;
 }
 
 /// Helper function for SDL event handler during sync shellpipe
 /// for killing the spawn processes.
 fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
-    if (mepo.sync_shellpipe_pid) |pid| {
+    if (mepo.shellpipe_sync_pid) |pid| {
         if (std.posix.kill(-pid, std.posix.SIG.KILL)) |_|
             utildbg.log("Killing sync shellpipe process {}\n", .{ pid })
         else |err|

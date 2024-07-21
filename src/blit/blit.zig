@@ -503,7 +503,7 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
             mepo.tile_cache.queue_lifo_bg.count(),
             mepo.tile_cache.transfer_map.count(),
             mepo.tile_cache.texture_map.count(),
-            mepo.async_shellpipe_threads.count(),
+            mepo.shellpipe_async_threads.count(),
         },
     );
 }
@@ -734,7 +734,7 @@ fn blit_multiline_text(
 
 /// Grays out the UI if a sync shellpipe is in progress.
 fn blit_overlay_blocked_ui(mepo: *Mepo) !void {
-    if (mepo.sync_shellpipe_pid != null)
+    if (mepo.shellpipe_sync_pid != null)
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{
             .value = 0x888888, .opacity = 128,
         }, sdl.SDL_Rect{
@@ -754,7 +754,7 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
 
         if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_group_active_item == null)
             continue;
-        if (mepo.uibuttons.items[btn_i].only_visible_when_sync_shellpipe == (mepo.sync_shellpipe_pid == null))
+        if (mepo.uibuttons.items[btn_i].only_visible_when_sync_shellpipe == (mepo.shellpipe_sync_pid == null))
             continue;
 
         const surf = try utilsdl.errorcheck_ptr(
