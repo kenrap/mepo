@@ -59,61 +59,39 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
             return;
         }
         try mepo.async_shellpipe_threads.put(unique_handle_id, sdl.SDL_GetThreadID(null));
+        defer _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
     }
 
-    // More or less from zig 0.9 stdlib child process's spawnPosix
-    const argv = [_][]const u8{ "sh", "-c", cmd };
-    const max_output_bytes: usize = 50 * 1024;
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
-    var child = std.process.Child.init(argv[0..], arena.allocator());
-    child.stdin_behavior = .Ignore;
+    const env_vars = try get_env_vars(mepo, arena.allocator());
+    const args = [_][]const u8{ "sh", "-c", cmd };
+    var child = std.process.Child.init(&args, arena.allocator());
+    child.pgid = 0;
+    child.allocator = arena.allocator();
+    child.argv = args[0..];
     child.stdout_behavior = .Pipe;
-    const env = try get_env_vars(mepo, mepo.allocator);
-    child.env_map = &env;
-    child.pgid = 0; // create new process group
-    try child.spawn();
+    child.stderr_behavior = .Pipe;
+    child.env_map = &env_vars;
     if (async_id == null)
         mepo.sync_shellpipe_pid = child.id;
-    var stdout = std.ArrayList(u8).init(mepo.allocator);
-    errdefer stdout.deinit();
 
-    var poll_fds = [_]std.posix.pollfd{
-        .{ .fd = child.stdout.?.handle, .events = std.posix.POLL.IN, .revents = undefined },
-    };
-    const bump_amt = 512;
-
-    var continue_reading = true;
-    while (continue_reading) {
-        const events = try std.posix.poll(&poll_fds, std.math.maxInt(i32));
-        if (events == 0) continue;
-        if (poll_fds[0].revents & std.posix.POLL.IN != 0) {
-            try stdout.ensureTotalCapacity(@min(stdout.items.len + bump_amt, max_output_bytes));
-            if (stdout.unusedCapacitySlice().len == 0) return error.StdoutStreamTooLong;
-            const nread = try std.posix.read(poll_fds[0].fd, stdout.unusedCapacitySlice());
-            if (nread == 0) {
-                continue_reading = false;
-                continue;
-            }
-            stdout.items.len += nread;
-
-            // Note: this is defacto broken since update from mepolang to JSON
-            // api since semicolon (;) can no longer be used as delimiter.
-            // TODO - will replace this bit with a single sync/noncontinual
-            // implementation
-            if (std.mem.lastIndexOf(u8, stdout.items, ";")) |jsonapi_statement_end_index| {
-                const statement = stdout.items[0 .. jsonapi_statement_end_index + 1];
-                utildbg.log("Running jsonapi statement from async shellpipe: {s}\n", .{statement});
-                const heap_statement = try mepo.allocator.dupeZ(u8, statement);
-                utilsdl.sdl_push_event_jsonapi_execution(heap_statement);
-                try stdout.replaceRange(0, jsonapi_statement_end_index + 1, &[_]u8{});
-            }
-        } else if (poll_fds[0].revents & (std.posix.POLL.ERR | std.posix.POLL.NVAL | std.posix.POLL.HUP) != 0) {
-            continue_reading = false;
-            continue;
-        }
+    var stdout = std.ArrayList(u8).init(arena.allocator());
+    var stderr = std.ArrayList(u8).init(arena.allocator());
+    errdefer {
+        stdout.deinit();
+        stderr.deinit();
     }
-    _ = try child.kill();
+    try child.spawn();
+    try child.collectOutput(&stdout, &stderr, 10000 * 1024);
+    const term = try child.wait();
+
+    const exitcode = term.Exited;
+    if (exitcode == 0) {
+        const heap_stdout = try mepo.allocator.dupeZ(u8, try stdout.toOwnedSlice());
+        utildbg.log("Running JSON APIstatement from async shellpipe: {s}\n", .{heap_stdout});
+        utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
+    }
 }
 
 fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {
