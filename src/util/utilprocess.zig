@@ -7,8 +7,7 @@ pub fn run_subprocess(
     allocator: std.mem.Allocator, 
     cmd: []const u8,
     env_vars: *const std.process.EnvMap, 
-    _: ?*std.process.Child.Id,
-    //set_process_id_ptr_opt: ?*std.process.Child.Id,
+    set_process_id_opt_ptr_opt: ?*?std.process.Child.Id,
 ) !?[]const u8 {
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
@@ -27,9 +26,9 @@ pub fn run_subprocess(
         stderr.deinit();
     }
     try child.spawn();
-    //if (set_process_id_ptr_opt != null) {
-    //    //set_process_id_ptr_opt.? = child.id;
-    //}
+    if (set_process_id_opt_ptr_opt != null) {
+        set_process_id_opt_ptr_opt.?.* = child.id;
+    }
     try child.collectOutput(&stdout, &stderr, 10000 * 1024);
     const term = try child.wait();
     switch (term) {

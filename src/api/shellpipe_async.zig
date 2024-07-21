@@ -3,6 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utilconversion = @import("../util/utilconversion.zig");
 const utilplatform = @import("../util/utilplatform.zig");
+const utilprocess = @import("../util/utilprocess.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
@@ -65,38 +66,14 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
     const env_vars = try get_env_vars(mepo, arena.allocator());
-    const args = [_][]const u8{ "sh", "-c", cmd };
-    var child = std.process.Child.init(&args, arena.allocator());
-    child.pgid = 0;
-    child.allocator = arena.allocator();
-    child.argv = args[0..];
-    child.stdout_behavior = .Pipe;
-    child.stderr_behavior = .Pipe;
-    child.env_map = &env_vars;
 
-    var stdout = std.ArrayList(u8).init(arena.allocator());
-    var stderr = std.ArrayList(u8).init(arena.allocator());
-    errdefer {
-        stdout.deinit();
-        stderr.deinit();
-    }
-    try child.spawn();
-    if (async_id == null)
-        mepo.shellpipe_sync_pid = child.id;
-    try child.collectOutput(&stdout, &stderr, 10000 * 1024);
-    const term = try child.wait();
-
-    switch (term) {
-        .Exited => |exitcode| {
-            if (exitcode == 0) {
-                const heap_stdout = try mepo.allocator.dupeZ(u8, try stdout.toOwnedSlice());
-                utildbg.log("Running JSON API statement from async shellpipe: {s}\n", .{heap_stdout});
-                utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
-            }
-        },
-        else => {
-            utildbg.log("Early termination of async_shellpipe (via signal, stopped, etc.)\n", .{});
-        }
+    if (try utilprocess.run_subprocess(
+        arena.allocator(), cmd, &env_vars,
+        if (async_id == null) &mepo.shellpipe_sync_pid else null,
+    )) |response_stdout| {
+        const heap_stdout = try mepo.allocator.dupeZ(u8, response_stdout);
+        utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
+        arena.allocator().free(response_stdout);
     }
 }
 
