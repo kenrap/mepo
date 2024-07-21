@@ -86,11 +86,17 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     try child.collectOutput(&stdout, &stderr, 10000 * 1024);
     const term = try child.wait();
 
-    const exitcode = term.Exited;
-    if (exitcode == 0) {
-        const heap_stdout = try mepo.allocator.dupeZ(u8, try stdout.toOwnedSlice());
-        utildbg.log("Running JSON APIstatement from async shellpipe: {s}\n", .{heap_stdout});
-        utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
+    switch (term) {
+        .Exited => |exitcode| {
+            if (exitcode == 0) {
+                const heap_stdout = try mepo.allocator.dupeZ(u8, try stdout.toOwnedSlice());
+                utildbg.log("Running JSON API statement from async shellpipe: {s}\n", .{heap_stdout});
+                utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
+            }
+        },
+        else => {
+            utildbg.log("Early termination of async_shellpipe (via signal, stopped, etc.)\n", .{});
+        }
     }
 }
 

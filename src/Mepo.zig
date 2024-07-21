@@ -812,8 +812,8 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
                 .only_visible_when_sync_shellpipe = true,
                 .only_visible_when_pin_active = false,
                 // Hardcoded action to kill the current sync shellpipe process
-                .mepolang_click_single = "",
-                .mepolang_click_hold = "",
+                .jsonapi_click_single = "",
+                .jsonapi_click_hold = "",
             });
             break :b uibuttons;
         },
