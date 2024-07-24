@@ -46,6 +46,7 @@ const JSONAPIIntro =
     \\  {"cmd": "command_name", "args": {"arg_name": "arg_value"}},
     \\  {"cmd": "command_name2", "args": {"arg_name": "arg_value"}}
     \\]
+    \\```
     \\
     \\The simplest way to get started with the JSON API is to
     \\experiment with playing with the autoloaded configuration file at
@@ -59,6 +60,7 @@ const JSONAPIIntro =
     \\  {"cmd": "prefset_n", "args": {"pref": "lat", "value": 42.3608} },
     \\  {"cmd": "prefset_n", "args": {"pref": "lon", "value": -71.0573}}
     \\]
+    \\```
     \\
     \\The rest of this document describes the [syntax rules](#syntax),
     \\[API commands](#api), and [preferences](#preferences) of JSON API.
