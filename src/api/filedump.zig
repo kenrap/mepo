@@ -23,7 +23,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     try filedump(mepo, save_types, filepath);
 }
 
-fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
+pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 

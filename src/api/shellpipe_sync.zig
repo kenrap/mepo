@@ -7,6 +7,7 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
 const sdl = @import("../sdlshim.zig");
+const filedump = @import("./filedump.zig");
 
 pub const spec = .{
     .name = "shellpipe_sync",
@@ -23,6 +24,8 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
+    try filedump.filedump(mepo, "rp", "$XDG_CACHE_HOME/mepo/shellpipe_savestate.json");
+
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
