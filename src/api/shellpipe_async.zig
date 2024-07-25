@@ -7,7 +7,6 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
 const sdl = @import("../sdlshim.zig");
-const get_env_vars = @import("./shellpipe_sync.zig").get_env_vars;
 
 const AsyncShellpipeRequest = struct {
     mepo: *Mepo,
@@ -106,4 +105,34 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
     }
     _ = try child.kill();
     _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
+}
+
+fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {
+    var v = try std.process.getEnvMap(allocator);
+
+    // Window and zoom info
+    try v.put("MEPO_WIN_W", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_w}));
+    try v.put("MEPO_WIN_H", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_h}));
+    try v.put("MEPO_ZOOM", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.zoom).u}));
+
+    // Center position
+    try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.lat).f}));
+    try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.lon).f}));
+
+    // Bbox
+    const bbox = mepo.bounding_box();
+    try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lat}));
+    try v.put("MEPO_TL_LON", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lon}));
+    try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.bottomright_lat}));
+    try v.put("MEPO_BR_LON", try std.fmt.allocPrint(allocator, "{d}", .{bbox.bottomright_lon}));
+
+    // Cursor position
+    const cursor_latlon = mepo.cursor_latlon();
+    try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lat}));
+    try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lon}));
+
+    // Pin metadata
+    try v.put("MEPO_PINGROUPACTIVE", try std.fmt.allocPrint(allocator, "{d}", .{mepo.pin_group_active}));
+
+    return v;
 }
