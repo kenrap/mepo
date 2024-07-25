@@ -8,20 +8,21 @@ INPUT="$(cat)"
 PINADDS="$(
   echo "$INPUT" | jq '[
     .[] | 
-    select(.geometry.type == "Point").geometry.coordinates | 
+    select(.geometry.type == "Point") | 
     {
       "cmd": "pin_add", 
       "args": {
         "group": 7,
-        "handle": "geojson_\(.[1])_\(.[0])",
-        "lat": .[1],
-        "lon": .[0]
+        "handle": "geojson_\(.geometry.coordinates.[1])_\(.geometry.coordinates.[0])",
+        "lat": .geometry.coordinates.[1],
+        "lon": .geometry.coordinates.[0]
       }
     }
   ]'
 )"
 
 PRECMDS='[
+    {"cmd": "prefset_n", "args": {"pref": "pingroup_7_ordered", "value": 1}},
     {"cmd": "pin_groupactivate", "args": {"group": 7}},
     {"cmd": "pin_purge", "args": {}}
 ]'
