@@ -111,7 +111,7 @@ pub fn generateMarkdownDocs(allocator: std.mem.Allocator) !void {
         \\
         \\---
         \\
-        \\## API
+        \\## API Commands
         \\
     , .{ JSONAPIIntro, config.Version });
 
