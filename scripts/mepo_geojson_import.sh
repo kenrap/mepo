@@ -4,8 +4,9 @@
 # May be used as:
 #   cat geojson_file.json | mepo_geojson_import.sh > ~/.config/mepo/bookmarks.json
 
+INPUT="$(cat)"
 PINADDS="$(
-  jq '[
+  echo "$INPUT" | jq '[
     .[] | 
     select(.geometry.type == "Point").geometry.coordinates | 
     {
@@ -20,4 +21,9 @@ PINADDS="$(
   ]'
 )"
 
-echo "$PINADDS"
+PRECMDS='[
+    {"cmd": "pin_groupactivate", "args": {"group": 7}},
+    {"cmd": "pin_purge", "args": {}}
+]'
+
+echo "[$PRECMDS, $PINADDS]" | jq  '[.[][]]'
