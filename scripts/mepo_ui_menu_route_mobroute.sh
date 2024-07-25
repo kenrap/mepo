@@ -2,7 +2,7 @@
 set -x
 set -o pipefail
 DISPLAYNAME=" Route: via Mobroute (Offline GTFS)"
-HOTKEY=R
+HOTKEY=r
 DOC='
   TODO
 '
@@ -18,25 +18,6 @@ Tunable - Max Transfer Seconds|2400
 Tunable - Max N Transfers|20
 Tunable - Walkspeed Km/Hr|4.5"
 
-MOBROUTE_ARGSPROMPT_TEXT="Mobroute Route
-  - You may edit the route parameters below.
-  - Note GTFS Feed ID is required!
-  - See more details at: http://sr.ht/~mil/mobroute
-  - Lookup Feed IDs at: http://mdb.lrdu.org
-  - Common GTFS Feed IDs: (TODO)
-  - Rows which were edited must be selected before hitting 'Route'
-
-Parameters:"
-
-ERR_PINS="Must have atleast 2 pins in active pin group to route between!
-  - Note: Please drop atleast two pins on the map to route between
-  - Note: You can use the drop pin item in the central menu (or press f)
-"
-
-ERR_PARAMS="Unable to construct Mobroute args!
-  - Note: You must select changed rows
-  - Note: You must change GTFS Feed ID to a number value
-"
 
 errdie() {
   zenity --error --text "$1"
@@ -44,6 +25,10 @@ errdie() {
 }
 
 gettablevals() {
+  ERR_PINS="Must have atleast 2 pins in active pin group to route between!
+    - Note: Please drop atleast two pins on the map to route between
+    - Note: You can use the drop pin item in the central menu (or press f)
+  "
   JSONPIN0="$(
     cat ~/.cache/mepo/shellpipe_savestate.json |
     jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
@@ -66,12 +51,14 @@ gettablevals() {
     sed "s#GEOCORDTO#$COORDTO#g"
 }
 
+mapnlvalstojson() {
+  jq -nR 'reduce inputs as $line ({}; .[$line] = input)'
+}
+
 zenitytableoutputtomobrouteparams() {
   INPUT="$(cat)"
   MOBROUTEPARAMS="$(
     echo "$INPUT" |
-      tr '|' '\n' |
-      jq -nR 'reduce inputs as $line ({}; .[$line] = input)' |
       jq '
         with_entries(if .key == "GTFS Feed ID" then (.key = "feed_ids" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
         with_entries(if .key == "From Geocoordinate" then (.key = "from" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
@@ -89,7 +76,10 @@ zenitytableoutputtomobrouteparams() {
         with_entries(if .key == "Tunable - Walkspeed Km/Hr" then (.key = "walkspeed_km_hr" | .value = (.value | tonumber)) else . end)
       '
   )"
-
+  ERR_PARAMS="Unable to construct Mobroute args!
+    - Note: You must select changed rows
+    - Note: You must change GTFS Feed ID to a number value
+  "
   [ $? != 0 ] && errdie "$ERR_PARAMS"
   echo "$MOBROUTEPARAMS"
 }
@@ -103,15 +93,26 @@ mobrouterun() {
 }
 
 main() {
-  TABLEVALS="$(gettablevals)"
-  SELECTRESULT="$(
-    echo "$TABLEVALS" | 
+  MOBROUTE_ARGSPROMPT_TEXT="Mobroute Route
+    - You may edit the route parameters below.
+    - Note GTFS Feed ID is required!
+    - See more details at: http://sr.ht/~mil/mobroute
+    - Lookup Feed IDs at: http://mdb.lrdu.org
+    - Common GTFS Feed IDs: (TODO)
+    - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
+
+  JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"
+  JSONSELECTRESULT="$(
+    gettablevals |
       awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
       xargs zenity --ok-label Route --list --editable --multiple --text "$MOBROUTE_ARGSPROMPT_TEXT" --print-column ALL \
       --column "Parameter" \
-      --column "Value"
+      --column "Value" |
+      tr '|' '\n' |
+      mapnlvalstojson
   )"
-  MOBROUTE_ROUTEPARAMS_BASE="$(echo "$SELECTRESULT" | zenitytableoutputtomobrouteparams)"
+  JSONRAWVALS="$(echo "[$JSONBASE, $JSONSELECTRESULT]" | jq add)"
+  MOBROUTE_ROUTEPARAMS_BASE="$(echo "$JSONRAWVALS" | zenitytableoutputtomobrouteparams)"
   MOBROUTE_ROUTEPARAMS_ENABLEGEOJSON='{"output_formats": ["geojson"]}'
   MOBROUTE_ROUTEPARAMS="$(echo "[$MOBROUTE_ROUTEPARAMS_BASE, $MOBROUTE_ROUTEPARAMS_ENABLEGEOJSON]" | jq add)"
   MOBROUTE_GEOJSON_RESULT="$(mobrouterun "$MOBROUTE_ROUTEPARAMS")"

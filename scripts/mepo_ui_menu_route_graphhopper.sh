@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME=" Route: via GraphHopper"
-HOTKEY=r
+HOTKEY=R
 DOC='
   Allows user to determine a route between two points via the publicly
   accessible GraphHopper instance. Presents menuing to prompt user for origin
