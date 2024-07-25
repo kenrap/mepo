@@ -15,46 +15,39 @@ DOC='
 [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
 [ -z "$MEPO_ENDPOINT_GRAPHHOPPER_ROUTE" ] && MEPO_ENDPOINT_GRAPHHOPPER_ROUTE="https://graphhopper.com/api/1/route"
 [ -z "$MEPO_APIKEY_GRAPHHOPPER" ] && MEPO_APIKEY_GRAPHHOPPER="49343b56-0779-47d1-8ca3-0ea706ddc9c7"
+[ -z "$MEPO_GRAPHHOPPER_DEFAULTS" ] && MEPO_GRAPHHOPPER_DEFAULTS="From Geocoordinate|GEOCORDFROM
+To Geocoordinate|GEOCORDTO
+Mode|car"
 
-errexit() {
+
+errdie() {
   echo "$1" >&2
   exit 1
 }
 
-nominatimquerytargetmenu() {
-  COORDS=""
+gettablevals() {
+  ERR_PINS="Must have atleast 2 pins in active pin group to route between!
+    - Note: Please drop atleast two pins on the map to route between
+    - Note: You can use the drop pin item in the central menu (or press f)
+  "
+  JSONPIN0="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
+  )"
+  [ $? != 0 ] && errdie "$ERR_PINS"
 
-  while ! echo "$COORDS" | grep -Eq "[-0-9.]+[ ]+[-0-9.]+"; do
-    QUERY="$(
-        printf %b "centerpoint\ncursor" |
-        PROMPT="$1 (Nominatim search)" mepo_ui_helper_menu.sh |
-        sed 's/ /%20/g'
-    )"
-    [ "$QUERY" = "centerpoint" ] && COORDS="$MEPO_CENTER_LAT $MEPO_CENTER_LON" && break
-    [ "$QUERY" = "cursor" ] && COORDS="$MEPO_CURSOR_LAT $MEPO_CURSOR_LON" && break
+  JSONPIN1="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
+  )"
+  [ $? != 0 ] && errdie "$ERR_PINS"
+  COORDFROM="$(echo "$JSONPIN0" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
+  COORDTO="$(echo "$JSONPIN1" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
+  echo "$MEPO_GRAPHHOPPER_DEFAULTS" | sed "s#GEOCORDFROM#$COORDFROM#g" | sed "s#GEOCORDTO#$COORDTO#g"
+}
 
-
-    VIEWBOX="$MEPO_TL_LON,$MEPO_TL_LAT,$MEPO_BR_LON,$MEPO_BR_LAT"
-    RESULT="$(
-      curl -Ss "${MEPO_ENDPOINT_NOMINATIM_SEARCH}?format=json&q=$QUERY&viewbox=$VIEWBOX&bounded=1&limit=50" |
-        jq '.[] | "\(.display_name) \(.lat) \(.lon)" '
-    )"
-
-    if ! echo "$RESULT" | awk NF | grep -Eq .; then
-      echo "No results - press any key!" | PROMPT="No results!" mepo_ui_helper_menu.sh  > /dev/null
-      continue
-    fi
-
-    COORDS="$(
-      echo "$RESULT" | 
-      PROMPT="Pick result" mepo_ui_helper_menu.sh |
-      grep -oE '[-0-9.]+' |
-      tail -n2 |
-      tr "\n" " "
-    )"
-  done
-
-  echo "$COORDS"
+mapnlvalstojson() {
+  jq -nR 'reduce inputs as $line ({}; .[$line] = input)'
 }
 
 curlgraphhopper() {
@@ -62,10 +55,10 @@ curlgraphhopper() {
   FROM="$2"
   DEST="$3"
 
-  FROMLAT="$(echo "$FROM" | cut -d " " -f1)"
-  FROMLON="$(echo "$FROM" | cut -d " " -f2)"
-  DESTLAT="$(echo "$DEST" | cut -d " " -f1)"
-  DESTLON="$(echo "$DEST" | cut -d " " -f2)"
+  FROMLAT="$(echo "$FROM" | cut -d "," -f1)"
+  FROMLON="$(echo "$FROM" | cut -d "," -f2)"
+  DESTLAT="$(echo "$DEST" | cut -d "," -f1)"
+  DESTLON="$(echo "$DEST" | cut -d "," -f2)"
 
   curl -Ss \
     -X POST \
@@ -121,17 +114,25 @@ printpins() {
 }
 
 main() {
-  MODE="$(
-    printf %b "car\nbike\nfoot" |
-    PROMPT="Route mode" mepo_ui_helper_menu.sh
+  GRAPHHOPPER_ARGSPROMPT_TEXT="Graphhopper Route
+    - You may edit the route parameters below.
+    - Valid modes are: walk, bike, car
+    - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
+
+  JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"
+  JSONSELECTRESULT="$(
+    gettablevals |
+      awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
+      xargs zenity --ok-label Route --list --editable --multiple --text "$GRAPHHOPPER_ARGSPROMPT_TEXT" --print-column ALL \
+      --column "Parameter" \
+      --column "Value" |
+      tr '|' '\n' |
+      mapnlvalstojson
   )"
-  echo "$MODE" | grep -qE "^(car|bike|foot)" || errexit "Unsupported route mode"
-
-  LOCFROM="$(nominatimquerytargetmenu "Route from")"
-  [ -z "$LOCFROM" ] && errexit "Failed to determine coordinates to route to"
-
-  LOCTO="$(nominatimquerytargetmenu "Route to")"
-  [ -z "$LOCTO" ] && errexit "Failed to determine coordinates to route to"
+  JSONRAWVALS="$(echo "[$JSONBASE, $JSONSELECTRESULT]" | jq add)"
+  MODE="$(echo "$JSONRAWVALS" | jq '.Mode' | tr -d '"')"
+  LOCFROM="$(echo "$JSONRAWVALS" | jq '."From Geocoordinate"' | tr -d '"')"
+  LOCTO="$(echo "$JSONRAWVALS" | jq '."To Geocoordinate"' | tr -d '"')"
 
   printpins "$(curlgraphhopper "$MODE" "$LOCFROM" "$LOCTO")"
 }
