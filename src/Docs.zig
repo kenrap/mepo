@@ -38,7 +38,7 @@ const JSONAPIIntro =
     \\
     \\
     \\The basic syntax for the JSON API is that anywhere JSON API commands
-    \\may be passed, you can define an array of commands as:
+    \\may be passed, you can pass an array of commands as:
     \\
     \\```sh
     \\[
@@ -47,28 +47,8 @@ const JSONAPIIntro =
     \\]
     \\```
     \\
-    \\The simplest way to get started with the JSON API is to
-    \\experiment with playing with the autoloaded configuration file at
-    \\`~/.config/mepo/config.json`. At it's simplest, you might use the
-    \\`prefset_n` command to change the default loaded location for instance.
-    \\ Add the following to config.mepo/config.json` as such:
-    \\
-    \\
-    \\```sh
-    \\[
-    \\  {"cmd": "prefset_n", "args": {"pref": "lat", "value": 42.3608} },
-    \\  {"cmd": "prefset_n", "args": {"pref": "lon", "value": -71.0573}}
-    \\]
-    \\```
-    \\
-    \\The rest of this document describes the [syntax rules](#syntax),
-    \\[API commands](#api), and [preferences](#preferences) of JSON API.
-    \\Note also that mepo by default runs with certain JSON API
-    \\statement's applied by default, this is known as the [base
-    \\configuration](#base-configuration).  Advanced details on scripting
-    \\and detailed practical examples of using JSON API may be viewed in
-    \\the [scripting guide](/scriptingguide.html) which should be seen as
-    \\a supplement to this document.
+    \\For a quickstart on how to use the JSON API practically, see
+    \\the [scripting guide](/scriptingguide.html).
 ;
 
 
