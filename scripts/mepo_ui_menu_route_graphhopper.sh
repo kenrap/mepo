@@ -87,31 +87,37 @@ curlgraphhopper() {
 printpins() {
   RESPONSE="$1"
 
-  echo "
-    prefset_n pingroup_7_ordered 1;
-    pin_groupactivate 7;
-    pin_purge;
-  "
+  PRECMDS='[
+      {"cmd": "prefset_n", "args": {"pref": "pingroup_7_ordered", "value": 1}},
+      {"cmd": "pin_groupactivate", "args": {"group": 7}},
+      {"cmd": "pin_purge", "args": {}}
+  ]'
 
-  echo "$RESPONSE" |
-    jq '
-      . as $root | 
-      [.paths[0].instructions | .[] | {"\(.interval[0])" : . }] | add as $instructions | 
-      $root.paths[0].points.coordinates |
-      to_entries |
-      map({coords:.value, idx:"\(.key)", instruction:$instructions["\(.key)"]}) | 
-      .[] | 
-      if(.instruction != null) then 
-        "
-          pin_add -1 0 \(.coords[1]) \(.coords[0]) [\(.idx)]; 
-          pin_meta -1 [\(.idx)] name [\(.instruction.text)]; 
-          pin_meta -1 [\(.idx)] time [\(.instruction.time / 1000 / 60) minutes]; 
-          pin_meta -1 [\(.idx)] distance [\(.instruction.distance)km];
-        "
-        else
-        "pin_add -1 1 \(.coords[1]) \(.coords[0]) [];"
-      end
-    ' | tr -d '"' | sed 's/\\n//g'
+  PINADDS="$(
+    echo "$RESPONSE" |
+      jq '[
+        . as $root | 
+        [.paths[0].instructions | .[] | {"\(.interval[0])" : . }] | add as $instructions | 
+        $root.paths[0].points.coordinates |
+        to_entries |
+        map({coords:.value, idx:"\(.key)", instruction:$instructions["\(.key)"]}) | 
+        .[] | 
+        if(.instruction != null) then 
+          [
+            {"cmd": "pin_add", "args": {"lat": .coords[1], "lon": .coords[0], "handle": .idx}},
+            {"cmd": "pin_meta", "args": {"key": "name", "value": .instruction.text, "handle": .idx}},
+            {"cmd": "pin_meta", "args": {"key": "time", "value": ((.instruction.time / 1000 / 60 | tostring) + " minutes"), "handle": .idx}},
+            {"cmd": "pin_meta", "args": {"key": "distance", "value": ((.instruction.distance | tostring) + "km"), "handle": .idx}}
+          ]
+          else
+          [
+            {"cmd": "pin_add", "args": {"lat": .coords[1], "lon": .coords[0], "handle": "", "structural": 1}}
+          ]
+        end
+      ] | flatten'
+  )"
+
+  echo "[$PRECMDS, $PINADDS]" | jq  '[.[][]]'
 }
 
 main() {
