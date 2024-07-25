@@ -38,21 +38,28 @@ fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
 
 fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
     const shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
-    defer shellpipe_request.mepo.allocator.destroy(shellpipe_request);
-    async_shellpipe_run_catch_errors(shellpipe_request.mepo, shellpipe_request.unique_handle_id, shellpipe_request.cmd) catch |err| {
+    const mepo = shellpipe_request.mepo;
+    defer mepo.allocator.destroy(shellpipe_request);
+    const unique_handle_id = shellpipe_request.unique_handle_id;
+    run_shellpipe(mepo, unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
+    _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
     return 0;
 }
 
-fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
+/// Spawn given command and wait for its output from another thread.
+/// If async_id is null (i.e. called from shellpipe_sync), signal the UI
+/// to soft-block until the command completes or is canceled.
+pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     defer mepo.allocator.free(cmd);
-    const thread_id = sdl.SDL_GetThreadID(null);
-    if (mepo.async_shellpipe_threads.get(unique_handle_id)) |already_spawned_thread_id| {
-        utildbg.log("Async shellpipe id {} already present with thread_id {}\n", .{ unique_handle_id, already_spawned_thread_id });
-        return;
+    if (async_id) |unique_handle_id| {
+        if (mepo.async_shellpipe_threads.get(unique_handle_id)) |thread_id| {
+            utildbg.log("Async shellpipe id {} already present with thread ID {}\n", .{ unique_handle_id, thread_id });
+            return;
+        }
+        try mepo.async_shellpipe_threads.put(unique_handle_id, sdl.SDL_GetThreadID(null));
     }
-    try mepo.async_shellpipe_threads.put(unique_handle_id, thread_id);
 
     // More or less from zig 0.9 stdlib child process's spawnPosix
     const argv = [_][]const u8{ "sh", "-c", cmd };
@@ -65,6 +72,8 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
     const env = try get_env_vars(mepo, mepo.allocator);
     child.env_map = &env;
     try child.spawn();
+    if (async_id == null)
+        mepo.sync_shellpipe_pid = child.id;
     var stdout = std.ArrayList(u8).init(mepo.allocator);
     errdefer stdout.deinit();
 
@@ -104,7 +113,6 @@ fn async_shellpipe_run_catch_errors(mepo: *Mepo, unique_handle_id: i8, cmd: []co
         }
     }
     _ = try child.kill();
-    _ = mepo.async_shellpipe_threads.swapRemove(unique_handle_id);
 }
 
 fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {

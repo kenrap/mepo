@@ -35,6 +35,7 @@ pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_type: types.RendererType = .Auto,
+sync_shellpipe_pid: ?std.process.Child.Id = null,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -512,24 +513,25 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
             const pending_fn = switch (e.type) {
-                sdl.SDL_FINGERDOWN => &event_fingerdown,
-                sdl.SDL_FINGERUP => &event_fingerup,
-                sdl.SDL_KEYUP => &event_keyup,
-                sdl.SDL_MOUSEBUTTONDOWN => &event_mousebuttondown,
-                sdl.SDL_MOUSEBUTTONUP => &event_mousebuttonup,
-                sdl.SDL_MOUSEMOTION => &event_mousemotion,
-                sdl.SDL_MOUSEWHEEL => &event_mousewheel,
-                sdl.SDL_MULTIGESTURE => &event_multigesture,
-                sdl.SDL_TEXTINPUT => &event_textinput,
                 sdl.SDL_QUIT => &event_quit,
                 sdl.SDL_WINDOWEVENT => &event_windowevent,
-                else => b: {
-                    // Async events triggered outside of main thread:
-                    // 1) signals & 2) jsonapi trigged via shellpipe or STDIN
-                    if (e.type == utilsdl.sdl_usereventtype(.JSONAPI)) break :b &event_jsonapiexecution;
-                    if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b &event_signal;
-                    // Unhandled case
-                    break :b &event_unhandled;
+                else => if (e.type == utilsdl.sdl_usereventtype(.Signal))
+                    &event_signal
+                else if (e.type == utilsdl.sdl_usereventtype(.JSONAPI))
+                    &event_jsonapiexecution // via shellpipe or stdin
+                else if (mepo.sync_shellpipe_pid == null) switch (e.type) {
+                    sdl.SDL_FINGERDOWN => &event_fingerdown,
+                    sdl.SDL_FINGERUP => &event_fingerup,
+                    sdl.SDL_KEYUP => &event_keyup,
+                    sdl.SDL_MOUSEBUTTONDOWN => &event_mousebuttondown,
+                    sdl.SDL_MOUSEBUTTONUP => &event_mousebuttonup,
+                    sdl.SDL_MOUSEMOTION => &event_mousemotion,
+                    sdl.SDL_MOUSEWHEEL => &event_mousewheel,
+                    sdl.SDL_MULTIGESTURE => &event_multigesture,
+                    sdl.SDL_TEXTINPUT => &event_textinput,
+                    else => &event_unhandled,
+                } else switch (e.type) {
+                    else => &event_unhandled,
                 },
             };
 
