@@ -3,16 +3,21 @@
 # 
 # May be used as:
 #   cat geojson_file.json | mepo_geojson_import.sh > ~/.config/mepo/bookmarks.json
-#
-jq '[
-  .[] | 
-  select(.geometry.type == "Point").geometry.coordinates | 
-  {
-    "cmd": "pin_add", 
-    "args": {
-      "handle": "geojson_\(.[1])_\(.[0])",
-      "lat": .[1],
-      "lon": .[0]
+
+PINADDS="$(
+  jq '[
+    .[] | 
+    select(.geometry.type == "Point").geometry.coordinates | 
+    {
+      "cmd": "pin_add", 
+      "args": {
+        "group": 7,
+        "handle": "geojson_\(.[1])_\(.[0])",
+        "lat": .[1],
+        "lon": .[0]
+      }
     }
-  }
-]'
+  ]'
+)"
+
+echo "$PINADDS"

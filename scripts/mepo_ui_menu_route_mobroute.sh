@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -x
 set -o pipefail
 DISPLAYNAME=" Route: via Mobroute (Offline GTFS)"
 HOTKEY=R
@@ -6,7 +7,7 @@ DOC='
   TODO
 '
 [ -z "$MEPO_MOBROUTE_DEFAULTS" ] && MEPO_MOBROUTE_DEFAULTS="GTFS Feed ID|(please edit)
-From Geocoordinate|282727.22222,73.333
+From Geocoordinate|GEOCORDFROM
 To Geocoordinate|GEOCORDTO
 Time|DATENOW
 Tunable - Transfer Categories|f,i
@@ -27,29 +28,52 @@ MOBROUTE_ARGSPROMPT_TEXT="Mobroute Route
 
 Parameters:"
 
-mobrouteargsprompt() {
-  MEPO_MOBROUTE_DEFAULTS="$(
-    echo "$MEPO_MOBROUTE_DEFAULTS" | 
-    sed "s#DATENOW#$(date -u +'%Y-%m-%dT%H:%M:%SZ')#g" |
-    sed "s#GEOCORDFROM#22.222,33.33#g" |
-    sed "s#GEOCORDTO#22.222,33.33#g"
-  )"
+ERR_PINS="Must have atleast 2 pins in active pin group to route between!
+  - Note: Please drop atleast two pins on the map to route between
+  - Note: You can use the drop pin item in the central menu (or press f)
+"
 
-  # Pass the formatted input to zenity
-  RESULT="$(
-    echo "$MEPO_MOBROUTE_DEFAULTS" | 
-      awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
-      xargs zenity --ok-label Route --list --editable --multiple --text "$MOBROUTE_ARGSPROMPT_TEXT" --print-column ALL \
-      --column "Parameter" \
-      --column "Value"
-  )"
+ERR_PARAMS="Unable to construct Mobroute args!
+  - Note: You must select changed rows
+  - Note: You must change GTFS Feed ID to a number value
+"
 
-  JSONARGS="$(
-    echo "$RESULT" |
+errdie() {
+  zenity --error --text "$1"
+  exit 1
+}
+
+gettablevals() {
+  JSONPIN0="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
+  )"
+  [ $? != 0 ] && errdie "$ERR_PINS"
+
+  JSONPIN1="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
+  )"
+  [ $? != 0 ] && errdie "$ERR_PINS"
+
+  DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+  COORDFROM="$(echo "$JSONPIN0" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
+  COORDTO="$(echo "$JSONPIN1" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
+    
+  echo "$MEPO_MOBROUTE_DEFAULTS" | 
+    sed "s#DATENOW#$DATE#g" |
+    sed "s#GEOCORDFROM#$COORDFROM#g" |
+    sed "s#GEOCORDTO#$COORDTO#g"
+}
+
+zenitytableoutputtomobrouteparams() {
+  INPUT="$(cat)"
+  MOBROUTEPARAMS="$(
+    echo "$INPUT" |
       tr '|' '\n' |
       jq -nR 'reduce inputs as $line ({}; .[$line] = input)' |
       jq '
-        with_entries(if .key == "GTFS Feed ID" then (.key = "gtfs_feed_id" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
+        with_entries(if .key == "GTFS Feed ID" then (.key = "feed_ids" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
         with_entries(if .key == "From Geocoordinate" then (.key = "from" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
         with_entries(if .key == "To Geocoordinate" then (.key = "to" | .value = (.value | split(",") | map(. | tonumber))) else . end) |
 
@@ -66,17 +90,32 @@ mobrouteargsprompt() {
       '
   )"
 
-  if [ $? != 0 ]; then
-    zenity --error --text "Unable to construct Mobroute args
-  - Note: You must select changed rows
-  - Note: You must change GTFS Feed ID to a number value
-  "
-  fi
+  [ $? != 0 ] && errdie "$ERR_PARAMS"
+  echo "$MOBROUTEPARAMS"
+}
+
+mobrouterun() {
+  RP="$1"
+  TMPERR="$(mktemp)"
+  MRRESULT="$(mobroute route -rp "{\"route_params\": $RP}" 2>$TMPERR)"
+  [ $? != 0 ] && errdie "Mobroute Execution Error:\n$(cat $TMPERR)"
+  echo "$MRRESULT"
 }
 
 main() {
-  JSONARGS="$(mobrouteargsprompt)"
-  # TODO mobroute route -p "$JSONARGS"
+  TABLEVALS="$(gettablevals)"
+  SELECTRESULT="$(
+    echo "$TABLEVALS" | 
+      awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
+      xargs zenity --ok-label Route --list --editable --multiple --text "$MOBROUTE_ARGSPROMPT_TEXT" --print-column ALL \
+      --column "Parameter" \
+      --column "Value"
+  )"
+  MOBROUTE_ROUTEPARAMS_BASE="$(echo "$SELECTRESULT" | zenitytableoutputtomobrouteparams)"
+  MOBROUTE_ROUTEPARAMS_ENABLEGEOJSON='{"output_formats": ["geojson"]}'
+  MOBROUTE_ROUTEPARAMS="$(echo "[$MOBROUTE_ROUTEPARAMS_BASE, $MOBROUTE_ROUTEPARAMS_ENABLEGEOJSON]" | jq add)"
+  MOBROUTE_GEOJSON_RESULT="$(mobrouterun "$MOBROUTE_ROUTEPARAMS")"
+  echo "$MOBROUTE_GEOJSON_RESULT" | jq .geojson | mepo_geojson_import.sh
 }
 
 main

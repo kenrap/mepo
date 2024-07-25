@@ -81,5 +81,8 @@ pub fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvM
     try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lat}));
     try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lon}));
 
+    // Pin metadata
+    try v.put("MEPO_PINGROUPACTIVE", try std.fmt.allocPrint(allocator, "{d}", .{mepo.pin_group_active}));
+
     return v;
 }

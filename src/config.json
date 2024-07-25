@@ -81,7 +81,7 @@
   {"cmd": "bind_key", "args": { "mod": "cs", "key": "9", "exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 8}}]}},
   {"cmd": "bind_key", "args": { "mod": "cs", "key": "0", "exps": [{"cmd": "pin_transfer", "args": { "from_group": -1, "handle": "all", "to_group": 9}}]}},
 
-  {"cmd": "bind_key", "args": { "mod": "_", "key": "d", "exps": [ {"cmd": "pin_delete", "args": { "group": -1, "handle": 1}}, {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}} ]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "d", "exps": [ {"cmd": "pin_delete", "args": {}}, {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}} ]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "d", "exps": [{"cmd": "pin_purge", "args": {}}]}},
 
   {"cmd": "bind_key", "args": { "mod": "_", "key": "/", "exps": [{"cmd": "preftoggle", "args": {"pref": "help"}}]}},
@@ -111,8 +111,8 @@
   {"cmd": "bind_key", "args": { "mod": "_", "key": "g", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_reposition_nominatim.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "g", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_search_nominatim.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "b", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_search_overpass.sh"}}]}},
-  {"cmd": "bind_key", "args": { "mod": "s", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_overpassrelation.sh"}}]}},
-  {"cmd": "bind_key", "args": { "mod": "_", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_graphhopper.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "_", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_mobroute.sh"}}]}},
+  {"cmd": "bind_key", "args": { "mod": "s", "key": "r", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_route_graphhopper.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "s", "key": "z", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_fontsize.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "z", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_zoom.sh"}}]}},
   {"cmd": "bind_key", "args": { "mod": "_", "key": "u", "exps": [{"cmd": "shellpipe_sync", "args": { "shellcode": "mepo_ui_menu_pref_url.sh"}}]}},
@@ -125,7 +125,7 @@
   {"cmd": "bind_key", "args": { "mod": "cs", "key": "b", "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "DIM=w MULT=-1  mepo_ui_helper_pref_pan.sh"}}]}},
 
 
-  {"cmd": "bind_button", "args": { "text": "Menu", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_central_menu.sh"}} ]}},
+  {"cmd": "bind_button", "args": { "text": "Menu", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_central_menu.sh", "filedump": "$XDG_CACHE_HOME/mepo/shellpipe_savestate.json"}} ]}},
   {"cmd": "bind_button", "args": { "text": "Center", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_user_pin_updater.sh droppinactivateandcenter"}} ]}},
   {"cmd": "bind_button", "args": { "text": "Relocate", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_reposition_nominatim.sh"}} ]}},
   {"cmd": "bind_button", "args": { "text": "Nm", "exps_click": [ {"cmd": "shellpipe_sync", "args": {"shellcode":  "mepo_ui_menu_search_nominatim.sh"}} ]}},
@@ -135,7 +135,7 @@
   {"cmd": "bind_button", "args": { "text": "~", "pin_only": 1,  "exps_click": [ {"cmd": "preftoggle", "args": {"pref":  "overlay_pindetails_expanded"}} ]}},
   {"cmd": "bind_button", "args": { "text": "Purge", "pin_only": 1,  "exps_click": [ {"cmd": "pin_purge", "args": {}} ]}},
   {"cmd": "bind_button", "args": { "text": "Del", "pin_only": 1,  "exps_click": [
-    {"cmd": "pin_delete", "args": { "group": -1, "handle": ""}},
+    {"cmd": "pin_delete", "args": {}},
     {"cmd": "pin_cycle", "args": { "viewport_only": 0, "delta": 1}},
     {"cmd": "center_on_pin", "args": {}}
   ]}},
@@ -184,7 +184,7 @@
   }},
 
 
-  {"cmd": "bind_click", "args": { "button": 1, "clicks": -1, "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "mepo_ui_central_menu.sh"}}]}},
+  {"cmd": "bind_click", "args": { "button": 1, "clicks": -1, "exps": [{"cmd": "shellpipe_sync", "args": {"shellcode": "mepo_ui_central_menu.sh", "filedump": "$XDG_CACHE_HOME/mepo/shellpipe_savestate.json"}}]}},
   {"cmd": "bind_click", "args": { "button": 1, "clicks": 2, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": 1}}]}},
   {"cmd": "bind_click", "args": { "button": 1, "clicks": 3, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -2}}]}},
   {"cmd": "bind_click", "args": { "button": 2, "clicks": 1, "exps": [{"cmd": "zoom_relative", "args": {"zoom_delta": -1}}]}},
