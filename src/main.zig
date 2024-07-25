@@ -19,7 +19,7 @@ pub fn main() !void {
     const allocator = std.heap.c_allocator;
     var stderr_debugging_on: bool = false;
     var stdin_jsonapi_parsing_on: bool = false;
-    var mode: enum { Graphical, Download, Version, DocsMarkdown, DocsManpage, Help } = .Graphical;
+    var mode: enum { Graphical, Download, Version, DocsMarkdown, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var renderer_type: types.RendererType = .Auto;
 
@@ -28,11 +28,8 @@ pub fn main() !void {
     while (arg_w != null) : (arg_w = args_it.next()) {
         const arg = arg_w.?;
         if (std.mem.eql(u8, arg, "-docmd")) {
-            // -docmdapi: Documentation mode, generates markdown docs for JSON API
+            // -docmd: Documentation mode, generates markdown docs for JSON API
             mode = .DocsMarkdown;
-        } else if (std.mem.eql(u8, arg, "-docman")) {
-            // -docman: Documentation mode, generates manpage docs for JSON API
-            mode = .DocsManpage;
         } else if (std.mem.startsWith(u8, arg, "-d")) {
             // -d: Downloader mode (non-video), runs cfg
             mode = .Download;
@@ -56,7 +53,7 @@ pub fn main() !void {
             // -v: Version
             mode = .Version;
         } else if (std.mem.eql(u8, arg, "-h")) {
-            // -v: Version
+            // -h: Version
             mode = .Help;
         } else if (std.mem.startsWith(u8, arg, "-")) {
             std.debug.print("Unknown CLI flag: '{s}'\nUsage - ", .{arg});
@@ -66,10 +63,7 @@ pub fn main() !void {
 
     switch (mode) {
         .DocsMarkdown => {
-            try Docs.generate(allocator, .Markdown);
-        },
-        .DocsManpage => {
-            try Docs.generate(allocator, .Manpage);
+            try Docs.generateMarkdownDocs(allocator);
         },
         .Graphical => {
             var tile_cache = try TileCache.init(allocator);
