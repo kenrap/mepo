@@ -4,9 +4,9 @@ const utildbg = @import("../util/utildbg.zig");
 // In the case that []const u8 is returned, it's the callers responsibility
 // to free the return value
 pub fn run_subprocess(
-    allocator: std.mem.Allocator, 
+    allocator: std.mem.Allocator,
     cmd: []const u8,
-    env_vars: *const std.process.EnvMap, 
+    env_vars: *const std.process.EnvMap,
     set_process_id_opt_ptr_opt: ?*?std.process.Child.Id,
 ) !?[]const u8 {
     var arena = std.heap.ArenaAllocator.init(allocator);
@@ -39,7 +39,7 @@ pub fn run_subprocess(
         },
         else => {
             utildbg.log("Early termination of async_shellpipe (via signal, stopped, etc.)\n", .{});
-        }
+        },
     }
     return null;
 }

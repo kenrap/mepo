@@ -736,9 +736,13 @@ fn blit_multiline_text(
 fn blit_overlay_blocked_ui(mepo: *Mepo) !void {
     if (mepo.shellpipe_sync_pid != null)
         try utilsdl.sdl_renderer_rect(mepo.renderer, .{
-            .value = 0x888888, .opacity = 128,
+            .value = 0x888888,
+            .opacity = 128,
         }, sdl.SDL_Rect{
-            .x = 1, .y = 1, .w = @intCast(mepo.win_w), .h = @intCast(mepo.win_h),
+            .x = 1,
+            .y = 1,
+            .w = @intCast(mepo.win_w),
+            .h = @intCast(mepo.win_h),
         }, .Fill);
 }
 

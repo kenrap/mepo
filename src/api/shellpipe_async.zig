@@ -68,7 +68,9 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     const env_vars = try get_env_vars(mepo, arena.allocator());
 
     if (try utilprocess.run_subprocess(
-        arena.allocator(), cmd, &env_vars,
+        arena.allocator(),
+        cmd,
+        &env_vars,
         if (async_id == null) &mepo.shellpipe_sync_pid else null,
     )) |response_stdout| {
         const heap_stdout = try mepo.allocator.dupeZ(u8, response_stdout);

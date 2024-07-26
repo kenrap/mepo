@@ -26,7 +26,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         if (!button.only_visible_when_sync_shellpipe)
             unreachable;
         mepo.allocator.free(button.text);
-        button.text = try std.fmt.allocPrintZ(mepo.allocator, "Cancel {s}", .{ cmd });
+        button.text = try std.fmt.allocPrintZ(mepo.allocator, "Cancel {s}", .{cmd});
     }
     sdl.SDL_DetachThread(sdl.SDL_CreateThread(run_sync_shellpipe, "sync_shellpipe", request));
 }
@@ -50,7 +50,7 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
 fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
     if (mepo.shellpipe_sync_pid) |pid| {
         if (std.posix.kill(-pid, std.posix.SIG.KILL)) |_|
-            utildbg.log("Killing sync shellpipe process {}\n", .{ pid })
+            utildbg.log("Killing sync shellpipe process {}\n", .{pid})
         else |err|
             utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
         // No need to wait for termination as run_shellpipe already handles HUP events.
@@ -74,6 +74,8 @@ pub fn event_mousebuttonup(mepo: *Mepo, _: sdl.SDL_Event) types.Pending {
     return if (blitfns.blit_uibuttons(mepo, cursor) catch null) |clicked_btn|
         if (clicked_btn.only_visible_when_sync_shellpipe)
             kill_sync_shellpipe(mepo)
-        else .None
-    else .None;
+        else
+            .None
+    else
+        .None;
 }
