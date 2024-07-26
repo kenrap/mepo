@@ -25,6 +25,7 @@ drag: ?struct {
     delta_x: u32 = 0,
     delta_y: u32 = 0,
 } = null,
+initialized_video: std.Thread.ResetEvent,
 fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
 fonts_normal: [50]*sdl.TTF_Font,
@@ -470,8 +471,9 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: 
         );
         sdl.SDL_DetachThread(thread);
 
+        mepo.initialized_video.wait();
+        const stdin = &std.io.getStdIn().reader();
         while (true) {
-            const stdin = &std.io.getStdIn().reader();
             const read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
             const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
             mepo.allocator.free(read_slice);
@@ -486,6 +488,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: 
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     const mepo: *@This() = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
+    mepo.initialized_video.set();
     mepo.jsonapi_execute(mepo.config) catch unreachable;
     sdl_event_loop(mepo) catch unreachable;
     return 0;
@@ -783,6 +786,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
+        .initialized_video = std.Thread.ResetEvent{},
         .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
         .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
         .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
