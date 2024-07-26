@@ -60,7 +60,6 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
             return;
         }
         try mepo.shellpipe_async_threads.put(unique_handle_id, sdl.SDL_GetThreadID(null));
-        defer _ = mepo.shellpipe_async_threads.swapRemove(unique_handle_id);
     }
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
