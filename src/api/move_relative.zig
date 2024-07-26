@@ -6,8 +6,8 @@ pub const spec = .{
     .name = "move_relative",
     .desc = "Move the map by a relative x/y amount.",
     .args = &.{
-        .{ .tag = .Number, .name = "rel_x", .desc = "Relative x amount", .default_value = .{ .Number = 0} },
-        .{ .tag = .Number, .name = "rel_y", .desc = "Relative y amount", .default_value = .{ .Number = 0} },
+        .{ .tag = .Number, .name = "rel_x", .desc = "Relative x amount", .default_value = .{ .Number = 0 } },
+        .{ .tag = .Number, .name = "rel_y", .desc = "Relative y amount", .default_value = .{ .Number = 0 } },
     },
     .execute = execute,
 };

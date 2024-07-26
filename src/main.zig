@@ -70,7 +70,7 @@ pub fn main() !void {
             var mepo = try Mepo.init(allocator, &tile_cache, config.DefaultBaseConfig, renderer_type);
             if (stderr_debugging_on) {
                 try mepo.jsonapi_execute(
-                  \\[{"cmd": "prefset_n", "args": {"debug_stderr": 1}}]
+                    \\[{"cmd": "prefset_n", "args": {"debug_stderr": 1}}]
                 );
             }
             mepo.init_video_and_sdl_stdin_loop(stdin_jsonapi_parsing_on) catch Mepo.graceful_terminate_sdl();

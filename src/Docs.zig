@@ -51,7 +51,6 @@ const JSONAPIIntro =
     \\the [scripting guide](/scriptingguide.html).
 ;
 
-
 const DocEnvVarsShellpipe =
     \\Both `shellpipe_sync` and `shellpipe_async` expose a number of ENV
     \\variables to the target script called. See below for the accessible

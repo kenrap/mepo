@@ -40,7 +40,7 @@ pub fn sdl_push_event_jsonapi_execution(jsonapi_text: [:0]const u8) void {
     sdlevent.user.data1 = @ptrFromInt(@intFromPtr(str_ptr));
     sdlevent.user.data2 = null;
     errorcheck(sdl.SDL_PushEvent(&sdlevent)) catch |err| {
-        utildbg.log("Error pushing jsonapi event ({s}) to SDL queue: {any}\n", .{jsonapi_text, err});
+        utildbg.log("Error pushing jsonapi event ({s}) to SDL queue: {any}\n", .{ jsonapi_text, err });
     };
 }
 

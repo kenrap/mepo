@@ -46,16 +46,13 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
                 .b => .Number,
                 .u => .Number,
                 .f => .Number,
-                .u24 => .HexText
+                .u24 => .HexText,
             };
             if (format_as == .Text) {
                 var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
                 try args.put("pref", .{ .string = pref.name });
                 try args.put("value", .{ .string = if (pref.value.t) |tv| tv else "" });
-                try statements.append(.{
-                  .cmd = "prefset_t",
-                  .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args}, .{})
-                });
+                try statements.append(.{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
             } else if (format_as == .Number) {
                 var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
                 try args.put("pref", .{ .string = pref.name });
@@ -63,20 +60,14 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
                     .b => @floatFromInt(@intFromBool(pref.value.b)),
                     .u => @floatFromInt(pref.value.u),
                     .f => pref.value.f,
-                    else => unreachable
-                }});
-                try statements.append(.{
-                  .cmd = "prefset_n",
-                  .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args}, .{})
-                });
+                    else => unreachable,
+                } });
+                try statements.append(.{ .cmd = "prefset_n", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
             } else if (format_as == .HexText) {
                 var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
                 try args.put("pref", .{ .string = pref.name });
                 try args.put("value", .{ .string = try std.fmt.allocPrint(arena.allocator(), "#{x}", .{pref.value.u24}) });
-                try statements.append(.{
-                  .cmd = "prefset_t",
-                  .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args}, .{})
-                });
+                try statements.append(.{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
             }
         }
     }
@@ -98,15 +89,12 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
                     if (pin.category == .Structural) break :b 1;
                     break :b 0;
                 } });
-                try statements.append(.{
-                  .cmd = "pin_add",
-                  .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pinadd}, .{})
-                });
+                try statements.append(.{ .cmd = "pin_add", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pinadd }, .{}) });
 
                 // Pin metadata
                 var it = pin.metadata.iterator();
                 while (it.next()) |kv| {
-                    var args_pinmeta= std.StringArrayHashMap(std.json.Value).init(arena.allocator());
+                    var args_pinmeta = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
                     try args_pinmeta.put("handle", .{ .string = handle: {
                         if (pin.handle) |h| break :handle h;
                         break :handle "";
@@ -114,21 +102,15 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
                     try args_pinmeta.put("group", .{ .integer = @intCast(pg_i) });
                     try args_pinmeta.put("key", .{ .string = kv.key_ptr.* });
                     try args_pinmeta.put("value", .{ .string = kv.value_ptr.* });
-                    try statements.append(.{
-                      .cmd = "pin_meta",
-                      .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pinmeta}, .{})
-                    });
+                    try statements.append(.{ .cmd = "pin_meta", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pinmeta }, .{}) });
                 }
             }
         }
 
         // Pin Group activate
-        var args_pingroupactivate= std.StringArrayHashMap(std.json.Value).init(arena.allocator());
+        var args_pingroupactivate = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
         try args_pingroupactivate.put("group", .{ .integer = mepo.pin_group_active });
-        try statements.append(.{
-          .cmd = "pin_groupactivate",
-          .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{.object = args_pingroupactivate}, .{})
-        });
+        try statements.append(.{ .cmd = "pin_groupactivate", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pingroupactivate }, .{}) });
     }
 
     const str = try std.json.stringifyAlloc(arena.allocator(), statements.items, .{
