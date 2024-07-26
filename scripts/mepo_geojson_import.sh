@@ -13,7 +13,13 @@ PINADDS="$(
       "cmd": "pin_add", 
       "args": {
         "group": 7,
-        "handle": "geojson_\(.geometry.coordinates.[1])_\(.geometry.coordinates.[0])",
+        "handle": (
+          if(.properties != null and .properties.name != null) then 
+            .properties.name
+          else
+              "geojson_\(.geometry.coordinates.[1])_\(.geometry.coordinates.[0])"
+          end
+        ),
         "lat": .geometry.coordinates.[1],
         "lon": .geometry.coordinates.[0]
       }
