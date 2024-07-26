@@ -488,8 +488,8 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: 
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     const mepo: *@This() = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
-    mepo.initialized_video.set();
     mepo.jsonapi_execute(mepo.config) catch unreachable;
+    mepo.initialized_video.set();
     sdl_event_loop(mepo) catch unreachable;
     return 0;
 }
