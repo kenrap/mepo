@@ -24,6 +24,10 @@ errdie() {
   exit 1
 }
 
+ensurehasmobroute() {
+  command -v mobroute >/dev/null || errdie "Binary mobroute missing; please install from your package manager"
+}
+
 gettablevals() {
   ERR_PINS="Must have atleast 2 pins in active pin group to route between!
     - Note: Please drop atleast two pins on the map to route between
@@ -93,6 +97,7 @@ mobrouterun() {
 }
 
 main() {
+  ensurehasmobroute
   MOBROUTE_ARGSPROMPT_TEXT="Mobroute Route
     - You may edit the route parameters below.
     - Note GTFS Feed ID is required!
