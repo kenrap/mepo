@@ -130,4 +130,4 @@ main() {
   echo "$MOBROUTE_GEOJSON_RESULT" | jq .geojson | mepo_geojson_import.sh
 }
 
-main
+if [ -n "$1" ]; then "$@"; else main; fi
