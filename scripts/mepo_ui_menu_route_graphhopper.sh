@@ -2,15 +2,9 @@
 DISPLAYNAME=" Route: via GraphHopper"
 HOTKEY=R
 DOC='
-  Allows user to determine a route between two points via the publicly
-  accessible GraphHopper instance. Presents menuing to prompt user for origin
-  and destination points. The cursor (e.g. the position of the mouse or on
-  mobile the last clicked point - e.g. in case of click-hold functionality)
-  and the centerpoint (where the crosshair is) may be used as origin or
-  destination points as an alternative to named entries. Named entry searches
-  use Nominatim to lookup the user input query. Resulting route is placed
-  into pin group 7 as an ordered pin group wherein instructional pins show
-  each direction in the route.
+  Allows user to route between the first two pins in the active pingroup
+  via the publicly accessible GraphHopper instance. Change variables in
+  the presented select list to toggle parameters.
 '
 [ -z "$MEPO_ENDPOINT_NOMINATIM_SEARCH" ] && MEPO_ENDPOINT_NOMINATIM_SEARCH="https://nominatim.openstreetmap.org/search"
 [ -z "$MEPO_ENDPOINT_GRAPHHOPPER_ROUTE" ] && MEPO_ENDPOINT_GRAPHHOPPER_ROUTE="https://graphhopper.com/api/1/route"
