@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-set -x
 set -o pipefail
 DISPLAYNAME=" Route: via Mobroute (Offline GTFS)"
 HOTKEY=r
