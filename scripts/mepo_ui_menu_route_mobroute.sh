@@ -4,7 +4,14 @@ set -o pipefail
 DISPLAYNAME=" Route: via Mobroute (Offline GTFS)"
 HOTKEY=r
 DOC='
-  TODO
+  Allows user to route between the first two pins in the active pingroup
+  via Mobroute. The route is calculated offline and GTFS data as needed is
+  pulled automatically (see http://sr.ht/~mil/mobroute for details). The
+  user is expected to provide the GTFS Feed ID (see http://mdb.lrdu.org)
+  for details. The request maybe slow on initial routes and will be
+  fast subsequently as GTFS data is cached locally. For this to work the
+  user should install mobroute from their package manager and ensure the
+  "mobroute" binary is in PATH.
 '
 [ -z "$MEPO_MOBROUTE_DEFAULTS" ] && MEPO_MOBROUTE_DEFAULTS="GTFS Feed ID|(please edit)
 From Geocoordinate|GEOCORDFROM
