@@ -38,23 +38,28 @@ ensurehasmobroute() {
   command -v mobroute >/dev/null || errdie "Binary mobroute missing; please install from your package manager"
 }
 
-gettablevals() {
+errcheckhastwopins() {
+  NPINS="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+      jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | length"
+  )"
+
   ERR_PINS="Must have atleast 2 pins in active pin group to route between!
     - Note: Please drop atleast two pins on the map to route between
     - Note: You can use the drop pin item in the central menu (or press f)
   "
+  [ "$NPINS" -lt "2" ] && errdie "$ERR_PINS"
+}
+
+gettablevals() {
   JSONPIN0="$(
     cat ~/.cache/mepo/shellpipe_savestate.json |
     jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
   )"
-  [ $? != 0 ] && errdie "$ERR_PINS"
-
   JSONPIN1="$(
     cat ~/.cache/mepo/shellpipe_savestate.json |
     jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
   )"
-  [ $? != 0 ] && errdie "$ERR_PINS"
-
   DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   COORDFROM="$(echo "$JSONPIN0" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
   COORDTO="$(echo "$JSONPIN1" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
@@ -116,6 +121,7 @@ main() {
     - Common GTFS Feed IDs: (TODO)
     - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
 
+  errcheckhastwopins
   JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"
   JSONSELECTRESULT="$(
     gettablevals |

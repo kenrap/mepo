@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -o pipefail
 DISPLAYNAME=" Route: via GraphHopper"
 HOTKEY=R
 DOC='
@@ -19,22 +20,28 @@ errdie() {
   exit 1
 }
 
-gettablevals() {
+errcheckhastwopins() {
+  NPINS="$(
+    cat ~/.cache/mepo/shellpipe_savestate.json |
+      jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | length"
+  )"
+
   ERR_PINS="Must have atleast 2 pins in active pin group to route between!
     - Note: Please drop atleast two pins on the map to route between
     - Note: You can use the drop pin item in the central menu (or press f)
   "
+  [ "$NPINS" -lt "2" ] && errdie "$ERR_PINS"
+}
+
+gettablevals() {
   JSONPIN0="$(
     cat ~/.cache/mepo/shellpipe_savestate.json |
     jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
   )"
-  [ $? != 0 ] && errdie "$ERR_PINS"
-
   JSONPIN1="$(
     cat ~/.cache/mepo/shellpipe_savestate.json |
     jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
   )"
-  [ $? != 0 ] && errdie "$ERR_PINS"
   COORDFROM="$(echo "$JSONPIN0" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
   COORDTO="$(echo "$JSONPIN1" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
   echo "$MEPO_GRAPHHOPPER_DEFAULTS" | sed "s#GEOCORDFROM#$COORDFROM#g" | sed "s#GEOCORDTO#$COORDTO#g"
@@ -113,6 +120,7 @@ main() {
     - Valid modes are: walk, bike, car
     - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
 
+  errcheckhastwopins
   JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"
   JSONSELECTRESULT="$(
     gettablevals |
