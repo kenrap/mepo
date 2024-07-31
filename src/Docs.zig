@@ -47,8 +47,13 @@ const JSONAPIIntro =
     \\]
     \\```
     \\
-    \\For a quickstart on how to use the JSON API practically, see
-    \\the [scripting guide](/scriptingguide.html).
+    \\For a quickstart on how to use the JSON API for user configuration
+    \\see [user guide JSON API section](/jsonapi.html#user-configuration); if 
+    \\you are interested in writing your own scripts - see the [scripting
+    \\guide](/scripting.html).
+    \\
+    \\The rest of this document outlines the functionality of all JSON
+    \\API commands, shellpipe env vars, and the base configuration.
 ;
 
 const DocEnvVarsShellpipe =
@@ -71,9 +76,13 @@ const DocEnvVarsShellpipe =
 
 const DocBaseConfigIntro =
     \\The following base configuration was built into Mepo as of
-    \\the current release version. Note, preferences can
-    \\be overridden directly for example with `prefset_n` and
-    \\`prefset_t`.
+    \\the current release version. These defaults are automatically
+    \\built into the mepo binary and can be overriden using the
+    \\[user configuration file](/jsonapi.html#user-configuration).
+    \\
+    \\Note, preferences can be overridden directly for example with `prefset_n`
+    \\ and `prefset_t`. And bindings can be removed / overriden by assinging
+    \\a nop command / empty expression list `[]` as the JSON expressions passed.
 ;
 
 pub fn generateMarkdownDocs(allocator: std.mem.Allocator) !void {
