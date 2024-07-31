@@ -16,7 +16,7 @@ Mode|car"
 
 
 errdie() {
-  echo "$1" >&2
+  zenity --error --text "$1"
   exit 1
 }
 
@@ -125,9 +125,11 @@ main() {
   JSONSELECTRESULT="$(
     gettablevals |
       awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
-      xargs zenity --ok-label Route --list --editable --multiple --text "$GRAPHHOPPER_ARGSPROMPT_TEXT" --print-column ALL \
-      --column "Parameter" \
-      --column "Value" |
+      xargs zenity \
+        $(mepo_ui_helper_menu.sh zenitydims 0.8 0.8) \
+        --ok-label Route --list --editable --multiple --text "$GRAPHHOPPER_ARGSPROMPT_TEXT" --print-column ALL \
+        --column "Parameter" \
+        --column "Value" |
       tr '|' '\n' |
       mapnlvalstojson
   )"

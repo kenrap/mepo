@@ -118,7 +118,8 @@ main() {
     - Note GTFS Feed ID is required!
     - See more details at: http://sr.ht/~mil/mobroute
     - Lookup Feed IDs at: http://mdb.lrdu.org
-    - Common GTFS Feed IDs: (TODO)
+    - Common GTFS Feed IDs: (Prague - 767, Brussels - 1088, Krakov - 1270, NYC - 516)
+    - Be patient first request downloads GTFS data and loads to system in one-time process
     - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
 
   errcheckhastwopins
@@ -126,9 +127,11 @@ main() {
   JSONSELECTRESULT="$(
     gettablevals |
       awk -F '|' '{printf "\"%s\" \"%s\" ", $1, $2}' |
-      xargs zenity --ok-label Route --list --editable --multiple --text "$MOBROUTE_ARGSPROMPT_TEXT" --print-column ALL \
-      --column "Parameter" \
-      --column "Value" |
+      xargs zenity \
+        $(mepo_ui_helper_menu.sh zenitydims 0.8 0.8) \
+        --ok-label Route --list --editable --multiple --text "$MOBROUTE_ARGSPROMPT_TEXT"   --print-column ALL \
+        --column "Parameter" \
+        --column "Value" |
       tr '|' '\n' |
       mapnlvalstojson
   )"
