@@ -24,7 +24,11 @@ Tunable - Max Transfer Seconds|2400
 Tunable - Max N Transfers|20
 Tunable - Walkspeed Km/Hr|4.5"
 
-
+errdiefile() {
+  zenity --text-info --filename="$1"
+  rm "$1"
+  exit 1
+}
 errdie() {
   zenity --error --text "$1"
   exit 1
@@ -98,7 +102,7 @@ mobrouterun() {
   RP="$1"
   TMPERR="$(mktemp)"
   MRRESULT="$(mobroute route -rp "{\"route_params\": $RP}" 2>$TMPERR)"
-  [ $? != 0 ] && errdie "Mobroute Execution Error:\n$(cat $TMPERR)"
+  [ $? = 0 ] || errdiefile "$TMPERR"
   echo "$MRRESULT"
 }
 
