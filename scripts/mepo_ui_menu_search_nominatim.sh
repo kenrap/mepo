@@ -88,7 +88,7 @@ main() {
           ] as $pin_meta_tags |
 
           [ $pin_add, $pin_meta_displayname, $pin_meta_tags ]
-         ) | flatten | del(..|nulls)
+         ) | flatten | del(..|nulls) | [limit(500; .[])]
       '
   )"
 

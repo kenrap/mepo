@@ -68,7 +68,7 @@ mapoverpassjsontopins() {
          ] as $pin_meta  | 
          
          [ $pin_add , $pin_meta ]
-      ) | flatten | del(..|nulls)
+      ) | flatten | del(..|nulls) | [limit(500; .[])]
     '
   )"
 
