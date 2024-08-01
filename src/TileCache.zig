@@ -126,7 +126,6 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     defer utilsdl.sdl_push_event_resize();
 
     // Empty texture map, surface map, & queues
-    for (tile_cache.texture_map.values()) |t| sdl.SDL_DestroyTexture(t);
     tile_cache.texture_map.clearAndFree();
     tile_cache.queue_lifo_ui.clearAndFree();
     tile_cache.queue_lifo_bg.clearAndFree();
