@@ -1,9 +1,4 @@
 #!/usr/bin/env sh
-# This script maps geojson to mepo's pin_add & pin_meta syntax.
-# 
-# May be used as:
-#   cat geojson_file.json | mepo_geojson_import.sh > ~/.config/mepo/bookmarks.json
-
 INPUT="$(cat)"
 PINADDS="$(
   echo "$INPUT" | jq '[
@@ -27,10 +22,15 @@ PINADDS="$(
   ]'
 )"
 
+ORIGINLAT="$(echo "$PINADDS" | jq '.[0].args.lat')"
+ORIGINLON="$(echo "$PINADDS" | jq '.[0].args.lon')"
+
 PRECMDS='[
     {"cmd": "prefset_n", "args": {"pref": "pingroup_7_ordered", "value": 1}},
     {"cmd": "pin_groupactivate", "args": {"group": 7}},
-    {"cmd": "pin_purge", "args": {}}
+    {"cmd": "pin_purge", "args": {}},
+    {"cmd": "prefset_n", "args": {"pref": "lat", "value": '$ORIGINLAT'}},
+    {"cmd": "prefset_n", "args": {"pref": "lon", "value": '$ORIGINLON'}}
 ]'
 
 echo "[$PRECMDS, $PINADDS]" | jq  '[.[][]]'
