@@ -48,9 +48,9 @@ const JSONAPIIntro =
     \\```
     \\
     \\For a quickstart on how to use the JSON API for user configuration
-    \\see [user guide JSON API section](/jsonapi.html#user-configuration); if 
-    \\you are interested in writing your own scripts - see the [scripting
-    \\guide](/scripting.html).
+    \\see [user guide JSON API section](/userguide.html#user-configuration-file); 
+    \\if you are interested in writing your own scripts - see the [scripting
+    \\guide](/scriptingguide.html).
     \\
     \\The rest of this document outlines the functionality of all JSON
     \\API commands, shellpipe env vars, and the base configuration.

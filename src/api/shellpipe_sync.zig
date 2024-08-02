@@ -11,7 +11,7 @@ const filedump = @import("./filedump.zig");
 
 pub const spec = .{
     .name = "shellpipe_sync",
-    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a JSON API expressions.",
+    .desc = "Run a system (shell) command synchronously and pipe; STDOUT returned from command will be executed back as a JSON API expressions. Note state of application can be introspected by examining ENV vars (documented in API doc) and also state is saved as JSON API commands to $XDG_CACHE_HOME/mepo/shellpipe_savestate.json",
     .args = &.{
         .{ .tag = .Text, .name = "shellcode", .desc = "Shell statement to execute" },
     },
