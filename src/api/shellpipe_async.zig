@@ -74,7 +74,6 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     )) |response_stdout| {
         const heap_stdout = try mepo.allocator.dupeZ(u8, response_stdout);
         utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
-        arena.allocator().free(response_stdout);
     }
 }
 
