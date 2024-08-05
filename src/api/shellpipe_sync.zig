@@ -48,7 +48,7 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
 /// for killing the spawn processes.
 fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
     if (mepo.shellpipe_sync_pid) |pid| {
-        if (std.posix.kill(-pid, std.posix.SIG.KILL)) |_|
+        if (std.posix.kill(-pid, std.posix.SIG.TERM)) |_|
             utildbg.log("Killing sync shellpipe process {}\n", .{pid})
         else |err|
             utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
