@@ -11,7 +11,7 @@ pub fn run_subprocess(
     allocator: std.mem.Allocator,
     cmd: []const u8,
     env_map: *const std.process.EnvMap,
-    set_process_id_opt_ptr_opt: ?*?std.process.Child.Id,
+    set_process_id_opt_ptr_opt: ?*?std.posix.pid_t,
 ) !?[]const u8 {
     var pid: std.c.pid_t = undefined;
     defer {
