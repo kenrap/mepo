@@ -21,7 +21,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
     const cmd = args[0].Text;
     var request = try mepo.allocator.create(Request);
     request.mepo = mepo;
-    request.cmd = try mepo.allocator.dupeZ(u8, cmd);
+    request.cmd = try mepo.allocator.dupe(u8, cmd);
     for (mepo.uibuttons.items[0..1]) |*button| {
         if (!button.only_visible_when_sync_shellpipe)
             unreachable;

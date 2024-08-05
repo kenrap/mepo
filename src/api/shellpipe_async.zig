@@ -32,7 +32,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     var sp_req = try mepo.allocator.create(AsyncShellpipeRequest);
     sp_req.unique_handle_id = unique_handle_id;
-    sp_req.cmd = try mepo.allocator.dupeZ(u8, cmd);
+    sp_req.cmd = try mepo.allocator.dupe(u8, cmd);
     sp_req.mepo = mepo;
     sdl.SDL_DetachThread(sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req));
 }
