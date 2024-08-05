@@ -41,7 +41,6 @@ fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
     defer request.mepo.allocator.destroy(request);
     run_shellpipe(request.mepo, null, request.cmd) catch |err|
         utildbg.log("Error running sync shellpipe: {}\n", .{err});
-    request.mepo.shellpipe_sync_pid = null;
     return 0;
 }
 
@@ -53,7 +52,8 @@ fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
             utildbg.log("Killing sync shellpipe process {}\n", .{pid})
         else |err|
             utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
-        // No need to wait for termination as run_shellpipe already handles HUP events.
+        // Process termination is waited by utilprocess.run_process
+        // in the other thread.
         return .Redraw;
     } else return .None;
 }
