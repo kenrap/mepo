@@ -7,6 +7,12 @@ const utildbg = @import("../util/utildbg.zig");
 // Executes the command cmd with environment variables in env_map.
 // When spawned without any error, returns null if the process terminates early,
 // otherwise stdout captured in a slice owned by the caller.
+//
+// Note: zig stdlib spawning (std.process.Child based impl) is avoided here
+// as zig doesn't support pgid for spawned processes. See:
+//   - https://lists.sr.ht/~mil/mepo-devel/%3C20240709141534.516065-1-cnx@loang.net%3E
+//   - https://github.com/ziglang/zig/pull/20556
+//
 pub fn run_subprocess(
     allocator: std.mem.Allocator,
     cmd: []const u8,
