@@ -11,11 +11,11 @@ const p = @import("util/utilprefs.zig");
 const utildbg = @import("util/utildbg.zig");
 const utilsdl = @import("util/utilsdl.zig");
 const datastructure = @import("datastructure/datastructure.zig");
+const shellpipe_sync = @import("api/shellpipe_sync.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
 allocator: std.mem.Allocator,
-async_shellpipe_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 config: []const u8,
 debug_message: ?[]const u8 = null,
@@ -35,6 +35,8 @@ pin_group_active_item: ?u32 = null,
 pin_groups: [10]std.ArrayList(types.Pin) = undefined,
 renderer: *sdl.SDL_Renderer = undefined,
 renderer_type: types.RendererType = .Auto,
+shellpipe_async_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
+shellpipe_sync_pid: ?std.posix.pid_t = null,
 table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
 table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
 table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
@@ -223,7 +225,7 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
+pub fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
     return x > 0 and y > 0 and x < mepo.win_w and y < mepo.win_h;
 }
 
@@ -512,24 +514,27 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
         // Process SDL events
         if (sdl.SDL_WaitEventTimeout(&e, config.DragThresholdTicks) > 0) {
             const pending_fn = switch (e.type) {
-                sdl.SDL_FINGERDOWN => &event_fingerdown,
-                sdl.SDL_FINGERUP => &event_fingerup,
-                sdl.SDL_KEYUP => &event_keyup,
-                sdl.SDL_MOUSEBUTTONDOWN => &event_mousebuttondown,
-                sdl.SDL_MOUSEBUTTONUP => &event_mousebuttonup,
-                sdl.SDL_MOUSEMOTION => &event_mousemotion,
-                sdl.SDL_MOUSEWHEEL => &event_mousewheel,
-                sdl.SDL_MULTIGESTURE => &event_multigesture,
-                sdl.SDL_TEXTINPUT => &event_textinput,
                 sdl.SDL_QUIT => &event_quit,
                 sdl.SDL_WINDOWEVENT => &event_windowevent,
-                else => b: {
-                    // Async events triggered outside of main thread:
-                    // 1) signals & 2) jsonapi trigged via shellpipe or STDIN
-                    if (e.type == utilsdl.sdl_usereventtype(.JSONAPI)) break :b &event_jsonapiexecution;
-                    if (e.type == utilsdl.sdl_usereventtype(.Signal)) break :b &event_signal;
-                    // Unhandled case
-                    break :b &event_unhandled;
+                else => if (e.type == utilsdl.sdl_usereventtype(.Signal))
+                    &event_signal
+                else if (e.type == utilsdl.sdl_usereventtype(.JSONAPI))
+                    &event_jsonapiexecution // via shellpipe or stdin
+                else if (mepo.shellpipe_sync_pid == null) switch (e.type) {
+                    sdl.SDL_FINGERDOWN => &event_fingerdown,
+                    sdl.SDL_FINGERUP => &event_fingerup,
+                    sdl.SDL_KEYUP => &event_keyup,
+                    sdl.SDL_MOUSEBUTTONDOWN => &event_mousebuttondown,
+                    sdl.SDL_MOUSEBUTTONUP => &event_mousebuttonup,
+                    sdl.SDL_MOUSEMOTION => &event_mousemotion,
+                    sdl.SDL_MOUSEWHEEL => &event_mousewheel,
+                    sdl.SDL_MULTIGESTURE => &event_multigesture,
+                    sdl.SDL_TEXTINPUT => &event_textinput,
+                    else => &event_unhandled,
+                } else switch (e.type) {
+                    sdl.SDL_KEYUP => &shellpipe_sync.event_keyup,
+                    sdl.SDL_MOUSEBUTTONUP => &shellpipe_sync.event_mousebuttonup,
+                    else => &event_unhandled,
                 },
             };
 
@@ -781,7 +786,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             evict_texture,
             &config.MaxTextures,
         ).init(allocator),
-        .async_shellpipe_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
+        .shellpipe_async_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
         .config = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
@@ -798,7 +803,20 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             break :pin_groups pgs;
         },
         .tile_cache = tile_cache,
-        .uibuttons = std.ArrayList(types.UIButton).init(allocator),
+        .uibuttons = b: {
+            var uibuttons = std.ArrayList(types.UIButton).init(allocator);
+            errdefer uibuttons.deinit();
+            try uibuttons.append(.{
+                .text = try allocator.dupeZ(u8, "Cancel sync shellpipe"),
+                .group_number = null,
+                .only_visible_when_sync_shellpipe = true,
+                .only_visible_when_pin_active = false,
+                // Hardcoded action to kill the current sync shellpipe process
+                .jsonapi_click_single = "",
+                .jsonapi_click_hold = "",
+            });
+            break :b uibuttons;
+        },
         .renderer_type = renderer_type,
     });
 }

@@ -301,7 +301,7 @@ fn blit_debugmessage(mepo: *Mepo) !void {
             mepo,
             0xff0000,
             null,
-            types.Color{ .value = 0xffffff, .opacity = 200 },
+            types.Color{ .value = 0xffffff, .opacity = 240 },
             .{ .h = mepo.win_h - bottom_off, .align_x = .Left, .align_y = .Bottom },
             0,
             5,
@@ -417,9 +417,9 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
             break :render_pin_label;
 
         const pin_label_bg_value: u24 = if (is_active) 0xe8e8e8 else 0xffffff;
-        const pin_label_bg: types.Color = .{ .value = pin_label_bg_value, .opacity = 255 };
+        const pin_label_bg: types.Color = .{ .value = pin_label_bg_value };
         const pin_label_border_value: u24 = if (is_active) 0x000000 else 0xe8e8e8;
-        const pin_label_border = .{ .value = pin_label_border_value, .opacity = 255 };
+        const pin_label_border = .{ .value = pin_label_border_value };
 
         const label_color: u24 = 0x000000;
         const label = lab: {
@@ -449,13 +449,13 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
 
     const bg: types.Color = color: {
         if (mepo.tile_cache.thread_download == null) {
-            break :color .{ .value = 0xffdfd1, .opacity = 255 };
+            break :color .{ .value = 0xffdfd1 };
         } else if (mepo.tile_cache.queue_lifo_ui.count() > 0) {
-            break :color .{ .value = 0xd7ffd6, .opacity = 255 };
+            break :color .{ .value = 0xd7ffd6 };
         } else if (mepo.tile_cache.queue_lifo_bg.count() > 0) {
-            break :color .{ .value = 0xc7d4ff, .opacity = 255 };
+            break :color .{ .value = 0xc7d4ff };
         } else {
-            break :color .{ .value = 0xffffff, .opacity = 100 };
+            break :color .{ .value = 0xffffff, .opacity = 180 };
         }
     };
 
@@ -503,7 +503,7 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
             mepo.tile_cache.queue_lifo_bg.count(),
             mepo.tile_cache.transfer_map.count(),
             mepo.tile_cache.texture_map.count(),
-            mepo.async_shellpipe_threads.count(),
+            mepo.shellpipe_async_threads.count(),
         },
     );
 }
@@ -531,7 +531,7 @@ fn blit_help(mepo: *Mepo) !void {
         mepo,
         0x000000,
         null,
-        types.Color{ .value = 0xe8e8e8, .opacity = 120 },
+        types.Color{ .value = 0xe8e8e8, .opacity = 225 },
         .{ .align_x = .Center, .align_y = .Center },
         0,
         0,
@@ -550,7 +550,7 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
     var width_value: c_int = 0;
     var height_row: c_int = 0;
 
-    const border_color = types.Color{ .value = 0x888888, .opacity = 255 };
+    const border_color = types.Color{ .value = 0x888888 };
 
     // Precalculate width/height for each label
     for (rows) |row| {
@@ -570,7 +570,7 @@ fn blit_table(mepo: *Mepo, x: i32, y: i32, padding: c_int, rows: []const [2][:0]
     }
 
     // Background color & border
-    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 125 }, sdl.SDL_Rect{
+    try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0xffffff, .opacity = 225 }, sdl.SDL_Rect{
         .x = x,
         .y = y,
         .w = width_label + width_value + padding * 4,
@@ -732,6 +732,20 @@ fn blit_multiline_text(
     }
 }
 
+/// Grays out the UI if a sync shellpipe is in progress.
+fn blit_overlay_blocked_ui(mepo: *Mepo) !void {
+    if (mepo.shellpipe_sync_pid != null)
+        try utilsdl.sdl_renderer_rect(mepo.renderer, .{
+            .value = 0x888888,
+            .opacity = 128,
+        }, sdl.SDL_Rect{
+            .x = 1,
+            .y = 1,
+            .w = @intCast(mepo.win_w),
+            .h = @intCast(mepo.win_h),
+        }, .Fill);
+}
+
 pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?types.UIButton {
     var btn_i = mepo.uibuttons.items.len;
     const pad: c_int = 5;
@@ -743,6 +757,8 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
         btn_i -= 1;
 
         if (mepo.uibuttons.items[btn_i].only_visible_when_pin_active and mepo.pin_group_active_item == null)
+            continue;
+        if (mepo.uibuttons.items[btn_i].only_visible_when_sync_shellpipe == (mepo.shellpipe_sync_pid == null))
             continue;
 
         const surf = try utilsdl.errorcheck_ptr(
@@ -792,23 +808,23 @@ pub fn blit_uibuttons(mepo: *Mepo, determine_click_target: ?sdl.SDL_Point) !?typ
 
             const bg_color = bg_color: {
                 if (mepo.drag != null and sdl.SDL_TRUE == sdl.SDL_PointInRect(&mepo.drag.?.point, &dest_rect_text_lab)) {
-                    break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
+                    break :bg_color types.Color{ .value = 0xe8e8e8 };
                 } else if (mepo.uibuttons.items[btn_i].group_number == mepo.pin_group_active) {
-                    break :bg_color types.Color{ .value = 0xe8e8e8, .opacity = 255 };
+                    break :bg_color types.Color{ .value = 0xe8e8e8 };
                 } else {
-                    break :bg_color types.Color{ .value = 0xffffff, .opacity = 125 };
+                    break :bg_color types.Color{ .value = 0xffffff, .opacity = 225 };
                 }
             };
 
             try utilsdl.sdl_renderer_rect(mepo.renderer, bg_color, target, .Fill);
-            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888, .opacity = 255 }, target, .Draw);
+            try utilsdl.sdl_renderer_rect(mepo.renderer, types.Color{ .value = 0x888888 }, target, .Draw);
             if (mepo.uibuttons.items[btn_i].group_number) |group_number| {
                 var highlight_rect = target;
                 highlight_rect.h = 3;
                 highlight_rect.x += 2;
                 highlight_rect.y += 2;
                 highlight_rect.w -= 4;
-                const color = types.Color{ .value = p.get(p.pingroup_prop(group_number, .Color)).u24, .opacity = 255 };
+                const color = types.Color{ .value = p.get(p.pingroup_prop(group_number, .Color)).u24 };
                 try utilsdl.sdl_renderer_rect(mepo.renderer, color, highlight_rect, .Fill);
             }
             const text = try utilsdl.errorcheck_ptr(sdl.SDL_Texture, sdl.SDL_CreateTextureFromSurface(mepo.renderer, surf));
@@ -842,6 +858,7 @@ pub fn blit(mepo: *Mepo) !void {
     try blit_overlay_pindetails(mepo);
     try blit_overlay_debugbar(mepo);
     try blit_help(mepo);
+    try blit_overlay_blocked_ui(mepo);
     try blit_debugmessage(mepo);
     _ = try blit_uibuttons(mepo, null);
 

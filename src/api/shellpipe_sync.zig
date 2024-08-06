@@ -1,13 +1,11 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const utilconversion = @import("../util/utilconversion.zig");
-const utilplatform = @import("../util/utilplatform.zig");
 const utildbg = @import("../util/utildbg.zig");
-const utilsdl = @import("../util/utilsdl.zig");
-const p = @import("../util/utilprefs.zig");
+const blitfns = @import("../blit/blit.zig");
 const sdl = @import("../sdlshim.zig");
 const filedump = @import("./filedump.zig");
+const run_shellpipe = @import("shellpipe_async.zig").run_shellpipe;
 
 pub const spec = .{
     .name = "shellpipe_sync",
@@ -19,70 +17,65 @@ pub const spec = .{
 };
 
 fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
-    const cmd = args[0].Text;
-    try shellpipe_sync(mepo, cmd);
-}
-
-fn shellpipe_sync(mepo: *Mepo, cmd: []const u8) !void {
     try filedump.filedump(mepo, "rp", "$XDG_CACHE_HOME/mepo/shellpipe_savestate.json");
-
-    var arena = std.heap.ArenaAllocator.init(mepo.allocator);
-    defer arena.deinit();
-
-    try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) in progress - run!", .{cmd}),
-    );
-    try mepo.blit();
-    const env_vars = try get_env_vars(mepo, arena.allocator());
-    const args = [_][]const u8{ "sh", "-c", cmd };
-    const process_result = try std.process.Child.run(.{
-        .allocator = arena.allocator(),
-        .argv = args[0..],
-        .env_map = &env_vars,
-        .max_output_bytes = 10000 * 1024,
-    });
-    const exitcode = process_result.term.Exited;
-    try mepo.update_debug_message(
-        try std.fmt.allocPrint(arena.allocator(), "Shellpipe sync ({s}) completed - execute, {d}!", .{ cmd, process_result.stdout.len }),
-    );
-    try mepo.blit();
-    if (exitcode == 0) {
-        try mepo.jsonapi_execute(process_result.stdout);
-        try mepo.update_debug_message(null);
-    } else {
-        utildbg.log("shellpipe error: exited with code {d}\n{s}", .{ exitcode, process_result.stderr });
-        try mepo.update_debug_message(process_result.stderr);
+    const cmd = args[0].Text;
+    var request = try mepo.allocator.create(Request);
+    request.mepo = mepo;
+    request.cmd = try mepo.allocator.dupe(u8, cmd);
+    for (mepo.uibuttons.items[0..1]) |*button| {
+        if (!button.only_visible_when_sync_shellpipe)
+            unreachable;
+        mepo.allocator.free(button.text);
+        button.text = try std.fmt.allocPrintZ(mepo.allocator, "Cancel {s}", .{cmd});
     }
+    sdl.SDL_DetachThread(sdl.SDL_CreateThread(run_sync_shellpipe, "sync_shellpipe", request));
 }
 
-// TODO: perhaps this should be moved to Mepo.zig ? used by both shellpipe_{,a}sync
-// TODO: document ENV vars usable in shell scripts context
-pub fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {
-    var v = try std.process.getEnvMap(allocator);
+const Request = struct {
+    mepo: *Mepo,
+    cmd: []const u8,
+};
 
-    // Window and zoom info
-    try v.put("MEPO_WIN_W", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_w}));
-    try v.put("MEPO_WIN_H", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_h}));
-    try v.put("MEPO_ZOOM", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.zoom).u}));
+fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
+    const request: *Request = @alignCast(@ptrCast(userdata.?));
+    defer request.mepo.allocator.destroy(request);
+    run_shellpipe(request.mepo, null, request.cmd) catch |err|
+        utildbg.log("Error running sync shellpipe: {}\n", .{err});
+    return 0;
+}
 
-    // Center position
-    try v.put("MEPO_CENTER_LAT", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.lat).f}));
-    try v.put("MEPO_CENTER_LON", try std.fmt.allocPrint(allocator, "{d}", .{p.get(p.pref.lon).f}));
+/// Helper function for SDL event handler during sync shellpipe
+/// for killing the spawn processes.
+fn kill_sync_shellpipe(mepo: *Mepo) types.Pending {
+    if (mepo.shellpipe_sync_pid) |pid| {
+        if (std.posix.kill(-pid, std.posix.SIG.TERM)) |_|
+            utildbg.log("Killing sync shellpipe process {}\n", .{pid})
+        else |err|
+            utildbg.log("Error killing sync shellpipe process {}: {}\n", .{ pid, err });
+        // Process termination is waited by utilprocess.run_process
+        // in the other thread.
+        return .Redraw;
+    } else return .None;
+}
 
-    // Bbox
-    const bbox = mepo.bounding_box();
-    try v.put("MEPO_TL_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lat}));
-    try v.put("MEPO_TL_LON", try std.fmt.allocPrint(allocator, "{d}", .{bbox.topleft_lon}));
-    try v.put("MEPO_BR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{bbox.bottomright_lat}));
-    try v.put("MEPO_BR_LON", try std.fmt.allocPrint(allocator, "{d}", .{bbox.bottomright_lon}));
+pub fn event_keyup(mepo: *Mepo, e: sdl.SDL_Event) types.Pending {
+    return switch (e.key.keysym.sym) {
+        // XXX: Make binding configurable?  Escape key also cancel Zenity.
+        sdl.SDLK_ESCAPE => kill_sync_shellpipe(mepo),
+        else => .None,
+    };
+}
 
-    // Cursor position
-    const cursor_latlon = mepo.cursor_latlon();
-    try v.put("MEPO_CURSOR_LAT", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lat}));
-    try v.put("MEPO_CURSOR_LON", try std.fmt.allocPrint(allocator, "{d}", .{cursor_latlon.Lon}));
-
-    // Pin metadata
-    try v.put("MEPO_PINGROUPACTIVE", try std.fmt.allocPrint(allocator, "{d}", .{mepo.pin_group_active}));
-
-    return v;
+pub fn event_mousebuttonup(mepo: *Mepo, _: sdl.SDL_Event) types.Pending {
+    if (mepo.fingers.items.len > 1) return .None;
+    const cursor = mepo.scaled_mouse_position();
+    if (!mepo.within_touch_bounds(cursor.x, cursor.y)) return .None;
+    mepo.drag = null;
+    return if (blitfns.blit_uibuttons(mepo, cursor) catch null) |clicked_btn|
+        if (clicked_btn.only_visible_when_sync_shellpipe)
+            kill_sync_shellpipe(mepo)
+        else
+            .None
+    else
+        .None;
 }
