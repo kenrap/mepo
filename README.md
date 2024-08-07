@@ -22,7 +22,7 @@ UI, and more.
 
 - **Fast & usable in resource-constrained environments**:
   - Mepo **launches quickly and runs quickly** on the PinePhone and other
-    resource-constrained devices. 
+    resource-constrained devices.
   - Mepo renders using SDL which keeps things **fast** and lightweight;
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
@@ -47,7 +47,7 @@ UI, and more.
     through a command-line flag.
   - Users can download based on a bounding-box or a user-specified radius
     from a specific point for multiple zoom levels.
-  - Offline usage is a primary usecase and should be treated as such, we 
+  - Offline usage is a primary usecase and should be treated as such, we
     can't assume a user is always online.
 - **Supports touch AND keyboard-oriented operation**:
   - A map application must of course be usable with a mouse / touch,
@@ -72,7 +72,6 @@ zig build version (master builds against zig 0.13.x). See the README of
 the tag/release version you are testing with for up-to-date documentation.
 
 Details on releases are available at: [releases page](https://git.sr.ht/~mil/mepo/refs).
-    
 
 ## **Funding**
 Between October 2021 and October 2022, [NLnet](https://nlnet.nl) kindly
