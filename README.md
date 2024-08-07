@@ -11,12 +11,12 @@ API to allow the user to change & add functionality such as adding their
 own search & routing scripts, add arbitrary buttons/keybindings to the
 UI, and more.
 
-- [Documentation Website](http://mepo.milesalan.com)
-- [Demo Video on postmarketOS phone](http://mepo.milesalan.com/demos.html#mobile-demo-major-features)
-- [Videos of User Interface](http://mepo.milesalan.com/demos.html)
-- [Install Guide](http://mepo.milesalan.com/installguide.html)
-- [User Guide](http://mepo.milesalan.com/userguide.html)
-- [JSON API](http://mepo.milesalan.com/mepolang.html)
+- [Documentation Website](https://mepo.milesalan.com)
+- [Demo Video on postmarketOS phone](https://mepo.milesalan.com/demos.html#mobile-demo-major-features)
+- [Videos of User Interface](https://mepo.milesalan.com/demos.html)
+- [Install Guide](https://mepo.milesalan.com/installguide.html)
+- [User Guide](https://mepo.milesalan.com/userguide.html)
+- [JSON API](https://mepo.milesalan.com/mepolang.html)
 
 ## **Features**
 
@@ -27,7 +27,7 @@ UI, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **Simple [JSON API for Scripting & Extending](http://mepo.milesalan.com/mepolang.html)**:
+- **Simple [JSON API for Scripting & Extending](https://mepo.milesalan.com/mepolang.html)**:
   - Mepo's core UI is built out to be as minimal as possible, only handling map rendering,
     displaying, pins, and simple IO operation (keybinding, mouse callbacks, etc.)
   - Extendeded functionality such as menus & and search integrations (via Nominatim, Overpass),
@@ -61,7 +61,8 @@ UI, and more.
     and portability to other future environments as well.
 
 ## **Documentation Website**
-Mepo has a documentation website which lives at: [mepo.milesalan.com](http://mepo.milesalan.com)
+Mepo has a documentation website which lives at:
+[mepo.milesalan.com](https://mepo.milesalan.com)
 
 ## **Releases**
 The most current release is 1.2.1 which builds against zig 0.12.x.
