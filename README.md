@@ -86,7 +86,7 @@ NLnet for accepting our application and making this development possible!
 Mepo is surely welcome to contributors who have experience or interest
 in mobile Linux, OSM, and/or Zig.
 
-- **Development Guide**: [here](doc/developguide.md)
+- **Development Guide**: [here](https://mepo.milesalan.com/contribute.html)
 - **Mailing List**: [mepo-devel](https://lists.sr.ht/~mil/mepo-devel)
 - **Tickets**: [mepo-tickets](https://todo.sr.ht/~mil/mepo-tickets)
 - **IRC**: #mepo on irc.oftc.net (mla is my nick)
