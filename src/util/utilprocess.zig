@@ -66,9 +66,11 @@ pub fn run_subprocess(
     if (set_process_id_opt_ptr_opt) |pid_ptr|
         pid_ptr.* = pid;
 
-    const file = std.fs.File{ .handle = pipe[0] };
-    const stdout = try file.readToEndAlloc(allocator, 10_000_000);
-    std.posix.close(pipe[0]);
+    const stdout = blk: {
+        defer std.posix.close(pipe[0]);
+        const file = std.fs.File{ .handle = pipe[0] };
+        break :blk try file.readToEndAlloc(allocator, 10_000_000);
+    };
     const result = std.posix.waitpid(pid, 0);
     // Spawn failure of foreign binaries are reported as successful:
     // https://github.com/ziglang/zig/pull/14866
