@@ -65,12 +65,7 @@ Mepo has a documentation website which lives at:
 [mepo.lrdu.org](https://mepo.lrdu.org)
 
 ## **Releases**
-The most current release is 1.2.1 which builds against zig 0.12.x.
-
-Note: On the master branch, there are major changes in documentation,
-functionality (switching from a custom DSL / mepolang to a JSON API), and
-zig build version (master builds against zig 0.13.x). See the README of
-the tag/release version you are testing with for up-to-date documentation.
+The most current release is 1.3.0 which builds against zig 0.13.x.
 
 Details on releases are available at: [releases page](https://git.sr.ht/~mil/mepo/refs).
 
