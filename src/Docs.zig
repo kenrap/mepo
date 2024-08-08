@@ -48,8 +48,8 @@ const JSONAPIIntro =
     \\```
     \\
     \\For a quickstart on how to use the JSON API for user configuration
-    \\see [user guide JSON API section](/userguide.html#user-configuration-file); 
-    \\if you are interested in writing your own scripts - see the [scripting
+    \\see [user guide configuration file section](/userguide.html#user-configuration-file);
+    \\and if you are interested in writing your own scripts - see the [scripting
     \\guide](/scriptingguide.html).
     \\
     \\The rest of this document outlines the functionality of all JSON
@@ -57,9 +57,16 @@ const JSONAPIIntro =
 ;
 
 const DocEnvVarsShellpipe =
-    \\Both `shellpipe_sync` and `shellpipe_async` expose a number of ENV
-    \\variables to the target script called. See below for the accessible
-    \\ENV variables exposed.
+    \\State from `shellpipe_sync` and `shellpipe_async` can be accessed in
+    \\two ways. Raw state (equivilant to using the `filedump` JSON API command)
+    \\is written to `~/mepo/shellpipe_savestate.json` before executing the
+    \\shellpipe. This state can be read with jq or any JSON parser.
+    \\
+    \\Additionally for simple scripts that don't need to access the full
+    \\state of Mepo, you may consider using a number of simple ENV
+    \\vars accessible to the target script called.
+    \\
+    \\Available ENV vars:
     \\
     \\- `MEPO_WIN_W`: Width of the UI window
     \\- `MEPO_WIN_H`: Height of the UI window
@@ -72,6 +79,7 @@ const DocEnvVarsShellpipe =
     \\- `MEPO_BR_LON`: Longitude of the bottom right point on the screen
     \\- `MEPO_CURSOR_LAT`: Latitude of the cursor position
     \\- `MEPO_CURSOR_LON`: Longitude of the cursor position
+    \\- `MEPO_PINGROUPACTIVE`: Number of the currently active pingroup
 ;
 
 const DocBaseConfigIntro =
