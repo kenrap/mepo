@@ -16,7 +16,7 @@ UI, and more.
 - [Videos of User Interface](https://mepo.lrdu.org/demos.html)
 - [Install Guide](https://mepo.lrdu.org/installguide.html)
 - [User Guide](https://mepo.lrdu.org/userguide.html)
-- [JSON API](https://mepo.lrdu.org/mepolang.html)
+- [JSON API](https://mepo.lrdu.org/jsonapi.html)
 
 ## **Features**
 
