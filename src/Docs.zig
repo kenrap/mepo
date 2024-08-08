@@ -59,7 +59,7 @@ const JSONAPIIntro =
 const DocEnvVarsShellpipe =
     \\State from `shellpipe_sync` and `shellpipe_async` can be accessed in
     \\two ways. Raw state (equivilant to using the `filedump` JSON API command)
-    \\is written to `~/mepo/shellpipe_savestate.json` before executing the
+    \\is written to `~/.config/mepo/shellpipe_savestate.json` before executing the
     \\shellpipe. This state can be read with jq or any JSON parser.
     \\
     \\Additionally for simple scripts that don't need to access the full
