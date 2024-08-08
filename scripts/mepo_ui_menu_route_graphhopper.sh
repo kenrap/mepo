@@ -116,9 +116,9 @@ printpins() {
 
 main() {
   GRAPHHOPPER_ARGSPROMPT_TEXT="Graphhopper Route
-    - You may edit the route parameters below.
-    - Valid modes are: walk, bike, car
-    - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
+  - You may edit the route parameters below.
+  - Valid modes are: walk, bike, car
+  - Rows edited must be selected before hitting 'Route'\n\nParameters:"
 
   errcheckhastwopins
   JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"

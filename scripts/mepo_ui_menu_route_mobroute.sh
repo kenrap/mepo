@@ -114,13 +114,14 @@ mobrouterun() {
 main() {
   ensurehasmobroute
   MOBROUTE_ARGSPROMPT_TEXT="Mobroute Route
-    - You may edit the route parameters below.
-    - Note GTFS Feed ID is required!
-    - See more details at: http://sr.ht/~mil/mobroute
-    - Lookup Feed IDs at: http://mdb.lrdu.org
-    - Common GTFS Feed IDs: (Prague - 767, Brussels - 1088, Krakov - 1270, NYC - 516)
-    - Be patient first request downloads GTFS data and loads to system in one-time process
-    - Rows which were edited must be selected before hitting 'Route'\n\nParameters:"
+  - You may edit the route parameters below.
+  - Note GTFS Feed ID is required!
+  - See more details at: http://sr.ht/~mil/mobroute
+  - Lookup Feed IDs at: http://mdb.lrdu.org
+  - Common GTFS Feed IDs:
+  - (Prague: 767, Brussels: 1088, Krakow: 1270, NYC: 516)
+  - Be patient; new Feed IDs trigger onetime/cached GTFS dataload
+  - Rows edited must be selected before hitting 'Route'\n\nParameters:"
 
   errcheckhastwopins
   JSONBASE="$(gettablevals | tr '|' '\n' | mapnlvalstojson)"
