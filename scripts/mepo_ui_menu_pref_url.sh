@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="⚙ Update: Tilesource"
-HOTKEY=u
+HOTKEY=v
 DOC='
   Updates the tilesource for the map to pull from. Note %1$d, %2$d, and %3$d
   are used to indicate X, Y, and Z variables respectively. Presents menuing

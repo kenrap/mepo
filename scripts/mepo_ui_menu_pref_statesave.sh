@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="↻ State: Save"
+HOTKEY=i
 DOC='
   Saves the state (pins & preferences) to ~/.cache/mepo/savestate.json
 '

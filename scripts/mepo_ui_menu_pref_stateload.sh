@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 DISPLAYNAME="↺ State: Load"
+HOTKEY=u
 DOC='
   Loads the state (pins & preferences) from ~/.cache/mepo/savestate.json
 '
