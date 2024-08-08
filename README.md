@@ -1,6 +1,6 @@
 # [**Mepo**](https://sr.ht/~mil/Mepo/)
 
-[![mepo_demo.gif](https://media.lrdu.org/mepo_demos/mepo_demo_1.0_search.gif)](http://mepo.milesalan.com/demos.html)
+[![mepo_demo.gif](https://media.lrdu.org/mepo_demos/mepo_demo_1.0_search.gif)](http://mepo.lrdu.org/demos.html)
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile
 Linux devices (like the PinePhone, Librem 5, pmOS devices etc.) and both
@@ -11,12 +11,12 @@ API to allow the user to change & add functionality such as adding their
 own search & routing scripts, add arbitrary buttons/keybindings to the
 UI, and more.
 
-- [Documentation Website](https://mepo.milesalan.com)
-- [Demo Video on postmarketOS phone](https://mepo.milesalan.com/demos.html#mobile-demo-major-features)
-- [Videos of User Interface](https://mepo.milesalan.com/demos.html)
-- [Install Guide](https://mepo.milesalan.com/installguide.html)
-- [User Guide](https://mepo.milesalan.com/userguide.html)
-- [JSON API](https://mepo.milesalan.com/mepolang.html)
+- [Documentation Website](https://mepo.lrdu.org)
+- [Demo Video on postmarketOS phone](https://mepo.lrdu.org/demos.html#mobile-demo-major-features)
+- [Videos of User Interface](https://mepo.lrdu.org/demos.html)
+- [Install Guide](https://mepo.lrdu.org/installguide.html)
+- [User Guide](https://mepo.lrdu.org/userguide.html)
+- [JSON API](https://mepo.lrdu.org/mepolang.html)
 
 ## **Features**
 
@@ -27,7 +27,7 @@ UI, and more.
     also as a bonus: portable.
   - Built in a non GC'd language ([Zig](https://ziglang.org/)) with an aim toward careful
     memory usage and allocations/deallocations
-- **Simple [JSON API for Scripting & Extending](https://mepo.milesalan.com/mepolang.html)**:
+- **Simple [JSON API for Scripting & Extending](https://mepo.lrdu.org/jsonapi.html)**:
   - Mepo's core UI is built out to be as minimal as possible, only handling map rendering,
     displaying, pins, and simple IO operation (keybinding, mouse callbacks, etc.)
   - Extendeded functionality such as menus & and search integrations (via Nominatim, Overpass),
@@ -62,7 +62,7 @@ UI, and more.
 
 ## **Documentation Website**
 Mepo has a documentation website which lives at:
-[mepo.milesalan.com](https://mepo.milesalan.com)
+[mepo.lrdu.org](https://mepo.lrdu.org)
 
 ## **Releases**
 The most current release is 1.2.1 which builds against zig 0.12.x.
@@ -86,7 +86,7 @@ NLnet for accepting our application and making this development possible!
 Mepo is surely welcome to contributors who have experience or interest
 in mobile Linux, OSM, and/or Zig.
 
-- **Development Guide**: [here](https://mepo.milesalan.com/contribute.html)
+- **Development Guide**: [here](https://mepo.lrdu.org/contribute.html)
 - **Mailing List**: [mepo-devel](https://lists.sr.ht/~mil/mepo-devel)
 - **Tickets**: [mepo-tickets](https://todo.sr.ht/~mil/mepo-tickets)
 - **IRC**: #mepo on irc.oftc.net (mla is my nick)
