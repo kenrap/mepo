@@ -389,13 +389,13 @@ pub fn jsonapi_execute(mepo: *@This(), jsonapi_text: []const u8) !void {
     switch (parsed.value) {
         .array => |value| {
             for (value.items) |v| {
-                const p2 = std.json.parseFromValue(Statement, std.heap.page_allocator, v, .{}) catch |e| {
+                const p2 = std.json.parseFromValue(Statement, arena.allocator(), v, .{}) catch |e| {
                     utildbg.log("JSON Value parse error for mepo statement: {} / {}\n", .{ e, v });
                     return;
                 };
                 const cmd = p2.value.cmd;
                 if (FnTable.get(cmd)) |fn_spec| {
-                    const args = jsonapi_execute_parseargs(std.heap.page_allocator, fn_spec.args, p2.value.args) catch |args_error| {
+                    const args = jsonapi_execute_parseargs(arena.allocator(), fn_spec.args, p2.value.args) catch |args_error| {
                         std.debug.print("Error parsing args for {s} ({any}): {}\n", .{ cmd, p2.value.args, args_error });
                         return;
                     };
