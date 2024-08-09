@@ -340,7 +340,10 @@ fn jsonapi_execute_parseargs(
     fn_spec_args: []const types.MepoFnSpecArg,
     map: std.json.ArrayHashMap(std.json.Value),
 ) anyerror![types.MepoFnNargs]types.MepoArg {
-    var args: [types.MepoFnNargs]types.MepoArg = undefined;
+    var args: [types.MepoFnNargs]types.MepoArg = .{
+      .{.Number = 0}, .{.Number = 0}, .{.Number = 0},
+      .{.Number = 0}, .{.Number = 0}, .{.Number = 0},
+    };
     for (fn_spec_args, 0..) |spec_arg, i| {
         if (map.map.get(spec_arg.name)) |arg| {
             switch (arg) {
