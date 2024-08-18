@@ -326,9 +326,8 @@ pub fn event_quit(mepo: *Self, _: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_unhandled(_: *Self, e: sdl.SDL_Event) types.Pending {
+fn event_unhandled(_: *Self, _: sdl.SDL_Event) types.Pending {
     //utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
-    _ = e;
     return .None;
 }
 
