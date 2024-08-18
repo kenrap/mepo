@@ -2,29 +2,30 @@ const std = @import("std");
 
 pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, comptime eviction_function: fn (key_type, metadata_type) void, comptime size: *usize) type {
     return struct {
+        const Self = @This();
         array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
         size: *usize,
         mutex: std.Thread.Mutex,
 
-        pub fn count(self: *@This()) usize {
+        pub fn count(self: *Self) usize {
             self.mutex.lock();
             defer self.mutex.unlock();
             return self.array_hash_map.count();
         }
 
-        pub fn get(self: *@This(), key: key_type) ?metadata_type {
+        pub fn get(self: *Self, key: key_type) ?metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
             return self.array_hash_map.get(key);
         }
 
-        pub fn values(self: *@This()) []metadata_type {
+        pub fn values(self: *Self) []metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
             return self.array_hash_map.values();
         }
 
-        pub fn put(self: *@This(), k: key_type, v: metadata_type) !?metadata_type {
+        pub fn put(self: *Self, k: key_type, v: metadata_type) !?metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
 
@@ -32,7 +33,7 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, co
             return if (self.array_hash_map.count() > self.size.*) return self.shift() else null;
         }
 
-        fn shift(self: *@This()) !metadata_type {
+        fn shift(self: *Self) !metadata_type {
             const shifted_key = self.array_hash_map.keys()[0];
             const shifted_val = self.array_hash_map.values()[0];
             self.array_hash_map.orderedRemoveAt(0);
@@ -40,7 +41,7 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, co
             return shifted_val;
         }
 
-        pub fn clearAndFree(self: *@This()) void {
+        pub fn clearAndFree(self: *Self) void {
             self.mutex.lock();
             defer self.mutex.unlock();
             var it = self.array_hash_map.iterator();
@@ -48,12 +49,12 @@ pub fn EvictionHashMap(comptime key_type: type, comptime metadata_type: type, co
             self.array_hash_map.clearAndFree();
         }
 
-        pub fn init(allocator: std.mem.Allocator) @This() {
-            return @as(@This(), .{
+        pub fn init(allocator: std.mem.Allocator) Self {
+            return .{
                 .size = size,
                 .mutex = std.Thread.Mutex{},
                 .array_hash_map = std.array_hash_map.AutoArrayHashMap(key_type, metadata_type).init(allocator),
-            });
+            };
         }
     };
 }

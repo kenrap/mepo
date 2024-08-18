@@ -66,7 +66,7 @@ pub const Color = struct {
 
     const RGBA = packed struct { r: u8, g: u8, b: u8, a: u8 };
 
-    fn to_rgba(self: @This()) RGBA {
+    fn to_rgba(self: Color) RGBA {
         return .{
             .r = @intCast(self.value >> 16),
             .g = @intCast(self.value >> 8 & 0xff),
@@ -75,12 +75,12 @@ pub const Color = struct {
         };
     }
 
-    pub fn to_sdl(self: @This()) sdl.SDL_Color {
+    pub fn to_sdl(self: Color) sdl.SDL_Color {
         const rgba = self.to_rgba();
         return .{ .r = rgba.r, .g = rgba.g, .b = rgba.b, .a = rgba.a };
     }
 
-    pub fn to_u32(self: @This()) u32 {
+    pub fn to_u32(self: Color) u32 {
         return @bitCast(self.to_rgba());
     }
 };

@@ -10,31 +10,32 @@ const std = @import("std");
 //      running put() and then pop() ensures the same item is referenced
 pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type {
     return struct {
+        const Self = @This();
         array_hash_map: std.array_hash_map.AutoArrayHashMap(key_type, metadata_type),
         mutex: std.Thread.Mutex,
 
-        pub fn count(self: *@This()) usize {
+        pub fn count(self: *Self) usize {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.count();
         }
 
-        pub fn get(self: *@This(), key: key_type) ?metadata_type {
+        pub fn get(self: *Self, key: key_type) ?metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.get(key);
         }
 
-        pub fn getPtr(self: *@This(), key: key_type) ?*metadata_type {
+        pub fn getPtr(self: *Self, key: key_type) ?*metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.getPtr(key);
         }
 
-        pub fn pop(self: *@This()) struct { key: key_type, value: metadata_type } {
+        pub fn pop(self: *Self) struct { key: key_type, value: metadata_type } {
             self.mutex.lock();
             defer self.mutex.unlock();
 
@@ -42,35 +43,35 @@ pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type 
             return .{ .key = popped.key, .value = popped.value };
         }
 
-        pub fn getIndex(self: *@This(), key: key_type) ?usize {
+        pub fn getIndex(self: *Self, key: key_type) ?usize {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.getIndex(key);
         }
 
-        pub fn swapRemove(self: *@This(), key: key_type) bool {
+        pub fn swapRemove(self: *Self, key: key_type) bool {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.swapRemove(key);
         }
 
-        pub fn values(self: *@This()) []metadata_type {
+        pub fn values(self: *Self) []metadata_type {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.values();
         }
 
-        pub fn iterator(self: *@This()) std.array_hash_map.AutoArrayHashMap(key_type, metadata_type).Iterator {
+        pub fn iterator(self: *Self) std.array_hash_map.AutoArrayHashMap(key_type, metadata_type).Iterator {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             return self.array_hash_map.iterator();
         }
 
-        pub fn put(self: *@This(), k: key_type, v: metadata_type) !void {
+        pub fn put(self: *Self, k: key_type, v: metadata_type) !void {
             self.mutex.lock();
             defer self.mutex.unlock();
 
@@ -82,18 +83,18 @@ pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type 
             try self.array_hash_map.put(k, v);
         }
 
-        pub fn clearAndFree(self: *@This()) void {
+        pub fn clearAndFree(self: *Self) void {
             self.mutex.lock();
             defer self.mutex.unlock();
 
             self.array_hash_map.clearAndFree();
         }
 
-        pub fn init(allocator: std.mem.Allocator) @This() {
-            return @as(@This(), .{
+        pub fn init(allocator: std.mem.Allocator) Self {
+            return .{
                 .mutex = std.Thread.Mutex{},
                 .array_hash_map = std.array_hash_map.AutoArrayHashMap(key_type, metadata_type).init(allocator),
-            });
+            };
         }
     };
 }

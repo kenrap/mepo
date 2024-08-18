@@ -15,6 +15,7 @@ const shellpipe_sync = @import("api/shellpipe_sync.zig");
 const zoom_relative = @import("./api/zoom_relative.zig").zoom_relative;
 const FnTable = @import("./api/_FnTable.zig");
 
+const Self = @This();
 allocator: std.mem.Allocator,
 blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
 config: []const u8,
@@ -50,21 +51,21 @@ win_w: u32 = config.InitWindowW,
 window: *sdl.SDL_Window = undefined,
 quit_action: ?[]const u8 = null,
 
-pub fn convert_latlon_to_xy(mepo: *@This(), lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
+pub fn convert_latlon_to_xy(mepo: *Self, lat_or_lon: enum { LonToX, LatToY }, lat_lon_value: f64) i32 {
     return switch (lat_or_lon) {
         .LonToX => -1 * (mepo.get_x() - @as(i32, @intCast(mepo.win_w / 2)) - utilconversion.lon_to_px_x(lat_lon_value, p.get(p.pref.zoom).u)),
         .LatToY => -1 * (mepo.get_y() - @as(i32, @intCast(mepo.win_h / 2)) - utilconversion.lat_to_px_y(lat_lon_value, p.get(p.pref.zoom).u)),
     };
 }
 
-fn event_fingerdown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_fingerdown(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     for (mepo.fingers.items) |f| if (e.tfinger.fingerId == f) return .None;
     mepo.fingers.append(e.tfinger.fingerId) catch unreachable;
     if (mepo.fingers.items.len > 1) mepo.fingers_gesture_delta = 0;
     return .None;
 }
 
-fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_fingerup(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     for (mepo.fingers.items, 0..) |f, i| {
         if (e.tfinger.fingerId == f) {
             _ = mepo.fingers.orderedRemove(i);
@@ -75,7 +76,7 @@ fn event_fingerup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_textinput(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     var idx: usize = 0;
     var pending: types.Pending = .None;
     const text = e.text.text;
@@ -94,7 +95,7 @@ fn event_textinput(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return pending;
 }
 
-fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_multigesture(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     const threshold_pan_dist = 0.004;
     const threshold_rotate_radians = 0.015;
 
@@ -126,7 +127,7 @@ fn event_multigesture(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_mousebuttondown(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
 
     const cursor = mepo.scaled_mouse_position();
@@ -142,7 +143,7 @@ fn event_mousebuttondown(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_mousebuttonup(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
     defer mepo.drag = null;
 
@@ -207,7 +208,7 @@ fn event_mousebuttonup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_mousemotion(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     if (mepo.fingers.items.len > 1) return .None;
 
     const cursor = mepo.scaled_mouse_position();
@@ -225,16 +226,16 @@ fn event_mousemotion(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-pub fn within_touch_bounds(mepo: *@This(), x: c_int, y: c_int) bool {
+pub fn within_touch_bounds(mepo: *Self, x: c_int, y: c_int) bool {
     return x > 0 and y > 0 and x < mepo.win_w and y < mepo.win_h;
 }
 
-fn event_mousewheel(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_mousewheel(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     zoom_relative(mepo, e.wheel.y);
     return .Redraw;
 }
 
-fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_keyup(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     if (sdl.SDL_TRUE == sdl.SDL_IsTextInputActive() and
         e.key.keysym.mod == 0) return .None;
     const key = sdl.SDL_GetScancodeName(e.key.keysym.scancode);
@@ -270,7 +271,7 @@ fn event_keyup(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_signal(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_signal(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     if (mepo.table_signals.get(@intCast(e.user.code))) |run_expression| {
         utildbg.log("Got signals table function {s}\n", .{run_expression});
         mepo.jsonapi_execute(run_expression) catch unreachable;
@@ -279,7 +280,7 @@ fn event_signal(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_windowevent(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     // Fix for certain platforms like Phosh like open keyboard on winevents
     defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
 
@@ -305,7 +306,7 @@ fn event_windowevent(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-fn event_jsonapiexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_jsonapiexecution(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     const heap_str = std.mem.sliceTo(@as([*c]u8, @ptrCast(e.user.data1)), 0);
     utildbg.log("SDL jsonapi event proccessing: <{s}>\n", .{heap_str});
     mepo.jsonapi_execute(heap_str) catch |err| {
@@ -315,7 +316,7 @@ fn event_jsonapiexecution(mepo: *@This(), e: sdl.SDL_Event) types.Pending {
     return .Redraw;
 }
 
-pub fn event_quit(mepo: *@This(), _: sdl.SDL_Event) types.Pending {
+pub fn event_quit(mepo: *Self, _: sdl.SDL_Event) types.Pending {
     if (mepo.quit_action) |quit_action| {
         mepo.jsonapi_execute(quit_action) catch |err| {
             utildbg.log("Error with running jsonapi quit action: {}\n", .{err});
@@ -325,7 +326,7 @@ pub fn event_quit(mepo: *@This(), _: sdl.SDL_Event) types.Pending {
     return .None;
 }
 
-fn event_unhandled(_: *@This(), e: sdl.SDL_Event) types.Pending {
+fn event_unhandled(_: *Self, e: sdl.SDL_Event) types.Pending {
     //utildbg.log("Unhandled SDL Event: {s}\n", .{@tagName(@intToEnum(sdl.SDL_EventType, @intCast(c_int, e.type)))});
     _ = e;
     return .None;
@@ -376,7 +377,7 @@ fn jsonapi_execute_parseargs(
     return args;
 }
 
-pub fn jsonapi_execute(mepo: *@This(), jsonapi_text: []const u8) !void {
+pub fn jsonapi_execute(mepo: *Self, jsonapi_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
 
@@ -418,7 +419,7 @@ pub fn jsonapi_execute(mepo: *@This(), jsonapi_text: []const u8) !void {
     }
 }
 
-fn dispatch_check_click_hold(mepo: *@This()) void {
+fn dispatch_check_click_hold(mepo: *Self) void {
     if (mepo.drag == null or mepo.fingers.items.len > 1) {
         mepo.drag = null;
         return;
@@ -450,7 +451,7 @@ fn dispatch_check_click_hold(mepo: *@This()) void {
     }
 }
 
-fn dispatch_check_timers(mepo: *@This()) !void {
+fn dispatch_check_timers(mepo: *Self) !void {
     var it = mepo.table_timers.iterator();
     while (it.next()) |kv| {
         const timer_input = kv.key_ptr.*;
@@ -467,7 +468,7 @@ fn dispatch_check_timers(mepo: *@This()) !void {
     }
 }
 
-pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: bool) !void {
+pub fn init_video_and_sdl_stdin_loop(mepo: *Self, enable_stdin_jsonapi_repl: bool) !void {
     if (enable_stdin_jsonapi_repl) {
         const thread = sdl.SDL_CreateThread(
             mepo_sdl_loop_thread_boot,
@@ -491,7 +492,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *@This(), enable_stdin_jsonapi_repl: 
 }
 
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
-    const mepo: *@This() = @alignCast(@ptrCast(userdata.?));
+    const mepo: *Self = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
     mepo.jsonapi_execute(mepo.config) catch unreachable;
     mepo.initialized_video.set();
@@ -499,7 +500,7 @@ fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     return 0;
 }
 
-pub fn sdl_event_loop(mepo: *@This()) !void {
+pub fn sdl_event_loop(mepo: *Self) !void {
     var pending: types.Pending = .None;
     var e: sdl.SDL_Event = undefined;
 
@@ -546,7 +547,7 @@ pub fn sdl_event_loop(mepo: *@This()) !void {
     }
 }
 
-pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
+pub fn update_debug_message(mepo: *Self, new_msg_opt: ?[]const u8) !void {
     if (mepo.debug_message) |dbg_msg| mepo.allocator.free(dbg_msg);
     if (new_msg_opt) |new_msg| {
         mepo.debug_message = try mepo.allocator.dupe(u8, new_msg);
@@ -563,7 +564,7 @@ pub fn update_debug_message(mepo: *@This(), new_msg_opt: ?[]const u8) !void {
 // This is used in several places as its more reliable then motion/button
 // events which seem to have some issue with SetLogicalSize in certain
 // platforms as of SDL 2.0.22
-pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
+pub fn scaled_mouse_position(mepo: *Self) sdl.SDL_Point {
     var cursor_x: c_int = undefined;
     var cursor_y: c_int = undefined;
     var gl_w: c_int = undefined;
@@ -580,7 +581,7 @@ pub fn scaled_mouse_position(mepo: *@This()) sdl.SDL_Point {
     return .{ .x = @intFromFloat(scaled_x), .y = @intFromFloat(scaled_y) };
 }
 
-pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
+pub fn cursor_latlon(mepo: *Self) struct { Lat: f64, Lon: f64 } {
     const cursor = mepo.scaled_mouse_position();
 
     const cursor_lat = utilconversion.px_y_to_lat(
@@ -598,23 +599,23 @@ pub fn cursor_latlon(mepo: *@This()) struct { Lat: f64, Lon: f64 } {
     };
 }
 
-pub fn get_x(_: *@This()) i32 {
+pub fn get_x(_: *Self) i32 {
     return utilconversion.lon_to_px_x(p.get(p.pref.lon).f, p.get(p.pref.zoom).u);
 }
 
-pub fn get_y(_: *@This()) i32 {
+pub fn get_y(_: *Self) i32 {
     return utilconversion.lat_to_px_y(p.get(p.pref.lat).f, p.get(p.pref.zoom).u);
 }
 
-pub fn set_x(_: *@This(), x: i32) void {
+pub fn set_x(_: *Self, x: i32) void {
     p.set_n(p.pref.lon, utilconversion.px_x_to_lon(x, p.get(p.pref.zoom).u));
 }
 
-pub fn set_y(_: *@This(), y: i32) void {
+pub fn set_y(_: *Self, y: i32) void {
     p.set_n(p.pref.lat, utilconversion.px_y_to_lat(y, p.get(p.pref.zoom).u));
 }
 
-pub fn bounding_box(mepo: *@This()) types.LatLonBox {
+pub fn bounding_box(mepo: *Self) types.LatLonBox {
     return .{
         .topleft_lat = utilconversion.px_y_to_lat(mepo.get_y() - @as(i32, @intCast(mepo.win_h / 2)), p.get(p.pref.zoom).u),
         .topleft_lon = utilconversion.px_x_to_lon(mepo.get_x() - @as(i32, @intCast(mepo.win_w / 2)), p.get(p.pref.zoom).u),
@@ -737,11 +738,11 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     };
 }
 
-pub fn blit(mepo: *@This()) !void {
+pub fn blit(mepo: *Self) !void {
     return blitfns.blit(mepo);
 }
 
-pub fn video_init(mepo: *@This()) !void {
+pub fn video_init(mepo: *Self) !void {
     mepo.window = try setup_sdl_video_and_window(mepo.allocator);
     mepo.renderer = renderer: {
         const r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
@@ -780,8 +781,8 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
     return fonts;
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, renderer_type: types.RendererType) anyerror!@This() {
-    return @as(@This(), .{
+pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, renderer_type: types.RendererType) anyerror!Self {
+    return Self{
         .allocator = allocator,
         .blit_pinlayer_cache = datastructure.EvictionHashMap(
             types.XYZ,
@@ -821,5 +822,5 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             break :b uibuttons;
         },
         .renderer_type = renderer_type,
-    });
+    };
 }

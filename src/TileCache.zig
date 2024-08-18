@@ -40,6 +40,7 @@ const TileData = union(TileDataTag) {
 const TileDataTag = enum { transfer_datum, texture, queued_position, error_type };
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
+const Self = @This();
 allocator: std.mem.Allocator,
 dev_null_fd: ?*cstdio.FILE,
 thread_download: ?*sdl.SDL_Thread = null,
@@ -57,7 +58,7 @@ transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 /// Downloads tiles continuously
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
-pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
+pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
     const initial_queue_bg_size = tile_cache.queue_lifo_bg.count();
     var ui_last_update_ticks = sdl.SDL_GetTicks();
     var running: c_int = undefined;
@@ -117,7 +118,7 @@ pub fn download_loop(tile_cache: *@This(), graphical_mode: bool) !void {
 
 /// Sets the cache URL, making copy of str
 /// Caller passed ptr url may be safely freed
-pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
+pub fn set_cache_url(tile_cache: *Self, url: [:0]const u8) !void {
     if (tile_cache.thread_download != null) {
         // Set's network off (cancels inprogress transfers, resumes on switch)
         tile_cache.set_network(false);
@@ -133,7 +134,7 @@ pub fn set_cache_url(tile_cache: *@This(), url: [:0]const u8) !void {
     try p.set_t(tile_cache.allocator, p.pref.tile_cache_url, url);
 }
 
-pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
+pub fn set_cache_dir(tile_cache: *Self, path: [:0]const u8) !void {
     try p.set_t(tile_cache.allocator, p.pref.tile_cache_dir, path);
 
     const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, p.get(p.pref.tile_cache_dir).t.?);
@@ -144,7 +145,7 @@ pub fn set_cache_dir(tile_cache: *@This(), path: [:0]const u8) !void {
 
 /// E.g. esentially the one function responsibel for launching/termination
 /// of the download thread
-pub fn set_network(tile_cache: *@This(), enable: bool) void {
+pub fn set_network(tile_cache: *Self, enable: bool) void {
     tile_cache.set_queue(null);
     if (!enable and tile_cache.thread_download != null) {
         const orphan_thread = tile_cache.thread_download.?;
@@ -161,7 +162,7 @@ pub fn set_network(tile_cache: *@This(), enable: bool) void {
 
 /// E.g. essentially the one function responsible for launching/termination
 /// of the queuer thread
-pub fn set_queue(tile_cache: *@This(), dl_req_opt: ?DownloadBBoxRequest) void {
+pub fn set_queue(tile_cache: *Self, dl_req_opt: ?DownloadBBoxRequest) void {
     // Cancel any existing queueing thread
     if (tile_cache.thread_queuebbox) |thread_queuebbox| {
         const orphan_thread = thread_queuebbox;
@@ -184,7 +185,7 @@ pub fn set_queue(tile_cache: *@This(), dl_req_opt: ?DownloadBBoxRequest) void {
     }
 }
 
-pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
+pub fn tile_bg_bbox_queue(tile_cache: *Self, dl_req: DownloadBBoxRequest, cancellable: bool) !QueuedInfo {
     if (cancellable and tile_cache.thread_download == null) return error.NoDownloadThread;
 
     const lat_min = if (dl_req.a_lat < dl_req.b_lat) dl_req.a_lat else dl_req.b_lat;
@@ -238,7 +239,7 @@ pub fn tile_bg_bbox_queue(tile_cache: *@This(), dl_req: DownloadBBoxRequest, can
 /// thread and thus is safe to use renderer functions within (e.g. we transfer
 /// the SDL surface into a texture here)
 /// TODO: maybe just move this fn/code wholesale into Mepo.zig?
-pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileData {
+pub fn tile_ui_retreive_or_queue(tile_cache: *Self, coords: types.XYZ) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
     if (tile_cache.texture_map.get(coords)) |texture| {
@@ -281,7 +282,7 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *@This(), coords: types.XYZ) !TileD
 // ////////////////////////////////////////////////////////////////////////////
 // Private
 
-fn curl_add_to_multi_and_register_transfer(tile_cache: *@This(), coords: types.XYZ, load_to_texture: bool) !void {
+fn curl_add_to_multi_and_register_transfer(tile_cache: *Self, coords: types.XYZ, load_to_texture: bool) !void {
     if (tile_cache.transfer_map.get(coords)) |_| return;
 
     const transfer_datum: *TransferDatum = datum: {
@@ -360,7 +361,7 @@ fn curl_errorcheck(response: curl.CURLMcode) !void {
     return error.CurlMultiFail;
 }
 
-fn curl_client_to_coords(tile_cache: *@This(), client: ?*curl.CURL) ?types.XYZ {
+fn curl_client_to_coords(tile_cache: *Self, client: ?*curl.CURL) ?types.XYZ {
     var it = tile_cache.transfer_map.iterator();
     while (it.next()) |kv| {
         if (kv.value_ptr.*.client == client) {
@@ -376,7 +377,7 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
 }
 
 /// Show progress indicator for the download loop (for non interactive downloading)
-fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: usize) void {
+fn download_loop_progress_indicator(tile_cache: *Self, initial_queue_size: usize) void {
     std.debug.print("\x1b[1;1H\x1b[2J", .{});
     std.debug.print(
         \\Mepo - download mode
@@ -396,13 +397,13 @@ fn download_loop_progress_indicator(tile_cache: *@This(), initial_queue_size: us
 
 /// Determine whether the download loop should continue based on either
 /// if in graphical mode or non-empty queu
-fn download_loop_should_continue(tile_cache: *@This(), graphical_mode: bool) bool {
+fn download_loop_should_continue(tile_cache: *Self, graphical_mode: bool) bool {
     const graphical_and_online = (graphical_mode and tile_cache.thread_download != null);
     const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo_bg.count() > 0 or tile_cache.transfer_map.count() > 0));
     return graphical_and_online or nongraphical_and_pending;
 }
 
-fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !void {
+fn download_loop_transfer_complete(tile_cache: *Self, msg: *curl.CURLMsg) !void {
     switch (msg.data.result) {
         curl.CURLE_OPERATION_TIMEDOUT => {
             utildbg.log("Curl timed out for msg: {}\n", .{msg});
@@ -447,7 +448,7 @@ fn download_loop_transfer_complete(tile_cache: *@This(), msg: *curl.CURLMsg) !vo
 /// SDL resize (refresh event). By effect, if tile is loaded in texture
 /// map rendering thread fetches and updates it; if CURLE_OK wasn't
 /// there - the item will get repushed back into queue
-fn download_loop_transfer_cleanup(tile_cache: *@This(), client: ?*curl.CURL) !void {
+fn download_loop_transfer_cleanup(tile_cache: *Self, client: ?*curl.CURL) !void {
     if (tile_cache.curl_client_to_coords(client)) |coords| {
         const transfer_datum = tile_cache.transfer_map.get(coords).?;
         tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
@@ -463,7 +464,7 @@ fn evict_texture(_: types.XYZ, texture: *sdl.SDL_Texture) void {
     sdl.SDL_DestroyTexture(texture);
 }
 
-fn load_data_to_surface(_: *@This(), data: []u8) !*sdl.SDL_Surface {
+fn load_data_to_surface(_: *Self, data: []u8) !*sdl.SDL_Surface {
     if (data.len == 0) return error.LoadToSurfaceFailEmptyData;
 
     const memory = try utilsdl.errorcheck_ptr(sdl.SDL_RWops, sdl.SDL_RWFromConstMem(@ptrCast(&data[0]), @intCast(data.len)));
@@ -482,7 +483,7 @@ fn png_path(allocator: std.mem.Allocator, source: []const u8, coords: types.XYZ)
 
 /// Check whether tile is already in the filesystem and not expired according
 /// to creation time & expiry seconds setting
-fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !bool {
+fn tile_exists_in_fs_and_non_expired(tile_cache: *Self, coords: types.XYZ) !bool {
     if (tile_cache.cache_dir) |cache_dir| {
         const png = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
         defer tile_cache.allocator.free(png);
@@ -497,7 +498,7 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *@This(), coords: types.XYZ) !b
 }
 
 fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
-    const tile_cache: *@This() = @alignCast(@ptrCast(userdata.?));
+    const tile_cache: *Self = @alignCast(@ptrCast(userdata.?));
     if (tile_cache.tile_bg_bbox_queue(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
     } else |err| {
@@ -508,16 +509,16 @@ fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
 }
 
 fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.C) c_int {
-    const tile_cache: *@This() = @alignCast(@ptrCast(userdata.?));
+    const tile_cache: *Self = @alignCast(@ptrCast(userdata.?));
     tile_cache.download_loop(true) catch |e| {
         utildbg.log("Error running download loop: {}\n", .{e});
     };
     return 0;
 }
 
-pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
+pub fn init(allocator: std.mem.Allocator) anyerror!Self {
     if (curl.curl_multi_init()) |_| {
-        var tc = @as(@This(), .{
+        var tc = Self{
             .allocator = allocator,
             .dev_null_fd = cstdio.fopen("/dev/null", "wb"),
             .curl_multi = curl.curl_multi_init().?,
@@ -525,7 +526,7 @@ pub fn init(allocator: std.mem.Allocator) anyerror!@This() {
             .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
             .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures).init(allocator),
             .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
-        });
+        };
         try tc.set_cache_url(try allocator.dupeZ(u8, "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"));
         return tc;
     } else {
