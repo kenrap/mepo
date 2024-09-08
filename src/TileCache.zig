@@ -338,8 +338,8 @@ fn curl_callback_tile_xferinfo(
     _ = ul_total;
     _ = ul_now;
     const tile_data: *TransferDatum = @alignCast(@ptrCast(user_data));
-    tile_data.progress_dl_now = dl_now;
-    tile_data.progress_dl_total = dl_total;
+    tile_data.progress_dl_now = @intCast(dl_now);
+    tile_data.progress_dl_total = @intCast(dl_total);
     return curl.CURL_PROGRESSFUNC_CONTINUE;
 }
 
