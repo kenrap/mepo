@@ -106,7 +106,7 @@ zenitytableoutputtomobrouteparams() {
 mobrouterun() {
   RP="$1"
   TMPERR="$(mktemp)"
-  MRRESULT="$(mobroute route -rp "{\"route_params\": $RP}" 2>$TMPERR)"
+  MRRESULT="$(mobroute route -p "{\"route_params\": $RP}" 2>$TMPERR)"
   [ $? = 0 ] || errdiefile "$TMPERR"
   echo "$MRRESULT"
 }
