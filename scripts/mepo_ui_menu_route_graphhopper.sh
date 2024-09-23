@@ -22,7 +22,7 @@ errdie() {
 
 errcheckhastwopins() {
   NPINS="$(
-    cat ~/.cache/mepo/shellpipe_savestate.json |
+    cat $XDG_CACHE_HOME/mepo/shellpipe_savestate.json |
       jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | length"
   )"
 
@@ -35,12 +35,12 @@ errcheckhastwopins() {
 
 gettablevals() {
   JSONPIN0="$(
-    cat ~/.cache/mepo/shellpipe_savestate.json |
-    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
+    cat $XDG_CACHE_HOME/mepo/shellpipe_savestate.json |
+      jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | first"
   )"
   JSONPIN1="$(
-    cat ~/.cache/mepo/shellpipe_savestate.json |
-    jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
+    cat $XDG_CACHE_HOME/mepo/shellpipe_savestate.json |
+      jq "[.[] | select(.cmd == \"pin_add\" and .args.group == $MEPO_PINGROUPACTIVE)] | last"
   )"
   COORDFROM="$(echo "$JSONPIN0" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"
   COORDTO="$(echo "$JSONPIN1" | jq '(.args.lat|tostring) + ", " + (.args.lon|tostring)' |tr -d '"')"

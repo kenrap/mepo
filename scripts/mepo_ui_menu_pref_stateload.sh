@@ -2,7 +2,7 @@
 DISPLAYNAME="↺ State: Load"
 HOTKEY=u
 DOC='
-  Loads the state (pins & preferences) from ~/.cache/mepo/savestate.json
+  Loads the state (pins & preferences) from $XDG_CACHE_HOME/mepo/savestate.json
 '
 
 main() {

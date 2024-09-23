@@ -2,7 +2,7 @@
 DISPLAYNAME="↻ State: Save"
 HOTKEY=i
 DOC='
-  Saves the state (pins & preferences) to ~/.cache/mepo/savestate.json
+  Saves the state (pins & preferences) to $XDG_CACHE_HOME/mepo/savestate.json
 '
 
 main() {
