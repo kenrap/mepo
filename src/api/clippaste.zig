@@ -23,7 +23,7 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
     // trim commas, and see if can parse as floats; if so assume lat/lon
     // if not - break out and run whatever is in clipboard as jsonapi
     parse_lat_lon: {
-        var it = std.mem.split(u8, text, " ");
+        var it = std.mem.splitSequence(u8, text, " ");
         var lat: ?f64 = null;
         var lon: ?f64 = null;
 
