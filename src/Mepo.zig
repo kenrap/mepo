@@ -18,7 +18,7 @@ const FnTable = @import("./api/_FnTable.zig");
 const Self = @This();
 allocator: std.mem.Allocator,
 blit_pinlayer_cache: datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures),
-config: []const u8,
+config_contents: []const u8,
 debug_message: ?[]const u8 = null,
 drag: ?struct {
     begin_ticks: u32,
@@ -485,7 +485,7 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *Self, enable_stdin_jsonapi_repl: boo
 fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
     const mepo: *Self = @alignCast(@ptrCast(userdata.?));
     video_init(mepo) catch unreachable;
-    mepo.jsonapi_execute(mepo.config) catch unreachable;
+    mepo.jsonapi_execute(mepo.config_contents) catch unreachable;
     mepo.initialized_video.set();
     sdl_event_loop(mepo) catch unreachable;
     return 0;
@@ -782,7 +782,7 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             &config.MaxTextures,
         ).init(allocator),
         .shellpipe_async_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
-        .config = use_config,
+        .config_contents = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
         .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
