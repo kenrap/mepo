@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "clippaste",
     .desc = "Extract clipboard contents and either center on coordinate (if clipboard content matches `lat lon` format); otherwise run clipboard contents as JSON API expressions.",
     .args = &.{},

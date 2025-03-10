@@ -2,7 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "pin_transfer",
     .desc = "Transfer a pin from one group to another.",
     .args = &.{

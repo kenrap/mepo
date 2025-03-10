@@ -4,7 +4,7 @@ const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "prefinc",
     .desc = "Increase or decrease a preference by the given delta value.",
     .args = &.{

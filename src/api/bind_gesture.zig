@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_gesture",
     .desc = "Bind a multitouch gesture event to execute JSON API expressions.",
     .args = &.{
@@ -27,7 +27,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 fn bind_gesture(mepo: *Mepo, action: types.GestureInputAction, fingers: u8, direction: types.GestureInputDirection, expression: []const u8) !void {
     utildbg.log("Binding gesture: fingers={} action={} direction={} to expression {s}\n", .{ fingers, action, direction, expression });
 
-    const gest = .{
+    const gest = types.GestureInput{
         .n_fingers = fingers,
         .action = action,
         .direction = direction,

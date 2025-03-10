@@ -7,7 +7,7 @@ const utilfile = @import("../util/utilfile.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const utilprefs = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "filedump",
     .desc = "Save the current state of pins and/or preferences to a file as JSON API expressions.",
     .args = &.{

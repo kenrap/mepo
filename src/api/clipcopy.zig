@@ -6,7 +6,7 @@ const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "clipcopy",
     .desc = "Copy the current map coordinates to the clipboard; will be in format: `lat lon`.",
     .args = &.{},

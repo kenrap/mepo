@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "zoom_relative",
     .desc = "Update the map's zoom level by a relative delta.",
     .args = &.{

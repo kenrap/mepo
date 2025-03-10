@@ -6,7 +6,7 @@ const utilconversion = @import("../util/utilconversion.zig");
 const utildbg = @import("../util/utildbg.zig");
 const config = @import("../config.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "cache_dlbbox",
     .desc = "Queue tiles for a bounding box to download to the cache in the background for the given zoom levels. Writes directly to filesystem cache (path determined by `tile_cache_dir` preference) as tiles are downloaded.",
     .args = &.{

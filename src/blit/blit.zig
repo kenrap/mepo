@@ -213,7 +213,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
                         const is_ordered = p.get(p.pingroup_prop(pin_group_i, .Ordered)).b;
                         break :is_active_path (pin_group_i == mepo.pin_group_active and mepo.pin_group_active_item != null and
                             ((is_ordered and is_active_path_track) or
-                            (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
+                                (!is_ordered and mepo.pin_group_active_item.? == pin_i)));
                     };
                     is_active_path_track = track: {
                         const has_active_pg_item = mepo.pin_group_active_item != null;
@@ -417,9 +417,9 @@ fn blit_pin(mepo: *Mepo, pin: *types.Pin, prev_pin: ?*types.Pin, pin_group: u8, 
             break :render_pin_label;
 
         const pin_label_bg_value: u24 = if (is_active) 0xe8e8e8 else 0xffffff;
-        const pin_label_bg: types.Color = .{ .value = pin_label_bg_value };
+        const pin_label_bg = types.Color{ .value = pin_label_bg_value };
         const pin_label_border_value: u24 = if (is_active) 0x000000 else 0xe8e8e8;
-        const pin_label_border = .{ .value = pin_label_border_value };
+        const pin_label_border = types.Color{ .value = pin_label_border_value };
 
         const label_color: u24 = 0x000000;
         const label = lab: {

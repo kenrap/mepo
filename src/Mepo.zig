@@ -333,8 +333,8 @@ fn jsonapi_execute_parseargs(
     map: std.json.ArrayHashMap(std.json.Value),
 ) anyerror![types.MepoFnNargs]types.MepoArg {
     var args: [types.MepoFnNargs]types.MepoArg = .{
-      .{.Number = 0}, .{.Number = 0}, .{.Number = 0},
-      .{.Number = 0}, .{.Number = 0}, .{.Number = 0},
+        .{ .Number = 0 }, .{ .Number = 0 }, .{ .Number = 0 },
+        .{ .Number = 0 }, .{ .Number = 0 }, .{ .Number = 0 },
     };
     for (fn_spec_args, 0..) |spec_arg, i| {
         if (map.map.get(spec_arg.name)) |arg| {
@@ -449,7 +449,7 @@ fn dispatch_check_timers(mepo: *Self) !void {
         const timer_jsonapi = kv.value_ptr.*;
         if (sdl.SDL_GetTicks() > timer_input.created_at_ticks + (timer_input.interval_seconds * 1000)) {
             mepo.jsonapi_execute(timer_jsonapi) catch unreachable;
-            const new_timer = .{
+            const new_timer = types.TimerInput{
                 .created_at_ticks = sdl.SDL_GetTicks(),
                 .interval_seconds = timer_input.interval_seconds,
             };

@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "center_on_pin",
     .desc = "Center the map on the currently active pin.",
     .args = &.{},

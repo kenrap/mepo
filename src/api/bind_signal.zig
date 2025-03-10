@@ -5,7 +5,7 @@ const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_signal",
     .desc = "Bind a signal to execute JSON API expressions.",
     .args = &.{

@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const p = @import("../util/utilprefs.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "center_on_mouse",
     .desc = "Center the map on the current position of the mouse.",
     .args = &.{},

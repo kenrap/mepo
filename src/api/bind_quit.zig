@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_quit",
     .desc = "Bind JSON API expressions to run on quitting the application.",
     .args = &.{

@@ -15,7 +15,7 @@ const AsyncShellpipeRequest = struct {
     cmd: []const u8,
 };
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "shellpipe_async",
     .desc = "Run a system (shell) command and pipe asynchronously; STDOUT returned from command will be executed back as a jsonapi expression.",
     .args = &.{

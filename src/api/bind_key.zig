@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_key",
     .desc = "Bind a key combination to execute a JSON API expressions.",
     .args = &.{
@@ -39,7 +39,7 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         break :m modifier;
     };
 
-    const key: types.KeyInput = .{
+    const key = types.KeyInput{
         .keymod = @intCast(keymod),
         .key = std.ascii.toLower(key_str[0]),
     };

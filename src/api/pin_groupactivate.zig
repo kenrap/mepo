@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const pin_cycle = @import("pin_cycle.zig").pin_cycle;
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "pin_groupactivate",
     .desc = "Activate the pin group specified.",
     .args = &.{

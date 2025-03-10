@@ -2,7 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "pin_purge",
     .desc = "Purge all pins in the currently active pin group.",
     .args = &.{},

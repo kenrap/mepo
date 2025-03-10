@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utilfile = @import("../util/utilfile.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "fileload",
     .desc = "Load JSON API expressions from an arbitrary filesystem file.",
     .args = &.{

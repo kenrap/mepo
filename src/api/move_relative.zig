@@ -2,7 +2,7 @@ const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "move_relative",
     .desc = "Move the map by a relative x/y amount.",
     .args = &.{

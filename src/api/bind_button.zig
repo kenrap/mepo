@@ -4,7 +4,7 @@ const std = @import("std");
 const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_button",
     .desc = "Create a UI button which executes a JSON commands. UI buttons appear aligned in the bottom right of the screen or the top left alongside the pin details overlay (see first argument).",
     .args = &.{

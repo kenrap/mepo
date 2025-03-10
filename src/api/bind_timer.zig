@@ -5,7 +5,7 @@ const sdl = @import("../sdlshim.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 
-pub const spec = .{
+pub const spec = types.MepoFnSpec{
     .name = "bind_timer",
     .desc = "Bind a timer to execute JSON API expressions at the given interval.",
     .args = &.{
@@ -23,7 +23,7 @@ fn bind_timer(mepo: *Mepo, interval_seconds: u32, expression: []const u8) !void 
     utildbg.log("Binding timer: interval seconds={d} to expression {s}\n", .{ interval_seconds, expression });
 
     const expression_heap_allocated = try mepo.allocator.dupe(u8, expression);
-    const timer: types.TimerInput = .{
+    const timer = types.TimerInput{
         .interval_seconds = interval_seconds,
         .created_at_ticks = sdl.SDL_GetTicks(),
     };
