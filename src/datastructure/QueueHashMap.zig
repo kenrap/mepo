@@ -35,12 +35,14 @@ pub fn QueueHashMap(comptime key_type: type, comptime metadata_type: type) type 
             return self.array_hash_map.getPtr(key);
         }
 
-        pub fn pop(self: *Self) struct { key: key_type, value: metadata_type } {
+        pub fn pop(self: *Self) ?struct { key: key_type, value: metadata_type } {
             self.mutex.lock();
             defer self.mutex.unlock();
 
-            const popped = self.array_hash_map.pop();
-            return .{ .key = popped.key, .value = popped.value };
+            if (self.array_hash_map.pop()) |popped| {
+                return .{ .key = popped.key, .value = popped.value };
+            }
+            return null;
         }
 
         pub fn getIndex(self: *Self, key: key_type) ?usize {

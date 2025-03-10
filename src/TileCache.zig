@@ -82,15 +82,21 @@ pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
         }
 
         // 2. Transfer from UI LIFO into transfers
-        while (tile_cache.queue_lifo_ui.count() > 0 and tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            const coords = tile_cache.queue_lifo_ui.pop();
-            try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
+        while (tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
+            if (tile_cache.queue_lifo_ui.pop()) |coords| {
+                try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
+            } else {
+                break;
+            }
         }
 
         // 3. Transfer from BG LIFO into transfers
-        while (tile_cache.queue_lifo_bg.count() > 0 and tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            const coords = tile_cache.queue_lifo_bg.pop();
-            try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
+        while (tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
+            if (tile_cache.queue_lifo_bg.pop()) |coords| {
+                try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
+            } else {
+                break;
+            }
         }
 
         // 4. Print status message if non graphical
