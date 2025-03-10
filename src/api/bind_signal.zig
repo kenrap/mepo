@@ -45,7 +45,7 @@ fn bind_signal(mepo: *Mepo, signo_str: [:0]const u8, expression: []const u8) !vo
         .flags = 0,
     };
 
-    std.posix.sigaction(signal_name, &signal_action, null) catch return error.FailedToSetupSighandler;
+    std.posix.sigaction(signal_name, &signal_action, null);
 
     if (mepo.table_signals.get(signal_name)) |heap_str| {
         mepo.allocator.free(heap_str);
