@@ -88,4 +88,4 @@ in mobile Linux, OSM, and/or Zig.
 
 ## **Packaging Links**
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/mepo.svg)](https://repology.org/project/mepo/versions)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/mepo-openstreetmap-viewer.svg)](https://repology.org/project/mepo-openstreetmap-viewer/versions)
