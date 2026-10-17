@@ -69,7 +69,7 @@ Mepo has a documentation website which lives at:
 [mepo.lrdu.org](https://mepo.lrdu.org)
 
 ## **Releases**
-The most current release is 1.3.4 which builds against zig 0.14.x.
+The most current release is 1.4.0 which builds against zig 0.17.x.
 
 Details on releases are available at: [releases page](https://git.sr.ht/~mil/mepo/refs).
 
