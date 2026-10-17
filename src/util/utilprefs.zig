@@ -57,80 +57,80 @@ const PrefMapping = struct {
 const n_prefs = 38;
 pub var prefs_mapping: [n_prefs]PrefMapping = mapping: {
     var mapping: [n_prefs]PrefMapping = undefined;
-    mapping[@intFromEnum(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
-    mapping[@intFromEnum(pref.lon)] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .bounds = .{ .min = -180, .max = 180 }, .desc = "Longitude of the map" };
-    mapping[@intFromEnum(pref.zoom)] = .{ .name = "zoom", .value = .{
+    mapping[@backingInt(pref.lat)] = .{ .name = "lat", .value = .{ .f = 40.78392 }, .bounds = .{ .min = -90, .max = 90 }, .desc = "Latitude of the map" };
+    mapping[@backingInt(pref.lon)] = .{ .name = "lon", .value = .{ .f = -73.96442 }, .bounds = .{ .min = -180, .max = 180 }, .desc = "Longitude of the map" };
+    mapping[@backingInt(pref.zoom)] = .{ .name = "zoom", .value = .{
         .u = 14,
     }, .bounds = .{ .min = 0, .max = 19 }, .desc = "Zoom level of the map (should be set between 0-19)" };
-    mapping[@intFromEnum(pref.debug_message_enabled)] = .{ .name = "debug_message_enabled", .value = .{ .b = true }, .desc = "Whether debug overlay message should be shown in the UI" };
-    mapping[@intFromEnum(pref.distance_unit_tf_km_mi)] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false }, .desc = "Whether to show distance in km (0) or mi (1)" };
-    mapping[@intFromEnum(pref.overlay_debugbar)] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "Whether to show the debug bar" };
-    mapping[@intFromEnum(pref.help)] = .{ .name = "help", .value = .{ .b = false }, .desc = "Whether to show the help overlay" };
-    mapping[@intFromEnum(pref.overlay_pindetails)] = .{ .name = "overlay_pindetails", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay" };
-    mapping[@intFromEnum(pref.overlay_pindetails_expanded)] = .{ .name = "overlay_pindetails_expanded", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay as expanded" };
-    mapping[@intFromEnum(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .bounds = .{ .min = 0, .max = 300 }, .desc = "Pixel size of the crosshairs" };
-    mapping[@intFromEnum(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Scale for dragging" };
-    mapping[@intFromEnum(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 49 }, .desc = "Size of the font in the UI" };
-    mapping[@intFromEnum(pref.debug_stderr)] = .{ .name = "debug_stderr", .value = .{ .b = true }, .desc = "Send debug information to STDERR (note the commandline flag `-e` overrides this setting)" };
-    mapping[@intFromEnum(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 9999 }, .desc = "Maximum number of concurrent transfers for curl" };
-    mapping[@intFromEnum(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .bounds = .{ .min = -1, .max = 99999999 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };
-    mapping[@intFromEnum(pref.tile_cache_network)] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "Whether to download new tiledata from external servers; if 0 that means you're offline" };
-    mapping[@intFromEnum(pref.tile_cache_dir)] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "Path of directory to store the downloaded tiles" };
-    mapping[@intFromEnum(pref.tile_cache_url)] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "URL source for the tiles, uses %1/%2/%3 to represent X/Y/Z" };
+    mapping[@backingInt(pref.debug_message_enabled)] = .{ .name = "debug_message_enabled", .value = .{ .b = true }, .desc = "Whether debug overlay message should be shown in the UI" };
+    mapping[@backingInt(pref.distance_unit_tf_km_mi)] = .{ .name = "distance_unit_tf_km_mi", .value = .{ .b = false }, .desc = "Whether to show distance in km (0) or mi (1)" };
+    mapping[@backingInt(pref.overlay_debugbar)] = .{ .name = "overlay_debugbar", .value = .{ .b = true }, .desc = "Whether to show the debug bar" };
+    mapping[@backingInt(pref.help)] = .{ .name = "help", .value = .{ .b = false }, .desc = "Whether to show the help overlay" };
+    mapping[@backingInt(pref.overlay_pindetails)] = .{ .name = "overlay_pindetails", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay" };
+    mapping[@backingInt(pref.overlay_pindetails_expanded)] = .{ .name = "overlay_pindetails_expanded", .value = .{ .b = true }, .desc = "Whether to show the pin detail overlay as expanded" };
+    mapping[@backingInt(pref.crosshair_size)] = .{ .name = "crosshair_size", .value = .{ .u = 15 }, .bounds = .{ .min = 0, .max = 300 }, .desc = "Pixel size of the crosshairs" };
+    mapping[@backingInt(pref.drag_scale)] = .{ .name = "drag_scale", .value = .{ .u = 2 }, .bounds = .{ .min = 1, .max = 200 }, .desc = "Scale for dragging" };
+    mapping[@backingInt(pref.fontsize_ui)] = .{ .name = "fontsize_ui", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 49 }, .desc = "Size of the font in the UI" };
+    mapping[@backingInt(pref.debug_stderr)] = .{ .name = "debug_stderr", .value = .{ .b = true }, .desc = "Send debug information to STDERR (note the commandline flag `-e` overrides this setting)" };
+    mapping[@backingInt(pref.tile_cache_max_n_transfers)] = .{ .name = "tile_cache_max_n_transfers", .value = .{ .u = 20 }, .bounds = .{ .min = 1, .max = 9999 }, .desc = "Maximum number of concurrent transfers for curl" };
+    mapping[@backingInt(pref.tile_cache_expiry_seconds)] = .{ .name = "tile_cache_expiry_seconds", .value = .{ .f = -1 }, .bounds = .{ .min = -1, .max = 99999999 }, .desc = "Number of seconds before a downloaded tiledata should be considered invalid" };
+    mapping[@backingInt(pref.tile_cache_network)] = .{ .name = "tile_cache_network", .value = .{ .b = true }, .desc = "Whether to download new tiledata from external servers; if 0 that means you're offline" };
+    mapping[@backingInt(pref.tile_cache_dir)] = .{ .name = "tile_cache_dir", .value = .{ .t = null }, .desc = "Path of directory to store the downloaded tiles" };
+    mapping[@backingInt(pref.tile_cache_url)] = .{ .name = "tile_cache_url", .value = .{ .t = null }, .desc = "URL source for the tiles, uses %1/%2/%3 to represent X/Y/Z" };
 
-    mapping[@intFromEnum(pref.pingroup_0_ordered)] = .{ .name = "pingroup_0_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 0 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_1_ordered)] = .{ .name = "pingroup_1_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 1 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_2_ordered)] = .{ .name = "pingroup_2_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 2 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_3_ordered)] = .{ .name = "pingroup_3_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 3 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_4_ordered)] = .{ .name = "pingroup_4_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 4 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_5_ordered)] = .{ .name = "pingroup_5_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 5 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_6_ordered)] = .{ .name = "pingroup_6_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 6 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_7_ordered)] = .{ .name = "pingroup_7_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 7 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_8_ordered)] = .{ .name = "pingroup_8_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 8 should be ordered" };
-    mapping[@intFromEnum(pref.pingroup_9_ordered)] = .{ .name = "pingroup_9_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 9 should be ordered" };
+    mapping[@backingInt(pref.pingroup_0_ordered)] = .{ .name = "pingroup_0_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 0 should be ordered" };
+    mapping[@backingInt(pref.pingroup_1_ordered)] = .{ .name = "pingroup_1_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 1 should be ordered" };
+    mapping[@backingInt(pref.pingroup_2_ordered)] = .{ .name = "pingroup_2_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 2 should be ordered" };
+    mapping[@backingInt(pref.pingroup_3_ordered)] = .{ .name = "pingroup_3_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 3 should be ordered" };
+    mapping[@backingInt(pref.pingroup_4_ordered)] = .{ .name = "pingroup_4_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 4 should be ordered" };
+    mapping[@backingInt(pref.pingroup_5_ordered)] = .{ .name = "pingroup_5_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 5 should be ordered" };
+    mapping[@backingInt(pref.pingroup_6_ordered)] = .{ .name = "pingroup_6_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 6 should be ordered" };
+    mapping[@backingInt(pref.pingroup_7_ordered)] = .{ .name = "pingroup_7_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 7 should be ordered" };
+    mapping[@backingInt(pref.pingroup_8_ordered)] = .{ .name = "pingroup_8_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 8 should be ordered" };
+    mapping[@backingInt(pref.pingroup_9_ordered)] = .{ .name = "pingroup_9_ordered", .value = .{ .b = false }, .desc = "Whether pingroup 9 should be ordered" };
 
-    mapping[@intFromEnum(pref.pingroup_0_color)] = .{ .name = "pingroup_0_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 0" };
-    mapping[@intFromEnum(pref.pingroup_1_color)] = .{ .name = "pingroup_1_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 1" };
-    mapping[@intFromEnum(pref.pingroup_2_color)] = .{ .name = "pingroup_2_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 2" };
-    mapping[@intFromEnum(pref.pingroup_3_color)] = .{ .name = "pingroup_3_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 3" };
-    mapping[@intFromEnum(pref.pingroup_4_color)] = .{ .name = "pingroup_4_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 4" };
-    mapping[@intFromEnum(pref.pingroup_5_color)] = .{ .name = "pingroup_5_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 5" };
-    mapping[@intFromEnum(pref.pingroup_6_color)] = .{ .name = "pingroup_6_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 6" };
-    mapping[@intFromEnum(pref.pingroup_7_color)] = .{ .name = "pingroup_7_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 7" };
-    mapping[@intFromEnum(pref.pingroup_8_color)] = .{ .name = "pingroup_8_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 8" };
-    mapping[@intFromEnum(pref.pingroup_9_color)] = .{ .name = "pingroup_9_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 9" };
+    mapping[@backingInt(pref.pingroup_0_color)] = .{ .name = "pingroup_0_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 0" };
+    mapping[@backingInt(pref.pingroup_1_color)] = .{ .name = "pingroup_1_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 1" };
+    mapping[@backingInt(pref.pingroup_2_color)] = .{ .name = "pingroup_2_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 2" };
+    mapping[@backingInt(pref.pingroup_3_color)] = .{ .name = "pingroup_3_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 3" };
+    mapping[@backingInt(pref.pingroup_4_color)] = .{ .name = "pingroup_4_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 4" };
+    mapping[@backingInt(pref.pingroup_5_color)] = .{ .name = "pingroup_5_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 5" };
+    mapping[@backingInt(pref.pingroup_6_color)] = .{ .name = "pingroup_6_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 6" };
+    mapping[@backingInt(pref.pingroup_7_color)] = .{ .name = "pingroup_7_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 7" };
+    mapping[@backingInt(pref.pingroup_8_color)] = .{ .name = "pingroup_8_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 8" };
+    mapping[@backingInt(pref.pingroup_9_color)] = .{ .name = "pingroup_9_color", .value = .{ .u24 = 0x0 }, .desc = "Color to indicate pingroup 9" };
 
     break :mapping mapping;
 };
 
 pub fn get(prefname: pref) PrefValueUnion {
-    return prefs_mapping[@intFromEnum(prefname)].value;
+    return prefs_mapping[@backingInt(prefname)].value;
 }
 
 pub fn set_n(prefname: pref, value: f64) void {
     var bounded_value: f64 = value;
-    if (prefs_mapping[@intFromEnum(prefname)].bounds) |bounds| {
+    if (prefs_mapping[@backingInt(prefname)].bounds) |bounds| {
         if (bounded_value > bounds.max) bounded_value = bounds.max;
         if (bounded_value < bounds.min) bounded_value = bounds.min;
     }
 
-    switch (prefs_mapping[@intFromEnum(prefname)].value) {
+    switch (prefs_mapping[@backingInt(prefname)].value) {
         .b => {
-            prefs_mapping[@intFromEnum(prefname)].value = .{ .b = value == 1 };
+            prefs_mapping[@backingInt(prefname)].value = .{ .b = value == 1 };
         },
         .u => {
             if (bounded_value > std.math.maxInt(u8)) bounded_value = std.math.maxInt(u8);
             if (bounded_value < std.math.minInt(u8)) bounded_value = std.math.minInt(u8);
-            prefs_mapping[@intFromEnum(prefname)].value = .{ .u = @intFromFloat(bounded_value) };
+            prefs_mapping[@backingInt(prefname)].value = .{ .u = @intFromFloat(bounded_value) };
         },
         .f => {
-            prefs_mapping[@intFromEnum(prefname)].value = .{ .f = value };
+            prefs_mapping[@backingInt(prefname)].value = .{ .f = value };
         },
         .t => {},
         .u24 => {
             if (bounded_value > std.math.maxInt(u24)) bounded_value = std.math.maxInt(u24);
             if (bounded_value < std.math.minInt(u24)) bounded_value = std.math.minInt(u24);
-            prefs_mapping[@intFromEnum(prefname)].value = .{ .u24 = @intFromFloat(value) };
+            prefs_mapping[@backingInt(prefname)].value = .{ .u24 = @intFromFloat(value) };
         },
     }
 }
@@ -160,21 +160,21 @@ pub fn pingroup_prop(pingroup: usize, prop: enum { Ordered, Color }) pref {
 }
 
 pub fn set_t(allocator: std.mem.Allocator, prefname: pref, value: []const u8) !void {
-    if (prefs_mapping[@intFromEnum(prefname)].value.t) |heap_allocated_text| allocator.free(heap_allocated_text);
-    prefs_mapping[@intFromEnum(prefname)].value.t = try allocator.dupeZ(u8, value);
+    if (prefs_mapping[@backingInt(prefname)].value.t) |heap_allocated_text| allocator.free(heap_allocated_text);
+    prefs_mapping[@backingInt(prefname)].value.t = try allocator.dupeSentinel(u8, value, 0);
 }
 
 pub fn lookup_pref_from_string(prefname: []const u8) ?pref {
     for (prefs_mapping, 0..) |p, i|
         if (std.mem.eql(u8, p.name, prefname))
-            return @enumFromInt(i);
+            return @fromBackingInt(@intCast(i));
     return null;
 }
 
 pub fn toggle_bool(prefname: pref) void {
-    switch (prefs_mapping[@intFromEnum(prefname)].value) {
+    switch (prefs_mapping[@backingInt(prefname)].value) {
         .b => {
-            prefs_mapping[@intFromEnum(prefname)].value = .{ .b = !prefs_mapping[@intFromEnum(prefname)].value.b };
+            prefs_mapping[@backingInt(prefname)].value = .{ .b = !prefs_mapping[@backingInt(prefname)].value.b };
         },
         else => {},
     }

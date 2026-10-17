@@ -7,7 +7,7 @@ const utilprocess = @import("../util/utilprocess.zig");
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 const p = @import("../util/utilprefs.zig");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 
 const AsyncShellpipeRequest = struct {
     mepo: *Mepo,
@@ -37,15 +37,15 @@ fn async_shellpipe(mepo: *Mepo, unique_handle_id: i8, cmd: []const u8) !void {
     sdl.SDL_DetachThread(sdl.SDL_CreateThread(async_shellpipe_run, "async_shellpipe", sp_req));
 }
 
-fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
-    const shellpipe_request: *AsyncShellpipeRequest = @alignCast(@ptrCast(userdata.?));
+fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.c) c_int {
+    const shellpipe_request: *AsyncShellpipeRequest = @ptrCast(@alignCast(userdata.?));
     const mepo = shellpipe_request.mepo;
     defer mepo.allocator.destroy(shellpipe_request);
     const unique_handle_id = shellpipe_request.unique_handle_id;
     run_shellpipe(mepo, unique_handle_id, shellpipe_request.cmd) catch |err| {
         utildbg.log("Error running async shellpipe: {}\n", .{err});
     };
-    _ = mepo.shellpipe_async_threads.swapRemove(unique_handle_id);
+    _ = mepo.shellpipe_async_threads.swapRemove(unique_handle_id) catch false;
     return 0;
 }
 
@@ -55,7 +55,7 @@ fn async_shellpipe_run(userdata: ?*anyopaque) callconv(.C) c_int {
 pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
     defer mepo.allocator.free(cmd);
     if (async_id) |unique_handle_id| {
-        if (mepo.shellpipe_async_threads.get(unique_handle_id)) |thread_id| {
+        if (try mepo.shellpipe_async_threads.get(unique_handle_id)) |thread_id| {
             utildbg.log("Async shellpipe id {} already present with thread ID {}\n", .{ unique_handle_id, thread_id });
             return;
         }
@@ -64,21 +64,23 @@ pub fn run_shellpipe(mepo: *Mepo, async_id: ?i8, cmd: []const u8) !void {
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
-    const env_vars = try get_env_vars(mepo, arena.allocator());
+    const alloc = arena.allocator();
+    const env_vars = try get_env_vars(mepo, alloc);
 
     if (try utilprocess.run_subprocess(
-        arena.allocator(),
+        alloc,
+        mepo.io,
         cmd,
         &env_vars,
         if (async_id == null) &mepo.shellpipe_sync_pid else null,
     )) |response_stdout| {
-        const heap_stdout = try mepo.allocator.dupeZ(u8, response_stdout);
+        const heap_stdout = try mepo.allocator.dupeSentinel(u8, response_stdout, 0);
         utilsdl.sdl_push_event_jsonapi_execution(heap_stdout);
     }
 }
 
-fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.EnvMap {
-    var v = try std.process.getEnvMap(allocator);
+fn get_env_vars(mepo: *Mepo, allocator: std.mem.Allocator) !std.process.Environ.Map {
+    var v = try mepo.environ.clone(allocator);
 
     // Window and zoom info
     try v.put("MEPO_WIN_W", try std.fmt.allocPrint(allocator, "{d}", .{mepo.win_w}));

@@ -1,5 +1,9 @@
 # [**Mepo**](https://sr.ht/~mil/Mepo/)
 
+**This fork is for Zig update maintenance and not development.**
+
+If the upstream were to become active and would like to cherry-pick my changes, all I ask to keep my commit author credit.
+
 [![mepo_demo.gif](https://media.lrdu.org/mepo_demos/mepo_demo_1.0_search.gif)](http://mepo.lrdu.org/demos.html)
 
 Mepo is a fast, simple, and hackable OSM map viewer for desktop & mobile

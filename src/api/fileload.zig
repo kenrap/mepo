@@ -18,11 +18,13 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 }
 
 fn fileload(mepo: *Mepo, filepath: []const u8) !void {
-    const expanded_path = try utilfile.wordexp_filepath(mepo.allocator, filepath);
+    const expanded_path = try utilfile.wordexp_filepath(mepo.allocator, mepo.environ, filepath);
     defer mepo.allocator.free(expanded_path);
-    const jsonapi_file = try std.fs.openFileAbsolute(expanded_path, .{});
-    defer jsonapi_file.close();
-    const code = try jsonapi_file.readToEndAlloc(mepo.allocator, 99999);
+    const jsonapi_file = try std.Io.Dir.openFileAbsolute(mepo.io, expanded_path, .{});
+    defer jsonapi_file.close(mepo.io);
+    var buffer: [4096]u8 = undefined;
+    var reader = jsonapi_file.reader(mepo.io, &buffer);
+    const code = try reader.interface.allocRemaining(mepo.allocator, .limited(99999));
     defer mepo.allocator.free(code);
     try mepo.jsonapi_execute(code);
 }

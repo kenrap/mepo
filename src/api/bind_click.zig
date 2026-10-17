@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = types.MepoFnSpec{
@@ -30,5 +30,5 @@ fn bind_click(mepo: *Mepo, button: u8, clicks: i8, expression: []const u8) !void
         _ = mepo.table_clicks.swapRemove(click);
     }
     const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.table_clicks.put(click, expression_mepo_allocated);
+    try mepo.table_clicks.put(mepo.allocator, click, expression_mepo_allocated);
 }

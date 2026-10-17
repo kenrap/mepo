@@ -39,8 +39,8 @@ pub fn pin_meta(mepo: *Mepo, group: i32, handle: [:0]const u8, key: [:0]const u8
     } else if (std.mem.eql(u8, "lon", key)) {
         pin.lon = try std.fmt.parseFloat(f64, value);
     } else {
-        const heap_key = try mepo.allocator.dupeZ(u8, key);
-        const heap_val = try mepo.allocator.dupeZ(u8, value);
-        try pin.metadata.put(heap_key, heap_val);
+        const heap_key = try mepo.allocator.dupeSentinel(u8, key, 0);
+        const heap_val = try mepo.allocator.dupeSentinel(u8, value, 0);
+        try pin.metadata.put(mepo.allocator, heap_key, heap_val);
     }
 }

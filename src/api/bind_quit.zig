@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = types.MepoFnSpec{

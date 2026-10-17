@@ -1,4 +1,5 @@
-const sdl = @import("../sdlshim.zig");
+const std = @import("std");
+const sdl = @import("../sdlshim.zig").c;
 const types = @import("../types.zig");
 const errors = @import("../errors.zig");
 const utildbg = @import("./utildbg.zig");
@@ -44,10 +45,10 @@ pub fn sdl_push_event_jsonapi_execution(jsonapi_text: [:0]const u8) void {
     };
 }
 
-pub fn sdl_push_event_signal(signal: c_int) callconv(.C) void {
+pub fn sdl_push_event_signal(signal: std.posix.SIG) callconv(.c) void {
     var sdlevent: sdl.SDL_Event = undefined;
     sdlevent.type = sdl_usereventtype(.Signal);
-    sdlevent.user.code = signal;
+    sdlevent.user.code = @intCast(@backingInt(signal));
     _ = sdl.SDL_PushEvent(&sdlevent);
 }
 

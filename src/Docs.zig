@@ -93,8 +93,10 @@ const DocBaseConfigIntro =
     \\a nop command / empty expression list `[]` as the JSON expressions passed.
 ;
 
-pub fn generateMarkdownDocs(allocator: std.mem.Allocator) !void {
-    const stdout = std.io.getStdOut().writer();
+pub fn generateMarkdownDocs(io: std.Io, allocator: std.mem.Allocator) !void {
+    var doc = std.Io.Writer.Allocating.init(allocator);
+    defer doc.deinit();
+    const stdout = &doc.writer;
 
     try stdout.print(
         \\# JSON API
@@ -222,4 +224,8 @@ pub fn generateMarkdownDocs(allocator: std.mem.Allocator) !void {
     ,
         .{ DocEnvVarsShellpipe, DocBaseConfigIntro, config.DefaultBaseConfig },
     );
+
+    const bytes = try doc.toOwnedSlice();
+    defer allocator.free(bytes);
+    try std.Io.File.stdout().writeStreamingAll(io, bytes);
 }

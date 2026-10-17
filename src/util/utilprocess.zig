@@ -1,6 +1,4 @@
-const c = @cImport({
-    @cInclude("spawn.h");
-});
+const c = @import("spawn");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 
@@ -15,8 +13,9 @@ const utildbg = @import("../util/utildbg.zig");
 //
 pub fn run_subprocess(
     allocator: std.mem.Allocator,
+    io: std.Io,
     cmd: []const u8,
-    env_map: *const std.process.EnvMap,
+    env_map: *const std.process.Environ.Map,
     set_process_id_opt_ptr_opt: ?*?std.posix.pid_t,
 ) !?[]const u8 {
     var pid: std.c.pid_t = undefined;
@@ -29,9 +28,15 @@ pub fn run_subprocess(
     if (c.posix_spawn_file_actions_init(&actions) != 0)
         return error.PosixSpawnFileActionsInitFailed;
     defer if (c.posix_spawn_file_actions_destroy(&actions) != 0) unreachable;
-    const pipe = try std.posix.pipe();
-    errdefer std.posix.close(pipe[0]);
-    errdefer std.posix.close(pipe[1]);
+    var pipe: [2]std.posix.system.fd_t = undefined;
+    switch (std.posix.errno(std.posix.system.pipe(&pipe))) {
+        .SUCCESS => {},
+        else => |other| {
+            return std.posix.unexpectedErrno(other);
+        },
+    }
+    errdefer _ = std.posix.system.close(pipe[0]);
+    errdefer _ = std.posix.system.close(pipe[1]);
     // The read end of the pipe is unused by the spawned process.
     if (c.posix_spawn_file_actions_addclose(&actions, pipe[0]) != 0)
         return error.PosixSpawnFileActionsAddCloseFailed;
@@ -53,29 +58,34 @@ pub fn run_subprocess(
 
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
+    const alloc = arena.allocator();
     const args = [_:null]?[*:0]u8{
-        (try arena.allocator().dupeZ(u8, "sh")).ptr,
-        (try arena.allocator().dupeZ(u8, "-c")).ptr,
-        (try std.fmt.allocPrintZ(arena.allocator(), "exec {s}", .{cmd})).ptr,
+        (try alloc.dupeSentinel(u8, "sh", 0)).ptr,
+        (try alloc.dupeSentinel(u8, "-c", 0)).ptr,
+        (try std.fmt.allocPrintSentinel(alloc, "exec {s}", .{cmd}, 0)).ptr,
     };
-    const env_vars = try std.process.createEnvironFromMap(arena.allocator(), env_map, .{});
-    if (c.posix_spawnp(&pid, "sh", &actions, &attr, &args, env_vars.ptr) != 0)
+    const env_vars = try env_map.createPosixBlock(alloc, .{});
+    defer env_vars.deinit(alloc);
+    if (c.posix_spawnp(&pid, "sh", &actions, &attr, &args, @ptrCast(env_vars.slice)) != 0)
         return error.PosixSpawnFailed;
     // The write end of the pipe is unused by this parent process.
-    std.posix.close(pipe[1]);
+    _ = std.posix.system.close(pipe[1]);
     if (set_process_id_opt_ptr_opt) |pid_ptr|
         pid_ptr.* = pid;
 
     const stdout = blk: {
-        defer std.posix.close(pipe[0]);
-        const file = std.fs.File{ .handle = pipe[0] };
-        break :blk try file.readToEndAlloc(allocator, 10_000_000);
+        defer _ = std.posix.system.close(pipe[0]);
+        const file = std.Io.File{ .handle = pipe[0], .flags = .{ .nonblocking = false } };
+        var read_buffer: [4096]u8 = undefined;
+        var reader = file.reader(io, &read_buffer);
+        break :blk try reader.interface.allocRemaining(allocator, .limited(10_000_000));
     };
-    const result = std.posix.waitpid(pid, 0);
+    var status: c_int = undefined;
+    _ = std.posix.system.waitpid(pid, &status, 0);
     // Spawn failure of foreign binaries are reported as successful:
     // https://github.com/ziglang/zig/pull/14866
     // TODO: mention this in user documentation.
-    if (result.status == 0) return stdout;
+    if (status == 0) return stdout;
     allocator.free(stdout);
     utildbg.log("Early termination of spawned process (via signal, stopped, etc.): {s}\n", .{cmd});
     return null;

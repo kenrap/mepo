@@ -1,5 +1,5 @@
 const std = @import("std");
-const sdl = @import("./sdlshim.zig");
+const sdl = @import("./sdlshim.zig").c;
 const types = @import("./types.zig");
 const config = @import("./config.zig");
 const errors = @import("./errors.zig");
@@ -26,7 +26,9 @@ drag: ?struct {
     delta_x: u32 = 0,
     delta_y: u32 = 0,
 } = null,
-initialized_video: std.Thread.ResetEvent,
+environ: *const std.process.Environ.Map,
+initialized_video: std.Io.Event,
+io: std.Io,
 fingers: std.ArrayList(sdl.SDL_FingerID),
 fingers_gesture_delta: isize = 0,
 fonts_normal: [50]*sdl.TTF_Font,
@@ -38,11 +40,11 @@ renderer: *sdl.SDL_Renderer = undefined,
 renderer_type: types.RendererType = .Auto,
 shellpipe_async_threads: datastructure.QueueHashMap(i8, sdl.SDL_threadID),
 shellpipe_sync_pid: ?std.posix.pid_t = null,
-table_gestures: std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8),
-table_clicks: std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8),
-table_keybindings: std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8),
-table_signals: std.array_hash_map.AutoArrayHashMap(u6, []const u8),
-table_timers: std.array_hash_map.AutoArrayHashMap(types.TimerInput, []const u8),
+table_gestures: std.array_hash_map.Auto(types.GestureInput, []const u8),
+table_clicks: std.array_hash_map.Auto(types.ClickInput, []const u8),
+table_keybindings: std.array_hash_map.Auto(types.KeyInput, []const u8),
+table_signals: std.array_hash_map.Auto(u6, []const u8),
+table_timers: std.array_hash_map.Auto(types.TimerInput, []const u8),
 tile_cache: *TileCache,
 title_update_ms: usize = 0,
 uibuttons: std.ArrayList(types.UIButton),
@@ -60,7 +62,7 @@ pub fn convert_latlon_to_xy(mepo: *Self, lat_or_lon: enum { LonToX, LatToY }, la
 
 fn event_fingerdown(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     for (mepo.fingers.items) |f| if (e.tfinger.fingerId == f) return .None;
-    mepo.fingers.append(e.tfinger.fingerId) catch unreachable;
+    mepo.fingers.append(mepo.allocator, e.tfinger.fingerId) catch unreachable;
     if (mepo.fingers.items.len > 1) mepo.fingers_gesture_delta = 0;
     return .None;
 }
@@ -102,13 +104,21 @@ fn event_multigesture(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     const threshold_pan_dist = 0.004;
     const threshold_rotate_radians = 0.015;
     const run_gesture: types.GestureInput = if (e.mgesture.dDist > threshold_pan_dist) .{
-        .action = .Pan, .direction = .In, .n_fingers = @intCast(e.mgesture.numFingers),
+        .action = .Pan,
+        .direction = .In,
+        .n_fingers = @intCast(e.mgesture.numFingers),
     } else if (e.mgesture.dDist < -threshold_pan_dist) .{
-        .action = .Pan, .direction = .Out, .n_fingers = @intCast(e.mgesture.numFingers),
+        .action = .Pan,
+        .direction = .Out,
+        .n_fingers = @intCast(e.mgesture.numFingers),
     } else if (e.mgesture.dTheta > threshold_rotate_radians) .{
-        .action = .Rotate, .direction = .In, .n_fingers = @intCast(e.mgesture.numFingers),
+        .action = .Rotate,
+        .direction = .In,
+        .n_fingers = @intCast(e.mgesture.numFingers),
     } else if (e.mgesture.dTheta < -threshold_rotate_radians) .{
-        .action = .Rotate, .direction = .Out, .n_fingers = @intCast(e.mgesture.numFingers),
+        .action = .Rotate,
+        .direction = .Out,
+        .n_fingers = @intCast(e.mgesture.numFingers),
     } else return .None;
 
     mepo.fingers_gesture_delta += if (run_gesture.direction == .In) 1 else -1;
@@ -274,7 +284,7 @@ fn event_signal(mepo: *Self, e: sdl.SDL_Event) types.Pending {
 
 fn event_windowevent(mepo: *Self, e: sdl.SDL_Event) types.Pending {
     // Fix for certain platforms like Phosh like open keyboard on winevents
-    defer if (utilplatform.supports_osk()) sdl.SDL_StopTextInput();
+    defer if (utilplatform.supports_osk(mepo)) sdl.SDL_StopTextInput();
 
     switch (e.window.event) {
         sdl.SDL_WINDOWEVENT_FOCUS_GAINED => {
@@ -349,11 +359,11 @@ fn jsonapi_execute_parseargs(
                 },
                 .string => |parsedText| {
                     if (spec_arg.tag != .Text) return error.InvalidArgTypeGotText;
-                    args[i] = .{ .Text = try allocator.dupeZ(u8, parsedText) };
+                    args[i] = .{ .Text = try allocator.dupeSentinel(u8, parsedText, 0) };
                 },
                 .array => |g| {
                     if (spec_arg.tag != .Exps) return error.InvalidArgTypeGotExps;
-                    const str = try std.json.stringifyAlloc(allocator, g.items, .{});
+                    const str = try std.json.Stringify.valueAlloc(allocator, g.items, .{});
                     args[i] = .{ .Exps = str };
                 },
                 else => return error.InvalidArgsTypeGotUnknown,
@@ -371,12 +381,13 @@ fn jsonapi_execute_parseargs(
 pub fn jsonapi_execute(mepo: *Self, jsonapi_text: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
+    const alloc = arena.allocator();
 
     const Statement = struct {
         cmd: []u8,
         args: std.json.ArrayHashMap(std.json.Value),
     };
-    const parsed = std.json.parseFromSlice(std.json.Value, arena.allocator(), jsonapi_text, .{}) catch |e| {
+    const parsed = std.json.parseFromSlice(std.json.Value, alloc, jsonapi_text, .{}) catch |e| {
         utildbg.log("Attempted to parse Mepo JSON API - provided invalid JSON: {} / {s}\n", .{ e, jsonapi_text });
         return;
     };
@@ -384,13 +395,13 @@ pub fn jsonapi_execute(mepo: *Self, jsonapi_text: []const u8) !void {
     switch (parsed.value) {
         .array => |value| {
             for (value.items) |v| {
-                const p2 = std.json.parseFromValue(Statement, arena.allocator(), v, .{}) catch |e| {
+                const p2 = std.json.parseFromValue(Statement, alloc, v, .{}) catch |e| {
                     utildbg.log("JSON Value parse error for mepo statement: {} / {}\n", .{ e, v });
                     return;
                 };
                 const cmd = p2.value.cmd;
                 if (FnTable.get(cmd)) |fn_spec| {
-                    const args = jsonapi_execute_parseargs(arena.allocator(), fn_spec.args, p2.value.args) catch |args_error| {
+                    const args = jsonapi_execute_parseargs(alloc, fn_spec.args, p2.value.args) catch |args_error| {
                         std.debug.print("Error parsing args for {s} ({any}): {}\n", .{ cmd, p2.value.args, args_error });
                         return;
                     };
@@ -454,7 +465,7 @@ fn dispatch_check_timers(mepo: *Self) !void {
                 .interval_seconds = timer_input.interval_seconds,
             };
             _ = mepo.table_timers.swapRemove(timer_input);
-            try mepo.table_timers.put(new_timer, timer_jsonapi);
+            try mepo.table_timers.put(mepo.allocator, new_timer, timer_jsonapi);
         }
     }
 }
@@ -468,12 +479,16 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *Self, enable_stdin_jsonapi_repl: boo
         );
         sdl.SDL_DetachThread(thread);
 
-        mepo.initialized_video.wait();
-        const stdin = &std.io.getStdIn().reader();
+        try mepo.initialized_video.wait(mepo.io);
+        var in_buffer: [102400]u8 = undefined;
+        var stdin = std.Io.File.stdin().reader(mepo.io, &in_buffer);
+
         while (true) {
-            const read_slice: []const u8 = stdin.readUntilDelimiterAlloc(mepo.allocator, '\n', 102400) catch continue;
-            const slice_z = try mepo.allocator.dupeZ(u8, read_slice);
-            mepo.allocator.free(read_slice);
+            var read_list = std.Io.Writer.Allocating.init(mepo.allocator);
+            defer read_list.deinit();
+            _ = stdin.interface.streamDelimiter(&read_list.writer, '\n') catch continue;
+            stdin.interface.toss(1);
+            const slice_z = try read_list.toOwnedSliceSentinel(0);
             std.debug.print("Read {d} bytes, running input as jsonapi\n", .{slice_z.len});
             utilsdl.sdl_push_event_jsonapi_execution(slice_z);
         }
@@ -482,11 +497,11 @@ pub fn init_video_and_sdl_stdin_loop(mepo: *Self, enable_stdin_jsonapi_repl: boo
     }
 }
 
-fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.C) c_int {
-    const mepo: *Self = @alignCast(@ptrCast(userdata.?));
+fn mepo_sdl_loop_thread_boot(userdata: ?*anyopaque) callconv(.c) c_int {
+    const mepo: *Self = @ptrCast(@alignCast(userdata.?));
     video_init(mepo) catch unreachable;
     mepo.jsonapi_execute(mepo.config_contents) catch unreachable;
-    mepo.initialized_video.set();
+    mepo.initialized_video.set(mepo.io);
     sdl_event_loop(mepo) catch unreachable;
     return 0;
 }
@@ -620,15 +635,15 @@ pub fn graceful_terminate_sdl() void {
     sdl.IMG_Quit();
     sdl.SDL_VideoQuit();
     sdl.SDL_Quit();
-    std.posix.exit(0);
+    std.process.exit(0);
 }
 
-pub fn sighandle_terminate(arg: c_int) callconv(.C) void {
+pub fn sighandle_terminate(arg: c_int) callconv(.c) void {
     utildbg.log("Graceful shutdown via signal: {}", .{arg});
     graceful_terminate_sdl();
 }
 
-fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
+fn setup_sdl_video_and_window(mepo: *Self, allocator: std.mem.Allocator) !*sdl.SDL_Window {
     // Dump debug info about SDL version compiled/linked
     {
         const version = v: {
@@ -657,10 +672,9 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     // Initialize SDL video
     video_init: {
         // Attempt to initialize with whatever is set in SDL_VIDEODRIVER
-        const env_videodriver_opt = std.process.getEnvVarOwned(allocator, "SDL_VIDEODRIVER") catch null;
+        const env_videodriver_opt = mepo.environ.get("SDL_VIDEODRIVER");
         if (env_videodriver_opt) |env_videodriver| env_videoinit: {
-            defer allocator.free(env_videodriver);
-            const env_videodriver_z = try allocator.dupeZ(u8, env_videodriver);
+            const env_videodriver_z = try allocator.dupeSentinel(u8, env_videodriver, 0);
             defer allocator.free(env_videodriver_z);
             utildbg.log("SDL_VIDEODRIVER env var set to {s}, attempting initialize\n", .{env_videodriver});
             utilsdl.errorcheck(sdl.SDL_VideoInit(&env_videodriver_z[0])) catch |e| {
@@ -697,7 +711,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
     // scripts need the OSK and besides that onscreen keyboard should
     // be hidden).. so for Phosh we disable textinput
     {
-        const textinput_enable = !utilplatform.supports_osk();
+        const textinput_enable = !utilplatform.supports_osk(mepo);
         if (textinput_enable) sdl.SDL_StartTextInput() else sdl.SDL_StopTextInput();
         utildbg.log("Setting SDL TextInput system to be enabled?: {}\n", .{textinput_enable});
     }
@@ -712,7 +726,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
             config.InitWindowH,
             sdl.SDL_WINDOW_SHOWN | sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         ));
-        if (std.posix.getenv("MEPO_WINDOW_REPOSITION")) |reposition| {
+        if (mepo.environ.get("MEPO_WINDOW_REPOSITION")) |reposition| {
             if (reposition.len == 1 and reposition[0] == '1') {
                 sdl.SDL_SetWindowPosition(w, 0, 0);
             }
@@ -720,7 +734,7 @@ fn setup_sdl_video_and_window(allocator: std.mem.Allocator) !*sdl.SDL_Window {
 
         // E.g. Phosh sometimes doesn't use all space, e.g. strange bar
         // on bottom; so fullscreen & defullscreen to trigger window resize
-        if (utilplatform.xdg_session_desktop() == .Phosh) {
+        if (utilplatform.xdg_session_desktop(mepo) == .Phosh) {
             _ = sdl.SDL_SetWindowFullscreen(w, sdl.SDL_WINDOW_FULLSCREEN);
             _ = sdl.SDL_SetWindowFullscreen(w, 0);
         }
@@ -734,7 +748,7 @@ pub fn blit(mepo: *Self) !void {
 }
 
 pub fn video_init(mepo: *Self) !void {
-    mepo.window = try setup_sdl_video_and_window(mepo.allocator);
+    mepo.window = try setup_sdl_video_and_window(mepo, mepo.allocator);
     mepo.renderer = renderer: {
         const r = try utilsdl.errorcheck_ptr(sdl.SDL_Renderer, sdl.SDL_CreateRenderer(
             mepo.window,
@@ -772,7 +786,14 @@ fn init_create_fonts_array(bold: bool) ![50]*sdl.TTF_Font {
     return fonts;
 }
 
-pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []const u8, renderer_type: types.RendererType) anyerror!Self {
+pub fn init(
+    io: std.Io,
+    allocator: std.mem.Allocator,
+    environ: *const std.process.Environ.Map,
+    tile_cache: *TileCache,
+    use_config: []const u8,
+    renderer_type: types.RendererType,
+) anyerror!Self {
     return Self{
         .allocator = allocator,
         .blit_pinlayer_cache = datastructure.EvictionHashMap(
@@ -780,29 +801,31 @@ pub fn init(allocator: std.mem.Allocator, tile_cache: *TileCache, use_config: []
             *sdl.SDL_Texture,
             evict_texture,
             &config.MaxTextures,
-        ).init(allocator),
-        .shellpipe_async_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(allocator),
+        ).init(io, allocator),
+        .environ = environ,
+        .io = io,
+        .shellpipe_async_threads = datastructure.QueueHashMap(i8, sdl.SDL_threadID).init(io, allocator),
         .config_contents = use_config,
         .fonts_normal = try init_create_fonts_array(false),
         .fonts_bold = try init_create_fonts_array(true),
-        .fingers = std.ArrayList(sdl.SDL_FingerID).init(allocator),
-        .initialized_video = std.Thread.ResetEvent{},
-        .table_gestures = std.array_hash_map.AutoArrayHashMap(types.GestureInput, []const u8).init(allocator),
-        .table_keybindings = std.array_hash_map.AutoArrayHashMap(types.KeyInput, []const u8).init(allocator),
-        .table_clicks = std.array_hash_map.AutoArrayHashMap(types.ClickInput, []const u8).init(allocator),
-        .table_signals = std.array_hash_map.AutoArrayHashMap(u6, []const u8).init(allocator),
-        .table_timers = std.array_hash_map.AutoArrayHashMap(types.TimerInput, []const u8).init(allocator),
+        .fingers = std.ArrayList(sdl.SDL_FingerID).empty,
+        .initialized_video = .unset,
+        .table_gestures = .empty,
+        .table_keybindings = .empty,
+        .table_clicks = .empty,
+        .table_signals = .empty,
+        .table_timers = .empty,
         .pin_groups = pin_groups: {
             var pgs: [10]std.ArrayList(types.Pin) = undefined;
-            for (pgs, 0..) |_, i| pgs[i] = std.ArrayList(types.Pin).init(allocator);
+            for (pgs, 0..) |_, i| pgs[i] = std.ArrayList(types.Pin).empty;
             break :pin_groups pgs;
         },
         .tile_cache = tile_cache,
         .uibuttons = b: {
-            var uibuttons = std.ArrayList(types.UIButton).init(allocator);
-            errdefer uibuttons.deinit();
-            try uibuttons.append(.{
-                .text = try allocator.dupeZ(u8, "Cancel sync shellpipe"),
+            var uibuttons = std.ArrayList(types.UIButton).empty;
+            errdefer uibuttons.deinit(allocator);
+            try uibuttons.append(allocator, .{
+                .text = try allocator.dupeSentinel(u8, "Cancel sync shellpipe", 0),
                 .group_number = null,
                 .only_visible_when_sync_shellpipe = true,
                 .only_visible_when_pin_active = false,

@@ -1,11 +1,7 @@
 const std = @import("std");
-const curl = @cImport({
-    @cInclude("curl/curl.h");
-});
-const cstdio = @cImport({
-    @cInclude("stdio.h");
-});
-const sdl = @import("./sdlshim.zig");
+const curl = @import("curl");
+const cstdio = @import("stdio");
+const sdl = @import("./sdlshim.zig").c;
 const types = @import("./types.zig");
 const config = @import("./config.zig");
 const utilsdl = @import("./util/utilsdl.zig");
@@ -24,6 +20,7 @@ pub const DownloadBBoxRequest = struct {
     zoom_max: i32,
 };
 const TransferDatum = struct {
+    allocator: std.mem.Allocator,
     client: *curl.CURL,
     coords: types.XYZ,
     data_arraylist: std.ArrayList(u8),
@@ -41,13 +38,15 @@ const TileDataTag = enum { transfer_datum, texture, queued_position, error_type 
 const QueuedInfo = struct { n_queued: usize, n_cached: usize };
 
 const Self = @This();
+io: std.Io,
 allocator: std.mem.Allocator,
+environ: *const std.process.Environ.Map,
 dev_null_fd: ?*cstdio.FILE,
 thread_download: ?*sdl.SDL_Thread = null,
 thread_queuebbox: ?*sdl.SDL_Thread = null,
 bbox_queue: ?DownloadBBoxRequest = null,
 byte_counter: u64 = 0,
-cache_dir: ?std.fs.Dir = null,
+cache_dir: ?std.Io.Dir = null,
 curl_multi: *curl.CURLM,
 queue_lifo_ui: datastructure.QueueHashMap(types.XYZ, void),
 queue_lifo_bg: datastructure.QueueHashMap(types.XYZ, void),
@@ -59,15 +58,15 @@ transfer_map: datastructure.QueueHashMap(types.XYZ, *TransferDatum),
 /// If graphical_mode is true, will idle even when queue_lifo is empty.
 /// If graphical_mode is false, will terminate once queue_lifo is empty.
 pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
-    const initial_queue_bg_size = tile_cache.queue_lifo_bg.count();
+    const initial_queue_bg_size = try tile_cache.queue_lifo_bg.count();
     var ui_last_update_ticks = sdl.SDL_GetTicks();
     var running: c_int = undefined;
     var n_msgs: c_int = undefined;
 
-    while (tile_cache.download_loop_should_continue(graphical_mode)) {
+    while (try tile_cache.download_loop_should_continue(graphical_mode)) {
         // 1. Use curl multi interface to loop through completed transfers
         //    transfers out to textures & cleans up
-        curl_processing_loop: while (tile_cache.download_loop_should_continue(graphical_mode)) {
+        curl_processing_loop: while (try tile_cache.download_loop_should_continue(graphical_mode)) {
             try curl_errorcheck(curl.curl_multi_perform(tile_cache.curl_multi, &running));
             if (curl.curl_multi_info_read(tile_cache.curl_multi, &n_msgs)) |msg| {
                 if (msg.*.msg == curl.CURLMSG_DONE) {
@@ -82,8 +81,8 @@ pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
         }
 
         // 2. Transfer from UI LIFO into transfers
-        while (tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            if (tile_cache.queue_lifo_ui.pop()) |coords| {
+        while (try tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
+            if (try tile_cache.queue_lifo_ui.pop()) |coords| {
                 try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, true);
             } else {
                 break;
@@ -91,8 +90,8 @@ pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
         }
 
         // 3. Transfer from BG LIFO into transfers
-        while (tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
-            if (tile_cache.queue_lifo_bg.pop()) |coords| {
+        while (try tile_cache.transfer_map.count() < p.get(p.pref.tile_cache_max_n_transfers).u) {
+            if (try tile_cache.queue_lifo_bg.pop()) |coords| {
                 try tile_cache.curl_add_to_multi_and_register_transfer(coords.key, false);
             } else {
                 break;
@@ -100,7 +99,7 @@ pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
         }
 
         // 4. Print status message if non graphical
-        if (!graphical_mode) tile_cache.download_loop_progress_indicator(initial_queue_bg_size);
+        if (!graphical_mode) try tile_cache.download_loop_progress_indicator(initial_queue_bg_size);
 
         // 5. Idle and poll on curl multi
         curl_errorcheck(curl.curl_multi_poll(tile_cache.curl_multi, undefined, 0, config.DownloaderPollMs, null)) catch |e| {
@@ -115,8 +114,8 @@ pub fn download_loop(tile_cache: *Self, graphical_mode: bool) !void {
     }
 
     // Purge out in-progress transfers on thread termination
-    while (tile_cache.transfer_map.count() > 0) {
-        tile_cache.download_loop_transfer_cleanup(tile_cache.transfer_map.values()[0].client) catch |e| {
+    while (try tile_cache.transfer_map.count() > 0) {
+        tile_cache.download_loop_transfer_cleanup((try tile_cache.transfer_map.values())[0].client) catch |e| {
             utildbg.log("Failed to cleanup in-progress transfer on download thread termination: {}\n", .{e});
         };
     }
@@ -143,10 +142,10 @@ pub fn set_cache_url(tile_cache: *Self, url: [:0]const u8) !void {
 pub fn set_cache_dir(tile_cache: *Self, path: [:0]const u8) !void {
     try p.set_t(tile_cache.allocator, p.pref.tile_cache_dir, path);
 
-    const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, p.get(p.pref.tile_cache_dir).t.?);
+    const expanded_path = try utilfile.wordexp_filepath(tile_cache.allocator, tile_cache.environ, p.get(p.pref.tile_cache_dir).t.?);
     defer tile_cache.allocator.free(expanded_path);
-    try std.fs.cwd().makePath(expanded_path);
-    tile_cache.cache_dir = try std.fs.cwd().openDir(expanded_path, .{ .access_sub_paths = true });
+    try std.Io.Dir.cwd().createDirPath(tile_cache.io, expanded_path);
+    tile_cache.cache_dir = try std.Io.Dir.cwd().openDir(tile_cache.io, expanded_path, .{ .access_sub_paths = true });
 }
 
 /// E.g. esentially the one function responsibel for launching/termination
@@ -227,7 +226,7 @@ pub fn tile_bg_bbox_queue(tile_cache: *Self, dl_req: DownloadBBoxRequest, cancel
                     n_cached += 1;
                 } else {
                     n_queued += 1;
-                    try tile_cache.queue_lifo_bg.put(coords, void{});
+                    try tile_cache.queue_lifo_bg.put(coords, null);
                 }
             }
         }
@@ -248,16 +247,16 @@ pub fn tile_bg_bbox_queue(tile_cache: *Self, dl_req: DownloadBBoxRequest, cancel
 pub fn tile_ui_retreive_or_queue(tile_cache: *Self, coords: types.XYZ) !TileData {
     var file_cached_png_opt: ?[]u8 = null;
 
-    if (tile_cache.texture_map.get(coords)) |texture| {
+    if (try tile_cache.texture_map.get(coords)) |texture| {
         return TileData{ .texture = texture };
-    } else if (tile_cache.transfer_map.get(coords)) |transfer| {
+    } else if (try tile_cache.transfer_map.get(coords)) |transfer| {
         return TileData{ .transfer_datum = transfer.* };
     } else if (tile_cache.cache_dir) |cache_dir| load_from_fs: {
         if (!try tile_cache.tile_exists_in_fs_and_non_expired(coords)) break :load_from_fs;
         const png_fs_path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
         defer tile_cache.allocator.free(png_fs_path);
 
-        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.allocator, png_fs_path, 500000) catch |err| b: {
+        file_cached_png_opt = cache_dir.readFileAlloc(tile_cache.io, png_fs_path, tile_cache.allocator, .limited(500000)) catch |err| b: {
             utildbg.log("Unable to alloc space for PNG: {}\n", .{err});
             break :b null;
         };
@@ -278,9 +277,9 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *Self, coords: types.XYZ) !TileData
     if (tile_cache.thread_download == null) {
         return TileData{ .error_type = .Offline };
     } else {
-        try tile_cache.queue_lifo_ui.put(coords, void{});
+        try tile_cache.queue_lifo_ui.put(coords, null);
         return TileData{
-            .queued_position = if (tile_cache.queue_lifo_ui.getIndex(coords)) |index| @intCast(index) else 0,
+            .queued_position = if (try tile_cache.queue_lifo_ui.getIndex(coords)) |index| @intCast(index) else 0,
         };
     }
 }
@@ -289,13 +288,14 @@ pub fn tile_ui_retreive_or_queue(tile_cache: *Self, coords: types.XYZ) !TileData
 // Private
 
 fn curl_add_to_multi_and_register_transfer(tile_cache: *Self, coords: types.XYZ, load_to_texture: bool) !void {
-    if (tile_cache.transfer_map.get(coords)) |_| return;
+    if (try tile_cache.transfer_map.get(coords)) |_| return;
 
     const transfer_datum: *TransferDatum = datum: {
         var dat = try tile_cache.allocator.create(TransferDatum);
+        dat.allocator = tile_cache.allocator;
         dat.client = curl.curl_easy_init().?;
         dat.coords = coords;
-        dat.data_arraylist = std.ArrayList(u8).init(tile_cache.allocator);
+        dat.data_arraylist = std.ArrayList(u8).empty;
         dat.progress_dl_now = null;
         dat.progress_dl_total = null;
         dat.load_to_texture = load_to_texture;
@@ -339,11 +339,11 @@ fn curl_callback_tile_xferinfo(
     dl_now: curl.curl_off_t,
     ul_total: curl.curl_off_t,
     ul_now: curl.curl_off_t,
-) callconv(.C) c_uint {
+) callconv(.c) c_uint {
     //utildbg.log("Progress: {} {}\n", .{ dl_now, dl_total });
     _ = ul_total;
     _ = ul_now;
-    const tile_data: *TransferDatum = @alignCast(@ptrCast(user_data));
+    const tile_data: *TransferDatum = @ptrCast(@alignCast(user_data));
     tile_data.progress_dl_now = dl_now;
     tile_data.progress_dl_total = dl_total;
     return curl.CURL_PROGRESSFUNC_CONTINUE;
@@ -354,11 +354,11 @@ fn curl_callback_tile_write(
     size: c_uint,
     nmemb: c_uint,
     user_data: *anyopaque,
-) callconv(.C) c_uint {
+) callconv(.c) c_uint {
     //utildbg.log("Write!!: \n", .{});
-    const transfer_datum: *TransferDatum = @alignCast(@ptrCast(user_data));
+    const transfer_datum: *TransferDatum = @ptrCast(@alignCast(user_data));
     const typed_data: [*]u8 = @ptrCast(data);
-    transfer_datum.data_arraylist.appendSlice(typed_data[0 .. nmemb * size]) catch return 0;
+    transfer_datum.data_arraylist.appendSlice(transfer_datum.allocator, typed_data[0 .. nmemb * size]) catch return 0;
     return nmemb * size;
 }
 
@@ -367,8 +367,8 @@ fn curl_errorcheck(response: curl.CURLMcode) !void {
     return error.CurlMultiFail;
 }
 
-fn curl_client_to_coords(tile_cache: *Self, client: ?*curl.CURL) ?types.XYZ {
-    var it = tile_cache.transfer_map.iterator();
+fn curl_client_to_coords(tile_cache: *Self, client: ?*curl.CURL) !?types.XYZ {
+    var it = try tile_cache.transfer_map.iterator();
     while (it.next()) |kv| {
         if (kv.value_ptr.*.client == client) {
             return kv.value_ptr.*.coords;
@@ -383,7 +383,7 @@ fn curl_setopt(client: *curl.CURL, opt: c_int, value: anytype) !void {
 }
 
 /// Show progress indicator for the download loop (for non interactive downloading)
-fn download_loop_progress_indicator(tile_cache: *Self, initial_queue_size: usize) void {
+fn download_loop_progress_indicator(tile_cache: *Self, initial_queue_size: usize) !void {
     std.debug.print("\x1b[1;1H\x1b[2J", .{});
     std.debug.print(
         \\Mepo - download mode
@@ -393,8 +393,8 @@ fn download_loop_progress_indicator(tile_cache: *Self, initial_queue_size: usize
         \\
     ,
         .{
-            100.0 * @as(f32, @floatFromInt(initial_queue_size - tile_cache.queue_lifo_bg.count())) / @as(f32, @floatFromInt(initial_queue_size)),
-            initial_queue_size - tile_cache.queue_lifo_bg.count(),
+            100.0 * @as(f32, @floatFromInt(initial_queue_size - try tile_cache.queue_lifo_bg.count())) / @as(f32, @floatFromInt(initial_queue_size)),
+            initial_queue_size - try tile_cache.queue_lifo_bg.count(),
             initial_queue_size,
             tile_cache.byte_counter / 1024 / 1024,
         },
@@ -403,9 +403,9 @@ fn download_loop_progress_indicator(tile_cache: *Self, initial_queue_size: usize
 
 /// Determine whether the download loop should continue based on either
 /// if in graphical mode or non-empty queu
-fn download_loop_should_continue(tile_cache: *Self, graphical_mode: bool) bool {
+fn download_loop_should_continue(tile_cache: *Self, graphical_mode: bool) !bool {
     const graphical_and_online = (graphical_mode and tile_cache.thread_download != null);
-    const nongraphical_and_pending = (!graphical_mode and (tile_cache.queue_lifo_bg.count() > 0 or tile_cache.transfer_map.count() > 0));
+    const nongraphical_and_pending = (!graphical_mode and (try tile_cache.queue_lifo_bg.count() > 0 or try tile_cache.transfer_map.count() > 0));
     return graphical_and_online or nongraphical_and_pending;
 }
 
@@ -415,8 +415,8 @@ fn download_loop_transfer_complete(tile_cache: *Self, msg: *curl.CURLMsg) !void 
             utildbg.log("Curl timed out for msg: {}\n", .{msg});
         },
         curl.CURLE_OK => {
-            if (tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
-                const transfer_datum = tile_cache.transfer_map.get(coords).?;
+            if (try tile_cache.curl_client_to_coords(msg.*.easy_handle)) |coords| {
+                const transfer_datum = (try tile_cache.transfer_map.get(coords)).?;
                 const datum_array = transfer_datum.data_arraylist.items;
                 tile_cache.byte_counter += transfer_datum.data_arraylist.items.len;
 
@@ -431,10 +431,10 @@ fn download_loop_transfer_complete(tile_cache: *Self, msg: *curl.CURLMsg) !void 
                     // Save to FS
                     if (is_valid_png_data) {
                         const path = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
-                        try cache_dir.writeFile(.{ .sub_path = path, .data = datum_array });
+                        try cache_dir.writeFile(tile_cache.io, .{ .sub_path = path, .data = datum_array });
                     }
                 }
-                if (tile_cache.transfer_map.get(coords).?.load_to_texture) {
+                if ((try tile_cache.transfer_map.get(coords)).?.load_to_texture) {
                     // Load to surface
                     _ = try tile_cache.load_data_to_surface(datum_array);
                     utilsdl.sdl_push_event_resize();
@@ -455,10 +455,10 @@ fn download_loop_transfer_complete(tile_cache: *Self, msg: *curl.CURLMsg) !void 
 /// map rendering thread fetches and updates it; if CURLE_OK wasn't
 /// there - the item will get repushed back into queue
 fn download_loop_transfer_cleanup(tile_cache: *Self, client: ?*curl.CURL) !void {
-    if (tile_cache.curl_client_to_coords(client)) |coords| {
-        const transfer_datum = tile_cache.transfer_map.get(coords).?;
-        tile_cache.transfer_map.get(coords).?.data_arraylist.deinit();
-        _ = tile_cache.transfer_map.swapRemove(coords);
+    if (try tile_cache.curl_client_to_coords(client)) |coords| {
+        const transfer_datum = (try tile_cache.transfer_map.get(coords)).?;
+        (try tile_cache.transfer_map.get(coords)).?.data_arraylist.deinit(tile_cache.allocator);
+        _ = try tile_cache.transfer_map.swapRemove(coords);
         tile_cache.allocator.destroy(transfer_datum);
 
         try curl_errorcheck(curl.curl_multi_remove_handle(tile_cache.curl_multi, client));
@@ -482,8 +482,8 @@ fn png_path(allocator: std.mem.Allocator, source: []const u8, coords: types.XYZ)
     std.crypto.hash.sha2.Sha256.hash(source, &source_hash, .{});
     return try std.fmt.allocPrint(
         allocator,
-        "{s}_{d}_{d}_{d}.png",
-        .{ std.fmt.fmtSliceHexLower(source_hash[0..8]), coords.z, coords.x, coords.y },
+        "{x}_{d}_{d}_{d}.png",
+        .{ source_hash[0..8], coords.z, coords.x, coords.y },
     );
 }
 
@@ -493,18 +493,19 @@ fn tile_exists_in_fs_and_non_expired(tile_cache: *Self, coords: types.XYZ) !bool
     if (tile_cache.cache_dir) |cache_dir| {
         const png = try png_path(tile_cache.allocator, p.get(p.pref.tile_cache_url).t.?, coords);
         defer tile_cache.allocator.free(png);
-        const tile_file = cache_dir.openFile(png, .{}) catch return false;
-        defer tile_file.close();
+        const tile_file = cache_dir.openFile(tile_cache.io, png, .{}) catch return false;
+        defer tile_file.close(tile_cache.io);
         const expiry_seconds: i32 = @intFromFloat(p.get(p.pref.tile_cache_expiry_seconds).f);
-        if (expiry_seconds < 0 or std.time.timestamp() < (try tile_file.stat()).ctime + expiry_seconds) {
+        const now_secs = std.Io.Timestamp.toSeconds(std.Io.Clock.now(.real, tile_cache.io));
+        if (expiry_seconds < 0 or now_secs < std.Io.Timestamp.toSeconds((try tile_file.stat(tile_cache.io)).ctime) + expiry_seconds) {
             return true;
         }
     }
     return false;
 }
 
-fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
-    const tile_cache: *Self = @alignCast(@ptrCast(userdata.?));
+fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.c) c_int {
+    const tile_cache: *Self = @ptrCast(@alignCast(userdata.?));
     if (tile_cache.tile_bg_bbox_queue(tile_cache.bbox_queue.?, true)) |q| {
         utildbg.log("Done: {}\n", .{q});
     } else |err| {
@@ -514,26 +515,28 @@ fn threadable_tile_bg_bbox_queue(userdata: ?*anyopaque) callconv(.C) c_int {
     return 0;
 }
 
-fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.C) c_int {
-    const tile_cache: *Self = @alignCast(@ptrCast(userdata.?));
+fn threadable_download_loop_sdl(userdata: ?*anyopaque) callconv(.c) c_int {
+    const tile_cache: *Self = @ptrCast(@alignCast(userdata.?));
     tile_cache.download_loop(true) catch |e| {
         utildbg.log("Error running download loop: {}\n", .{e});
     };
     return 0;
 }
 
-pub fn init(allocator: std.mem.Allocator) anyerror!Self {
+pub fn init(io: std.Io, allocator: std.mem.Allocator, environ: *const std.process.Environ.Map) anyerror!Self {
     if (curl.curl_multi_init()) |_| {
         var tc = Self{
+            .io = io,
             .allocator = allocator,
+            .environ = environ,
             .dev_null_fd = cstdio.fopen("/dev/null", "wb"),
             .curl_multi = curl.curl_multi_init().?,
-            .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
-            .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(allocator),
-            .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures).init(allocator),
-            .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(allocator),
+            .queue_lifo_ui = datastructure.QueueHashMap(types.XYZ, void).init(io, allocator),
+            .queue_lifo_bg = datastructure.QueueHashMap(types.XYZ, void).init(io, allocator),
+            .texture_map = datastructure.EvictionHashMap(types.XYZ, *sdl.SDL_Texture, evict_texture, &config.MaxTextures).init(io, allocator),
+            .transfer_map = datastructure.QueueHashMap(types.XYZ, *TransferDatum).init(io, allocator),
         };
-        try tc.set_cache_url(try allocator.dupeZ(u8, "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png"));
+        try tc.set_cache_url(try allocator.dupeSentinel(u8, "https://tile.openstreetmap.org/%3$d/%1$d/%2$d.png", 0));
         return tc;
     } else {
         return error.MultiInitFail;

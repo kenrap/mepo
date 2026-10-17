@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = types.MepoFnSpec{
@@ -33,18 +33,18 @@ fn bind_button(mepo: *Mepo, visible_only_when_pin_active: bool, group_number: ?u
         if (std.mem.eql(u8, text, btn.text)) {
             mepo.allocator.free(btn.jsonapi_click_single);
             mepo.allocator.free(btn.jsonapi_click_hold);
-            btn.jsonapi_click_single = try mepo.allocator.dupeZ(u8, expression_click_single);
-            btn.jsonapi_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold);
+            btn.jsonapi_click_single = try mepo.allocator.dupeSentinel(u8, expression_click_single, 0);
+            btn.jsonapi_click_hold = try mepo.allocator.dupeSentinel(u8, expression_click_hold, 0);
             btn.only_visible_when_pin_active = visible_only_when_pin_active;
             return;
         }
     }
 
-    try mepo.uibuttons.append(.{
-        .text = try mepo.allocator.dupeZ(u8, text),
+    try mepo.uibuttons.append(mepo.allocator, .{
+        .text = try mepo.allocator.dupeSentinel(u8, text, 0),
         .group_number = group_number,
-        .jsonapi_click_single = try mepo.allocator.dupeZ(u8, expression_click_single),
-        .jsonapi_click_hold = try mepo.allocator.dupeZ(u8, expression_click_hold),
+        .jsonapi_click_single = try mepo.allocator.dupeSentinel(u8, expression_click_single, 0),
+        .jsonapi_click_hold = try mepo.allocator.dupeSentinel(u8, expression_click_hold, 0),
         .only_visible_when_pin_active = visible_only_when_pin_active,
     });
 }

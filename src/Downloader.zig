@@ -46,7 +46,7 @@ pub fn cache_dlbbox(tile_cache: *TileCache, download_request_str: []const u8) !v
             delay_seconds,
         },
     );
-    std.time.sleep(std.time.ns_per_s * delay_seconds);
+    try std.Io.sleep(tile_cache.io, .{ .nanoseconds = std.time.ns_per_s * delay_seconds }, .real);
     _ = tile_cache.download_loop(false) catch unreachable;
 }
 

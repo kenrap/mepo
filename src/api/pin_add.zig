@@ -32,11 +32,11 @@ fn pin_add(mepo: *Mepo, group: i32, is_structural: bool, lat: f64, lon: f64, han
         }
     }
 
-    try mepo.pin_groups[pin_group].append(.{
+    try mepo.pin_groups[pin_group].append(mepo.allocator, .{
         .lat = lat,
         .lon = lon,
-        .handle = if (handle.len == 0) null else try mepo.allocator.dupeZ(u8, handle), // E.g. for routes.. pins dont have handles
+        .handle = if (handle.len == 0) null else try mepo.allocator.dupeSentinel(u8, handle, 0), // E.g. for routes.. pins dont have handles
         .category = if (is_structural) .Structural else .Instructive,
-        .metadata = std.array_hash_map.StringArrayHashMap([:0]const u8).init(mepo.allocator),
+        .metadata = std.array_hash_map.String([:0]const u8).empty,
     });
 }

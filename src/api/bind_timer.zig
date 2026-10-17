@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 const utilsdl = @import("../util/utilsdl.zig");
 
@@ -28,5 +28,5 @@ fn bind_timer(mepo: *Mepo, interval_seconds: u32, expression: []const u8) !void 
         .created_at_ticks = sdl.SDL_GetTicks(),
     };
 
-    try mepo.table_timers.put(timer, expression_heap_allocated);
+    try mepo.table_timers.put(mepo.allocator, timer, expression_heap_allocated);
 }

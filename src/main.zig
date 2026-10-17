@@ -5,25 +5,27 @@ const Mepo = @import("./Mepo.zig");
 const Docs = @import("./Docs.zig");
 const Downloader = @import("./Downloader.zig");
 const TileCache = @import("./TileCache.zig");
-const sdl = @import("./sdlshim.zig");
+const sdl = @import("./sdlshim.zig").c;
 const types = @import("./types.zig");
 const utildbg = @import("./util/utildbg.zig");
 
-pub fn main() !void {
+pub fn main(init: std.process.Init) !void {
     comptime {
         const v = builtin.zig_version;
-        if (v.major != 0 or v.minor != 14)
-            @panic("Must be built against Zig 0.14.x");
+        if (v.major != 0 or v.minor != 17)
+            @panic("Must be built against Zig 0.17.x");
     }
 
     const allocator = std.heap.c_allocator;
+    const io = init.io;
+    const environ = init.environ_map;
     var stderr_debugging_on: bool = false;
     var stdin_jsonapi_parsing_on: bool = false;
     var mode: enum { Graphical, Download, Version, DocsMarkdown, Help } = .Graphical;
     var download_request: []const u8 = undefined;
     var renderer_type: types.RendererType = .Auto;
 
-    var args_it = std.process.args();
+    var args_it = init.minimal.args.iterate();
     var arg_w = args_it.next();
     while (arg_w != null) : (arg_w = args_it.next()) {
         const arg = arg_w.?;
@@ -63,11 +65,11 @@ pub fn main() !void {
 
     switch (mode) {
         .DocsMarkdown => {
-            try Docs.generateMarkdownDocs(allocator);
+            try Docs.generateMarkdownDocs(io, allocator);
         },
         .Graphical => {
-            var tile_cache = try TileCache.init(allocator);
-            var mepo = try Mepo.init(allocator, &tile_cache, config.DefaultBaseConfig, renderer_type);
+            var tile_cache = try TileCache.init(io, allocator, environ);
+            var mepo = try Mepo.init(io, allocator, environ, &tile_cache, config.DefaultBaseConfig, renderer_type);
             if (stderr_debugging_on) {
                 try mepo.jsonapi_execute(
                     \\[{"cmd": "prefset_n", "args": {"debug_stderr": 1}}]
@@ -76,7 +78,7 @@ pub fn main() !void {
             mepo.init_video_and_sdl_stdin_loop(stdin_jsonapi_parsing_on) catch Mepo.graceful_terminate_sdl();
         },
         .Download => {
-            var tile_cache = try TileCache.init(allocator);
+            var tile_cache = try TileCache.init(io, allocator, environ);
             try Downloader.cache_dlbbox(&tile_cache, download_request);
         },
         .Version => {
@@ -99,6 +101,7 @@ pub fn main() !void {
             }
             std.debug.print(
                 \\===============================================
+                \\
             ,
                 .{},
             );

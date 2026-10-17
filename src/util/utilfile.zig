@@ -1,16 +1,12 @@
 const std = @import("std");
-const wordexp = @cImport({
-    @cInclude("wordexp.h");
-});
-const cstdlib = @cImport({
-    @cInclude("stdlib.h");
-});
+const wordexp = @import("wordexp");
+const cstdlib = @import("stdlib");
 
 /// Runs underlying wordexp (see man 3 wordexp) to expand globs & handle tilde
 /// expansion.
 ///
 /// Caller responsible for freeing returned ptr memory
-pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]const u8 {
+pub fn wordexp_filepath(allocator: std.mem.Allocator, environ: *const std.process.Environ.Map, path: []const u8) ![:0]const u8 {
 
     // Within config, we assume user can pass XDG_{CONFIG,CACHE}_HOME to
     // fileload etc. and callers of this fn; so here we just follow XDG default
@@ -29,9 +25,9 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
             .default_home_path = ".cache",
         },
     }) |default_mapping| {
-        if (std.posix.getenv(default_mapping.env_var) != null) continue;
-        if (std.posix.getenv("HOME")) |home_dir| {
-            const value = try std.fmt.allocPrintZ(allocator, "{s}/{s}", .{ home_dir, default_mapping.default_home_path });
+        if (environ.get(default_mapping.env_var) != null) continue;
+        if (environ.get("HOME")) |home_dir| {
+            const value = try std.fmt.allocPrintSentinel(allocator, "{s}/{s}", .{ home_dir, default_mapping.default_home_path }, 0);
             defer allocator.free(value);
             _ = cstdlib.setenv(&default_mapping.env_var[0], &value[0], 1);
         }
@@ -43,13 +39,13 @@ pub fn wordexp_filepath(allocator: std.mem.Allocator, path: []const u8) ![:0]con
     if (wordexp.wordexp(&path[0], &expansion, 0) != 0) {
         return error.CacheDirExpansionFail;
     } else {
-        return try std.fmt.allocPrintZ(allocator, "{s}", .{expansion.we_wordv[0]});
+        return try std.fmt.allocPrintSentinel(allocator, "{s}", .{expansion.we_wordv[0]}, 0);
     }
 }
 
-pub fn mkdirp_folder_basename(file_path: []const u8) !void {
-    if (std.fs.path.dirname(file_path)) |dir_fp| {
-        try std.fs.cwd().makePath(dir_fp);
+pub fn mkdirp_folder_basename(io: std.Io, file_path: []const u8) !void {
+    if (std.Io.Dir.path.dirname(file_path)) |dir_fp| {
+        try std.Io.Dir.cwd().createDirPath(io, dir_fp);
         return;
     }
     return error.DirnameFail;

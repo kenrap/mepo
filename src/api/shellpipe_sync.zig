@@ -3,7 +3,7 @@ const types = @import("../types.zig");
 const std = @import("std");
 const utildbg = @import("../util/utildbg.zig");
 const blitfns = @import("../blit/blit.zig");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const filedump = @import("./filedump.zig");
 const run_shellpipe = @import("shellpipe_async.zig").run_shellpipe;
 
@@ -26,7 +26,7 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
         if (!button.only_visible_when_sync_shellpipe)
             unreachable;
         mepo.allocator.free(button.text);
-        button.text = try std.fmt.allocPrintZ(mepo.allocator, "Cancel {s}", .{cmd});
+        button.text = try std.fmt.allocPrintSentinel(mepo.allocator, "Cancel {s}", .{cmd}, 0);
     }
     sdl.SDL_DetachThread(sdl.SDL_CreateThread(run_sync_shellpipe, "sync_shellpipe", request));
 }
@@ -36,8 +36,8 @@ const Request = struct {
     cmd: []const u8,
 };
 
-fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.C) c_int {
-    const request: *Request = @alignCast(@ptrCast(userdata.?));
+fn run_sync_shellpipe(userdata: ?*anyopaque) callconv(.c) c_int {
+    const request: *Request = @ptrCast(@alignCast(userdata.?));
     defer request.mepo.allocator.destroy(request);
     run_shellpipe(request.mepo, null, request.cmd) catch |err|
         utildbg.log("Error running sync shellpipe: {}\n", .{err});

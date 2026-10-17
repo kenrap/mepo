@@ -42,7 +42,7 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
     };
 
     if (from_pin_i_opt) |from_pin_i| {
-        try mepo.pin_groups[to_group].append(mepo.pin_groups[from_group].items[from_pin_i]);
+        try mepo.pin_groups[to_group].append(mepo.allocator, mepo.pin_groups[from_group].items[from_pin_i]);
         _ = mepo.pin_groups[from_group].orderedRemove(from_pin_i);
 
         // If pin to transfer is the currently active pin we
@@ -56,7 +56,7 @@ fn pin_transfer(mepo: *Mepo, from_group_number: i32, target_pin_handle: [:0]cons
         }
     } else {
         for (mepo.pin_groups[from_group].items, 0..) |_, pin_i| {
-            try mepo.pin_groups[to_group].append(mepo.pin_groups[from_group].items[pin_i]);
+            try mepo.pin_groups[to_group].append(mepo.allocator, mepo.pin_groups[from_group].items[pin_i]);
         }
         for (mepo.pin_groups[from_group].items) |_| {
             _ = mepo.pin_groups[from_group].orderedRemove(0);

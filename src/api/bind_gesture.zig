@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = types.MepoFnSpec{
@@ -38,5 +38,5 @@ fn bind_gesture(mepo: *Mepo, action: types.GestureInputAction, fingers: u8, dire
         _ = mepo.table_gestures.swapRemove(gest);
     }
     const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.table_gestures.put(gest, expression_mepo_allocated);
+    try mepo.table_gestures.put(mepo.allocator, gest, expression_mepo_allocated);
 }

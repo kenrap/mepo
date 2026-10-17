@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const utildbg = @import("../util/utildbg.zig");
 
 pub const spec = types.MepoFnSpec{
@@ -49,5 +49,5 @@ fn bind_key(mepo: *Mepo, mod_str: [:0]const u8, key_str: [:0]const u8, expressio
         _ = mepo.table_keybindings.swapRemove(key);
     }
     const expression_mepo_allocated = try mepo.allocator.dupe(u8, expression);
-    try mepo.table_keybindings.put(key, expression_mepo_allocated);
+    try mepo.table_keybindings.put(mepo.allocator, key, expression_mepo_allocated);
 }

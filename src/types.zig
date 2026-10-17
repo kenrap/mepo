@@ -1,6 +1,6 @@
 const std = @import("std");
 const Mepo = @import("Mepo.zig");
-const sdl = @import("./sdlshim.zig");
+const sdl = @import("./sdlshim.zig").c;
 
 pub const Latlon = struct { lat: f64, lon: f64 };
 pub const XYZ = struct { x: u32, y: u32, z: u8 };
@@ -16,7 +16,7 @@ pub const Pin = struct {
     lon: f64,
     handle: ?[:0]const u8 = null,
     category: enum { Instructive, Structural } = .Instructive,
-    metadata: std.array_hash_map.StringArrayHashMap([:0]const u8),
+    metadata: std.array_hash_map.String([:0]const u8),
 };
 pub const PinGroup = struct {
     pins: std.ArrayList(Pin),

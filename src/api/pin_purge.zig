@@ -25,5 +25,5 @@ fn execute(mepo: *Mepo, _: [types.MepoFnNargs]types.MepoArg) !void {
             }
         }
     }
-    mepo.pin_groups[mepo.pin_group_active].clearAndFree();
+    mepo.pin_groups[mepo.pin_group_active].clearAndFree(mepo.allocator);
 }

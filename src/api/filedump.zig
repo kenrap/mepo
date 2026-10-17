@@ -1,7 +1,7 @@
 const Mepo = @import("../Mepo.zig");
 const types = @import("../types.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 
 const utilfile = @import("../util/utilfile.zig");
 const utilsdl = @import("../util/utilsdl.zig");
@@ -26,17 +26,18 @@ fn execute(mepo: *Mepo, args: [types.MepoFnNargs]types.MepoArg) !void {
 pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
+    const alloc = arena.allocator();
 
-    const expanded_path = try utilfile.wordexp_filepath(arena.allocator(), filepath);
-    try utilfile.mkdirp_folder_basename(expanded_path);
-    const jsonapi_file = try std.fs.createFileAbsoluteZ(expanded_path, .{});
-    defer jsonapi_file.close();
+    const expanded_path = try utilfile.wordexp_filepath(alloc, mepo.environ, filepath);
+    try utilfile.mkdirp_folder_basename(mepo.io, expanded_path);
+    const jsonapi_file = try std.Io.Dir.createFileAbsolute(mepo.io, expanded_path, .{});
+    defer jsonapi_file.close(mepo.io);
 
     const Statement = struct {
         cmd: [:0]const u8,
         args: std.json.ArrayHashMap(std.json.Value),
     };
-    var statements = std.ArrayList(Statement).init(arena.allocator());
+    var statements = std.ArrayList(Statement).empty;
 
     // 1. Preferences
     if (std.mem.containsAtLeast(u8, save_types, 1, "r")) {
@@ -49,25 +50,25 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
                 .u24 => .HexText,
             };
             if (format_as == .Text) {
-                var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-                try args.put("pref", .{ .string = pref.name });
-                try args.put("value", .{ .string = if (pref.value.t) |tv| tv else "" });
-                try statements.append(.{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
+                var args = std.array_hash_map.String(std.json.Value).empty;
+                try args.put(alloc, "pref", .{ .string = pref.name });
+                try args.put(alloc, "value", .{ .string = if (pref.value.t) |tv| tv else "" });
+                try statements.append(alloc, .{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args }, .{}) });
             } else if (format_as == .Number) {
-                var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-                try args.put("pref", .{ .string = pref.name });
-                try args.put("value", .{ .float = switch (pref.value) {
+                var args = std.array_hash_map.String(std.json.Value).empty;
+                try args.put(alloc, "pref", .{ .string = pref.name });
+                try args.put(alloc, "value", .{ .float = switch (pref.value) {
                     .b => @floatFromInt(@intFromBool(pref.value.b)),
                     .u => @floatFromInt(pref.value.u),
                     .f => pref.value.f,
                     else => unreachable,
                 } });
-                try statements.append(.{ .cmd = "prefset_n", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
+                try statements.append(alloc, .{ .cmd = "prefset_n", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args }, .{}) });
             } else if (format_as == .HexText) {
-                var args = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-                try args.put("pref", .{ .string = pref.name });
-                try args.put("value", .{ .string = try std.fmt.allocPrint(arena.allocator(), "#{x}", .{pref.value.u24}) });
-                try statements.append(.{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args }, .{}) });
+                var args = std.array_hash_map.String(std.json.Value).empty;
+                try args.put(alloc, "pref", .{ .string = pref.name });
+                try args.put(alloc, "value", .{ .string = try std.fmt.allocPrint(alloc, "#{x}", .{pref.value.u24}) });
+                try statements.append(alloc, .{ .cmd = "prefset_t", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args }, .{}) });
             }
         }
     }
@@ -77,44 +78,44 @@ pub fn filedump(mepo: *Mepo, save_types: []const u8, filepath: []const u8) !void
         for (mepo.pin_groups, 0..) |pg, pg_i| {
             for (pg.items) |pin| {
                 // Pin add
-                var args_pinadd = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-                try args_pinadd.put("handle", .{ .string = handle: {
+                var args_pinadd = std.array_hash_map.String(std.json.Value).empty;
+                try args_pinadd.put(alloc, "handle", .{ .string = handle: {
                     if (pin.handle) |h| break :handle h;
                     break :handle "";
                 } });
-                try args_pinadd.put("group", .{ .integer = @intCast(pg_i) });
-                try args_pinadd.put("lat", .{ .float = pin.lat });
-                try args_pinadd.put("lon", .{ .float = pin.lon });
-                try args_pinadd.put("is_structural", .{ .integer = b: {
+                try args_pinadd.put(alloc, "group", .{ .integer = @intCast(pg_i) });
+                try args_pinadd.put(alloc, "lat", .{ .float = pin.lat });
+                try args_pinadd.put(alloc, "lon", .{ .float = pin.lon });
+                try args_pinadd.put(alloc, "is_structural", .{ .integer = b: {
                     if (pin.category == .Structural) break :b 1;
                     break :b 0;
                 } });
-                try statements.append(.{ .cmd = "pin_add", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pinadd }, .{}) });
+                try statements.append(alloc, .{ .cmd = "pin_add", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args_pinadd }, .{}) });
 
                 // Pin metadata
                 var it = pin.metadata.iterator();
                 while (it.next()) |kv| {
-                    var args_pinmeta = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-                    try args_pinmeta.put("handle", .{ .string = handle: {
+                    var args_pinmeta = std.array_hash_map.String(std.json.Value).empty;
+                    try args_pinmeta.put(alloc, "handle", .{ .string = handle: {
                         if (pin.handle) |h| break :handle h;
                         break :handle "";
                     } });
-                    try args_pinmeta.put("group", .{ .integer = @intCast(pg_i) });
-                    try args_pinmeta.put("key", .{ .string = kv.key_ptr.* });
-                    try args_pinmeta.put("value", .{ .string = kv.value_ptr.* });
-                    try statements.append(.{ .cmd = "pin_meta", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pinmeta }, .{}) });
+                    try args_pinmeta.put(alloc, "group", .{ .integer = @intCast(pg_i) });
+                    try args_pinmeta.put(alloc, "key", .{ .string = kv.key_ptr.* });
+                    try args_pinmeta.put(alloc, "value", .{ .string = kv.value_ptr.* });
+                    try statements.append(alloc, .{ .cmd = "pin_meta", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args_pinmeta }, .{}) });
                 }
             }
         }
 
         // Pin Group activate
-        var args_pingroupactivate = std.StringArrayHashMap(std.json.Value).init(arena.allocator());
-        try args_pingroupactivate.put("group", .{ .integer = mepo.pin_group_active });
-        try statements.append(.{ .cmd = "pin_groupactivate", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(arena.allocator(), .{ .object = args_pingroupactivate }, .{}) });
+        var args_pingroupactivate = std.array_hash_map.String(std.json.Value).empty;
+        try args_pingroupactivate.put(alloc, "group", .{ .integer = mepo.pin_group_active });
+        try statements.append(alloc, .{ .cmd = "pin_groupactivate", .args = try std.json.ArrayHashMap(std.json.Value).jsonParseFromValue(alloc, .{ .object = args_pingroupactivate }, .{}) });
     }
 
-    const str = try std.json.stringifyAlloc(arena.allocator(), statements.items, .{
+    const str = try std.json.Stringify.valueAlloc(alloc, statements.items, .{
         .whitespace = .indent_2,
     });
-    try jsonapi_file.writeAll(str);
+    try jsonapi_file.writeStreamingAll(mepo.io, str);
 }

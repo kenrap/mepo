@@ -1,6 +1,6 @@
 const Mepo = @import("../Mepo.zig");
 const std = @import("std");
-const sdl = @import("../sdlshim.zig");
+const sdl = @import("../sdlshim.zig").c;
 const types = @import("../types.zig");
 const config = @import("../config.zig");
 const errors = @import("../errors.zig");
@@ -81,7 +81,7 @@ fn blit_tile_surface(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i32
         .texture => |text| {
             try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
         },
-        .queued_position => |_| {
+        .queued_position => {
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xffffff }, rect_intersect, .Fill);
             try utilsdl.sdl_renderer_rect(mepo.renderer, .{ .value = 0xebebeb }, rect_intersect, .Draw);
             try blit_multiline_text(
@@ -166,7 +166,7 @@ fn blit_tile_pinlayer(mepo: *Mepo, tile_x: u32, tile_y: u32, zoom: u8, x_off: i3
         .h = rect_intersect.h,
     };
 
-    if (mepo.blit_pinlayer_cache.get(.{ .x = tile_x, .y = tile_y, .z = zoom })) |text| {
+    if (try mepo.blit_pinlayer_cache.get(.{ .x = tile_x, .y = tile_y, .z = zoom })) |text| {
         //utildbg.log("Pinlayer cache hit {}\n", .{.{ .x = tile_x, .y = tile_y, .z = zoom }});
         try utilsdl.errorcheck(sdl.SDL_RenderCopy(mepo.renderer, text, &rect_src, &rect_intersect));
     } else {
@@ -250,43 +250,51 @@ fn blit_overlay_pindetails(mepo: *Mepo) !void {
 
     var arena = std.heap.ArenaAllocator.init(mepo.allocator);
     defer arena.deinit();
+    const alloc = arena.allocator();
 
-    var al = std.ArrayList([2][:0]const u8).init(arena.allocator());
+    var al = std.ArrayList([2][:0]const u8).empty;
     if (mepo.pin_group_active_item) |_| {
         const pin = mepo.pin_groups[mepo.pin_group_active].items[mepo.pin_group_active_item.?];
-        const pin_coords_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon });
-        const distance_str = try std.fmt.allocPrintZ(arena.allocator(), "{d:.2}{s} away", .{
-            utilconversion.distance_haversine(
-                if (d_unit_km) .Km else .Mi,
-                p.get(p.pref.lat).f,
-                p.get(p.pref.lon).f,
-                pin.lat,
-                pin.lon,
-            ),
-            d_unit,
-        });
+        const pin_coords_str = try std.fmt.allocPrintSentinel(alloc, "{d:.5} lat / {d:.5} lon", .{ pin.lat, pin.lon }, 0);
+        const distance_str = try std.fmt.allocPrintSentinel(
+            alloc,
+            "{d:.2}{s} away",
+            .{
+                utilconversion.distance_haversine(
+                    if (d_unit_km) .Km else .Mi,
+                    p.get(p.pref.lat).f,
+                    p.get(p.pref.lon).f,
+                    pin.lat,
+                    pin.lon,
+                ),
+                d_unit,
+            },
+            0,
+        );
 
         if (pin.handle != null) {
-            try al.append(([_][:0]const u8{ "Handle:", pin.handle.? })[0..].*);
+            try al.append(alloc, ([_][:0]const u8{ "Handle:", pin.handle.? })[0..].*);
         }
-        try al.append(([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
+        try al.append(alloc, ([_][:0]const u8{ "Coords:", pin_coords_str })[0..].*);
         if (p.get(p.pref.overlay_pindetails_expanded).b) {
-            try al.append(([_][:0]const u8{ try std.fmt.allocPrintZ(
-                arena.allocator(),
+            try al.append(alloc, ([_][:0]const u8{ try std.fmt.allocPrintSentinel(
+                alloc,
                 "Group {d}:",
                 .{mepo.pin_group_active},
-            ), try std.fmt.allocPrintZ(
-                arena.allocator(),
+                0,
+            ), try std.fmt.allocPrintSentinel(
+                alloc,
                 "{d} of {d} ",
                 .{
                     mepo.pin_group_active_item.? + 1,
                     mepo.pin_groups[mepo.pin_group_active].items.len,
                 },
+                0,
             ) })[0..].*);
-            try al.append(([_][:0]const u8{ "Dist:", distance_str })[0..].*);
+            try al.append(alloc, ([_][:0]const u8{ "Dist:", distance_str })[0..].*);
             for (pin.metadata.keys()) |k| {
-                const duped = try std.fmt.allocPrintZ(arena.allocator(), "{s}", .{k});
-                try al.append(([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
+                const duped = try std.fmt.allocPrintSentinel(alloc, "{s}", .{k}, 0);
+                try al.append(alloc, ([_][:0]const u8{ duped, pin.metadata.get(k).? })[0..].*);
             }
         }
         const off_y = p.get(p.pref.fontsize_ui).u + 26;
@@ -450,9 +458,9 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
     const bg: types.Color = color: {
         if (mepo.tile_cache.thread_download == null) {
             break :color .{ .value = 0xffdfd1 };
-        } else if (mepo.tile_cache.queue_lifo_ui.count() > 0) {
+        } else if (try mepo.tile_cache.queue_lifo_ui.count() > 0) {
             break :color .{ .value = 0xd7ffd6 };
-        } else if (mepo.tile_cache.queue_lifo_bg.count() > 0) {
+        } else if (try mepo.tile_cache.queue_lifo_bg.count() > 0) {
             break :color .{ .value = 0xc7d4ff };
         } else {
             break :color .{ .value = 0xffffff, .opacity = 180 };
@@ -499,11 +507,11 @@ fn blit_overlay_debugbar(mepo: *Mepo) !void {
             p.get(p.pref.zoom).u,
             @intFromBool(mepo.tile_cache.thread_download != null),
             mepo.pin_group_active,
-            mepo.tile_cache.queue_lifo_ui.count(),
-            mepo.tile_cache.queue_lifo_bg.count(),
-            mepo.tile_cache.transfer_map.count(),
-            mepo.tile_cache.texture_map.count(),
-            mepo.shellpipe_async_threads.count(),
+            try mepo.tile_cache.queue_lifo_ui.count(),
+            try mepo.tile_cache.queue_lifo_bg.count(),
+            try mepo.tile_cache.transfer_map.count(),
+            try mepo.tile_cache.texture_map.count(),
+            try mepo.shellpipe_async_threads.count(),
         },
     );
 }
@@ -512,15 +520,15 @@ fn blit_help(mepo: *Mepo) !void {
     if (!p.get(p.pref.help).b) return;
 
     const msg = msg: {
-        var acc = std.ArrayList([]const u8).init(mepo.allocator);
-        defer acc.deinit();
+        var acc = std.ArrayList([]const u8).empty;
+        defer acc.deinit(mepo.allocator);
         defer for (acc.items) |item| mepo.allocator.free(item);
 
         var it = mepo.table_keybindings.iterator();
 
         while (it.next()) |kv| {
             const keymod = utilsdl.sdl_keymod_to_str(kv.key_ptr.keymod);
-            try acc.append(try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
+            try acc.append(mepo.allocator, try std.fmt.allocPrint(mepo.allocator, "{s} {c} = {s}", .{ keymod, kv.key_ptr.key, kv.value_ptr.* }));
         }
 
         break :msg try std.mem.join(mepo.allocator, "\n", acc.items);
@@ -644,7 +652,7 @@ fn blit_multiline_text(
     comptime fmt_string: [:0]const u8,
     args: anytype,
 ) !void {
-    const msg = try std.fmt.allocPrintZ(mepo.allocator, fmt_string, args);
+    const msg = try std.fmt.allocPrintSentinel(mepo.allocator, fmt_string, args, 0);
     defer mepo.allocator.free(msg);
 
     const font_size = font_size: {
@@ -667,7 +675,7 @@ fn blit_multiline_text(
         while (lines_it.next()) |line| {
             if (textures_array_size + 1 > textures_array.len - 1) break;
 
-            const line_sentinel_terminated = try mepo.allocator.dupeZ(u8, line);
+            const line_sentinel_terminated = try mepo.allocator.dupeSentinel(u8, line, 0);
             defer mepo.allocator.free(line_sentinel_terminated);
 
             const text_surf = try utilsdl.errorcheck_ptr(
@@ -869,7 +877,7 @@ pub fn blit(mepo: *Mepo) !void {
     // specified config frequency
     if (sdl.SDL_GetTicks() > mepo.title_update_ms + config.TitleUpdateFrequencyMs) {
         mepo.title_update_ms = sdl.SDL_GetTicks();
-        const title = try std.fmt.allocPrintZ(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ p.get(p.pref.lat).f, p.get(p.pref.lon).f });
+        const title = try std.fmt.allocPrintSentinel(mepo.allocator, "mepo - {d:.5} lat, {d:.5} lon", .{ p.get(p.pref.lat).f, p.get(p.pref.lon).f }, 0);
         defer mepo.allocator.free(title);
         _ = sdl.SDL_SetWindowTitle(mepo.window, &title[0]);
     }
